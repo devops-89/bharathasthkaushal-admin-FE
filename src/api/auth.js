@@ -1,5 +1,4 @@
 import { publicApi } from "./config";
-
 export const authControllers = {
   login: async (data) => {
     try {

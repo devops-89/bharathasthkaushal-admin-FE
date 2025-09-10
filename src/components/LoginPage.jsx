@@ -287,6 +287,7 @@ export default function LoginPage({ onLogin }) {
             opacity: 0.5;
           }
         }
+          
       `}</style>
     </div>
   );

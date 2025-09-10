@@ -1,14 +1,22 @@
 import React, { useState } from "react";
-import { Plus, Search, Filter, Grid, List } from "lucide-react";
+import { Plus, Search, Filter, Grid, List, X, Upload } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { categoryControllers } from "../api/category";
 const SubcategoryManagement = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get category ID from URL params
+  const { id } = useParams(); 
   const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    category_name: "",
+    category_logo: null,
+    parent_id: "",
+    description: "",
+    type: "Sub-Category"
+  });
 
-  // Categories data (same as in CategoryManagement)
+  
   const categories = [
     {
       id: 1,
@@ -37,10 +45,7 @@ const SubcategoryManagement = () => {
       ],
     },
   ];
-
-  // Find the category based on the ID from URL params
   const category = categories.find(cat => cat.id === parseInt(id));
-
   if (!category) {
     return (
       <div className="ml-64 pt-20 p-6">
@@ -54,10 +59,64 @@ const SubcategoryManagement = () => {
       </div>
     );
   }
-
   const filteredSubcategories = category.subcategories.filter((sub) =>
     sub.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData(prev => ({
+      ...prev,
+      category_logo: file
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.category_name.trim()) {
+      alert("Category name is required");
+      return;
+    }
+    if (!formData.category_logo) {
+      alert("Category logo is required");
+      return;
+    }
+    if (!formData.parent_id) {
+      alert("Parent category is required");
+      return;
+    }
+    if (!formData.description.trim()) {
+      alert("Description is required");
+      return;
+    }
+
+    console.log("Form submitted:", formData);
+    
+    setFormData({
+      category_name: "",
+      category_logo: null,
+      parent_id: "",
+      description: "",
+      type: "Sub-Category"
+    });
+    setShowAddForm(false);
+  };
+  const resetForm = () => {
+    setFormData({
+      category_name: "",
+      category_logo: null,
+      parent_id: "",
+      description: "",
+      type: "Sub-Category"
+    });
+    setShowAddForm(false);
+  };
 
   return (
     <div className="ml-64 pt-20 p-6">
@@ -93,7 +152,10 @@ const SubcategoryManagement = () => {
                 <List size={20} />
               </button>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+            <button 
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
               <Plus size={20} />
               Add Subcategory
             </button>
@@ -119,6 +181,151 @@ const SubcategoryManagement = () => {
         </div>
       </div>
 
+      {/* Add Subcategory Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">AddNew Subcategory</h2>
+              <button
+                onClick={resetForm}
+                className="text-gray-400 hover:text-gray-600"
+           >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="space-y-6">
+                {/* Category Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="category_name"
+                    value={formData.category_name}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="Enter subcategory name"
+                    required
+                  />
+                </div>
+
+                {/* Category Logo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Logo <span className="text-red-500">*</span>
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
+                    <input
+                      type="file"
+                      name="category_logo"
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                      id="logo-upload"
+                      required
+                    />
+                    <label htmlFor="logo-upload" className="cursor-pointer">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium text-orange-600 hover:text-orange-500">
+                          Click to upload
+                        </span> or drag and drop
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        PNG, JPG, GIF up to 10MB
+                      </div>
+                    </label>
+                    {formData.category_logo && (
+                      <div className="mt-2 text-sm text-green-600">
+                        Selected: {formData.category_logo.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Parent ID */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Parent Category <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="parent_id"
+                    value={formData.parent_id}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select parent category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select the main category this subcategory belongs to
+                  </p>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    placeholder="Enter detailed description of the subcategory"
+                    required
+                  />
+                </div>
+
+                {/* Type (Read-only) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type
+                  </label>
+                  <input
+                    type="text"
+                    name="type"
+                    value={formData.type}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                    readOnly
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This is automatically set to Sub-Category for subcategories
+                  </p>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Add Subcategory
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* No subcategories message */}
       {filteredSubcategories.length === 0 ? (
         <div className="text-center py-12">
@@ -132,7 +339,10 @@ const SubcategoryManagement = () => {
             }
           </p>
           {!searchTerm && (
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+            <button 
+              onClick={() => setShowAddForm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
               <Plus size={16} />
               Add First Subcategory
             </button>

@@ -384,46 +384,7 @@ const PaymentManagement = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <Download className="text-blue-600" size={20} />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Export Payments</div>
-                  <div className="text-sm text-gray-500">Download payment reports</div>
-                </div>
-              </div>
-            </button>
-            
-            <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <div className="bg-green-100 p-2 rounded-lg">
-                  <CreditCard className="text-green-600" size={20} />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Process Refunds</div>
-                  <div className="text-sm text-gray-500">Handle refund requests</div>
-                </div>
-              </div>
-            </button>
-            
-            <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
-              <div className="flex items-center gap-3">
-                <div className="bg-purple-100 p-2 rounded-lg">
-                  <User className="text-purple-600" size={20} />
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">Customer Support</div>
-                  <div className="text-sm text-gray-500">Resolve payment issues</div>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

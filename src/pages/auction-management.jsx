@@ -209,7 +209,7 @@ const AuctionManagement = () => {
           </select>
         </div>
       </div>
-
+      
       {/* Auctions Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
