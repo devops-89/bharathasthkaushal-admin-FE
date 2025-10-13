@@ -7,12 +7,13 @@ import Dashboard from "./pages/Dashboard";
 import ApprovalManagement from "./pages/approvalmanagement";
 import Artisans from "./pages/artisans";
 import AuctionManagement from "./pages/auction-management";
-import CategoryManagement from "./pages/category-management";
+import CategoryManagement from "./pages/category-management";      
 import EmployeeManagement from "./pages/employee-management";
 import PaymentManagement from "./pages/payment-management";
 import PermissionManagement from "./pages/permission-management";
 import ProductManagement from "./pages/product-management";
 import AddProduct from "./pages/product-management/add-product";
+import ProductDetails from "./pages/product-management/product-details";
 import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 function App() {
@@ -27,19 +28,23 @@ function App() {
       setShow(true);
     }
   }, [location.pathname]);
-
   return (
     <div className="">
       {show && <Wrapper />}
       {show && <Header />}
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/artisans" element={<Artisans />} />
         <Route path="/product-management" element={<ProductManagement />} />
         <Route
           path="/product-management/add-product"
           element={<AddProduct />}
+        />
+        <Route 
+        path="/product-management/product-details/:id"
+        element={<ProductDetails/>} 
         />
         <Route path="/category-management" element={<CategoryManagement />} />
         <Route path="/auction-management" element={<AuctionManagement />} />
@@ -50,17 +55,17 @@ function App() {
         />
         <Route path="/employee-management" element={<EmployeeManagement />} />
         <Route path="/payment-management" element={<PaymentManagement />} />
-        <Route
+        <Route 
           path="/permission-management"
           element={<PermissionManagement />}
         />
         <Route
           path="/category-management/sub-category/:id"
-          element={<Subcategory />}
+          element={<Subcategory/>}
         />
+        <Route path="/categories/:page/:pageSize/:id" element={<CategoryManagement/>} />
       </Routes>
     </div>
   );
 }
-
 export default App;

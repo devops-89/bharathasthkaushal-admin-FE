@@ -527,7 +527,7 @@ const ApprovalManagementDetails = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </div> 
           )}
         </div>
       </div>

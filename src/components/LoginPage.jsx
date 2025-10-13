@@ -217,7 +217,7 @@ export default function LoginPage({ onLogin }) {
                 id="email"
                 type="email"
                 required
-                // value={email}
+               
                 onChange={inputHandler}
                 style={inputStyle}
                 placeholder="Enter your email"
@@ -238,7 +238,6 @@ export default function LoginPage({ onLogin }) {
                 id="password"
                 type="password"
                 required
-                // value={password}
                 onChange={inputHandler}
                 style={inputStyle}
                 placeholder="Enter your password"

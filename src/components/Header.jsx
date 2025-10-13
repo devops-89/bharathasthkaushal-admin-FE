@@ -1,22 +1,32 @@
 import { LogOut, User } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import logo from '../assets/image.png';
-
+import { useNavigate } from "react-router-dom";
+import { authControllers } from "../api/auth"; 
 const Header = () => {
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      authAPI.logout();
+  const handleLogout = async () => {
+  if (window.confirm('Are you sure you want to logout?')) {
+    try {
+      await authControllers.logout(); 
+       navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
-    setIsDropdownOpen(false);
-  };
+
+  }
+  setIsDropdownOpen(false);
+
+}; 
+
   const handleProfile = () => {
-    // Add your profile navigation logic here
     console.log('Navigate to profile');
     setIsDropdownOpen(false);
-  };
-  // Close dropdown when clicking outside
+  }; 
+
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package } from 'lucide-react';
-
 const PaymentManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
-  const paymentData = [
+  const paymentData = [   
     {
       id: 'PAY001',
       customerName: 'Priya Sharma',
@@ -24,6 +23,7 @@ const PaymentManagement = () => {
       customerName: 'Rajesh Kumar',
       email: 'rajesh.k@email.com',
       product: 'Wooden Handicraft Set',
+    
       category: 'Handicraft',
       amount: 2300.00,
       date: '14 Aug 2025',

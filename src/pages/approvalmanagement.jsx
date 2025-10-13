@@ -330,8 +330,6 @@ const ApprovalManagement = () => {
       categoryFilter === "All Categories" || item.category === categoryFilter;
     return statusMatch && categoryMatch;
   });
-
-  // If in detail view, show detail component
   if (currentView === "details" && selectedProduct) {
     return (
       <div className="p-6 bg-gray-50 min-h-screen">

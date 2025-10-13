@@ -13,7 +13,7 @@ import {
 import { Plus, Eye, UserPlus, CreditCard } from "lucide-react";
 
 const Dashboard = () => {
-  // Button click handlers
+ 
   const handleAddArtisan = () => {
     alert("Add Artisan functionality will be implemented here");
   };
@@ -29,7 +29,6 @@ const Dashboard = () => {
   const handleViewPayments = () => {
     alert("View Payments functionality will be implemented here");
   };
-  // Sample data for charts
   const serviceData = [
     { month: "Jan", services: 25 },
     { month: "Feb", services: 20 },

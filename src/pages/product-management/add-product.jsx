@@ -5,7 +5,6 @@ import { productControllers } from "../../api/product";
 
 const AddProduct = () => {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     product_name: "",
     categoryId: "",
@@ -20,11 +19,9 @@ const AddProduct = () => {
     dimension: "",
     description: "",
   });
-
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -33,53 +30,44 @@ const AddProduct = () => {
     }));
   };
 
-  
   const handleFileChange = (e) => {
     setImages(Array.from(e.target.files));
   };
-
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
       const data = new FormData();
-
-  
       Object.entries(formData).forEach(([key, value]) => {
         data.append(key, value);
       });
-
-      
       if (images.length > 0) {
         images.forEach((file) => {
-          data.append("images", file); 
+          data.append("images", file);
         });
       }
 
-    
-      console.log(" Request Payload:");
+      console.log("Request Payload:");
       for (let [key, value] of data.entries()) {
         console.log(`${key}:`, value);
       }
-
-      
       const res = await productControllers.addProduct(data);
-
-      alert(" Product added successfully!");
+      alert("Product added successfully!");
       console.log("Product Response:", res.data);
-      navigate("/product-management");
+
+
+
+      navigate("/product-management", { state: { refresh: true } });
     } catch (err) {
-      console.error(" Error adding product:", err.response?.data || err);
+      console.error("Error adding product:", err.response?.data || err);
       alert(err.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }
   };
-
   const handleGoBack = () => {
     navigate(-1);
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-4xl mx-auto">
@@ -92,6 +80,7 @@ const AddProduct = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
+
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Add New Product
@@ -239,17 +228,13 @@ const AddProduct = () => {
                 type="text"
                 name="size"
                 value={formData.size.join(", ")}
-              
                 onChange={(e) =>
-    setFormData({
-      ...formData,
-      size: e.target.value.split(",").map((s) => s.trim()), // 👈 split into array
-    })
-  }
+                  setFormData({
+                    ...formData,
+                    size: e.target.value.split(",").map((s) => s.trim()),
+                  })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                
-                //placeholder="S, M, L, XL"
-                
               />
             </div>
 
