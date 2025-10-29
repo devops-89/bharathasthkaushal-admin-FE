@@ -1,7 +1,5 @@
 import { getuserSecuredApi } from "./config";
-
 export const userControllers = {
-
   getUserListGroup: async (group) => {
     try {
       let result = await getuserSecuredApi.get(
@@ -10,12 +8,20 @@ export const userControllers = {
       );
       return result;
     } 
-  
     catch (error) {
     throw error;
-
     }
-    
-  },    
+  },
+  
+  
+
+
+
+
+
+
+
+
 
 };
+

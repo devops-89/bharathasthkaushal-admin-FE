@@ -10,6 +10,7 @@ import {
   User2Icon,
   CreditCard,
   Lock,
+  HelpCircle,
 } from 'lucide-react'
 const Wrapper = () => {
   const location = useLocation()
@@ -23,16 +24,14 @@ const Wrapper = () => {
     {path :'/employee-management', name :'Employee Management', icon: User2Icon},
     {path:'/payment-management',name:'Payment Management', icon:CreditCard},
     {path:'/permission-management',name:'Permission Management', icon:Lock },
-    
-  ]
-
+    {path:'/need-assistant', name:'Need Assistant',icon:HelpCircle  },
+  ]  
   const isActive = (path) => {
-    return location.pathname === path || (path === '/dashboard' && location.pathname === '/')
+    return location.pathname === path || (path === '/dashboard' && location.pathname === '/') 
   }
   return (
     <aside className="fixed left-0 top-16 w-64 bg-gray-800 h-screen z-40 overflow-y-auto">
-    
-      <nav className="mt-6">
+      <nav className="mt-6">  
         <div className="px-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon
@@ -48,13 +47,13 @@ const Wrapper = () => {
               >
                 <Icon className="w-5 h-5 mr-3" />
                 {item.name}
+                
               </Link>
             )
           })}
         </div>
       </nav>
-    </aside>
+     </aside>
   )
 }
-
 export default Wrapper

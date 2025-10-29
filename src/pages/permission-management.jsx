@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   Users, 
   Shield, 
@@ -19,9 +20,9 @@ import {
   Globe,
   Building,
   Target,
-  TrendingUp
+  TrendingUp,
+  
 } from 'lucide-react';
-
 const PermissionManagement = () => {
   const [users, setUsers] = useState([
     {
@@ -143,37 +144,25 @@ const PermissionManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('edit'); 
   const [editingUser, setEditingUser] = useState(null);
-
   const permissionsList = [
-    
     { id: 'view_all_data', name: 'View All Data', description: 'Access to all national data', level: 1 },
     { id: 'manage_all_users', name: 'Manage All Users', description: 'Manage all user accounts nationwide', level: 1 },
     { id: 'strategic_planning', name: 'Strategic Planning', description: 'Access to strategic planning tools', level: 1 },
     { id: 'policy_management', name: 'Policy Management', description: 'Create and modify company policies', level: 1 },
     { id: 'view_financials', name: 'View All Financials', description: 'Access to complete financial data', level: 1 },
     { id: 'delete_records', name: 'Delete Records', description: 'Permission to delete any records', level: 1 },
-    
-    
     { id: 'view_zonal_data', name: 'View Zonal Data', description: 'Access to zone-specific data', level: 2 },
     { id: 'manage_zone_users', name: 'Manage Zone Users', description: 'Manage users within the zone', level: 2 },
     { id: 'view_zone_financials', name: 'View Zone Financials', description: 'Access to zonal financial data', level: 2 },
     { id: 'zone_planning', name: 'Zone Planning', description: 'Zone-level planning and strategy', level: 2 },
-    
-    
     { id: 'view_state_data', name: 'View State Data', description: 'Access to state-specific data', level: 3 },
     { id: 'manage_state_users', name: 'Manage State Users', description: 'Manage users within the state', level: 3 },
     { id: 'view_state_financials', name: 'View State Financials', description: 'Access to state financial data', level: 3 },
-    
-    
     { id: 'view_area_data', name: 'View Area Data', description: 'Access to area-specific data', level: 4 },
-    { id: 'manage_area_users', name: 'Manage Area Users', description: 'Manage users within the area', level: 4 },
-    
-    
+    { id: 'manage_area_users', name: 'Manage Area Users', description: 'Manage users within the area', level: 4 }, 
     { id: 'view_territory_data', name: 'View Territory Data', description: 'Access to territory-specific data', level: 5 },
     { id: 'manage_territory_team', name: 'Manage Territory Team', description: 'Manage territory team members', level: 5 },
     { id: 'territory_planning', name: 'Territory Planning', description: 'Territory-level planning', level: 5 },
-    
-  
     { id: 'view_sales_data', name: 'View Sales Data', description: 'Access to sales performance data', level: 6 },
     { id: 'manage_sales_team', name: 'Manage Sales Team', description: 'Manage direct sales team', level: 6 },
     { id: 'view_customer_data', name: 'View Customer Data', description: 'Access to customer information', level: 6 },
@@ -189,7 +178,6 @@ const PermissionManagement = () => {
     { id: 'create_territory_reports', name: 'Create Territory Reports', description: 'Generate territory reports', level: 5 },
     { id: 'sales_reporting', name: 'Sales Reporting', description: 'Generate sales reports', level: 6 }
   ];
-
   const departments = [
     'Country Head',
     'Zonal Manager', 
@@ -288,7 +276,21 @@ const PermissionManagement = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                  Permission Management
               </h1>
-              <p className="text-gray-600 mt-1">Manage user roles and permissions across sales hierarchy levels</p>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                <NavLink
+                  to="/Dashboard"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""} >
+                          Dashboard
+                        </NavLink>
+                        <span>•</span>
+                        <NavLink
+                          to="/permission-management"
+                          className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                        >
+                          Permission  Management 
+                        </NavLink>
+                  </nav>
+      
             </div>
           </div>
 

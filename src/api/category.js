@@ -29,8 +29,25 @@
         );
         return result;
       } catch (error) {
+        throw error ;
+      }
+
+    },
+    getallSubcategory: async(categoryId)=>
+    {
+      try{
+        let result = await productSecuredApi.get(
+          `/category/getallsubcategory`,
+          {
+            headers:{"cache-control":"no-cache"},
+          }
+        );
+        console.log("wjdsdhjhdec",result)
+        return result;
+
+      } catch (error)
+      {
         throw error;
       }
-    },
-    
+    } ,
   };

@@ -92,7 +92,6 @@ const ProductDetails = () => {
       );
     }
   };
-
   const handleAssignFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === 'stepIds') {

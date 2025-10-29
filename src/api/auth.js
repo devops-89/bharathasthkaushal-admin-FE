@@ -33,10 +33,12 @@ addEmployee: async (data) => {
   },
 
   addArtisan: async (data) => {
+    console.log(data)
     try {
-      let result = await securedApi.post("/register_artisan", data);
+      let result = await securedApi.post("/admin_register_artisan", data);
+      console.log("gsgggdegdugd",result);
       return result;
-    } catch (error) {
+    } catch (error) {               
       throw error;
     }
   },

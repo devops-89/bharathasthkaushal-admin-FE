@@ -82,7 +82,7 @@ const Header = () => {
                 className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4 mr-3" />
-                Logout
+                           Logout
               </button>
             </div>
           )}

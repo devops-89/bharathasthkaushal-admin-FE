@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Search, Filter, Plus, X, Eye, MoreVertical, Phone, Calendar, User, Mail, MapPin } from 'lucide-react'
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
+import { NavLink } from 'react-router-dom';
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
@@ -124,16 +125,34 @@ const ArtisanManagement = () => {
   const uniqueLocations = [...new Set(partnersData.map(p => p.location.split(',')[0]))]
 
   return (
-    <div className="ml-64 pt-20 flex-1">
-      {/* Page Header */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+      <div className="max-w-5xl mx-auto">
+
+    
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Employee Management</h1>
             <nav className="flex items-center space-x-2 text-sm text-gray-500 mt-2">
-              <span>Dashboard</span>
-              <span>•</span>
-              <span>Employee</span>
+          
+                       
+                                      <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                                        <NavLink
+                            to="/Dashboard"
+                            className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                          >
+                            Dashboard
+                          </NavLink>
+                                        
+                                        <span>•</span>
+                                         <NavLink
+                            to="/employee-management"
+                            className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                          >
+                            Employee Management 
+                          </NavLink>
+                                      </nav>
+                        
             </nav>
           </div>
         </div>
@@ -189,17 +208,7 @@ const ArtisanManagement = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Location
                 </label>
-                {/* <select
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                  <option value="">All Locations</option>
-                  {uniqueLocations.map(location => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </select> */}
+                
               </div>
             </div>
             <div className="flex justify-end mt-4">
@@ -348,7 +357,6 @@ const ArtisanManagement = () => {
           </div>
         </div>
       )}
-
       {/* Details Modal */}
       {showDetailsModal && selectedPartner && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -504,6 +512,7 @@ const ArtisanManagement = () => {
           <p className="text-gray-500">No artisans found matching your search criteria.</p>
         </div>
       )}
+    </div>
     </div>
   )
 }

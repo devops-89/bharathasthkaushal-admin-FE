@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 const ApprovalManagement = () => {
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
@@ -347,6 +348,23 @@ const ApprovalManagement = () => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
             Approval Management
           </h1>
+                                 <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                                    <NavLink
+                        to="/Dashboard"
+                        className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                      >
+                        Dashboard
+                      </NavLink>
+                                    
+                                    <span>•</span>
+                                     <NavLink
+                        to="/approval-management"
+                        className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                      >
+                        Approval Management 
+                      </NavLink>
+          </nav>
+                    
         </div>
       </div>
 

@@ -16,12 +16,14 @@ import AddProduct from "./pages/product-management/add-product";
 import ProductDetails from "./pages/product-management/product-details";
 import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
+import NeedAssistant from "./pages/need-assistant";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [show, setShow] = useState(false);
   useEffect(() => {
+    
     if (location.pathname === "/") {
       setShow(false);
     } else {
@@ -64,7 +66,12 @@ function App() {
           element={<Subcategory/>}
         />
         <Route path="/categories/:page/:pageSize/:id" element={<CategoryManagement/>} />
+        <Route 
+          path="/need-assistant"
+          element={<NeedAssistant/>}
+        />
       </Routes>
+      
     </div>
   );
 }

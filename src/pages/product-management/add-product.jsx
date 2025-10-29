@@ -2,7 +2,6 @@ import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
-
 const AddProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -21,7 +20,6 @@ const AddProduct = () => {
   });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -54,9 +52,6 @@ const AddProduct = () => {
       const res = await productControllers.addProduct(data);
       alert("Product added successfully!");
       console.log("Product Response:", res.data);
-
-
-
       navigate("/product-management", { state: { refresh: true } });
     } catch (err) {
       console.error("Error adding product:", err.response?.data || err);
@@ -80,11 +75,11 @@ const AddProduct = () => {
             >
               <ArrowLeft className="w-6 h-6 text-gray-600" />
             </button>
-
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Add New Product
               </h1>
+              
               <p className="text-gray-600">
                 Enter product details for your handloom/handcraft item
               </p>
@@ -267,6 +262,7 @@ const AddProduct = () => {
                 placeholder="10x20 cm"
               />
             </div>
+            
 
             {/* Description */}
             <div className="md:col-span-2">

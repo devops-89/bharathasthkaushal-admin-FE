@@ -7,7 +7,7 @@ export const productControllers = {
       },
     });
   },
-  getAllProducts: () => {
+  getAllProducts: () => { 
   return productSecuredApi.get("/product/admin/all-products");
   },
   getProductById: (id) => {
@@ -23,17 +23,19 @@ createBuildStep: (formData) => {
         },                                             
       }
     );
-  }, 
+  },
+
+  
+
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
-  },  
+  },   
 createAuction: (auctionData) => {
     return productSecuredApi.post("/auction/create", auctionData);
   },
   startAuction: (auctionId) => {
     return productSecuredApi.put(`/auction/start/${auctionId}`);
   },
-
   getActiveAuctions: () => {
     return productSecuredApi.get("/auction/active");
   },

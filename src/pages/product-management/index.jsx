@@ -9,12 +9,12 @@ import {
   ShoppingBag,
   User,
 }from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
 export default function ProductManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState(null);
-
   const location = useLocation();
   const navigate = useNavigate();
   const fetchProducts = async () => {
@@ -47,9 +47,21 @@ export default function ProductManagement() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Product Management
               </h1>
-              <p className="text-gray-600 text- lg">
-                Manage your handloom and handcraft products
-              </p>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+               <NavLink
+                  to="/Dashboard"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""} >
+                  Dashboard
+                </NavLink>
+                              
+                              <span>•</span>
+                               <NavLink
+                  to="/product-management"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                >
+                  Product Management 
+                </NavLink>
+                            </nav>
             </div>
             <Link to={"/product-management/add-product"}>
               <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors">
@@ -124,12 +136,7 @@ export default function ProductManagement() {
                         </span>
                       </div>
                     </div>
-                    {/* <div className="flex items-center justify-between text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <ShoppingBag className="w-4 h-4" />
-                        <span>Stock: {product.stock}</span>
-                      </div>
-                    </div> */}
+                    
                     <button
                       onClick={() => handleViewDetails(product.productId)}
                       className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
