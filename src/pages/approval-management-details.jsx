@@ -9,19 +9,12 @@ import {
   IndianRupee,
   Package
 } from "lucide-react";
-
 const ApprovalManagementDetails = () => {
   const [compensationPercentage, setCompensationPercentage] = useState(0);
-  
-  // Mock navigation function for demo
   const handleNavigateBack = () => {
     alert("Navigating back to approval management list");
   };
-
-  // Get product ID from URL - for demo, we'll use ID 1
   const productId = 1;
-
-  // Mock data - same as in ApprovalManagement component
   const pendingApprovals = [
     {
       id: 1,

@@ -17,6 +17,8 @@ import ProductDetails from "./pages/product-management/product-details";
 import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +34,7 @@ function App() {
   }, [location.pathname]);
   return (
     <div className="">
+      <ToastContainer position="top-right" autoClose={2500} />
       {show && <Wrapper />}
       {show && <Header />}
       <Routes>

@@ -1,7 +1,19 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Package, Palette, Ruler, Award, ChevronLeft, ChevronRight, X, ChevronDown, ChevronUp, Users, FileText } from "lucide-react";
+import {
+  Package,
+  Palette,
+  Ruler,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Users,
+  FileText,
+} from "lucide-react";
+
 import { productControllers } from "../../api/product";
 const ProductDetails = () => {
   const { id } = useParams();
@@ -11,48 +23,53 @@ const ProductDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [showCreateStepForm, setShowCreateStepForm] = useState(false);
-  const [buildSteps, setBuildSteps] = useState([]); 
-  const [expandedStep, setExpandedStep] = useState(null); 
+  const [buildSteps, setBuildSteps] = useState([]);
+  const [expandedStep, setExpandedStep] = useState(null);
   const [products, setProducts] = useState([]);
   const [referenceImages, setReferenceImages] = useState([]);
-   
-  const [assignForm, setAssignForm] = useState({
 
-    artisanId: '',
+  const [assignForm, setAssignForm] = useState({
+    artisanId: "",
     stepIds: [],
-    deadline: '',
-    priority: 'medium',
-    notes: ''
+    deadline: "",
+    priority: "medium",
+    notes: "",
   });
   const [createStepForm, setCreateStepForm] = useState({
-    productId: '',
-    sequence: '',
-    stepName: '',
-    description: '',
-    proposedPrice: '',
-    admin_remarks: '',
-    dueDate: '',
-    materials: '',
-    instructions: ''
+    productId: "",
+    sequence: "",
+    stepName: "",
+    description: "",
+    proposedPrice: "",
+    admin_remarks: "",
+    dueDate: "",
+    materials: "",
+    instructions: "",
   });
-` `
+  ` `;
   useEffect(() => {
-    console.log("Route param id:", id); 
+    console.log("Route param id:", id);
     if (id) {
       setLoading(true);
       Promise.all([
-        productControllers.getProductById(id).then((res) => {
-          console.log("Product API response:", res.data);
-          const productData = res.data?.data || res.data; 
-          setProduct(productData || null);
-          return productData;
-        }).catch((err) => {
-          console.error("Error fetching product:", err.response?.data || err.message);
-          setProduct(null);
-          return null;
-        }),
+        productControllers
+          .getProductById(id)
+          .then((res) => {
+            console.log("Product API response:", res.data);
+            const productData = res.data?.data || res.data;
+            setProduct(productData || null);
+            return productData;
+          })
+          .catch((err) => {
+            console.error(
+              "Error fetching product:",
+              err.response?.data || err.message
+            );
+            setProduct(null);
+            return null;
+          }),
         fetchProducts(),
-        fetchBuildSteps()
+        fetchBuildSteps(),
       ]).finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -64,7 +81,10 @@ const ProductDetails = () => {
       console.log("Products Response:", res.data.data.docs);
       setProducts(res.data.data?.docs || []);
     } catch (err) {
-      console.error("Error fetching products:", err.response?.data || err.message);
+      console.error(
+        "Error fetching products:",
+        err.response?.data || err.message
+      );
       setProducts([]);
     }
   };
@@ -74,37 +94,40 @@ const ProductDetails = () => {
       console.log("Build steps API response:", res.data);
       setBuildSteps(res.data?.data || res.data || []);
     } catch (err) {
-      console.error("Error fetching build steps:", err.response?.data || err.message);
+      console.error(
+        "Error fetching build steps:",
+        err.response?.data || err.message
+      );
       setBuildSteps([]);
     }
   };
   const nextImage = () => {
     if (product?.images?.length) {
-      setSelectedImageIndex((prevIndex) => 
-        (prevIndex + 1) % product.images.length
+      setSelectedImageIndex(
+        (prevIndex) => (prevIndex + 1) % product.images.length
       );
     }
   };
   const prevImage = () => {
     if (product?.images?.length) {
-      setSelectedImageIndex((prevIndex) => 
+      setSelectedImageIndex((prevIndex) =>
         prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
       );
     }
   };
   const handleAssignFormChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (name === 'stepIds') {
-      setAssignForm(prev => ({
+    if (name === "stepIds") {
+      setAssignForm((prev) => ({
         ...prev,
-        stepIds: checked 
+        stepIds: checked
           ? [...prev.stepIds, value]
-          : prev.stepIds.filter(id => id !== value)
+          : prev.stepIds.filter((id) => id !== value),
       }));
     } else {
-      setAssignForm(prev => ({
+      setAssignForm((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -118,11 +141,11 @@ const ProductDetails = () => {
       alert("Steps assigned to artisan successfully!");
 
       setAssignForm({
-        artisanId: '',
+        artisanId: "",
         stepIds: [],
-        deadline: '',
-        priority: 'medium',
-        notes: ''
+        deadline: "",
+        priority: "medium",
+        notes: "",
       });
       setShowAssignForm(false);
       setLoading(false);
@@ -131,9 +154,9 @@ const ProductDetails = () => {
 
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
-    setCreateStepForm(prev => ({
+    setCreateStepForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -162,15 +185,15 @@ const ProductDetails = () => {
         console.log("Create build step API response:", res.data);
         alert("Build step created successfully!");
         setCreateStepForm({
-          productId: '',
-          sequence: '',
-          stepName: '',
-          description: '',
-          proposedPrice: '',
-          admin_remarks: '',
-          dueDate: '',
-          materials: '',
-          instructions: ''
+          productId: "",
+          sequence: "",
+          stepName: "",
+          description: "",
+          proposedPrice: "",
+          admin_remarks: "",
+          dueDate: "",
+          materials: "",
+          instructions: "",
         });
         setReferenceImages([]);
         if (createStepForm.productId === id) {
@@ -179,7 +202,10 @@ const ProductDetails = () => {
         setShowCreateStepForm(false);
       })
       .catch((err) => {
-        console.error("Error creating build step:", err.response?.data || err.message);
+        console.error(
+          "Error creating build step:",
+          err.response?.data || err.message
+        );
         alert("Error creating build step. Please try again.");
       })
       .finally(() => setLoading(false));
@@ -191,14 +217,14 @@ const ProductDetails = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -218,7 +244,9 @@ const ProductDetails = () => {
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex items-center justify-center">
         <div className="text-center">
           <Package className="w-24 h-24 text-gray-400 mx-auto mb-4" />
-          <p className="text-red-600 text-xl font-seFmibold">Product not found!</p>
+          <p className="text-red-600 text-xl font-seFmibold">
+            Product not found!
+          </p>
         </div>
       </div>
     );
@@ -253,7 +281,7 @@ const ProductDetails = () => {
                         src={product.images[selectedImageIndex]?.imageUrl}
                         alt={product?.product_name}
                         className="w-full h-64 lg:h-80 object-cover rounded-2xl shadow-lg transition-transform group-hover:scale-105"
-                      />      
+                      />
                       {/* Image Counter*/}
                       <div className="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm font-medium">
                         {selectedImageIndex + 1} / {product.images.length}
@@ -278,7 +306,8 @@ const ProductDetails = () => {
                           <button
                             onClick={nextImage}
                             className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all opacity-0 group-hover:opacity-100"
-                          >``
+                          >
+                            ``
                             <ChevronRight className="w-6 h-6 text-gray-700" />
                           </button>
                         </>
@@ -291,9 +320,9 @@ const ProductDetails = () => {
                               key={index}
                               onClick={() => setSelectedImageIndex(index)}
                               className={`w-2 h-2 rounded-full transition-all ${
-                                selectedImageIndex === index 
-                                  ? 'bg-white scale-125' 
-                                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                                selectedImageIndex === index
+                                  ? "bg-white scale-125"
+                                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
                               }`}
                             />
                           ))}
@@ -314,9 +343,9 @@ const ProductDetails = () => {
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
                         className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImageIndex === index 
-                            ? 'border-orange-500 shadow-lg scale-105' 
-                            : 'border-gray-200 hover:border-orange-300'
+                          selectedImageIndex === index
+                            ? "border-orange-500 shadow-lg scale-105"
+                            : "border-gray-200 hover:border-orange-300"
                         }`}
                       >
                         <img
@@ -332,19 +361,20 @@ const ProductDetails = () => {
                 <div className="space-y-3">
                   <button
                     onClick={() => setShowCreateStepForm(true)}
-                    className="w-full px-4 py-4 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                    className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                   >
                     <FileText className="w-3 h-5" />
                     Create Build Step
                   </button>
                   <button
                     onClick={() => setShowAssignForm(true)}
-                    className="-full px-4 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                    className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  >
                     <Users className="w-5 h-5" />
                     Assign Steps to Artisan
                   </button>
                 </div>
-                {/* Build Steps FAQ Section */} 
+                {/* Build Steps FAQ Section */}
                 <div className="mt-8">
                   <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-6 border border-gray-200">
                     <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -354,12 +384,17 @@ const ProductDetails = () => {
                     {buildSteps.length === 0 ? (
                       <div className="text-center py-8">
                         <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 text-lg">No build steps available</p>
+                        <p className="text-gray-500 text-lg">
+                          No build steps available
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         {buildSteps.map((step) => (
-                          <div key={step.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                          <div
+                            key={step.id}
+                            className="border border-gray-200 rounded-xl overflow-hidden"
+                          >
                             <button
                               onClick={() => toggleStepExpanded(step.id)}
                               className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between transition-colors"
@@ -368,9 +403,15 @@ const ProductDetails = () => {
                                 <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
                                   Step {step.sequence}
                                 </span>
-                                <span className="font-medium text-gray-900">{step.stepName}</span>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(step.status)}`}>
-                                  {step.status?.replace('_', ' ').toUpperCase()}
+                                <span className="font-medium text-gray-900">
+                                  {step.stepName}
+                                </span>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                    step.status
+                                  )}`}
+                                >
+                                  {step.status?.replace("_", " ").toUpperCase()}
                                 </span>
                               </div>
                               {expandedStep === step.id ? (
@@ -383,22 +424,42 @@ const ProductDetails = () => {
                               <div className="px-4 pb-4 bg-gray-50">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                                   <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2">Description</h4>
-                                    <p className="text-gray-600 text-sm">{step.description}</p>
+                                    <h4 className="font-semibold text-gray-700 mb-2">
+                                      Description
+                                    </h4>
+                                    <p className="text-gray-600 text-sm">
+                                      {step.description}
+                                    </p>
                                   </div>
                                   <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2">Proposed Price</h4>
-                                    <p className="text-orange-600 font-bold text-lg">₹{step.proposed_price || step.proposedPrice}</p>
+                                    <h4 className="font-semibold text-gray-700 mb-2">
+                                      Proposed Price
+                                    </h4>
+                                    <p className="text-orange-600 font-bold text-lg">
+                                      ₹
+                                      {step.proposed_price ||
+                                        step.proposedPrice}
+                                    </p>
                                   </div>
                                   {step.admin_remarks && (
                                     <div className="md:col-span-2">
-                                      <h4 className="font-semibold text-gray-700 mb-2">Admin Remarks</h4>
-                                      <p className="text-gray-600 text-sm bg-white p-3 rounded-lg">{step.admin_remarks}</p>
+                                      <h4 className="font-semibold text-gray-700 mb-2">
+                                        Admin Remarks
+                                      </h4>
+                                      <p className="text-gray-600 text-sm bg-white p-3 rounded-lg">
+                                        {step.admin_remarks}
+                                      </p>
                                     </div>
                                   )}
                                   <div className="md:col-span-2">
-                                    <h4 className="font-semibold text-gray-700 mb-2">Created Date</h4>
-                                    <p className="text-gray-600 text-sm">{new Date(step.createdAt).toLocaleDateString()}</p>
+                                    <h4 className="font-semibold text-gray-700 mb-2">
+                                      Created Date
+                                    </h4>
+                                    <p className="text-gray-600 text-sm">
+                                      {new Date(
+                                        step.createdAt
+                                      ).toLocaleDateString()}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -445,7 +506,9 @@ const ProductDetails = () => {
                 </div>
                 {/* Stock Status */}
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-700 font-medium">Availability:</span>
+                  <span className="text-gray-700 font-medium">
+                    Availability:
+                  </span>
                   <span
                     className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
                       parseInt(product?.quantity || 0) < 10
@@ -453,10 +516,16 @@ const ProductDetails = () => {
                         : "bg-green-100 text-green-700"
                     }`}
                   >
-                    <div className={`w-2 h-2 rounded-full ${
-                      parseInt(product?.quantity || 0) < 10 ? "bg-red-500" : "bg-green-500"
-                    }`}></div>
-                    {parseInt(product?.quantity || 0) < 10 ? "Low Stock" : "In Stock"} 
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        parseInt(product?.quantity || 0) < 10
+                          ? "bg-red-500"
+                          : "bg-green-500"
+                      }`}
+                    ></div>
+                    {parseInt(product?.quantity || 0) < 10
+                      ? "Low Stock"
+                      : "In Stock"}
                     ({product?.quantity || 0} units)
                   </span>
                 </div>
@@ -464,13 +533,15 @@ const ProductDetails = () => {
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
                     Product Details
-                  </h3>                 
+                  </h3>
                   <div className="grid grid-cols-1 gap-3">
                     {product?.artisan && (
                       <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                         <Award className="w-5 h-5 text-blue-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Artisan:</span>
+                          <span className="text-gray-700 font-medium">
+                            Artisan:
+                          </span>
                           <span className="ml-2 text-blue-600 font-semibold">
                             {product.artisan?.name || product.artisan}
                           </span>
@@ -481,18 +552,25 @@ const ProductDetails = () => {
                       <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                         <Package className="w-5 h-5 text-gray-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Material:</span>
-                          <span className="ml-2 text-gray-900 font-medium">{product.material}</span>
+                          <span className="text-gray-700 font-medium">
+                            Material:
+                          </span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {product.material}
+                          </span>
                         </div>
-                        
                       </div>
                     )}
                     {product?.color && (
                       <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
                         <Palette className="w-5 h-5 text-purple-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Color:</span>
-                          <span className="ml-2 text-gray-900 font-medium">{product.color}</span>
+                          <span className="text-gray-700 font-medium">
+                            Color:
+                          </span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {product.color}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -500,8 +578,12 @@ const ProductDetails = () => {
                       <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                         <Ruler className="w-5 h-5 text-green-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Size:</span>
-                          <span className="ml-2 text-gray-900 font-medium">{product.size.join(", ")}</span>
+                          <span className="text-gray-700 font-medium">
+                            Size:
+                          </span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {product.size.join(", ")}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -509,8 +591,12 @@ const ProductDetails = () => {
                       <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
                         <Package className="w-5 h-5 text-yellow-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Net Weight:</span>
-                          <span className="ml-2 text-gray-900 font-medium">{product.netWeight}</span>
+                          <span className="text-gray-700 font-medium">
+                            Net Weight:
+                          </span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {product.netWeight}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -518,8 +604,12 @@ const ProductDetails = () => {
                       <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
                         <Ruler className="w-5 h-5 text-indigo-600" />
                         <div>
-                          <span className="text-gray-700 font-medium">Dimensions:</span>
-                          <span className="ml-2 text-gray-900 font-medium">{product.dimension}</span>
+                          <span className="text-gray-700 font-medium">
+                            Dimensions:
+                          </span>
+                          <span className="ml-2 text-gray-900 font-medium">
+                            {product.dimension}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -532,10 +622,11 @@ const ProductDetails = () => {
                       Description
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-xl">
-                      <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                      <p className="text-gray-700 leading-relaxed">
+                        {product.description}
+                      </p>
                     </div>
                   </div>
-              
                 )}
                 {/* Back Button */}
                 <button
@@ -554,7 +645,9 @@ const ProductDetails = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Create New Build Step</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Create New Build Step
+              </h2>
               <button
                 onClick={() => setShowCreateStepForm(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -653,7 +746,7 @@ const ProductDetails = () => {
                   value={createStepForm.dueDate}
                   onChange={handleCreateStepFormChange}
                   required
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
@@ -704,7 +797,9 @@ const ProductDetails = () => {
                   type="file"
                   multiple
                   accept="image/*"
-                  onChange={(e) => setReferenceImages(Array.from(e.target.files))}
+                  onChange={(e) =>
+                    setReferenceImages(Array.from(e.target.files))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 />
               </div>
@@ -719,7 +814,7 @@ const ProductDetails = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-500 text-white rounded-lg hover:from-orange-600 hover:to-orange-600 transition-colors disabled:opacity-50"
                 >
                   {loading ? "Creating..." : "Create Step"}
                 </button>
@@ -733,7 +828,9 @@ const ProductDetails = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Assign Steps to Artisan</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Assign Steps to Artisan
+              </h2>
               <button
                 onClick={() => setShowAssignForm(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -754,10 +851,16 @@ const ProductDetails = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Choose an artisan...</option>
-                  <option value="artisan1">Ram Kumar (Bamboo Specialist)</option>
+                  <option value="artisan1">
+                    Ram Kumar (Bamboo Specialist)
+                  </option>
                   <option value="artisan2">Sita Devi (Wood Carver)</option>
-                  <option value="artisan3">Arjun Singh (Painting Expert)</option>
-                  <option value="artisan4">Maya Sharma (Finishing Specialist)</option>
+                  <option value="artisan3">
+                    Arjun Singh (Painting Expert)
+                  </option>
+                  <option value="artisan4">
+                    Maya Sharma (Finishing Specialist)
+                  </option>
                 </select>
               </div>
               <div>
@@ -771,12 +874,17 @@ const ProductDetails = () => {
                 ) : (
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
                     {buildSteps.map((step) => (
-                      <label key={step.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                      <label
+                        key={step.id}
+                        className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           name="stepIds"
                           value={step.id}
-                          checked={assignForm.stepIds.includes(step.id.toString())}
+                          checked={assignForm.stepIds.includes(
+                            step.id.toString()
+                          )}
                           onChange={handleAssignFormChange}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
@@ -785,14 +893,20 @@ const ProductDetails = () => {
                             <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
                               Step {step.sequence}
                             </span>
-                            <span className="font-medium text-gray-900">{step.stepName}</span>
+                            <span className="font-medium text-gray-900">
+                              {step.stepName}
+                            </span>
                           </div>
-                          <p className="text-gray-600 text-sm mt-1">{step.description}</p>
-                          <span className="text-orange-600 font-semibold text-sm">₹{step.proposed_price || step.proposedPrice}</span>
+                          <p className="text-gray-600 text-sm mt-1">
+                            {step.description}
+                          </p>
+                          <span className="text-orange-600 font-semibold text-sm">
+                            ₹{step.proposed_price || step.proposedPrice}
+                          </span>
                         </div>
                       </label>
-                    ))}                  
-                  </div>          
+                    ))}
+                  </div>
                 )}
               </div>
               <div>
@@ -805,7 +919,7 @@ const ProductDetails = () => {
                   value={assignForm.deadline}
                   onChange={handleAssignFormChange}
                   required
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -849,13 +963,13 @@ const ProductDetails = () => {
                 <button
                   type="submit"
                   disabled={loading || assignForm.stepIds.length === 0}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-500 text-white rounded-lg hover:from-orange-600 hover:to-orange-600 transition-colors disabled:opacity-50"
                 >
                   {loading ? "Assigning..." : "Assign Steps"}
                 </button>
               </div>
             </form>
-          </div>
+          </div>  
         </div>
       )}
     </div>

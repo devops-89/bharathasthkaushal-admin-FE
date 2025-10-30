@@ -13,9 +13,10 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
-import {categoryControllers} from "../api/category";
+import { categoryControllers } from "../api/category";
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -52,19 +53,33 @@ const ArtisanManagement = () => {
     ST: ["Gond", "Bhil", "Santhal", "Munda"],
   };
 
- 
   const getallSubcategory = async (categoryId) => {
-  try {
-    const resultData = await categoryControllers.getallSubcategory(categoryId);
-    
-      setSubCategories(resultData.data.data.docs)
-      
-  
-  } catch (error) {
-    console.error("Error fetching subcategories:", error);
-    setSubCategories([]); 
-  }
-};
+    try {
+      const resultData = await categoryControllers.getallSubcategory(
+        categoryId
+      );
+
+      setSubCategories(resultData.data.data.docs);
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+      setSubCategories([]);
+    }
+  };
+  const handleVerifyArtisan = async (id) => {
+    try {
+      const partner = partnersData.find((p) => p.id === id);
+      if (partner.verify_status === "VERIFIED") {
+        toast.info("This artisan is already verified ✅");
+        return;
+      }
+
+      const response = await userControllers.verifyArtisan(id);
+      toast.success("Artisan Verified Successfully ✅");
+      fetchArtisans();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error verifying artisan");
+    }
+  };
   const fetchArtisans = async () => {
     try {
       const response = await userControllers.getUserListGroup("ARTISAN");
@@ -108,12 +123,12 @@ const ArtisanManagement = () => {
   };
   useEffect(() => {
     fetchArtisans();
-  getallSubcategory('categoryId');
+    getallSubcategory("categoryId");
   }, []);
-console.log("hdwjhed",subCategories);
+  console.log("hdwjhed", subCategories);
   const toggleDropdown = (partnerId) => {
     setDropdownOpen(dropdownOpen === partnerId ? null : partnerId);
-  }; 
+  };
   const handleViewDetails = (partner) => {
     setSelectedPartner(partner);
     setShowDetailsModal(true);
@@ -196,8 +211,8 @@ console.log("hdwjhed",subCategories);
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
         {/* Page Header */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+          <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Artisan Management
@@ -218,26 +233,10 @@ console.log("hdwjhed",subCategories);
                     isActive ? "text-orange-600 font-semibold" : ""
                   }
                 >
-
                   Artisans
                 </NavLink>
               </nav>
             </div>
-          </div>
-        </div>
-        {/* Tabs */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex flex-wrap gap-2 mb-4">
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === "all"
-                  ? "bg-orange-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              All Artisans
-            </button>
           </div>
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4">
@@ -251,14 +250,14 @@ console.log("hdwjhed",subCategories);
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-            <button
+            {/* <button
               onClick={() => setShowFilter(!showFilter)}
               className={`flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors ${
                 showFilter ? "bg-gray-200" : "bg-gray-100"
               }`}
             >
               <Filter className="w-4 h-4 mr-2" /> Filter
-            </button>
+            </button> */}
             <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
@@ -298,6 +297,7 @@ console.log("hdwjhed",subCategories);
             </div>
           )}
         </div>
+
         {/* Register Artisan Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -356,7 +356,7 @@ console.log("hdwjhed",subCategories);
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location *
+                      Location
                     </label>
                     <input
                       type="location"
@@ -385,7 +385,7 @@ console.log("hdwjhed",subCategories);
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
+                        Phone Number
                       </label>
                       <input
                         type="tel"
@@ -395,15 +395,14 @@ console.log("hdwjhed",subCategories);
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="9876543210"
                       />
-                    </div> 
+                    </div>
                   </div>
                   <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Expertise Field *
-
-                      </label>
-                      <select
-                        name="expertizeField"
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Expertise Field
+                    </label>
+                    <select
+                      name="expertizeField"
                       value={formData.expertizeField}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -412,8 +411,8 @@ console.log("hdwjhed",subCategories);
                       {subCategories.map((subCategory, index) => (
                         <option key={index} value={subCategory.category_name}>
                           {subCategory.category_name}
-                          </option>
-                      ))} 
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -432,7 +431,7 @@ console.log("hdwjhed",subCategories);
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      User Caste Category *
+                      User Caste Category
                     </label>
                     <select
                       name="user_caste_category"
@@ -449,7 +448,7 @@ console.log("hdwjhed",subCategories);
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub Caste *
+                      Sub Caste
                     </label>
                     <select
                       name="subCaste"
@@ -469,7 +468,7 @@ console.log("hdwjhed",subCategories);
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Gst Number *
+                      Gst Number
                     </label>
                     <input
                       type="text"
@@ -505,9 +504,19 @@ console.log("hdwjhed",subCategories);
             <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">
+                  {/* <h2 className="text-xl font-bold text-gray-900">
                     Artisan Details
-                  </h2>
+                  </h2> */}
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+  Artisan Details
+
+  {selectedPartner.verify_status === "VERIFIED" && (
+    <span className="text-green-600 text-sm font-semibold px-3 py-1 border border-green-500 rounded-full">
+      ✅ Verified Artisan
+    </span>
+  )}
+</h2>
+
                   <button
                     onClick={() => setShowDetailsModal(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -679,11 +688,26 @@ console.log("hdwjhed",subCategories);
                         {partner.expertizeField || "Not Specified"}
                       </div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div
+                        className={`text-sm font-semibold px-3 py-1 rounded-full w-fit ${
+                          partner.verify_status === "VERIFIED"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {partner.verify_status === "VERIFIED"
+                          ? "Verified"
+                          : "Pending"}
+                      </div>
+                    </td>
+
                     <th className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {partner.status || "Approved Artisan"}
                       </div>
                     </th>
+
                     <td className="px-6 py-4 whitespace-nowrap relative">
                       <button
                         onClick={() => toggleDropdown(partner.id)}
@@ -700,6 +724,34 @@ console.log("hdwjhed",subCategories);
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </button>
+
+                          {/* {partner.status !== "Verified" && (
+                            <button
+                              onClick={() => handleVerifyArtisan(partner.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                            >
+                              ✅ Verify Artisan
+                            </button>
+                          )} */}
+                          {partner.verify_status !== "VERIFIED" ? (
+                            <button
+                              onClick={() => handleVerifyArtisan(partner.id)}
+                              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                            >
+                              ✅ Verify Artisan
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                toast.info(
+                                  "This artisan is already verified ✅"
+                                )
+                              }
+                              className="flex items-center w-full px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                            >
+                              ✔ Already Verified
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -719,5 +771,5 @@ console.log("hdwjhed",subCategories);
       </div>
     </div>
   );
-}
+};
 export default ArtisanManagement;

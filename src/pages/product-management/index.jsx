@@ -8,7 +8,7 @@ import {
   Palette,
   ShoppingBag,
   User,
-}from "lucide-react";
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
@@ -18,7 +18,6 @@ export default function ProductManagement() {
   const location = useLocation();
   const navigate = useNavigate();
   const fetchProducts = async () => {
-    
     productControllers
       .getAllProducts()
       .then((res) => {
@@ -40,7 +39,7 @@ export default function ProductManagement() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-7xl mx-auto">
-       {/* Header */}
+        {/* Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -48,38 +47,45 @@ export default function ProductManagement() {
                 Product Management
               </h1>
               <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-               <NavLink
+                <NavLink
                   to="/Dashboard"
-                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""} >
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
+                >
                   Dashboard
                 </NavLink>
-                              
-                              <span>•</span>
-                               <NavLink
+
+                <span>•</span>
+                <NavLink
                   to="/product-management"
-                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
                 >
-                  Product Management 
+                  Product Management
                 </NavLink>
-                            </nav>
+              </nav>
             </div>
-            <Link to={"/product-management/add-product"}>
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 transition-colors">
-                <span className="text-xl">+</span> Add New Product
-              </button>
-               </Link>
           </div>
           {/* SearchBar*/}
-          
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+            <Link to={"/product-management/add-product"}>
+              <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
+                <span className="text-xl"> + </span> Add New Product
+              </button>
+            </Link>
           </div>
         </div>
         {/* Products List  */}
@@ -93,9 +99,7 @@ export default function ProductManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products?.docs.map((product) => (
                 <div
-
                   key={product.id}
-                  
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <div className="relative mb-4">
@@ -136,7 +140,7 @@ export default function ProductManagement() {
                         </span>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => handleViewDetails(product.productId)}
                       className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"

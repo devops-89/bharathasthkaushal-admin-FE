@@ -10,6 +10,10 @@ export const productControllers = {
   getAllProducts: () => { 
   return productSecuredApi.get("/product/admin/all-products");
   },
+  getAllProductsReady:()=>
+  {
+     return productSecuredApi.get("/product/admin/all-products?buildStatus=READY_FOR_AUCTION")
+  },
   getProductById: (id) => {
   return productSecuredApi.get(`/product/productdetails/${id}`);
 },
