@@ -13,8 +13,8 @@ import {
   Users,
   FileText,
 } from "lucide-react";
-
 import { productControllers } from "../../api/product";
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const ProductDetails = () => {
   const [expandedStep, setExpandedStep] = useState(null);
   const [products, setProducts] = useState([]);
   const [referenceImages, setReferenceImages] = useState([]);
-
   const [assignForm, setAssignForm] = useState({
     artisanId: "",
     stepIds: [],
@@ -36,17 +35,19 @@ const ProductDetails = () => {
     notes: "",
   });
   const [createStepForm, setCreateStepForm] = useState({
-    productId: "",
-    sequence: "",
-    stepName: "",
-    description: "",
-    proposedPrice: "",
-    admin_remarks: "",
-    dueDate: "",
-    materials: "",
-    instructions: "",
-  });
-  ` `;
+  productId: "",
+  sequence: "",
+  stepName: "",
+  description: "",
+  proposedPrice: "",
+  admin_remarks: "",
+  dueDate: "",
+  materials: "",
+  instructions: "",
+});
+
+const [showRejectModal, setShowRejectModal] = useState(false);
+const [rejectReason, setRejectReason] = useState("");
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -257,14 +258,12 @@ const ProductDetails = () => {
     }
     return product?.mrp || 0;
   };
-
   const getSavingsAmount = () => {
     if (product?.discount > 0) {
       return calculateDiscountedPrice() - (product?.mrp || 0);
     }
     return 0;
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20">
       <div className="max-w-7xl mx-auto">
@@ -274,7 +273,7 @@ const ProductDetails = () => {
             <div className="lg:col-span-7 p-8">
               <div className="sticky top-8">
                 {/* Main Image with Carousel */}
-                <div className="mb-6">
+                <div className="mb-6"> 
                   {product?.images?.length > 0 ? (
                     <div className="relative group">
                       <img
@@ -307,7 +306,6 @@ const ProductDetails = () => {
                             onClick={nextImage}
                             className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 shadow-lg transition-all opacity-0 group-hover:opacity-100"
                           >
-                            ``
                             <ChevronRight className="w-6 h-6 text-gray-700" />
                           </button>
                         </>
@@ -335,7 +333,7 @@ const ProductDetails = () => {
                     </div>
                   )}
                 </div>
-                {/* Thumbnail Images */}
+                {/* Thumbnaill    & Images */}
                 {product?.images?.length > 1 && (
                   <div className="flex gap-3 overflow-x-auto pb-2 mb-4">
                     {product.images.map((img, index) => (
@@ -356,7 +354,77 @@ const ProductDetails = () => {
                       </button>
                     ))}
                   </div>
-                )}
+                )}       
+              <div className="mt-3 mb-3 ml-6 mr-6">
+  {/* APPROVED */}
+  {product.admin_approval_status === "APPROVED" && (
+    <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+      Approved
+    </span>
+  )}
+
+  {/* REJECTED – show reason if exists */}
+  {product.admin_approval_status === "REJECTED" && (
+    <div className="space-y-2">
+      <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
+        Rejected
+      </span>
+      
+      {product.adminRemarks && (
+        <p className="text-sm text-red-600 italic">
+          Reason: {product.adminRemarks}
+        </p>
+      )}
+    </div>
+  )}
+
+  {/* PENDING – Approve or open Reject modal */}
+  {product.admin_approval_status === "PENDING" && (
+    <div className="flex gap-4">
+      <button
+       onClick={async () => {
+  try {
+    await productControllers.updateProductStatus(product.productId, "APPROVED");
+    alert("Product Approved");
+    const res = await productControllers.getProductById(id);
+    setProduct(res.data?.data || res.data);
+  } catch (err) {
+    alert("Failed to approve");
+  }
+}}
+        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+      >
+        Approve
+      </button>
+
+      <button
+       onClick={async () => {
+  try {
+    await productControllers.updateProductStatus(
+      product.productId,
+      "REJECTED",
+      rejectReason.trim()
+    );
+    alert("Product Rejected");
+
+    // Refresh product data instantly (no full reload)
+    const res = await productControllers.getProductById(id);
+    setProduct(res.data?.data || res.data);
+
+    setShowRejectModal(false);
+    setRejectReason(""); // clear input
+  } catch (err) {
+    console.error(err);
+    alert("Failed to reject product");
+  }
+}}
+        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+      >
+        Reject
+      </button>
+    </div>
+  )}
+</div>
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
@@ -481,6 +549,8 @@ const ProductDetails = () => {
                     {product?.product_name || "Unnamed Product"}
                   </h1>
                 </div>
+              
+
                 {/* Price Section */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
                   <div className="flex items-center gap-4 mb-3">
@@ -548,6 +618,8 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     )}
+                    {/* Approval Action Section */}
+
                     {product?.material && (
                       <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                         <Package className="w-5 h-5 text-gray-600" />
@@ -969,10 +1041,73 @@ const ProductDetails = () => {
                 </button>
               </div>
             </form>
-          </div>  
+          </div>
         </div>
       )}
     </div>
+
+
+
   );
+
+
+  {/* Reject Reason Modal */}
+{showRejectModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-gray-900">Reject Product</h2>
+        <button
+          onClick={() => setShowRejectModal(false)}
+          className="p-2 hover:bg-gray-100 rounded-full"
+        >
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Reason for rejection <span className="text-red-500">*</span>
+        </label>
+        <textarea
+          rows={4}
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+          placeholder="e.g. Product is not well finished"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+        />
+      </div>
+
+      <div className="flex gap-3">
+        <button
+          onClick={() => setShowRejectModal(false)}
+          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          disabled={!rejectReason.trim()}
+          onClick={async () => {
+            try {
+              await productControllers.updateProductStatus(
+                product.productId,
+                "REJECTED",
+                rejectReason.trim()   // <-- sends adminRemarks
+              );
+              alert("Product Rejected");
+              setShowRejectModal(false);
+              window.location.reload();   // refresh to show new status + reason
+            } catch (err) {
+              alert("Failed to reject");
+            }
+          }}
+          className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
+        >
+          Confirm Reject
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 };
 export default ProductDetails;

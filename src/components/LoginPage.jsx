@@ -30,7 +30,6 @@ export default function LoginPage({ onLogin }) {
           : "",
     });
   };
-
   const handleSubmit = () => {
     if (loginValidation({ state, errors, setErrors })) {
       let body = {

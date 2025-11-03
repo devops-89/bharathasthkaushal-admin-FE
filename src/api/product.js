@@ -7,34 +7,35 @@ export const productControllers = {
       },
     });
   },
-  getAllProducts: () => { 
-  return productSecuredApi.get("/product/admin/all-products");
+  getAllProducts: () => {
+    return productSecuredApi.get("/product/admin/all-products");
   },
-  getAllProductsReady:()=>
-  {
-     return productSecuredApi.get("/product/admin/all-products?buildStatus=READY_FOR_AUCTION")
-  },
-  getProductById: (id) => {
-  return productSecuredApi.get(`/product/productdetails/${id}`);
-},
-createBuildStep: (formData) => {
-    return productSecuredApi.post(
-      "/build-step/create",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },                                             
-      }
+  getAllProductsReady: () => {
+    return productSecuredApi.get(
+      "/product/admin/all-products?buildStatus=READY_FOR_AUCTION"
     );
   },
-
-  
-
+  getProductById: (id) => {
+    return productSecuredApi.get(`/product/productdetails/${id}`);
+  },
+  updateProductStatus: (id, status) => {
+    return productSecuredApi.patch(`/product/${id}/status`, {
+      admin_approval_status: status,
+      adminRemarks: adminRemarks,
+      
+    });
+  },
+  createBuildStep: (formData) => {
+    return productSecuredApi.post("/build-step/create", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
-  },   
-createAuction: (auctionData) => {
+  },
+  createAuction: (auctionData) => {
     return productSecuredApi.post("/auction/create", auctionData);
   },
   startAuction: (auctionId) => {
@@ -46,5 +47,4 @@ createAuction: (auctionData) => {
   getAuctionDetails: (auctionId) => {
     return productSecuredApi.get(`/auction/details/${auctionId}`);
   },
-
 };
