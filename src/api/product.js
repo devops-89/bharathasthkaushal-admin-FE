@@ -19,10 +19,10 @@ export const productControllers = {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
   updateProductStatus: (id, status) => {
+    console.log("nhhuhuug",id,status)
     return productSecuredApi.patch(`/product/${id}/status`, {
       admin_approval_status: status,
       adminRemarks: adminRemarks,
-      
     });
   },
   createBuildStep: (formData) => {
@@ -32,9 +32,14 @@ export const productControllers = {
       },
     });
   },
+
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
   },
+  assignStepToArtisan: (data) => {
+  return productSecuredApi.patch("/build-step/assign-artisan", data);
+},
+
   createAuction: (auctionData) => {
     return productSecuredApi.post("/auction/create", auctionData);
   },

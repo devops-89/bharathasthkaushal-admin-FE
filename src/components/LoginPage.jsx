@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { loginValidation } from "../utils/validationSchema";
-
 export default function LoginPage({ onLogin }) {
   const [state, setState] = useState({
     email: "",
     password: "",
   });
+  
   const [errors, setErrors] = useState({
     email: "",
     password: "",

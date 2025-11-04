@@ -35,19 +35,19 @@ const ProductDetails = () => {
     notes: "",
   });
   const [createStepForm, setCreateStepForm] = useState({
-  productId: "",
-  sequence: "",
-  stepName: "",
-  description: "",
-  proposedPrice: "",
-  admin_remarks: "",
-  dueDate: "",
-  materials: "",
-  instructions: "",
-});
+    productId: "",
+    sequence: "",
+    stepName: "",
+    description: "",
+    proposedPrice: "",
+    admin_remarks: "",
+    dueDate: "",
+    materials: "",
+    instructions: "",
+  });
 
-const [showRejectModal, setShowRejectModal] = useState(false);
-const [rejectReason, setRejectReason] = useState("");
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -87,6 +87,7 @@ const [rejectReason, setRejectReason] = useState("");
         err.response?.data || err.message
       );
       setProducts([]);
+      
     }
   };
   const fetchBuildSteps = async () => {
@@ -132,27 +133,38 @@ const [rejectReason, setRejectReason] = useState("");
       }));
     }
   };
+  const handleAssignFormSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-  const handleAssignFormSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  try {
+    for (let stepId of assignForm.stepIds) {
+      const payload = {
+        buildStepId: stepId,
+        artisanId: assignForm.artisanId,
+        productId: id,
+      };
+      await productControllers.assignStepToArtisan(payload);
+    }
 
-    setTimeout(() => {
-      console.log("Steps would be assigned:", assignForm);
-      alert("Steps assigned to artisan successfully!");
+    alert("Steps assigned successfully ");
+    setAssignForm({
+      artisanId: "",
+      stepIds: [],
+      deadline: "",
+      priority: "medium",
+      notes: "",
+    });
 
-      setAssignForm({
-        artisanId: "",
-        stepIds: [],
-        deadline: "",
-        priority: "medium",
-        notes: "",
-      });
-      setShowAssignForm(false);
-      setLoading(false);
-    }, 1000);
-  };
-
+    setShowAssignForm(false);
+    fetchBuildSteps();
+  } catch (err) {
+    console.log(err);
+    alert("Failed to assign steps ");
+  } finally {
+    setLoading(false);
+  }
+};
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
     setCreateStepForm((prev) => ({
@@ -180,6 +192,7 @@ const [rejectReason, setRejectReason] = useState("");
     referenceImages.forEach((file) => {
       formData.append("reference_images", file);
     });
+
     productControllers
       .createBuildStep(formData)
       .then((res) => {
@@ -273,7 +286,7 @@ const [rejectReason, setRejectReason] = useState("");
             <div className="lg:col-span-7 p-8">
               <div className="sticky top-8">
                 {/* Main Image with Carousel */}
-                <div className="mb-6"> 
+                <div className="mb-6">
                   {product?.images?.length > 0 ? (
                     <div className="relative group">
                       <img
@@ -354,77 +367,8 @@ const [rejectReason, setRejectReason] = useState("");
                       </button>
                     ))}
                   </div>
-                )}       
-              <div className="mt-3 mb-3 ml-6 mr-6">
-  {/* APPROVED */}
-  {product.admin_approval_status === "APPROVED" && (
-    <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-      Approved
-    </span>
-  )}
-
-  {/* REJECTED – show reason if exists */}
-  {product.admin_approval_status === "REJECTED" && (
-    <div className="space-y-2">
-      <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
-        Rejected
-      </span>
-      
-      {product.adminRemarks && (
-        <p className="text-sm text-red-600 italic">
-          Reason: {product.adminRemarks}
-        </p>
-      )}
-    </div>
-  )}
-
-  {/* PENDING – Approve or open Reject modal */}
-  {product.admin_approval_status === "PENDING" && (
-    <div className="flex gap-4">
-      <button
-       onClick={async () => {
-  try {
-    await productControllers.updateProductStatus(product.productId, "APPROVED");
-    alert("Product Approved");
-    const res = await productControllers.getProductById(id);
-    setProduct(res.data?.data || res.data);
-  } catch (err) {
-    alert("Failed to approve");
-  }
-}}
-        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-      >
-        Approve
-      </button>
-
-      <button
-       onClick={async () => {
-  try {
-    await productControllers.updateProductStatus(
-      product.productId,
-      "REJECTED",
-      rejectReason.trim()
-    );
-    alert("Product Rejected");
-
-    // Refresh product data instantly (no full reload)
-    const res = await productControllers.getProductById(id);
-    setProduct(res.data?.data || res.data);
-
-    setShowRejectModal(false);
-    setRejectReason(""); // clear input
-  } catch (err) {
-    console.error(err);
-    alert("Failed to reject product");
-  }
-}}
-        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-      >
-        Reject
-      </button>
-    </div>
-  )}
-</div>
+                )}
+              
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
@@ -440,6 +384,7 @@ const [rejectReason, setRejectReason] = useState("");
                   >
                     <Users className="w-5 h-5" />
                     Assign Steps to Artisan
+                    
                   </button>
                 </div>
                 {/* Build Steps FAQ Section */}
@@ -540,6 +485,7 @@ const [rejectReason, setRejectReason] = useState("");
                 </div>
               </div>
             </div>
+          
             {/* Product Information - Right Side */}
             <div className="lg:col-span-5 p-8 bg-gradient-to-br from-gray-50 to-white">
               <div className="space-y-6">
@@ -549,7 +495,6 @@ const [rejectReason, setRejectReason] = useState("");
                     {product?.product_name || "Unnamed Product"}
                   </h1>
                 </div>
-              
 
                 {/* Price Section */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
@@ -618,7 +563,70 @@ const [rejectReason, setRejectReason] = useState("");
                         </div>
                       </div>
                     )}
-                    {/* Approval Action Section */}
+                    {/* approval Action Section */}
+                    {/* ✅ PRODUCT APPROVAL BLOCK */}
+<div className="mt-3 mb-3 ml-6 mr-6">
+
+  {/* ✅ Condition 1: artisan_id exists & artisan_address is NULL */}
+  {product.artisanId && product.artisanAddress == null ? (
+    
+    product.admin_approval_status === "PENDING" ? (
+    
+      <div className="flex gap-4">
+        <button
+          onClick={async () => {
+            try {
+              
+              await productControllers.updateProductStatus(product.productId, "APPROVED");
+              console.log("jhdwhswchjhj")
+              alert("Product Approved ");
+              const updated = await productControllers.getProductById(id);
+              console.log("xskllsxxs",updated)
+              setProduct(updated.data?.data || updated.data);
+            } catch (err) {
+              alert("Failed to Approve ");
+            }
+          }}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+        >
+          Approve
+        </button>
+
+        <button
+          onClick={() => setShowRejectModal(true)}
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+        >
+          Reject
+        </button>
+      </div>
+    ) : product.admin_approval_status === "REJECTED" ? (
+    
+      <div className="space-y-2">
+        <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
+          Rejected
+        </span>
+        {product.adminRemarks && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
+            <strong>Reason:</strong> {product.adminRemarks}
+          </p>
+        )}
+      </div>
+    ) : (
+    
+      <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+        Approved (Auto)
+      </span>
+    )
+
+  ) : (
+  
+    <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+      Approved
+    </span>
+  )}
+
+</div>
+
 
                     {product?.material && (
                       <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -953,13 +961,16 @@ const [rejectReason, setRejectReason] = useState("");
                         <input
                           type="checkbox"
                           name="stepIds"
-                          value={step.id}
-                          checked={assignForm.stepIds.includes(
-                            step.id.toString()
-                          )}
+                          // value={step.id}
+                          // checked={assignForm.stepIds.includes(
+                          //   step.id.toString()
+
+                          value={step.buildStepId || step.id}
+                          checked={assignForm.stepIds.includes((step.buildStepId || step.id).toString())}
                           onChange={handleAssignFormChange}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
+
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
@@ -1045,60 +1056,49 @@ const [rejectReason, setRejectReason] = useState("");
         </div>
       )}
     </div>
-
-
-
   );
 
-
-  {/* Reject Reason Modal */}
+  {
+    /* Reject Reason Modal */
+  }
 {showRejectModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-2xl p-6 w-full max-w-md">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-gray-900">Reject Product</h2>
-        <button
-          onClick={() => setShowRejectModal(false)}
-          className="p-2 hover:bg-gray-100 rounded-full"
-        >
+        <button onClick={() => setShowRejectModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
           <X className="w-5 h-5 text-gray-500" />
         </button>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Reason for rejection <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          rows={4}
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="e.g. Product is not well finished"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-        />
-      </div>
+      <textarea
+        rows={4}
+        value={rejectReason}
+        onChange={(e) => setRejectReason(e.target.value)}
+        placeholder="Enter rejection reason..."
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+      />
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 mt-4">
         <button
           onClick={() => setShowRejectModal(false)}
           className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
         >
           Cancel
         </button>
+
         <button
           disabled={!rejectReason.trim()}
           onClick={async () => {
             try {
-              await productControllers.updateProductStatus(
-                product.productId,
-                "REJECTED",
-                rejectReason.trim()   // <-- sends adminRemarks
-              );
-              alert("Product Rejected");
+              await productControllers.updateProductStatus(product.productId, "REJECTED", rejectReason.trim());
+              alert("Product Rejected ✅");
+              const updated = await productControllers.getProductById(id);
+              setProduct(updated.data?.data || updated.data);
               setShowRejectModal(false);
-              window.location.reload();   // refresh to show new status + reason
+              setRejectReason("");
             } catch (err) {
-              alert("Failed to reject");
+              alert("Failed to Reject ❌");
             }
           }}
           className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
@@ -1109,5 +1109,6 @@ const [rejectReason, setRejectReason] = useState("");
     </div>
   </div>
 )}
+
 };
 export default ProductDetails;
