@@ -15,6 +15,7 @@ import {
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
 import { NavLink } from "react-router-dom";
+import { toast } from "react-toastify";
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -45,6 +46,14 @@ const ArtisanManagement = () => {
     latitude: "",
     longitude: "",
   });
+  const [errors, setErrors] = useState({
+  firstName: "",
+  lastName: "",
+  email: "",
+  phoneNo: "",
+  location: "",
+});
+
   const [partnersData, setPartnersData] = useState([]);
 
   const fetchArtisans = async () => {
@@ -95,63 +104,55 @@ const ArtisanManagement = () => {
     setDropdownOpen(null);
   };
 
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  // const handleAddEmployee = async () => {
-  //   try {
-  //     const payload = {
-  //       email: formData.email,
-  //       phoneNo: formData.phoneNo,
-  //       user_group: "EMPLOYEE",
-  //       countryCode: formData.countryCode,
-  //       location: formData.location,
-  //       name: formData.name,
-  //       latitude: parseFloat(formData.latitude) || 0,
-  //       longitude: parseFloat(formData.longitude) || 0,
-  //     };
-  //     const response = await authControllers.addEmployee(payload);
-  //     if (response.status === 200) {
-  //       alert(
-  //         "Employee registered successfully! Login credentials sent to email."
-  //       );
-  //       setPartnersData((prev) => [
-  //         ...prev,
-  //         {
-  //           ...payload,
-  //           id: prev.length + 1,
-  //           joinedDate: new Date().toISOString().split("T")[0],
-  //         },
-  //       ]);
-  //       setShowAddForm(false);
-  //       setFormData({
-  //         name: "",
-  //         email: "",
-  //         phoneNo: "",
-  //         countryCode: "+91",
-  //         user_group: "EMPLOYEE",
-  //         location: "",
-  //         latitude: "",
-  //         longitude: "",
-  //       });
-  //     } else {
-  //       alert("Error: " + response.data?.message);
-  //     }
-  //   } catch (error) {
-  //     alert("Error registering employee: " + error.message);
-  //   }
+  // const handleFormChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
   // };
+  const handleFormChange = (e) => {
+  const { name, value } = e.target;
+
+  // Live validations
+  let newErrors = { ...errors };
+
+  if (name === "email") {
+    newErrors.email = (!value.includes("@") || !value.includes(".com"))
+      ? "Enter a valid email"
+      : "";
+  }
+
+  if (name === "phoneNo") {
+    newErrors.phoneNo = value.length !== 10 ? "Phone number must be 10 digits" : "";
+  }
+
+  if (name === "firstName") {
+    newErrors.firstName = value.trim() === "" ? "First name is required" : "";
+  }
+
+  if (name === "lastName") {
+    newErrors.lastName = value.trim() === "" ? "Last name is required" : "";
+  }
+
+  if (name === "location") {
+    newErrors.location = value.trim() === "" ? "Location is required" : "";
+  }
+
+  setErrors(newErrors);
+  setFormData((prev) => ({ ...prev, [name]: value }));
+};
 const handleAddEmployee = async () => {
+  if (errors.email || errors.phoneNo || errors.firstName || errors.lastName || errors.location) {
+    return toast.error("Please fill correct data .");
+  }
+  if (
+    !formData.firstName ||
+    !formData.lastName ||
+    !formData.email ||
+    !formData.phoneNo ||
+    !formData.location
+  ) {
+    return toast.error("All required fields must be filled.");
+  }
   try {
-    if (!formData.email.includes("@") || !formData.email.includes(".com")) {
-      return alert("Please enter a valid email address.");
-    }
-
-    if (formData.phoneNo.length !== 10) {
-      return alert("Phone number must be exactly 10 digits.");
-    }
-
     const payload = {
       email: formData.email.trim(),
       phoneNo: formData.phoneNo.trim(),
@@ -163,12 +164,10 @@ const handleAddEmployee = async () => {
       latitude: formData.latitude ? parseFloat(formData.latitude) : 0,
       longitude: formData.longitude ? parseFloat(formData.longitude) : 0,
     };
-
     const response = await authControllers.addEmployee(payload);
 
     if (response.status === 200) {
-      alert("Employee registered successfully!");
-
+      toast.success("Employee registered successfully!");
       setPartnersData((prev) => [
         ...prev,
         {
@@ -178,7 +177,6 @@ const handleAddEmployee = async () => {
           joinedDate: new Date().toISOString().split("T")[0],
         },
       ]);
-
       setShowAddForm(false);
       setFormData({
         firstName: "",
@@ -191,15 +189,14 @@ const handleAddEmployee = async () => {
         latitude: "",
         longitude: "",
       });
+      setErrors({});
     } else {
-      alert("Error: " + response.data?.message);
+      toast.error(response.data?.message || "Something went wrong.");
     }
   } catch (error) {
-    alert("Error registering employee: " + error.message);
+    toast.error(error.message);
   }
 };
-
-
 
 
   const filteredPartners = partnersData.filter((partner) => {
@@ -281,14 +278,7 @@ const handleAddEmployee = async () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-            {/* <button
-            onClick={() => setShowFilter(!showFilter)}
-            className={`flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors ${
-              showFilter ? 'bg-gray-200' : 'bg-gray-100'
-            }`}
-          >
-            <Filter className="w-4 h-4 mr-2" /> Filter
-          </button> */}
+            
             <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
@@ -380,6 +370,7 @@ const handleAddEmployee = async () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="example@yopmail.com"
                     />
+                    {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
                   </div>
                   <div className="flex gap-2">
                     <div className="w-24">
@@ -402,13 +393,17 @@ const handleAddEmployee = async () => {
                         Phone Number *
                       </label>
                       <input
+                      
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
                         onChange={handleFormChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="9876543210"
+                        
                       />
+                      {errors.phoneNo && <p className="text-red-500 text-xs">{errors.phoneNo}</p>}
+
                     </div>
                   </div>
                   <div>
