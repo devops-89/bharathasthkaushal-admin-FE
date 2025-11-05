@@ -18,13 +18,18 @@ export const productControllers = {
   getProductById: (id) => {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
-  updateProductStatus: (id, status) => {
-    console.log("nhhuhuug",id,status)
-    return productSecuredApi.patch(`/product/${id}/status`, {
-      admin_approval_status: status,
-      adminRemarks: adminRemarks,
-    });
-  },
+ 
+updateProductStatus: (id, status, adminRemarks = "") => {
+  const payload = {
+    admin_approval_status: status,
+    
+  };
+  if (status === "REJECTED") {
+    payload.adminRemarks = adminRemarks;
+  }
+  return productSecuredApi.patch(`/product/${id}/status`, payload);
+},
+
   createBuildStep: (formData) => {
     return productSecuredApi.post("/build-step/create", formData, {
       headers: {
@@ -32,7 +37,6 @@ export const productControllers = {
       },
     });
   },
-
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
   },
@@ -40,16 +44,36 @@ export const productControllers = {
   return productSecuredApi.patch("/build-step/assign-artisan", data);
 },
 
-  createAuction: (auctionData) => {
-    return productSecuredApi.post("/auction/create", auctionData);
-  },
-  startAuction: (auctionId) => {
-    return productSecuredApi.put(`/auction/start/${auctionId}`);
-  },
-  getActiveAuctions: () => {
-    return productSecuredApi.get("/auction/active");
-  },
-  getAuctionDetails: (auctionId) => {
-    return productSecuredApi.get(`/auction/details/${auctionId}`);
-  },
+  // createAuction: (auctionData) => {
+  //   return productSecuredApi.post("/auction/create", auctionData);
+  // },
+  // startAuction: (auctionId) => {
+  //   return productSecuredApi.put(`/auction/start/${auctionId}`);
+  // },
+  // getActiveAuctions: () => {
+  //   return productSecuredApi.get("/auction");
+  // },
+  // getAuctionDetails: (auctionId) => {
+  //   return productSecuredApi.get(`/auction/details/${auctionId}`);
+  // },
+  getAllAuctions: (params = {}) => {
+  return productSecuredApi.get("/auction", { params });
+},
+
+createAuction: (auctionData) => {
+  return productSecuredApi.post("/auction/create", auctionData);
+},
+
+startAuction: (auctionId) => {
+  return productSecuredApi.put(`/auction/start/${auctionId}`);
+},
+
+getAuctionDetails: (auctionId) => {
+  return productSecuredApi.get(`/auction/details/${auctionId}`);
+},
+
+getAuctionWinners: (page = 1, limit = 10) => {
+  return productSecuredApi.get(`/auction/winners?page=${page}&limit=${limit}`);
+},
+
 };

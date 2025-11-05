@@ -563,30 +563,37 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     )}
-                    {/* approval Action Section */}
-                    {/* ✅ PRODUCT APPROVAL BLOCK */}
 <div className="mt-3 mb-3 ml-6 mr-6">
 
-  {/* ✅ Condition 1: artisan_id exists & artisan_address is NULL */}
   {product.artisanId && product.artisanAddress == null ? (
     
     product.admin_approval_status === "PENDING" ? (
     
       <div className="flex gap-4">
         <button
+          // onClick={async () => {
+          //   try {
+          //     await productControllers.updateProductStatus(product.productId, "APPROVED");
+          //     alert("Product Approved ");
+          //     const updated = await productControllers.getProductById(id);
+          //     setProduct(updated.data?.data || updated.data);
+          //   } catch (err) {
+          //     alert("Failed to Approve ");
+          //   }
+          // }}
           onClick={async () => {
-            try {
-              
-              await productControllers.updateProductStatus(product.productId, "APPROVED");
-              console.log("jhdwhswchjhj")
-              alert("Product Approved ");
-              const updated = await productControllers.getProductById(id);
-              console.log("xskllsxxs",updated)
-              setProduct(updated.data?.data || updated.data);
-            } catch (err) {
-              alert("Failed to Approve ");
-            }
-          }}
+  try {
+    await productControllers.updateProductStatus(product.productId, "APPROVED");
+    alert("✅ Product Approved Successfully");
+
+    const updated = await productControllers.getProductById(id);
+    setProduct(updated.data?.data || updated.data);
+  } catch (err) {
+    alert("❌ Failed to Approve Product");
+    console.log(err);
+  }
+}}
+
           className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
         >
           Approve
@@ -602,7 +609,7 @@ const ProductDetails = () => {
     ) : product.admin_approval_status === "REJECTED" ? (
     
       <div className="space-y-2">
-        <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
+        <span className="bg-red-100 text-red-700 px-4 py- 2 rounded-lg font-semibold">
           Rejected
         </span>
         {product.adminRemarks && (
@@ -961,10 +968,6 @@ const ProductDetails = () => {
                         <input
                           type="checkbox"
                           name="stepIds"
-                          // value={step.id}
-                          // checked={assignForm.stepIds.includes(
-                          //   step.id.toString()
-
                           value={step.buildStepId || step.id}
                           checked={assignForm.stepIds.includes((step.buildStepId || step.id).toString())}
                           onChange={handleAssignFormChange}
@@ -1059,7 +1062,7 @@ const ProductDetails = () => {
   );
 
   {
-    /* Reject Reason Modal */
+    
   }
 {showRejectModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -1090,17 +1093,26 @@ const ProductDetails = () => {
         <button
           disabled={!rejectReason.trim()}
           onClick={async () => {
-            try {
-              await productControllers.updateProductStatus(product.productId, "REJECTED", rejectReason.trim());
-              alert("Product Rejected ✅");
-              const updated = await productControllers.getProductById(id);
-              setProduct(updated.data?.data || updated.data);
-              setShowRejectModal(false);
-              setRejectReason("");
-            } catch (err) {
-              alert("Failed to Reject ❌");
-            }
-          }}
+  try {
+    await productControllers.updateProductStatus(
+      product.productId,
+      "REJECTED",
+      rejectReason.trim()
+    );
+
+    alert(" Product Rejected Successfully");
+
+    const updated = await productControllers.getProductById(id);
+    setProduct(updated.data?.data || updated.data);
+
+    setShowRejectModal(false);
+    setRejectReason("");
+  } catch (err) {
+    alert(" Failed to Reject Product");
+    console.log(err);
+  }
+}}
+
           className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
         >
           Confirm Reject

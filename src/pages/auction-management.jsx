@@ -19,7 +19,7 @@ const AuctionManagement = () => {
     startDate: "",
     quantity: "",
   });
-
+  
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
@@ -39,67 +39,125 @@ const AuctionManagement = () => {
     }
   };
 
-  const fetchAuctions = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await productControllers.getActiveAuctions();
-      console.log("Auctions Response:", res.data);
-      const response = res.data.data || [];
-      const mappedAuctions = response.map((auction) => ({
-        ...auction,
-        title: auction.product?.product_name || "Unknown",
-        category:
-          auction.product?.material === "Cotton" ? "Handloom" : "Handicraft",
-        subcategory: "",
-        startingBid: parseFloat(auction.start_price || 0),
-        currentBid: parseFloat(auction.leading_amount || 0),
-        minBidAmount: parseFloat(auction.min_bid_amount || 0),
-        reservePrice: parseFloat(auction.reserve_price || 0),
-        startDate: auction.start_date
-          ? auction.start_date.slice(0, 10)
-          : "Not started",
-        endDate: auction.hard_close_at.slice(0, 10),
-        status:
-          auction.status === "LIVE"
-            ? "Active"
-            : auction.status.charAt(0).toUpperCase() +
-              auction.status.slice(1).toLowerCase(),
-        description: auction.product?.description || "No description",
-        dimensions: auction.product?.dimension || "Not specified",
-        weight: auction.product?.netWeight || "Not specified",
-        materials: auction.product?.material || "Not specified",
-        image: auction.product?.images?.[0] || null,
-      }));
-      setAuctions(mappedAuctions);
-    } catch (err) {
-      console.error(
-        "Error fetching auctions:",
-        err.response?.data || err.message
-      );
-      setError("Failed to fetch auctions. Please try again.");
-      setAuctions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchAuctions = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const res = await productControllers.getActiveAuctions();
+  //     console.log("Auctions Response:", res.data);
+  //     const response = res.data.data || [];
+  //     const mappedAuctions = response.map((auction) => ({
+  //       ...auction,
+  //       title: auction.product?.product_name || "Unknown",
+  //       category:
+  //         auction.product?.material === "Cotton" ? "Handloom" : "Handicraft",
+  //       subcategory: "",
+  //       startingBid: parseFloat(auction.start_price || 0),
+  //       currentBid: parseFloat(auction.leading_amount || 0),
+  //       minBidAmount: parseFloat(auction.min_bid_amount || 0),
+  //       reservePrice: parseFloat(auction.reserve_price || 0),
+  //       startDate: auction.start_date
+  //         ? auction.start_date.slice(0, 10)
+  //         : "Not started",
+  //       endDate: auction.hard_close_at.slice(0, 10),
+  //       status:
+  //         auction.status === "LIVE"
+  //           ? "Active"
+  //           : auction.status.charAt(0).toUpperCase() +
+  //             auction.status.slice(1).toLowerCase(),
+  //       description: auction.product?.description || "No description",
+  //       dimensions: auction.product?.dimension || "Not specified",
+  //       weight: auction.product?.netWeight || "Not specified",
+  //       materials: auction.product?.material || "Not specified",
+  //       image: auction.product?.images?.[0] || null,
+  //     }));
+  //     setAuctions(mappedAuctions);
+  //   } catch (err) {
+  //     console.error(
+  //       "Error fetching auctions:",
+  //       err.response?.data || err.message
+  //     );
+  //     setError("Failed to fetch auctions. Please try again.");
+  //     setAuctions([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const [winners, setWinners] = useState([]);
+const [showWinnersModal, setShowWinnersModal] = useState(false);
+
+const fetchWinners = async () => {
+  setLoading(true);
+  try {
+    const res = await productControllers.getAuctionWinners(1, 20);
+    setWinners(res.data.data.docs || []);
+    setShowWinnersModal(true);
+  } catch (err) {
+    console.error("Error fetching winners:", err);
+    alert("Failed to fetch winners");
+  }
+  setLoading(false);
+};
+
+const fetchAuctions = async () => {
+  setLoading(true);
+  setError(null);
+
+  try {
+    const res = await productControllers.getAllAuctions({
+      page: 1,
+      pageSize: 50,
+      // status: "LIVE", // Optional — remove to get all
+    });
+
+    const response = res.data.data.docs || res.data.data || [];
+
+    const mapped = response.map((auction) => ({
+      ...auction,
+      title: auction.product?.product_name || "Unknown",
+      category:
+        auction.product?.material === "Cotton" ? "Handloom" : "Handicraft",
+      startingBid: auction.start_price || 0,
+      currentBid: auction.leading_amount || 0,
+      minBidAmount: auction.min_bid_amount || 0,
+      reservePrice: auction.reserve_price || 0,
+      quantity: auction.quantity || 1,
+      startDate: auction.start_date?.slice(0, 10) || "Not started",
+      endDate: auction.hard_close_at?.slice(0, 10),
+
+      status: auction.status || "DRAFT",
+
+      image: auction.product?.images?.[0]?.imageUrl || null,
+    }));
+
+    setAuctions(mapped);
+  } catch (err) {
+    setError("Failed to fetch auctions");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchProducts();
     fetchAuctions();
   }, []);
-
   const getStatusBadge = (status) => {
-    const statusClasses = {
-      Active: "bg-green-100 text-green-800",
-      Ended: "bg-gray-100 text-gray-800",
-      Scheduled: "bg-blue-100 text-blue-800",
-    };
-    return `px-3 py-1 rounded-full text-sm font-medium ${
-      statusClasses[status] || "bg-gray-100 text-gray-800"
-    }`;
+  const statusMap = {
+    DRAFT: "bg-gray-200 text-gray-700",
+    SCHEDULED: "bg-blue-200 text-blue-800",
+    LIVE: "bg-green-200 text-green-800",
+    CHALLENGE: "bg-yellow-200 text-yellow-800",
+    ENDED: "bg-gray-300 text-gray-800",
+    SETTLED: "bg-purple-200 text-purple-800",
+    WON: "bg-teal-200 text-teal-800",
+    ACTIVE: "bg-green-200 text-green-800",
   };
-
+  return `px-3 py-1 rounded-full text-sm font-medium ${
+    statusMap[status] || "bg-gray-200 text-gray-800"
+  }`;
+};
   const handleAddAuction = async () => {
     if (
       !newAuction.productId ||
@@ -209,6 +267,18 @@ const AuctionManagement = () => {
       );
       console.log("Auction Details Response:", res.data);
       const details = res.data.data.auction;
+      const formatDateTime = (date) => {
+  if (!date) return "Not available";
+  const d = new Date(date);
+  return d.toLocaleString("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
       const mappedDetails = {
         ...details,
         title: details.product?.product_name || "Unknown",
@@ -219,10 +289,14 @@ const AuctionManagement = () => {
         currentBid: parseFloat(details.leading_amount || 0),
         minBidAmount: parseFloat(details.min_bid_amount || 0),
         reservePrice: parseFloat(details.reserve_price || 0),
-        startDate: details.start_date
-          ? details.start_date.slice(0, 10)
-          : "Not started",
-        endDate: details.hard_close_at.slice(0, 10),
+        // startDate: details.start_date
+        //   ? details.start_date.slice(0, 10)
+        //   : "Not started",
+        // endDate: details.hard_close_at.slice(0, 10),
+        startDate: formatDateTime(details.start_date),
+endDate: formatDateTime(details.hard_close_at),
+
+
          quantity: details.quantity || details.product?.quantity || 0,
 
         status:
@@ -250,10 +324,9 @@ const AuctionManagement = () => {
       setLoading(false);
     }
   };
-
   const handleStartAuction = async (auctionId) => {
     setLoading(true);
-    setError(null);
+    setError(null); 
     try {
       const res = await productControllers.startAuction(auctionId);
       console.log("Start Auction Response:", res.data);
@@ -293,6 +366,7 @@ const AuctionManagement = () => {
                 isActive ? "text-orange-600 font-semibold" : ""
               }
             >
+
               Dashboard
             </NavLink>
 
@@ -327,11 +401,11 @@ const AuctionManagement = () => {
           Loading...
         </div>
       )}
-
       {/* Auctions Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
+          
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Product Name
@@ -430,7 +504,7 @@ const AuctionManagement = () => {
         </table>
       </div>
 
-      {/* View Details Modal */}
+      {/* View Details Modals*/}
       {showDetailsModal && selectedAuction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -444,6 +518,8 @@ const AuctionManagement = () => {
               >
                 <X size={24} />
               </button>
+            
+
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -507,7 +583,6 @@ const AuctionManagement = () => {
                     </div>
                   </div>
                 </div>
-
                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
                   <h3 className="text-lg font-semibold text-purple-900 mb-4">
                     Auction Description
@@ -519,7 +594,6 @@ const AuctionManagement = () => {
                     </p>
                   </div>
                 </div>
-
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Product Details
@@ -552,6 +626,17 @@ const AuctionManagement = () => {
                   </div>
                 </div>
               </div>
+              {selectedAuction.leadBidder && (
+  <div>
+    <label className="block text-sm font-medium text-orange-700">
+      Leading Bidder
+    </label>
+    <p className="mt-1 text-sm text-orange-900">
+      {selectedAuction.leadBidder.name || selectedAuction.leading_bidder}
+    </p>
+  </div>
+)}
+
 
               {/* Right Column - Auction & Bids Info */}
               <div className="lg:col-span-1 space-y-6">
@@ -663,6 +748,13 @@ const AuctionManagement = () => {
                     <p className="text-sm text-gray-900">No bids placed yet.</p>
                   )}
                 </div>
+
+                 <button
+  onClick={fetchWinners}
+  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium"
+>
+  View Winners
+</button>
               </div>
             </div>
 
@@ -677,6 +769,30 @@ const AuctionManagement = () => {
           </div>
         </div>
       )}
+{showWinnersModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+    <div className="bg-white p-6 rounded-lg w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Auction Winners</h2>
+        <button onClick={() => setShowWinnersModal(false)}>
+          <X size={24} />
+        </button>
+      </div>
+
+      {winners.length > 0 ? (
+        winners.map((w) => (
+          <div key={w.id} className="border p-3 rounded mb-3">
+            <p><strong>Product:</strong> {w.product?.product_name}</p>
+            <p><strong>Winner:</strong> {w.user?.name}</p>
+            <p><strong>Winning Amount:</strong> ₹{w.amount}</p>
+          </div>
+        ))
+      ) : (
+        <p>No winners yet.</p>
+      )}
+    </div>
+  </div>
+)}
 
       {/* Add Auction Modal */}
       {showAddForm && (
