@@ -2,57 +2,54 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
+import { Eye, EyeOff } from "lucide-react";
 import { loginValidation } from "../utils/validationSchema";
 export default function LoginPage({ onLogin }) {
   const [state, setState] = useState({
     email: "",
     password: "",
   });
-  
   const [errors, setErrors] = useState({
     email: "",
     password: "",
     general: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-
   const inputHandler = (e) => {
     const { id, value } = e.target;
     setState({ ...state, [id]: value });
+
     setErrors({
       ...errors,
-      [id]:
-        id === "email"
-          ? !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-            ? "Please Enter Valid Email"
-            : ""
-          : "",
+      [id]: "",
     });
   };
+
   const handleSubmit = () => {
     if (loginValidation({ state, errors, setErrors })) {
       let body = {
         identity: state.email,
         password: state.password,
       };
+
+      setIsLoading(true);
+
       authControllers
         .login(body)
         .then((res) => {
           const response = res.data.data;
           localStorage.setItem("accessToken", response.accessToken);
-          console.log("res", res);
-
           navigate("/dashboard");
           setIsLoading(false);
         })
         .catch((err) => {
           let errMessage =
-            (err.response && err.response.data.message) || err.message;
-          setErrors({ ...errors, general: errMessage });
+            err?.response?.data?.message || "Invalid Email or Password";
+          setErrors({ ...errors, password: errMessage });
+          setIsLoading(false);
         });
-    } else {
-      // alert("shut up");
     }
   };
 
@@ -145,7 +142,6 @@ export default function LoginPage({ onLogin }) {
     marginTop: "24px",
     fontSize: "14px",
   };
-
   const demoButtonStyle = {
     width: "100%",
     background: "transparent",
@@ -216,7 +212,6 @@ export default function LoginPage({ onLogin }) {
                 id="email"
                 type="email"
                 required
-               
                 onChange={inputHandler}
                 style={inputStyle}
                 placeholder="Enter your email"
@@ -228,19 +223,35 @@ export default function LoginPage({ onLogin }) {
               )}
             </div>
 
-            {/* Password Field */}
             <div style={fieldContainerStyle}>
               <label htmlFor="password" style={labelStyle}>
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                required
-                onChange={inputHandler}
-                style={inputStyle}
-                placeholder="Enter your password"
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  onChange={inputHandler}
+                  style={{ ...inputStyle, paddingRight: "40px" }}
+                  placeholder="Enter your password"
+                />
+
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    color: "#92400e",
+                  }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </span>
+              </div>
+
               {errors.password && (
                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                   {errors.password}
