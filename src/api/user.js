@@ -7,12 +7,20 @@ export const userControllers = {
         { headers: { "Cache-Control": "no-cache" } }
       );
       return result;
-    } 
-    catch (error) {
-    throw error;
+    } catch (error) {
+      throw error;
     }
-  },    
-verifyArtisan: async (id) => {
+  },
+updateUserStatus: async (id, status) => {
+  try {
+    return await getuserSecuredApi.patch(`/users/${id}/status`, { status });
+  } catch (error) {
+    throw error;
+  }
+},
+
+
+  verifyArtisan: async (id) => {
     try {
       const body = { verifyStatus: "VERIFIED" };
       const response = await getuserSecuredApi.patch(
@@ -26,4 +34,3 @@ verifyArtisan: async (id) => {
     }
   },
 };
-

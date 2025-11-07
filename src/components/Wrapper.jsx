@@ -11,6 +11,7 @@ import {
   CreditCard,
   Lock,
   HelpCircle,
+  UserCheck,
 } from 'lucide-react'
 const Wrapper = () => {
   const location = useLocation()
@@ -24,8 +25,10 @@ const Wrapper = () => {
     {path :'/employee-management', name :'Employee Management', icon: User2Icon},
     {path:'/payment-management',name:'Payment Management', icon:CreditCard},
     {path:'/permission-management',name:'Permission Management', icon:Lock },
+    {path:'/user-management', name:'User Management', icon:UserCheck},
     {path:'/need-assistant', name:'Need Assistant',icon:HelpCircle  },
   ]  
+  
   const isActive = (path) => {
     return location.pathname === path || (path === '/dashboard' && location.pathname === '/') 
   }

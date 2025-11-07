@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -11,95 +11,94 @@ import {
   Cell,
 } from "recharts";
 import { Plus, Eye, UserPlus, CreditCard } from "lucide-react";
-
+import { productControllers } from "../api/product";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { NavLink } from "react-router-dom";
 const Dashboard = () => {
- 
   const handleAddArtisan = () => {
     alert("Add Artisan functionality will be implemented here");
   };
-
   const handleViewOrders = () => {
     alert("View Orders functionality will be implemented here");
   };
-
   const handleAssignWork = () => {
     alert("Assign Work functionality will be implemented here");
   };
-
   const handleViewPayments = () => {
     alert("View Payments functionality will be implemented here");
   };
-  const serviceData = [
-    { month: "Jan", services: 25 },
-    { month: "Feb", services: 20 },
-    { month: "Mar", services: 40 },
-    { month: "Apr", services: 30 },
-    { month: "May", services: 25 },
-    { month: "Jun", services: 30 },
-    { month: "Jul", services: 25 },
-    { month: "Aug", services: 45 },
-    { month: "Sep", services: 35 },
-    { month: "Oct", services: 60 },
-    { month: "Nov", services: 40 },
-    { month: "Dec", services: 40 },
-  ];
-  const pieData = [
-    { name: "Completed", value: 45, color: "#d97706" },
-    { name: "In Progress", value: 25, color: "#0ea5e9" },
-    { name: "Pending", value: 20, color: "#6b7280" },
-    { name: "Cancelled", value: 10, color: "#ef4444" },
-  ];
-  const stats = [
-    { title: "Total Artisans", value: "150", bgColor: "bg-white" },
-    { title: "Active Customers", value: "1200", bgColor: "bg-white" },
-    { title: "Service Requests", value: "45", bgColor: "bg-white" },
-  ];
+  const [serviceData, setServiceData] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const fetchMonthlyReport = async () => {
+    try {
+      const res = await productControllers.getMonthlyAuctionReport();
+      const monthOrder = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      let apiData = res.data.data.map((item) => ({
+        month: item.month,
+        services: item.endedCount || 0,
+      }));
+      const completeData = monthOrder.map((m) => {
+        const found = apiData.find((i) => i.month === m);
+        return found || { month: m, services: 0 };
+      });
+      setServiceData(completeData);
+      console.log("FINAL GRAPH DATA:", completeData);
+    } catch (err) {
+      toast.error("Failed to load monthly auction report ");
+    }
+  };
 
-  const actionButtons = [
-    {
-      title: "Add Artisan",
-      icon: Plus,
-      bgColor: "bg-white hover:bg-gray-50",
-      onClick: handleAddArtisan,
-    },
-    {
-      title: "View Orders",
-      icon: Eye,
-      bgColor: "bg-white hover:bg-gray-50",
-      onClick: handleViewOrders,
-    },
-    {
-      title: "Assign Work",
-      icon: UserPlus,
-      bgColor: "bg-white hover:bg-gray-50",
-      onClick: handleAssignWork,
-    },
-    {
-      title: "View Payments",
-      icon: CreditCard,
-      bgColor: "bg-white hover:bg-gray-50",
-      onClick: handleViewPayments,
-    },
-  ];
+  useEffect(() => {
+    fetchMonthlyReport();
+    fetchStatusSummary();
+  }, []);
+  const fetchStatusSummary = async () => {
+    try {
+      const res = await productControllers.getAuctionStatusSummary();
+      const formatted = res.data.data.map((item) => ({
+        name: item.status,
+        value: item.percentage,
+        color:
+          item.status === "LIVE"
+            ? "#0ea5e9"
+            : item.status === "ENDED"
+            ? "#d97706"
+            : "#6b7280",
+      }));
+      setPieData(formatted);
+    } catch (err) {
+      toast.error("Failed to load status summary ");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 ml-64 pt-20 flex-1">
-      <div className="max-w-full space-y-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className={`${stat.bgColor} rounded-xl p-8 shadow-sm border border-gray-200`}
-            >
-              <h3 className="text-base font-medium text-gray-600 mb-3">
-                {stat.title}
-              </h3>
-              <p className="text-4xl font-bold text-gray-900">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+                    Dashboard
+                  </h1>
+        
+                  <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                    <NavLink to="/Dashboard">Dashboard</NavLink>
+                
+                    
+                  </nav>
+                </div>
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Line Chart */}
@@ -112,7 +111,7 @@ const Dashboard = () => {
                 <LineChart data={serviceData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
                   <XAxis dataKey="month" stroke="#9ca3af" />
-                  <YAxis stroke="#9ca3af" />
+                  <YAxis stroke="#9ca3af" allowDecimals={false} />
                   <Line
                     type="monotone"
                     dataKey="services"
@@ -172,27 +171,6 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {actionButtons.map((button, index) => {
-            const Icon = button.icon;
-            return (
-              <button
-                key={index}
-                onClick={button.onClick}
-                className={`${button.bgColor} rounded-xl p-8 shadow-sm border border-gray-200 transition-colors duration-200 text-left group`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-medium text-gray-900 group-hover:text-orange-600">
-                    {button.title}
-                  </span>
-                  <Icon className="w-6 h-6 text-gray-400 group-hover:text-orange-500" />
-                </div>
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>

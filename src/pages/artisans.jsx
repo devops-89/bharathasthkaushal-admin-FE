@@ -26,6 +26,8 @@ const ArtisanManagement = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,19 +42,19 @@ const ArtisanManagement = () => {
     introVideo: "",
     gstNumber: "",
   });
+  
   const [partnersData, setPartnersData] = useState(() => {
     const savedData = localStorage.getItem("partnersData");
     return savedData ? JSON.parse(savedData) : [];
   });
-  const [subCategories, setSubCategories] = useState([]);
 
+  const [subCategories, setSubCategories] = useState([]);
   const casteCategories = {
     GENERAL: ["Brahmin", "Kshatriya", "Vaishya", "Shudra"],
     OBC: ["Yadav", "Kurmi", "Jat", "Gujjar"],
     SC: ["Chamar", "Pasi", "Dhobi", "Kori"],
     ST: ["Gond", "Bhil", "Santhal", "Munda"],
   };
-
   const getallSubcategory = async (categoryId) => {
     try {
       const resultData = await categoryControllers.getallSubcategory(
@@ -69,58 +71,49 @@ const ArtisanManagement = () => {
     try {
       const partner = partnersData.find((p) => p.id === id);
       if (partner.verify_status === "VERIFIED") {
-        toast.info("This artisan is already verified ✅");
+        toast.info("This artisan is already verified ");
         return;
       }
-
       const response = await userControllers.verifyArtisan(id);
-      toast.success("Artisan Verified Successfully ✅");
+      toast.success("Artisan Verified Successfully ");
       fetchArtisans();
     } catch (error) {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
-  const fetchArtisans = async () => {
-    try {
-      const response = await userControllers.getUserListGroup("ARTISAN");
-      console.log("API Response:", JSON.stringify(response.data, null, 2));
-      let artisans =
-        response.data?.data?.docs || response.data?.docs || response.data || [];
-      if (!Array.isArray(artisans)) {
-        console.error("Expected artisans to be an array, got:", artisans);
-        alert("Unexpected data format from API: artisans is not an array");
-        return;
-      }
-      const mappedData = artisans.map((user, index) => ({
-        id: user._id || user.id || `temp-id-${index + 1}`,
-        firstName:
-          user.firstName || (user.email ? user.email.split("@")[0] : "N/A"),
-        lastName: user.lastName || "N/A",
-        email: user.email || "N/A",
-        phoneNo: user.phoneNo || "N/A",
-        countryCode: user.countryCode || "+91",
-        expertizeField: user.expertizeField || "Not Specified",
-        location: user.location || " ",
-        aadhaarNumber: user.aadhaarNumber || "N/A",
-        user_caste_category: user.user_caste_category || "GENERAL",
-        subCaste: user.subCaste || "N/A",
-        introVideo: user.introVideo || "N/A",
-        gstNumber: user.gstNumber || "N/A",
-        joinedDate: user.createdAt
-          ? new Date(user.createdAt).toISOString().split("T")[0]
-          : "N/A",
-        status: user.status || "Approved Artisan",
-        user_group: user.user_group || "ARTISAN",
-      }));
 
-      console.log("Mapped Data:", mappedData);
-      setPartnersData(mappedData);
-      localStorage.setItem("partnersData", JSON.stringify(mappedData));
-    } catch (error) {
-      console.error("Error fetching artisans:", error);
-      alert("Error fetching artisan data: " + error.message);
-    }
-  };
+  const fetchArtisans = async () => {
+  try {
+    const response = await userControllers.getUserListGroup("ARTISAN");
+    let artisans =
+      response.data?.data?.docs || response.data?.docs || response.data || [];
+
+    const mappedData = artisans.map((user, index) => ({
+      id: user._id || user.id || `temp-id-${index + 1}`,
+      firstName: user.firstName || (user.email ? user.email.split("@")[0] : "—"),
+      lastName: user.lastName || "—",
+      email: user.email || "—",
+      phoneNo: user.phoneNo || "—",
+      countryCode: user.countryCode || "+91",
+      expertizeField: user.expertizeField || "Not Specified",
+      location: user.location || "—",
+      gstNumber: user.gstNumber || "—",
+      user_caste_category: user.user_caste_category || "—",
+      joinedDate: user.createdAt
+        ? new Date(user.createdAt).toISOString().split("T")[0]
+        : "—",
+      verify_status: user.verify_status,
+      status: user.status || "Approved Artisan",
+      user_group: user.user_group || "ARTISAN",
+    }));
+
+    setPartnersData(mappedData);
+    // toast.success("Artisans Loaded Successfully ");
+  } catch (error) {
+    // toast.error("Failed to load artisans ");
+  }
+};
+
   useEffect(() => {
     fetchArtisans();
     getallSubcategory("categoryId");
@@ -206,6 +199,10 @@ const ArtisanManagement = () => {
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.expertizeField)),
   ].filter((field) => field && field !== "Not Specified");
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentPartners = filteredPartners.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredPartners.length / itemsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -250,14 +247,6 @@ const ArtisanManagement = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-            {/* <button
-              onClick={() => setShowFilter(!showFilter)}
-              className={`flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors ${
-                showFilter ? "bg-gray-200" : "bg-gray-100"
-              }`}
-            >
-              <Filter className="w-4 h-4 mr-2" /> Filter
-            </button> */}
             <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
@@ -508,14 +497,13 @@ const ArtisanManagement = () => {
                     Artisan Details
                   </h2> */}
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-  Artisan Details
-
-  {selectedPartner.verify_status === "VERIFIED" && (
-    <span className="text-green-600 text-sm font-semibold px-3 py-1 border border-green-500 rounded-full">
-      ✅ Verified Artisan
-    </span>
-  )}
-</h2>
+                    Artisan Details
+                    {selectedPartner.verify_status === "VERIFIED" && (
+                      <span className="text-green-600 text-sm font-semibold px-3 py-1 border border-green-500 rounded-full">
+                        ✅ Verified Artisan
+                      </span>
+                    )}
+                  </h2>
 
                   <button
                     onClick={() => setShowDetailsModal(false)}
@@ -665,7 +653,7 @@ const ArtisanManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPartners.map((partner) => (
+                {currentPartners.map((partner) => (
                   <tr
                     key={partner.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -769,7 +757,42 @@ const ArtisanManagement = () => {
           </div>
         )}
       </div>
+      {totalPages > 1 && (
+  <div className="flex justify-center items-center gap-2 py-4">
+    <button
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage(currentPage - 1)}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Prev
+    </button>
+
+    {[...Array(totalPages).keys()].map((num) => (
+      <button
+        key={num}
+        onClick={() => setCurrentPage(num + 1)}
+        className={`px-3 py-1 rounded ${
+          currentPage === num + 1
+            ? "bg-orange-600 text-white"
+            : "bg-gray-200 text-gray-700"
+        }`}
+      >
+        {num + 1}
+      </button>
+    ))}
+
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage(currentPage + 1)}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+)}
+
     </div>
+    
   );
 };
 export default ArtisanManagement;

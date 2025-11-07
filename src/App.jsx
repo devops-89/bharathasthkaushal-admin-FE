@@ -17,6 +17,8 @@ import ProductDetails from "./pages/product-management/product-details";
 import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
+import UserManagement from "./pages/user-management";
+import UserProfile from "./pages/user-profile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function App() {
@@ -70,11 +72,17 @@ function App() {
         />
         <Route path="/categories/:page/:pageSize/:id" element={<CategoryManagement/>} />
         <Route 
+        path="/user-management"
+        element={<UserManagement/>}
+        />
+      <Route path="/user-profile/:id" element={<UserProfile />} />
+
+
+        <Route 
           path="/need-assistant"
           element={<NeedAssistant/>}
         />
       </Routes>
-      
     </div>
   );
 }

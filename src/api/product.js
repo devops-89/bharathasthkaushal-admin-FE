@@ -43,19 +43,6 @@ updateProductStatus: (id, status, adminRemarks = "") => {
   assignStepToArtisan: (data) => {
   return productSecuredApi.patch("/build-step/assign-artisan", data);
 },
-
-  // createAuction: (auctionData) => {
-  //   return productSecuredApi.post("/auction/create", auctionData);
-  // },
-  // startAuction: (auctionId) => {
-  //   return productSecuredApi.put(`/auction/start/${auctionId}`);
-  // },
-  // getActiveAuctions: () => {
-  //   return productSecuredApi.get("/auction");
-  // },
-  // getAuctionDetails: (auctionId) => {
-  //   return productSecuredApi.get(`/auction/details/${auctionId}`);
-  // },
   getAllAuctions: (params = {}) => {
   return productSecuredApi.get("/auction", { params });
 },
@@ -75,5 +62,13 @@ getAuctionDetails: (auctionId) => {
 getAuctionWinners: (page = 1, limit = 10) => {
   return productSecuredApi.get(`/auction/winners?page=${page}&limit=${limit}`);
 },
+getMonthlyAuctionReport: () => {
+  return productSecuredApi.get("/auction/ended/monthly");
+},
+
+getAuctionStatusSummary: () => {
+  return productSecuredApi.get("/auction/status/summary");
+},
+
 
 };

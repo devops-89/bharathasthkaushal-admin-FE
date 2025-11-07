@@ -19,7 +19,7 @@ const AuctionManagement = () => {
     startDate: "",
     quantity: "",
   });
-  
+
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
@@ -107,7 +107,6 @@ const fetchAuctions = async () => {
     const res = await productControllers.getAllAuctions({
       page: 1,
       pageSize: 50,
-      // status: "LIVE", // Optional — remove to get all
     });
 
     const response = res.data.data.docs || res.data.data || [];
@@ -171,7 +170,6 @@ const fetchAuctions = async () => {
       alert("Please fill all fields");
       return;
     }
-
     const auctionData = {
       productId: parseInt(newAuction.productId),
       start_price: parseFloat(newAuction.startingBid),
