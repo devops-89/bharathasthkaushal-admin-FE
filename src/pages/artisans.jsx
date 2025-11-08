@@ -27,7 +27,8 @@ const ArtisanManagement = () => {
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -42,7 +43,7 @@ const ArtisanManagement = () => {
     introVideo: "",
     gstNumber: "",
   });
-  
+
   const [partnersData, setPartnersData] = useState(() => {
     const savedData = localStorage.getItem("partnersData");
     return savedData ? JSON.parse(savedData) : [];
@@ -83,36 +84,37 @@ const ArtisanManagement = () => {
   };
 
   const fetchArtisans = async () => {
-  try {
-    const response = await userControllers.getUserListGroup("ARTISAN");
-    let artisans =
-      response.data?.data?.docs || response.data?.docs || response.data || [];
+    try {
+      const response = await userControllers.getUserListGroup("ARTISAN");
+      let artisans =
+        response.data?.data?.docs || response.data?.docs || response.data || [];
 
-    const mappedData = artisans.map((user, index) => ({
-      id: user._id || user.id || `temp-id-${index + 1}`,
-      firstName: user.firstName || (user.email ? user.email.split("@")[0] : "—"),
-      lastName: user.lastName || "—",
-      email: user.email || "—",
-      phoneNo: user.phoneNo || "—",
-      countryCode: user.countryCode || "+91",
-      expertizeField: user.expertizeField || "Not Specified",
-      location: user.location || "—",
-      gstNumber: user.gstNumber || "—",
-      user_caste_category: user.user_caste_category || "—",
-      joinedDate: user.createdAt
-        ? new Date(user.createdAt).toISOString().split("T")[0]
-        : "—",
-      verify_status: user.verify_status,
-      status: user.status || "Approved Artisan",
-      user_group: user.user_group || "ARTISAN",
-    }));
+      const mappedData = artisans.map((user, index) => ({
+        id: user._id || user.id || `temp-id-${index + 1}`,
+        firstName:
+          user.firstName || (user.email ? user.email.split("@")[0] : "—"),
+        lastName: user.lastName || "—",
+        email: user.email || "—",
+        phoneNo: user.phoneNo || "—",
+        countryCode: user.countryCode || "+91",
+        expertizeField: user.expertizeField || "Not Specified",
+        location: user.location || "—",
+        gstNumber: user.gstNumber || "—",
+        user_caste_category: user.user_caste_category || "—",
+        joinedDate: user.createdAt
+          ? new Date(user.createdAt).toISOString().split("T")[0]
+          : "—",
+        verify_status: user.verify_status,
+        status: user.status || "Approved Artisan",
+        user_group: user.user_group || "ARTISAN",
+      }));
 
-    setPartnersData(mappedData);
-    // toast.success("Artisans Loaded Successfully ");
-  } catch (error) {
-    // toast.error("Failed to load artisans ");
-  }
-};
+      setPartnersData(mappedData);
+      // toast.success("Artisans Loaded Successfully ");
+    } catch (error) {
+      // toast.error("Failed to load artisans ");
+    }
+  };
 
   useEffect(() => {
     fetchArtisans();
@@ -199,10 +201,13 @@ const ArtisanManagement = () => {
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.expertizeField)),
   ].filter((field) => field && field !== "Not Specified");
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentPartners = filteredPartners.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredPartners.length / itemsPerPage);
+  const indexOfLastItem = currentPage * rowsPerPage;
+  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+  const currentPartners = filteredPartners.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -757,42 +762,50 @@ const ArtisanManagement = () => {
           </div>
         )}
       </div>
-      {totalPages > 1 && (
-  <div className="flex justify-center items-center gap-2 py-4">
-    <button
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage(currentPage - 1)}
-      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+
+      <div className="flex items-center justify-between p-4 border-t bg-white mt-4 rounded-b-xl">
+  <div className="flex items-center gap-2 text-sm">
+    <span className="text-gray-700">Rows per page:</span>
+    <select
+      value={rowsPerPage}
+      onChange={(e) => {
+        setRowsPerPage(Number(e.target.value));
+        setCurrentPage(1);
+      }}
+      className="border rounded px-2 py-1"
     >
-      Prev
+      <option value={10}>10</option>
+      <option value={25}>25</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
+    </select>
+  </div>
+
+  <div className="text-sm text-gray-600">
+    {indexOfFirstItem + 1}–
+    {Math.min(indexOfLastItem, filteredPartners.length)} of {filteredPartners.length}
+  </div>
+
+  <div className="flex items-center gap-1">
+    <button
+      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+      disabled={currentPage === 1}
+      className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+    >
+      ‹
     </button>
 
-    {[...Array(totalPages).keys()].map((num) => (
-      <button
-        key={num}
-        onClick={() => setCurrentPage(num + 1)}
-        className={`px-3 py-1 rounded ${
-          currentPage === num + 1
-            ? "bg-orange-600 text-white"
-            : "bg-gray-200 text-gray-700"
-        }`}
-      >
-        {num + 1}
-      </button>
-    ))}
-
     <button
+      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
       disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage(currentPage + 1)}
-      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+      className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
     >
-      Next
+      ›
     </button>
   </div>
-)}
+</div>
 
     </div>
-    
   );
 };
 export default ArtisanManagement;

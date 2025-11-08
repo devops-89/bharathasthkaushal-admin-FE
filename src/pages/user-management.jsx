@@ -11,7 +11,7 @@ function UserManagement() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   useEffect(() => {
@@ -65,10 +65,12 @@ function UserManagement() {
 
     setOpenModal(false);
   };
-  const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentUsers = users.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(users.length / itemsPerPage);
+
+  
+  const indexOfLastItem = currentPage * rowsPerPage;
+  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(users.length / rowsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -135,23 +137,48 @@ function UserManagement() {
               ))}
             </tbody>
           </table>
+      <div className="flex items-center justify-between p-4 border-t bg-white">
+  <div className="flex items-center gap-2 text-sm">
+    <span className="text-gray-700">Rows per page:</span>
+    <select
+      value={rowsPerPage}
+      onChange={(e) => {
+        setRowsPerPage(Number(e.target.value));
+        setCurrentPage(1);
+      }}
+      className="border rounded px-2 py-1"
+    >
+      <option value={10}>10</option>
+      <option value={25}>25</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
+    </select>
+  </div>
 
-          {/* Pagination UI */}
-          <div className="flex justify-center items-center py-3 space-x-3">
-            {[...Array(totalPages).keys()].map((num) => (
-              <button
-                key={num}
-                onClick={() => setCurrentPage(num + 1)}
-                className={`px-3 py-1 rounded-md ${
-                  currentPage === num + 1
-                    ? "bg-orange-600 text-white"
-                    : "bg-gray-200"
-                }`}
-              >
-                {num + 1}
-              </button>
-            ))}
-          </div>
+  <div className="text-sm text-gray-600">
+    {indexOfFirstItem + 1}–
+    {Math.min(indexOfLastItem, users.length)} of {users.length}
+  </div>
+
+  <div className="flex items-center gap-1">
+    <button
+      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+      disabled={currentPage === 1}
+      className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+    >
+      ‹
+    </button>
+
+    <button
+      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+    >
+      ›
+    </button>
+  </div>
+</div>
+
         </div>
 
         {openModal && (

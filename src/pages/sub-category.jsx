@@ -18,6 +18,7 @@ const SubcategoryManagement = () => {
     type: "Sub-Category",
   });
 
+
   const getSubcategories = () => {
     categoryControllers
       .getSubCategory(id)
@@ -73,6 +74,12 @@ const SubcategoryManagement = () => {
       [name]: value,
     }));
   };
+  const [currentPage, setCurrentPage] = useState(1);
+const [rowsPerPage, setRowsPerPage] = useState(10);
+const indexOfLastItem = currentPage * rowsPerPage;
+const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+const currentSubcategories = filteredSubcategories.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({
@@ -348,7 +355,7 @@ const SubcategoryManagement = () => {
         <>
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSubcategories.map((sub) => (
+              {currentSubcategories.map((sub) => (
                 <div
                   key={sub.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
@@ -387,7 +394,8 @@ const SubcategoryManagement = () => {
                 <div>Status</div>
                 <div>Products</div>
               </div>
-              {filteredSubcategories.map((sub) => (
+              {currentSubcategories.map((sub) => (
+ 
                 <div
                   key={sub.id}
                   className="grid grid-cols-4 gap-4 p-4 border-b hover:bg-gray-50 transition cursor-pointer"
@@ -417,7 +425,54 @@ const SubcategoryManagement = () => {
           )}
         </>
       )}
+      {filteredSubcategories.length > 0 && (
+  <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-lg shadow-sm">
+
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-gray-700">Rows per page:</span>
+      <select
+        value={rowsPerPage}
+        onChange={(e) => {
+          setRowsPerPage(Number(e.target.value));
+          setCurrentPage(1);
+        }}
+        className="border rounded px-2 py-1"
+      >
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+      </select>
     </div>
+
+    <div className="text-sm text-gray-600">
+      {indexOfFirstItem + 1}–
+      {Math.min(indexOfLastItem, filteredSubcategories.length)} of {filteredSubcategories.length}
+    </div>
+
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setCurrentPage((prev) => prev - 1)}
+        disabled={currentPage === 1}
+        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ‹
+      </button>
+
+      <button
+        onClick={() => setCurrentPage((prev) => prev + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ›
+      </button>
+    </div>
+
+  </div>
+)}
+
+    </div>
+
   );
 };
 

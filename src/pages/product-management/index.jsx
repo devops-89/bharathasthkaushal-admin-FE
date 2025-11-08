@@ -17,6 +17,17 @@ export default function ProductManagement() {
   const [products, setProducts] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const filteredProducts = products?.docs || [];
+  const indexOfLastItem = currentPage * rowsPerPage;
+  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
+
   const fetchProducts = async () => {
     productControllers
       .getAllProducts()
@@ -97,7 +108,7 @@ export default function ProductManagement() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products?.docs.map((product) => (
+              {currentProducts.map((product) => (
                 <div
                   key={product.id}
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
@@ -151,6 +162,61 @@ export default function ProductManagement() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {/* Pagination Controls */}
+          {filteredProducts.length > 0 && (
+            <div className="flex items-center justify-between p-4 border-t mt-4 bg-white rounded-b-xl">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-700">Rows per page:</span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+
+              <div className="text-sm text-gray-600">
+                {indexOfFirstItem + 1}–
+                {Math.min(indexOfLastItem, filteredProducts.length)} of{" "}
+                {filteredProducts.length}
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() =>
+                    currentPage > 1 && setCurrentPage(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                  className={`px-2 py-1 rounded ${
+                    currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                  }`}
+                >
+                  ‹
+                </button>
+
+                <button
+                  onClick={() =>
+                    currentPage < totalPages && setCurrentPage(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                  className={`px-2 py-1 rounded ${
+                    currentPage === totalPages
+                      ? "text-gray-400"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  ›
+                </button>
+              </div>
             </div>
           )}
         </div>

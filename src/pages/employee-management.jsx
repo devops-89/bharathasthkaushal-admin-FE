@@ -25,16 +25,7 @@ const ArtisanManagement = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
-  // const [formData, setFormData] = useState({
-  //   name: "",
-  //   email: "",
-  //   phoneNo: "",
-  //   countryCode: "+91",
-  //   user_group: "EMPLOYEE",
-  //   location: "",
-  //   latitude: "",
-  //   longitude: "",
-  // });
+ 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -55,6 +46,9 @@ const ArtisanManagement = () => {
 });
 
   const [partnersData, setPartnersData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+const [rowsPerPage, setRowsPerPage] = useState(10);
+
 
   const fetchArtisans = async () => {
     try {
@@ -104,14 +98,12 @@ const ArtisanManagement = () => {
     setDropdownOpen(null);
   };
 
-  // const handleFormChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
+  
   const handleFormChange = (e) => {
   const { name, value } = e.target;
 
-  // Live validations
+
+
   let newErrors = { ...errors };
 
   if (name === "email") {
@@ -211,6 +203,12 @@ const handleAddEmployee = async () => {
 
     return matchesSearch && matchesLocation && matchesTab;
   });
+
+const indexOfLastItem = currentPage * rowsPerPage;
+const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+const currentPartners = filteredPartners.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
+
 
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.location.split(",")[0])),
@@ -590,7 +588,8 @@ const handleAddEmployee = async () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPartners.map((partner) => (
+                {currentPartners.map((partner) => (
+ 
                   <tr
                     key={partner.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -647,6 +646,53 @@ const handleAddEmployee = async () => {
                 ))}
               </tbody>
             </table>
+            {/* Pagination Controls */}
+{filteredPartners.length > 0 && (
+  <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-xl shadow-sm mt-2">
+
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-gray-700">Rows per page:</span>
+      <select
+        value={rowsPerPage}
+        onChange={(e) => {
+          setRowsPerPage(Number(e.target.value));
+          setCurrentPage(1);
+        }}
+        className="border rounded px-2 py-1"
+      >
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+      </select>
+    </div>
+
+    <div className="text-sm text-gray-600">
+      {indexOfFirstItem + 1}–
+      {Math.min(indexOfLastItem, filteredPartners.length)} of {filteredPartners.length}
+    </div>
+
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ‹
+      </button>
+
+      <button
+        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ›
+      </button>
+    </div>
+
+  </div>
+)}
+
           </div>
         </div>
 
@@ -657,8 +703,11 @@ const handleAddEmployee = async () => {
             </p>
           </div>
         )}
+
       </div>
+      
     </div>
+
   );
 };
 

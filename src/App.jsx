@@ -14,7 +14,7 @@ import PermissionManagement from "./pages/permission-management";
 import ProductManagement from "./pages/product-management";
 import AddProduct from "./pages/product-management/add-product";
 import ProductDetails from "./pages/product-management/product-details";
-import ApprovalManagementDetails from "./pages/approval-management-details";
+//import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
 import UserManagement from "./pages/user-management";
@@ -55,11 +55,11 @@ function App() {
         />
         <Route path="/category-management" element={<CategoryManagement />} />
         <Route path="/auction-management" element={<AuctionManagement />} />
-        <Route path="/approval-management" element={<ApprovalManagement />} />
+        {/* <Route path="/approval-management" element={<ApprovalManagement />} />
         <Route
           path="/approval-management-details/:id"
           element={<ApprovalManagementDetails />}
-        />
+        /> */}
         <Route path="/employee-management" element={<EmployeeManagement />} />
         <Route path="/payment-management" element={<PaymentManagement />} />
         <Route 

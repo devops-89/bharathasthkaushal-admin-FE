@@ -15,6 +15,9 @@ const CategoryManagement = () => {
   const { page: paramPage, pageSize: paramPageSize } = useParams();
   const page = paramPage ? parseInt(paramPage, 10) : 1;
   const pageSize = paramPageSize ? parseInt(paramPageSize, 10) : 10;
+  const [currentPage, setCurrentPage] = useState(1);
+const [rowsPerPage, setRowsPerPage] = useState(10); // default 10
+
   const [formData, setFormData] = useState({
     category_name: "",
     category_logo: null,
@@ -24,6 +27,10 @@ const CategoryManagement = () => {
   const filteredCategories = categories.filter((cat) =>
     (cat.category_name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+const indexOfLastItem = currentPage * rowsPerPage;
+const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+const currentCategories = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
 
   const getCategoriesList = () => {
     categoryControllers
@@ -281,7 +288,7 @@ const CategoryManagement = () => {
         {/* Categories */}
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCategories.map((cat) => (
+            {currentCategories.map((cat) => (
               <div
                 key={cat.category_id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
@@ -313,7 +320,7 @@ const CategoryManagement = () => {
               <div>Description</div>{" "}
               {/* Changed from Products since data doesn't have it */}
             </div>
-            {filteredCategories.map((cat) => (
+            {currentCategories.map((cat) => (
               <div
                 key={cat.category_id}
                 className="grid grid-cols-4 gap-4 p-4 border-b cursor-pointer hover:bg-gray-50 transition"
@@ -332,7 +339,53 @@ const CategoryManagement = () => {
           </div>
         )}
       </div>
+      {/* Pagination Controls */}
+{filteredCategories.length > 0 && (
+  <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-b-xl shadow-sm">
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-gray-700">Rows per page:</span>
+      <select
+        value={rowsPerPage}
+        onChange={(e) => {
+          setRowsPerPage(Number(e.target.value));
+          setCurrentPage(1);
+        }}
+        className="border rounded px-2 py-1"
+      >
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+        <option value={100}>100</option>
+      </select>
     </div>
+
+    <div className="text-sm text-gray-600">
+      {indexOfFirstItem + 1}–
+      {Math.min(indexOfLastItem, filteredCategories.length)} of {filteredCategories.length}
+    </div>
+
+    <div className="flex items-center gap-1">
+      <button
+        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ‹
+      </button>
+
+      <button
+        onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+      >
+        ›
+      </button>
+    </div>
+  </div>
+)}
+
+    </div>
+    
   );
 };
 

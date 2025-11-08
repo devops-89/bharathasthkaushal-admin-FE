@@ -12,37 +12,35 @@ export default function LoginPage({ onLogin }) {
   const [errors, setErrors] = useState({
     email: "",
     password: "",
-    general: "",
+    general: "",                      
+
   });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const inputHandler = (e) => {
     const { id, value } = e.target;
     setState({ ...state, [id]: value });
-
     setErrors({
       ...errors,
       [id]: "",
     });
   };
-
   const handleSubmit = () => {
     if (loginValidation({ state, errors, setErrors })) {
       let body = {
         identity: state.email,
         password: state.password,
       };
-
       setIsLoading(true);
-
       authControllers
         .login(body)
         .then((res) => {
           const response = res.data.data;
           localStorage.setItem("accessToken", response.accessToken);
           navigate("/dashboard");
-          setIsLoading(false);
+          setIsLoading(false);``
         })
         .catch((err) => {
           let errMessage =
@@ -52,7 +50,6 @@ export default function LoginPage({ onLogin }) {
         });
     }
   };
-
   const containerStyle = {
     height: "100vh",
     display: "flex",
@@ -63,30 +60,26 @@ export default function LoginPage({ onLogin }) {
     overflow: "hidden",
     fontFamily: "system-ui, -apple-system, sans-serif",
   };
-
+  
   const cardStyle = {
     width: "100%",
     maxWidth: "384px",
     padding: "0 16px",
   };
-
   const logoContainerStyle = {
     textAlign: "center",
     marginBottom: "24px",
   };
-
   const titleStyle = {
     fontSize: "24px",
     fontWeight: "bold",
     color: "#92400e",
     marginBottom: "4px",
   };
-
   const subtitleStyle = {
     fontSize: "14px",
     color: "#d97706",
   };
-
   const formContainerStyle = {
     background: "rgba(255, 255, 255, 0.7)",
     backdropFilter: "blur(8px)",
@@ -99,7 +92,6 @@ export default function LoginPage({ onLogin }) {
   const fieldContainerStyle = {
     marginBottom: "16px",
   };
-
   const labelStyle = {
     display: "block",
     fontSize: "14px",
@@ -107,7 +99,7 @@ export default function LoginPage({ onLogin }) {
     color: "#92400e",
     marginBottom: "4px",
   };
-
+  
   const inputStyle = {
     width: "100%",
     padding: "10px 12px",
@@ -119,12 +111,10 @@ export default function LoginPage({ onLogin }) {
     color: "#78350f",
     fontSize: "14px",
   };
-
   const inputFocusStyle = {
     borderColor: "#f59e0b",
     boxShadow: "0 0 0 2px rgba(251, 191, 36, 0.1)",
   };
-
   const buttonStyle = {
     width: "100%",
     background: isLoading
@@ -142,6 +132,7 @@ export default function LoginPage({ onLogin }) {
     marginTop: "24px",
     fontSize: "14px",
   };
+
   const demoButtonStyle = {
     width: "100%",
     background: "transparent",
@@ -155,7 +146,6 @@ export default function LoginPage({ onLogin }) {
     marginTop: "8px",
     transition: "all 0.2s",
   };
-
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
@@ -180,13 +170,11 @@ export default function LoginPage({ onLogin }) {
           <h1 style={titleStyle}>Handloom & Handcraft</h1>
           <p style={subtitleStyle}>Welcome back</p>
         </div>
-
         {/* Login Form */}
-
         <div style={formContainerStyle}>
           <div>
             {/* General Error Message */}
-            {errors.general && (
+            {/* {errors.general && (
               <div
                 style={{
                   backgroundColor: "#fee2e2",
@@ -198,11 +186,11 @@ export default function LoginPage({ onLogin }) {
                   fontSize: "14px",
                   textAlign: "center",
                 }}
+                  
               >
                 {errors.general}
               </div>
-            )}
-
+              )} */}
             {/* Email section */}
             <div style={fieldContainerStyle}>
               <label htmlFor="email" style={labelStyle}>
@@ -221,6 +209,7 @@ export default function LoginPage({ onLogin }) {
                   {errors.email}
                 </p>
               )}
+              
             </div>
 
             <div style={fieldContainerStyle}>
@@ -296,7 +285,6 @@ export default function LoginPage({ onLogin }) {
             opacity: 0.5;
           }
         }
-          
       `}</style>
     </div>
   );
