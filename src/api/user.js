@@ -11,6 +11,7 @@ export const userControllers = {
       throw error;
     }
   },
+  
 updateUserStatus: async (id, status) => {
   try {
     return await getuserSecuredApi.patch(`/users/${id}/status`, { status });
@@ -18,8 +19,6 @@ updateUserStatus: async (id, status) => {
     throw error;
   }
 },
-
-
   verifyArtisan: async (id) => {
     try {
       const body = { verifyStatus: "VERIFIED" };

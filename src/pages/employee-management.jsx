@@ -25,7 +25,6 @@ const ArtisanManagement = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
- 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -38,18 +37,15 @@ const ArtisanManagement = () => {
     longitude: "",
   });
   const [errors, setErrors] = useState({
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNo: "",
-  location: "",
-});
-
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNo: "",
+    location: "",
+  });
   const [partnersData, setPartnersData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-const [rowsPerPage, setRowsPerPage] = useState(10);
-
-
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const fetchArtisans = async () => {
     try {
       const response = await userControllers.getUserListGroup("EMPLOYEE");
@@ -98,99 +94,102 @@ const [rowsPerPage, setRowsPerPage] = useState(10);
     setDropdownOpen(null);
   };
 
-  
   const handleFormChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
+    let newErrors = { ...errors };
 
-
-  let newErrors = { ...errors };
-
-  if (name === "email") {
-    newErrors.email = (!value.includes("@") || !value.includes(".com"))
-      ? "Enter a valid email"
-      : "";
-  }
-
-  if (name === "phoneNo") {
-    newErrors.phoneNo = value.length !== 10 ? "Phone number must be 10 digits" : "";
-  }
-
-  if (name === "firstName") {
-    newErrors.firstName = value.trim() === "" ? "First name is required" : "";
-  }
-
-  if (name === "lastName") {
-    newErrors.lastName = value.trim() === "" ? "Last name is required" : "";
-  }
-
-  if (name === "location") {
-    newErrors.location = value.trim() === "" ? "Location is required" : "";
-  }
-
-  setErrors(newErrors);
-  setFormData((prev) => ({ ...prev, [name]: value }));
-};
-const handleAddEmployee = async () => {
-  if (errors.email || errors.phoneNo || errors.firstName || errors.lastName || errors.location) {
-    return toast.error("Please fill correct data .");
-  }
-  if (
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.email ||
-    !formData.phoneNo ||
-    !formData.location
-  ) {
-    return toast.error("All required fields must be filled.");
-  }
-  try {
-    const payload = {
-      email: formData.email.trim(),
-      phoneNo: formData.phoneNo.trim(),
-      user_group: "EMPLOYEE",
-      countryCode: formData.countryCode,
-      location: formData.location.trim(),
-      firstName: formData.firstName.trim(),
-      lastName: formData.lastName.trim(),
-      latitude: formData.latitude ? parseFloat(formData.latitude) : 0,
-      longitude: formData.longitude ? parseFloat(formData.longitude) : 0,
-    };
-    const response = await authControllers.addEmployee(payload);
-
-    if (response.status === 200) {
-      toast.success("Employee registered successfully!");
-      setPartnersData((prev) => [
-        ...prev,
-        {
-          ...payload,
-          name: `${payload.firstName} ${payload.lastName}`.trim(),
-          id: prev.length + 1,
-          joinedDate: new Date().toISOString().split("T")[0],
-        },
-      ]);
-      setShowAddForm(false);
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNo: "",
-        countryCode: "+91",
-        user_group: "EMPLOYEE",
-        location: "",
-        latitude: "",
-        longitude: "",
-      });
-      setErrors({});
-    } else {
-      toast.error(response.data?.message || "Something went wrong.");
+    if (name === "email") {
+      newErrors.email =
+        !value.includes("@") || !value.includes(".com")
+          ? "Enter a valid email"
+          : "";
     }
-  } catch (error) {
-    toast.error(error.message);
-  }
-};
 
+    if (name === "phoneNo") {
+      newErrors.phoneNo =
+        value.length !== 10 ? "Phone number must be 10 digits" : "";
+    }
 
+    if (name === "firstName") {
+      newErrors.firstName = value.trim() === "" ? "First name is required" : "";
+    }
+
+    if (name === "lastName") {
+      newErrors.lastName = value.trim() === "" ? "Last name is required" : "";
+    }
+
+    if (name === "location") {
+      newErrors.location = value.trim() === "" ? "Location is required" : "";
+    }
+
+    setErrors(newErrors);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleAddEmployee = async () => {
+    if (
+      errors.email ||
+      errors.phoneNo ||
+      errors.firstName ||
+      errors.lastName ||
+      errors.location
+    ) {
+      return toast.error("Please fill correct data .");
+    }
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.phoneNo ||
+      !formData.location
+    ) {
+      return toast.error("All required fields must be filled.");
+    }
+    try {
+      const payload = {
+        email: formData.email.trim(),
+        phoneNo: formData.phoneNo.trim(),
+        user_group: "EMPLOYEE",
+        countryCode: formData.countryCode,
+        location: formData.location.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        latitude: formData.latitude ? parseFloat(formData.latitude) : 0,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : 0,
+      };
+      const response = await authControllers.addEmployee(payload);
+
+      if (response.status === 200) {
+        toast.success("Employee registered successfully!");
+        setPartnersData((prev) => [
+          ...prev,
+          {
+            ...payload,
+            name: `${payload.firstName} ${payload.lastName}`.trim(),
+            id: prev.length + 1,
+            joinedDate: new Date().toISOString().split("T")[0],
+          },
+        ]);
+        setShowAddForm(false);
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNo: "",
+          countryCode: "+91",
+          user_group: "EMPLOYEE",
+          location: "",
+          latitude: "",
+          longitude: "",
+        });
+        setErrors({});
+      } else {
+        toast.error(response.data?.message || "Something went wrong.");
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   const filteredPartners = partnersData.filter((partner) => {
     const matchesSearch =
       partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -203,17 +202,16 @@ const handleAddEmployee = async () => {
 
     return matchesSearch && matchesLocation && matchesTab;
   });
-
-const indexOfLastItem = currentPage * rowsPerPage;
-const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-const currentPartners = filteredPartners.slice(indexOfFirstItem, indexOfLastItem);
-const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
-
-
+  const indexOfLastItem = currentPage * rowsPerPage;
+  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+  const currentPartners = filteredPartners.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.location.split(",")[0])),
   ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
@@ -251,19 +249,6 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
 
         {/* Tabs */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex flex-wrap gap-2 mb-4">
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === "all"
-                  ? "bg-orange-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              All Employee
-            </button>
-          </div>
-
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
@@ -276,7 +261,7 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-            
+
             <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
@@ -368,7 +353,9 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="example@yopmail.com"
                     />
-                    {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-red-500 text-xs">{errors.email}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <div className="w-24">
@@ -391,17 +378,16 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
                         Phone Number *
                       </label>
                       <input
-                      
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
                         onChange={handleFormChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="9876543210"
-                        
                       />
-                      {errors.phoneNo && <p className="text-red-500 text-xs">{errors.phoneNo}</p>}
-
+                      {errors.phoneNo && (
+                        <p className="text-red-500 text-xs">{errors.phoneNo}</p>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -589,18 +575,14 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentPartners.map((partner) => (
- 
                   <tr
                     key={partner.id}
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {/* <div className="text-sm font-medium text-gray-900">
-                        {partner.name}
-                      </div> */}
                       <div className="text-sm font-medium text-gray-900">
-  {`${partner.firstName} ${partner.lastName}`}
-</div>
+                        {`${partner.firstName} ${partner.lastName}`}
+                      </div>
 
                       <div className="text-xs text-gray-500">
                         Joined: {partner.joinedDate}
@@ -647,52 +629,56 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
               </tbody>
             </table>
             {/* Pagination Controls */}
-{filteredPartners.length > 0 && (
-  <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-xl shadow-sm mt-2">
+            {filteredPartners.length > 0 && (
+              <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-xl shadow-sm mt-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-700">Rows per page:</span>
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                </div>
 
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-gray-700">Rows per page:</span>
-      <select
-        value={rowsPerPage}
-        onChange={(e) => {
-          setRowsPerPage(Number(e.target.value));
-          setCurrentPage(1);
-        }}
-        className="border rounded px-2 py-1"
-      >
-        <option value={10}>10</option>
-        <option value={25}>25</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
-    </div>
+                <div className="text-sm text-gray-600">
+                  {indexOfFirstItem + 1}–
+                  {Math.min(indexOfLastItem, filteredPartners.length)} of{" "}
+                  {filteredPartners.length}
+                </div>
 
-    <div className="text-sm text-gray-600">
-      {indexOfFirstItem + 1}–
-      {Math.min(indexOfLastItem, filteredPartners.length)} of {filteredPartners.length}
-    </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-2 py-1 rounded ${
+                      currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                    }`}
+                  >
+                    ‹
+                  </button>
 
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ‹
-      </button>
-
-      <button
-        onClick={() => setCurrentPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ›
-      </button>
-    </div>
-
-  </div>
-)}
-
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-2 py-1 rounded ${
+                      currentPage === totalPages
+                        ? "text-gray-400"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -703,11 +689,8 @@ const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
             </p>
           </div>
         )}
-
       </div>
-      
     </div>
-
   );
 };
 

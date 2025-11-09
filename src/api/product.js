@@ -18,17 +18,16 @@ export const productControllers = {
   getProductById: (id) => {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
- 
-updateProductStatus: (id, status, adminRemarks = "") => {
-  const payload = {
-    admin_approval_status: status,
-    
-  };
-  if (status === "REJECTED") {
-    payload.adminRemarks = adminRemarks;
-  }
-  return productSecuredApi.patch(`/product/${id}/status`, payload);
-},
+
+  updateProductStatus: (id, status, adminRemarks = "") => {
+    const payload = {
+      admin_approval_status: status,
+    };
+    if (status === "REJECTED") {
+      payload.adminRemarks = adminRemarks;
+    }
+    return productSecuredApi.patch(`/product/${id}/status`, payload);
+  },
 
   createBuildStep: (formData) => {
     return productSecuredApi.post("/build-step/create", formData, {
@@ -40,35 +39,40 @@ updateProductStatus: (id, status, adminRemarks = "") => {
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
   },
-  assignStepToArtisan: (data) => {
+ assignStepToArtisan: (data) => {
   return productSecuredApi.patch("/build-step/assign-artisan", data);
 },
+
+getAssignedSteps: () => {
+  return productSecuredApi.get("/build-step/artisan/my-steps");
+},
+
   getAllAuctions: (params = {}) => {
-  return productSecuredApi.get("/auction", { params });
-},
+    return productSecuredApi.get("/auction", { params });
+  },
 
-createAuction: (auctionData) => {
-  return productSecuredApi.post("/auction/create", auctionData);
-},
+  createAuction: (auctionData) => {
+    return productSecuredApi.post("/auction/create", auctionData);
+  },
 
-startAuction: (auctionId) => {
-  return productSecuredApi.put(`/auction/start/${auctionId}`);
-},
+  startAuction: (auctionId) => {
+    return productSecuredApi.put(`/auction/start/${auctionId}`);
+  },
 
-getAuctionDetails: (auctionId) => {
-  return productSecuredApi.get(`/auction/details/${auctionId}`);
-},
+  getAuctionDetails: (auctionId) => {
+    return productSecuredApi.get(`/auction/details/${auctionId}`);
+  },
 
-getAuctionWinners: (page = 1, limit = 10) => {
-  return productSecuredApi.get(`/auction/winners?page=${page}&limit=${limit}`);
-},
-getMonthlyAuctionReport: () => {
-  return productSecuredApi.get("/auction/ended/monthly");
-},
+  getAuctionWinners: (page = 1, limit = 10) => {
+    return productSecuredApi.get(
+      `/auction/winners?page=${page}&limit=${limit}`
+    );
+  },
+  getMonthlyAuctionReport: () => {
+    return productSecuredApi.get("/auction/ended/monthly");
+  },
 
-getAuctionStatusSummary: () => {
-  return productSecuredApi.get("/auction/status/summary");
-},
-
-
+  getAuctionStatusSummary: () => {
+    return productSecuredApi.get("/auction/status/summary");
+  },
 };

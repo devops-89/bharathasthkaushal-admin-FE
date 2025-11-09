@@ -22,33 +22,173 @@ export default function LoginPage({ onLogin }) {
   const inputHandler = (e) => {
     const { id, value } = e.target;
     setState({ ...state, [id]: value });
+    // Clear all errors when user starts typing
     setErrors({
-      ...errors,
-      [id]: "",
+      email: "",
+      password: "",
+      general: "",
     });
   };
   const handleSubmit = () => {
-    if (loginValidation({ state, errors, setErrors })) {
-      let body = {
-        identity: state.email,
-        password: state.password,
-      };
-      setIsLoading(true);
-      authControllers
-        .login(body)
-        .then((res) => {
-          const response = res.data.data;
-          localStorage.setItem("accessToken", response.accessToken);
-          navigate("/dashboard");
-          setIsLoading(false);``
-        })
-        .catch((err) => {
-          let errMessage =
-            err?.response?.data?.message || "Invalid Email or Password";
-          setErrors({ ...errors, password: errMessage });
-          setIsLoading(false);
-        });
+    // Step 1: Frontend validation - check BOTH fields independently
+    let frontendErrors = { email: "", password: "", general: "" };
+    const emailTrimmed = state.email.trim();
+    
+    // Email validation - improved to catch invalid domains
+    if (!emailTrimmed) {
+      frontendErrors.email = "Invalid email";
+    } else {
+      // Basic email format check
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailTrimmed)) {
+        frontendErrors.email = "Invalid email";
+      } else {
+        // Additional validation: check domain TLD
+        const domainPart = emailTrimmed.split('@')[1];
+        if (domainPart) {
+          const lastPart = domainPart.split('.').pop();
+          
+          // Common valid TLDs (extensive list)
+          const commonTLDs = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'in', 'uk', 'us', 'au', 'ca', 'de', 'fr', 'jp', 'cn', 'ru', 'br', 'mx', 'it', 'es', 'nl', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'ie', 'pt', 'be', 'at', 'ch', 'nz', 'sg', 'hk', 'my', 'th', 'ph', 'id', 'vn', 'kr', 'tw', 'tr', 'ae', 'sa', 'eg', 'za', 'info', 'biz', 'xyz', 'tech', 'online', 'site', 'website', 'app', 'dev', 'cloud', 'email', 'mail', 'me', 'tv', 'cc', 'ws', 'name', 'mobi', 'asia', 'tel', 'travel', 'jobs', 'pro', 'museum', 'aero', 'coop', 'int', 'mil'];
+          
+          // Check if TLD is invalid
+          if (!lastPart || lastPart.length < 2) {
+            // TLD too short or doesn't exist
+            frontendErrors.email = "Invalid email";
+          } else if (/^\d+$/.test(lastPart)) {
+            // Domain ends with only numbers
+            frontendErrors.email = "Invalid email";
+          } else if (lastPart.length > 15) {
+            // TLD too long (very unusual, likely invalid)
+            frontendErrors.email = "Invalid email";
+          } else if (/[^a-zA-Z]/.test(lastPart)) {
+            // TLD contains numbers or special characters
+            frontendErrors.email = "Invalid email";
+          } else if (!commonTLDs.includes(lastPart.toLowerCase())) {
+            // TLD not in common list - likely a typo (like .commm, .roomm, .rrrm, .conj)
+            // Frontend validation: be lenient, but flag obvious typos
+            // Check for common typos patterns
+            const commonTypos = ['comm', 'commm', 'commmm', 'room', 'roomm', 'roommm', 'conj', 'con', 'coom', 'coomm', 'rrrm', 'rrr', 'rrrr'];
+            if (commonTypos.includes(lastPart.toLowerCase()) || lastPart.length > 6) {
+              frontendErrors.email = "Invalid email";
+            }
+            // For other uncommon TLDs, let backend validate (don't block in frontend)
+          }
+        }
+      }
     }
+    
+    // Password validation (independent check - NOT else if)
+    if (!state.password.trim()) {
+      frontendErrors.password = "Invalid password";
+    }
+    
+    // Show frontend validation errors immediately (both can show at once)
+    const hasEmailError = frontendErrors.email !== "";
+    const hasPasswordError = frontendErrors.password !== "";
+    
+    if (hasEmailError || hasPasswordError) {
+      setErrors(frontendErrors);
+      // Don't call API if frontend validation fails
+      return;
+    }
+    
+    // Step 2: Both fields passed frontend validation, now call API
+    let body = {
+      identity: emailTrimmed,
+      password: state.password,
+    };
+    setIsLoading(true);
+    
+    // Clear errors before API call
+    setErrors({ email: "", password: "", general: "" });
+    
+    authControllers
+      .login(body)
+      .then((res) => {
+        const response = res.data.data;
+        localStorage.setItem("accessToken", response.accessToken);
+        navigate("/dashboard");
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        let errMessage = err?.response?.data?.message || "";
+        const errorMsgLower = errMessage.toLowerCase();
+        
+        // Initialize API errors
+        let apiErrors = { email: "", password: "", general: "" };
+        
+        // Filter phone errors
+        if (errorMsgLower.includes("phone")) {
+          // Ignore phone errors - show password error
+          apiErrors.password = "Invalid password";
+        }
+        // Check if error is specifically about PASSWORD
+        else if (errorMsgLower.includes("password") && 
+                 (errorMsgLower.includes("incorrect") || 
+                  errorMsgLower.includes("wrong") || 
+                  errorMsgLower.includes("invalid"))) {
+          // Password is wrong
+          apiErrors.password = "Invalid password";
+        }
+        // Check if error is about user/email not found or invalid email
+        else if (errorMsgLower.includes("user not found") || 
+                 errorMsgLower.includes("email not found") ||
+                 errorMsgLower.includes("no user") ||
+                 errorMsgLower.includes("account not found") ||
+                 errorMsgLower.includes("invalid email") ||
+                 errorMsgLower.includes("email invalid") ||
+                 (errorMsgLower.includes("user") && errorMsgLower.includes("not found")) ||
+                 errorMsgLower.includes("user does not exist")) {
+          // Email/User doesn't exist or invalid
+          apiErrors.email = "Invalid email";
+        }
+        // For generic "invalid credentials" or unknown errors
+        // Check if email format might be suspicious (invalid TLD, numbers in domain, etc.)
+        else {
+          const domainPart = emailTrimmed.split('@')[1];
+          let emailLooksInvalid = false;
+          
+          if (domainPart) {
+            const lastPart = domainPart.split('.').pop();
+            // Common valid TLDs (extensive list)
+            const commonTLDs = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'in', 'uk', 'us', 'au', 'ca', 'de', 'fr', 'jp', 'cn', 'ru', 'br', 'mx', 'it', 'es', 'nl', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'ie', 'pt', 'be', 'at', 'ch', 'nz', 'sg', 'hk', 'my', 'th', 'ph', 'id', 'vn', 'kr', 'tw', 'tr', 'ae', 'sa', 'eg', 'za', 'info', 'biz', 'xyz', 'tech', 'online', 'site', 'website', 'app', 'dev', 'cloud', 'email', 'mail', 'me', 'tv', 'cc', 'ws', 'name', 'mobi', 'asia', 'tel', 'travel', 'jobs', 'pro', 'museum', 'aero', 'coop', 'int', 'mil', 'yopmail', 'gmail', 'yahoo', 'hotmail', 'outlook', 'live', 'msn', 'aol', 'icloud', 'mail', 'pm', 'gm', 'ru', 'ua', 'by', 'kz', 'uz', 'tj', 'kg', 'md', 'am', 'az', 'ge', 'lv', 'lt', 'ee', 'is', 'li', 'lu', 'mc', 'ad', 'sm', 'va', 'mt', 'cy', 'gi', 'je', 'gg', 'im', 'fo', 'gl', 'sj', 'ax', 'bg', 'ro', 'hu', 'sk', 'si', 'hr', 'ba', 'rs', 'me', 'mk', 'al', 'xk'];
+            
+            // Check if TLD looks invalid
+            if (!lastPart || lastPart.length < 2) {
+              // TLD too short or doesn't exist
+              emailLooksInvalid = true;
+            } else if (/^\d+$/.test(lastPart)) {
+              // Domain ends with only numbers
+              emailLooksInvalid = true;
+            } else if (lastPart.length > 15) {
+              // TLD too long (very unusual, likely invalid)
+              emailLooksInvalid = true;
+            } else if (/[^a-zA-Z]/.test(lastPart)) {
+              // TLD contains numbers or special characters (except letters)
+              emailLooksInvalid = true;
+            } else if (!commonTLDs.includes(lastPart.toLowerCase())) {
+              // TLD not in common list - if backend rejected it, it's likely invalid
+              // This catches typos like .commm, .roomm, .rrrm, .conj, etc.
+              emailLooksInvalid = true;
+            }
+          } else {
+            // No domain part found
+            emailLooksInvalid = true;
+          }
+          
+          // If email looks suspicious and backend rejected it, show email error
+          // Otherwise, assume password is wrong
+          if (emailLooksInvalid) {
+            apiErrors.email = "Invalid email";
+          } else {
+            apiErrors.password = "Invalid password";
+          }
+        }
+        
+        setErrors(apiErrors);
+        setIsLoading(false);
+      });
   };
   const containerStyle = {
     height: "100vh",
@@ -167,30 +307,12 @@ export default function LoginPage({ onLogin }) {
               marginRight: "auto",
             }}
           />
-          <h1 style={titleStyle}>Handloom & Handcraft</h1>
+          <h1 style={titleStyle}>Handloom & Handicraft</h1>
           <p style={subtitleStyle}>Welcome back</p>
         </div>
         {/* Login Form */}
         <div style={formContainerStyle}>
           <div>
-            {/* General Error Message */}
-            {/* {errors.general && (
-              <div
-                style={{
-                  backgroundColor: "#fee2e2",
-                  border: "1px solid #fecaca",
-                  color: "#dc2626",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  marginBottom: "16px",
-                  fontSize: "14px",
-                  textAlign: "center",
-                }}
-                  
-              >
-                {errors.general}
-              </div>
-              )} */}
             {/* Email section */}
             <div style={fieldContainerStyle}>
               <label htmlFor="email" style={labelStyle}>
@@ -199,6 +321,7 @@ export default function LoginPage({ onLogin }) {
               <input
                 id="email"
                 type="email"
+                value={state.email}
                 required
                 onChange={inputHandler}
                 style={inputStyle}
@@ -220,6 +343,7 @@ export default function LoginPage({ onLogin }) {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  value={state.password}
                   required
                   onChange={inputHandler}
                   style={{ ...inputStyle, paddingRight: "40px" }}

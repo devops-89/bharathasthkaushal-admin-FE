@@ -239,9 +239,9 @@ const NeedAssistanceDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
-      <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
             Need Assistance
           </h1>

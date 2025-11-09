@@ -19,6 +19,7 @@ const AuctionManagement = () => {
     startDate: "",
     quantity: "",
   });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const indexOfLastItem = currentPage * rowsPerPage;
@@ -249,10 +250,7 @@ const AuctionManagement = () => {
         currentBid: parseFloat(details.leading_amount || 0),
         minBidAmount: parseFloat(details.min_bid_amount || 0),
         reservePrice: parseFloat(details.reserve_price || 0),
-        // startDate: details.start_date
-        //   ? details.start_date.slice(0, 10)
-        //   : "Not started",
-        // endDate: details.hard_close_at.slice(0, 10),
+
         startDate: formatDateTime(details.start_date),
         endDate: formatDateTime(details.hard_close_at),
 
@@ -310,14 +308,14 @@ const AuctionManagement = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen ml-64 pt-20 flex-1">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
             Auction Management
           </h1>
-          {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
+          
           <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
             <NavLink
               to="/Dashboard"

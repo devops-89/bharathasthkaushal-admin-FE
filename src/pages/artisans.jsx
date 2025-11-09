@@ -717,15 +717,6 @@ const ArtisanManagement = () => {
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </button>
-
-                          {/* {partner.status !== "Verified" && (
-                            <button
-                              onClick={() => handleVerifyArtisan(partner.id)}
-                              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
-                            >
-                              ✅ Verify Artisan
-                            </button>
-                          )} */}
                           {partner.verify_status !== "VERIFIED" ? (
                             <button
                               onClick={() => handleVerifyArtisan(partner.id)}

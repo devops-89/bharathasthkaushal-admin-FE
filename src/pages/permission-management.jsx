@@ -264,7 +264,7 @@ const PermissionManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6 ml-64 pt-20 flex-1">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

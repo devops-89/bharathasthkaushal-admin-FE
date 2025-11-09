@@ -89,24 +89,22 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-                    Dashboard
-                  </h1>
-        
-                  <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-                    <NavLink to="/Dashboard">Dashboard</NavLink>
-                
-                    
-                  </nav>
-                </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+
+          <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+            <NavLink to="/Dashboard">Dashboard</NavLink>
+          </nav>
+        </div>
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Line Chart */}
-          <div className="lg:col-span-2 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+          <div className="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Orders Requests
             </h3>
-            <div className="h-80">
+            <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={serviceData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -131,11 +129,11 @@ const Dashboard = () => {
           </div>
 
           {/* Pie Chart */}
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Orders Status
             </h3>
-            <div className="h-80">
+            <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

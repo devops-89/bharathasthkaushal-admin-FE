@@ -14,6 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { productControllers } from "../../api/product";
+import { userControllers } from "../../api/user";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -45,9 +46,21 @@ const ProductDetails = () => {
     materials: "",
     instructions: "",
   });
+const [artisans, setArtisans] = useState([]);
+
+useEffect(() => {
+  userControllers.getUserListGroup("ARTISAN").then((res) => {
+    let data = res.data.data.docs.map((a) => ({
+      id: a._id,
+      name: `${a.firstName} ${a.lastName}`,
+    }));
+    setArtisans(data);
+  });
+}, []);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -77,7 +90,7 @@ const ProductDetails = () => {
     }
   }, [id]);
   const fetchProducts = async () => {
-    try {
+    try { 
       const res = await productControllers.getAllProducts();
       console.log("Products Response:", res.data.data.docs);
       setProducts(res.data.data?.docs || []);
@@ -87,7 +100,6 @@ const ProductDetails = () => {
         err.response?.data || err.message
       );
       setProducts([]);
-      
     }
   };
   const fetchBuildSteps = async () => {
@@ -138,33 +150,56 @@ const ProductDetails = () => {
   setLoading(true);
 
   try {
-    for (let stepId of assignForm.stepIds) {
-      const payload = {
-        buildStepId: stepId,
-        artisanId: assignForm.artisanId,
-        productId: id,
-      };
-      await productControllers.assignStepToArtisan(payload);
-    }
+    const payload = {
+      buildStepId: assignForm.stepIds,
+      artisanId: assignForm.artisanId,
+      productId: id,
+    };
 
-    alert("Steps assigned successfully ");
-    setAssignForm({
-      artisanId: "",
-      stepIds: [],
-      deadline: "",
-      priority: "medium",
-      notes: "",
-    });
+    await productControllers.assignStepToArtisan(payload);
 
+    alert("✅ Step Assigned Successfully!");
     setShowAssignForm(false);
     fetchBuildSteps();
   } catch (err) {
-    console.log(err);
-    alert("Failed to assign steps ");
+    alert("❌ Failed to assign step");
   } finally {
     setLoading(false);
   }
 };
+
+//   const handleAssignFormSubmit = async (e) => {
+//   e.preventDefault();
+//   setLoading(true);
+
+//   try {
+//     for (let stepId of assignForm.stepIds) {
+//       const payload = {
+//         buildStepId: stepId,
+//         artisanId: assignForm.artisanId,
+//         productId: id,
+//       };
+//       await productControllers.assignStepToArtisan(payload);
+//     }
+
+//     alert("Steps assigned successfully ");
+//     setAssignForm({
+//       artisanId: "",
+//       stepIds: [],
+//       deadline: "",
+//       priority: "medium",
+//       notes: "",
+//     });
+
+//     setShowAssignForm(false);
+//     fetchBuildSteps();
+//   } catch (err) {
+//     console.log(err);
+//     alert("Failed to assign steps ");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
     setCreateStepForm((prev) => ({
@@ -241,6 +276,7 @@ const ProductDetails = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+  
 
   if (loading) {
     return (
@@ -378,14 +414,25 @@ const ProductDetails = () => {
                     <FileText className="w-3 h-5" />
                     Create Build Step
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => setShowAssignForm(true)}
                     className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                   >
                     <Users className="w-5 h-5" />
                     Assign Steps to Artisan
                     
-                  </button>
+                  </button> */}
+                  <button
+  onClick={async () => {
+    const res = await productControllers.getAssignedSteps();
+    console.log(res.data);
+    alert("Assigned steps loaded — check console");
+  }}
+  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+>
+  View Assigned Steps
+</button>
+
                 </div>
                 {/* Build Steps FAQ Section */}
                 <div className="mt-8">
@@ -912,152 +959,86 @@ const ProductDetails = () => {
       )}
       {/* Assign Steps to Artisan Modal */}
       {showAssignForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Assign Steps to Artisan
-              </h2>
-              <button
-                onClick={() => setShowAssignForm(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-            <form onSubmit={handleAssignFormSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Artisan
-                </label>
-                <select
-                  name="artisanId"
-                  value={assignForm.artisanId}
-                  onChange={handleAssignFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Choose an artisan...</option>
-                  <option value="artisan1">
-                    Ram Kumar (Bamboo Specialist)
-                  </option>
-                  <option value="artisan2">Sita Devi (Wood Carver)</option>
-                  <option value="artisan3">
-                    Arjun Singh (Painting Expert)
-                  </option>
-                  <option value="artisan4">
-                    Maya Sharma (Finishing Specialist)
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Steps to Assign
-                </label>
-                {buildSteps.length === 0 ? (
-                  <p className="text-gray-500 text-sm bg-gray-50 p-3 rounded-lg">
-                    No build steps available.
-                  </p>
-                ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                    {buildSteps.map((step) => (
-                      <label
-                        key={step.id}
-                        className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          name="stepIds"
-                          value={step.buildStepId || step.id}
-                          checked={assignForm.stepIds.includes((step.buildStepId || step.id).toString())}
-                          onChange={handleAssignFormChange}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
-                              Step {step.sequence}
-                            </span>
-                            <span className="font-medium text-gray-900">
-                              {step.stepName}
-                            </span>
-                          </div>
-                          <p className="text-gray-600 text-sm mt-1">
-                            {step.description}
-                          </p>
-                          <span className="text-orange-600 font-semibold text-sm">
-                            ₹{step.proposed_price || step.proposedPrice}
-                          </span>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Deadline
-                </label>
-                <input
-                  type="date"
-                  name="deadline"
-                  value={assignForm.deadline}
-                  onChange={handleAssignFormChange}
-                  required
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority Level
-                </label>
-                <select
-                  name="priority"
-                  value={assignForm.priority}
-                  onChange={handleAssignFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="low">Low Priority</option>
-                  <option value="medium">Medium Priority</option>
-                  <option value="high">High Priority</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Additional Notes
-                </label>
-                <textarea
-                  name="notes"
-                  value={assignForm.notes}
-                  onChange={handleAssignFormChange}
-                  rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Any special instructions for the artisan..."
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAssignForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || assignForm.stepIds.length === 0}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-500 text-white rounded-lg hover:from-orange-600 hover:to-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {loading ? "Assigning..." : "Assign Steps"}
-                </button>
-              </div>
-            </form>
-          </div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-gray-900">Assign Step</h2>
+        <button onClick={() => setShowAssignForm(false)} className="p-2 hover:bg-gray-100 rounded-full">
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      </div>
+
+      <form onSubmit={handleAssignFormSubmit} className="space-y-4">
+
+        {/* Artisan Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Artisan <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="artisanId"
+            value={assignForm.artisanId}
+            onChange={handleAssignFormChange}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          >
+            <option value="">Choose artisan...</option>
+            {artisans.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+
+        {/* Steps Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Step
+          </label>
+          <select
+            name="stepIds"
+            value={assignForm.stepIds}
+            onChange={handleAssignFormChange}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          >
+            <option value="">Choose step...</option>
+            {buildSteps.map((step) => (
+              <option key={step.buildStepId} value={step.buildStepId}>
+                Step {step.sequence} - {step.stepName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowAssignForm(false)}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading || !assignForm.stepIds}
+            className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+          >
+            {loading ? "Assigning..." : "Assign"}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+)}
+
+  
     </div>
   );
 

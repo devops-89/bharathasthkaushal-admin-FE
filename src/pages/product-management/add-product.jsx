@@ -1,7 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { productControllers } from "../../api/product";
+import { useEffect } from "react";
+import { categoryControllers } from "../../api/category";
 const AddProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,6 +19,43 @@ const AddProduct = () => {
     dimension: "",
     description: "",
   });
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await categoryControllers.getCategory();
+
+      console.log("CATEGORY RESPONSE:", res.data.data.docs);
+      setCategories(res.data?.data?.docs || []);
+    } catch (error) {
+      console.log("Category Fetch Error:", error);
+    }
+  };
+  const handleCategoryChange = async (e) => {
+    const selectedCategoryId = e.target.value;
+    setFormData((prev) => ({ ...prev, categoryId: selectedCategoryId }));
+
+    try {
+      const res = await categoryControllers.getSubCategory(selectedCategoryId);
+      console.log("SUBCATEGORY RESPONSE:", res.data.data.docs);
+
+      const filteredSubs = (res.data?.data?.docs || []).filter(
+        (item) => item.type === "Sub-Category"
+      );
+
+      setSubCategories(filteredSubs);
+    } catch (error) {
+      console.log("SubCategory Fetch Error:", error);
+    }
+  };
+
+  // };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const handleInputChange = (e) => {
@@ -79,7 +117,7 @@ const AddProduct = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Add New Product
               </h1>
-              
+
               <p className="text-gray-600">
                 Enter product details for your handloom/handcraft item
               </p>
@@ -106,35 +144,46 @@ const AddProduct = () => {
               />
             </div>
 
-            {/* Category ID */}
+            {/* Category */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Category ID *
+                Category *
               </label>
-              <input
-                type="text"
+              <select
                 name="categoryId"
                 value={formData.categoryId}
-                onChange={handleInputChange}
+                onChange={handleCategoryChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Enter Category Id"
                 required
-              />
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* SubCategory ID */}
+            {/* SubCategory */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                SubCategory ID
+                SubCategory *
               </label>
-              <input
-                type="text"
+              <select
                 name="subCategoryId"
                 value={formData.subCategoryId}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Enter SubCategory Id"
-              />
+                disabled={!subCategories.length}
+              >
+                <option value="">Select SubCategory</option>
+                {subCategories.map((sub) => (
+                  <option key={sub.category_id} value={sub.category_id}>
+                    {sub.category_name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* MRP */}
@@ -262,7 +311,6 @@ const AddProduct = () => {
                 placeholder="10x20 cm"
               />
             </div>
-            
 
             {/* Description */}
             <div className="md:col-span-2">
