@@ -114,14 +114,14 @@ export default function ProductManagement() {
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <div className="relative mb-4">
-                    {product.images && product.images.length > 0 ? (
+                    {product.images && product.images.length  ? (
                       <img
                         src={product.images[0].imageUrl}
                         alt={product.name}
                         className="w-full h-48 object-cover rounded-lg"
                       />
                     ) : null}
-                    <div
+                    {/* <div
                       className={`w-full h-48 bg-gradient-to-br from-orange-100 to-amber-100 rounded-lg flex items-center justify-center ${
                         product.images && product.images.length > 0
                           ? "hidden"
@@ -129,7 +129,7 @@ export default function ProductManagement() {
                       }`}
                     >
                       <Package className="w-16 h-16 text-orange-300" />
-                    </div>
+                    </div> */}
                     <div className="absolute top-0 right-0">
                       {product.quantity}
                     </div>

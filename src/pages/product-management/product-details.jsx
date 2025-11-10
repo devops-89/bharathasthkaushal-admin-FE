@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
-
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,14 +25,17 @@ const ProductDetails = () => {
   const [showCreateStepForm, setShowCreateStepForm] = useState(false);
   const [buildSteps, setBuildSteps] = useState([]);
   const [expandedStep, setExpandedStep] = useState(null);
+ 
   const [products, setProducts] = useState([]);
+  const [productPage, setProductPage] = useState(1);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [productLoading, setProductLoading] = useState(false);
+
   const [referenceImages, setReferenceImages] = useState([]);
   const [assignForm, setAssignForm] = useState({
+    productId: "",
+    buildStepId: "",
     artisanId: "",
-    stepIds: [],
-    deadline: "",
-    priority: "medium",
-    notes: "",
   });
   const [createStepForm, setCreateStepForm] = useState({
     productId: "",
@@ -46,21 +48,21 @@ const ProductDetails = () => {
     materials: "",
     instructions: "",
   });
-const [artisans, setArtisans] = useState([]);
+  const [artisans, setArtisans] = useState([]);
 
-useEffect(() => {
-  userControllers.getUserListGroup("ARTISAN").then((res) => {
-    let data = res.data.data.docs.map((a) => ({
-      id: a._id,
-      name: `${a.firstName} ${a.lastName}`,
-    }));
-    setArtisans(data);
-  });
-}, []);
+  useEffect(() => {
+    userControllers.getUserListGroup("ARTISAN").then((res) => {
+      let data = res.data.data.docs.map((a) => ({
+        id: a._id,
+        name: `${a.firstName} ${a.lastName}`,
+      }));
+      setArtisans(data);
+    });
+  }, []);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
-  
+
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -89,19 +91,29 @@ useEffect(() => {
       setLoading(false);
     }
   }, [id]);
-  const fetchProducts = async () => {
-    try { 
-      const res = await productControllers.getAllProducts();
-      console.log("Products Response:", res.data.data.docs);
-      setProducts(res.data.data?.docs || []);
+  
+  const fetchProducts = async (page = 1) => {
+    try {
+      setProductLoading(true);
+      const res = await productControllers.getAllProducts({ page, limit: 100 });
+
+      const newProducts = res.data?.data?.docs || [];
+
+      setProducts((prev) => [...prev, ...newProducts]);
+      setHasMoreProducts(newProducts.length > 0);
     } catch (err) {
       console.error(
         "Error fetching products:",
         err.response?.data || err.message
       );
-      setProducts([]);
+    } finally {
+      setProductLoading(false);
     }
   };
+  useEffect(() => {
+    fetchProducts(productPage);
+  }, [productPage]);
+
   const fetchBuildSteps = async () => {
     try {
       const res = await productControllers.getBuildSteps(id);
@@ -145,61 +157,30 @@ useEffect(() => {
       }));
     }
   };
+
   const handleAssignFormSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const payload = {
-      buildStepId: assignForm.stepIds,
-      artisanId: assignForm.artisanId,
-      productId: id,
-    };
+    try {
+      const payload = {
+        buildStepId: assignForm.stepIds,
+        artisanId: assignForm.artisanId,
+        productId: id,
+      };
 
-    await productControllers.assignStepToArtisan(payload);
+      await productControllers.assignStepToArtisan(payload);
 
-    alert("✅ Step Assigned Successfully!");
-    setShowAssignForm(false);
-    fetchBuildSteps();
-  } catch (err) {
-    alert("❌ Failed to assign step");
-  } finally {
-    setLoading(false);
-  }
-};
+      alert("✅ Step Assigned Successfully!");
+      setShowAssignForm(false);
+      fetchBuildSteps();
+    } catch (err) {
+      alert("❌ Failed to assign step");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-//   const handleAssignFormSubmit = async (e) => {
-//   e.preventDefault();
-//   setLoading(true);
-
-//   try {
-//     for (let stepId of assignForm.stepIds) {
-//       const payload = {
-//         buildStepId: stepId,
-//         artisanId: assignForm.artisanId,
-//         productId: id,
-//       };
-//       await productControllers.assignStepToArtisan(payload);
-//     }
-
-//     alert("Steps assigned successfully ");
-//     setAssignForm({
-//       artisanId: "",
-//       stepIds: [],
-//       deadline: "",
-//       priority: "medium",
-//       notes: "",
-//     });
-
-//     setShowAssignForm(false);
-//     fetchBuildSteps();
-//   } catch (err) {
-//     console.log(err);
-//     alert("Failed to assign steps ");
-//   } finally {
-//     setLoading(false);
-//   }
-// };
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
     setCreateStepForm((prev) => ({
@@ -276,7 +257,6 @@ useEffect(() => {
         return "bg-gray-100 text-gray-800";
     }
   };
-  
 
   if (loading) {
     return (
@@ -404,7 +384,7 @@ useEffect(() => {
                     ))}
                   </div>
                 )}
-              
+
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
@@ -414,25 +394,13 @@ useEffect(() => {
                     <FileText className="w-3 h-5" />
                     Create Build Step
                   </button>
-                  {/* <button
+                  <button
                     onClick={() => setShowAssignForm(true)}
                     className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                   >
                     <Users className="w-5 h-5" />
-                    Assign Steps to Artisan
-                    
-                  </button> */}
-                  <button
-  onClick={async () => {
-    const res = await productControllers.getAssignedSteps();
-    console.log(res.data);
-    alert("Assigned steps loaded — check console");
-  }}
-  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
->
-  View Assigned Steps
-</button>
-
+                    Create Assigned Step
+                  </button>
                 </div>
                 {/* Build Steps FAQ Section */}
                 <div className="mt-8">
@@ -532,7 +500,7 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-          
+
             {/* Product Information - Right Side */}
             <div className="lg:col-span-5 p-8 bg-gradient-to-br from-gray-50 to-white">
               <div className="space-y-6">
@@ -610,77 +578,73 @@ useEffect(() => {
                         </div>
                       </div>
                     )}
-<div className="mt-3 mb-3 ml-6 mr-6">
+                    <div className="mt-3 mb-3 ml-6 mr-6">
+                      {product.artisanId && product.artisanAddress == null ? (
+                        product.admin_approval_status === "PENDING" ? (
+                          <div className="flex gap-4">
+                            <button
+                              // onClick={async () => {
+                              //   try {
+                              //     await productControllers.updateProductStatus(product.productId, "APPROVED");
+                              //     alert("Product Approved ");
+                              //     const updated = await productControllers.getProductById(id);
+                              //     setProduct(updated.data?.data || updated.data);
+                              //   } catch (err) {
+                              //     alert("Failed to Approve ");
+                              //   }
+                              // }}
+                              onClick={async () => {
+                                try {
+                                  await productControllers.updateProductStatus(
+                                    product.productId,
+                                    "APPROVED"
+                                  );
+                                  alert("✅ Product Approved Successfully");
 
-  {product.artisanId && product.artisanAddress == null ? (
-    
-    product.admin_approval_status === "PENDING" ? (
-    
-      <div className="flex gap-4">
-        <button
-          // onClick={async () => {
-          //   try {
-          //     await productControllers.updateProductStatus(product.productId, "APPROVED");
-          //     alert("Product Approved ");
-          //     const updated = await productControllers.getProductById(id);
-          //     setProduct(updated.data?.data || updated.data);
-          //   } catch (err) {
-          //     alert("Failed to Approve ");
-          //   }
-          // }}
-          onClick={async () => {
-  try {
-    await productControllers.updateProductStatus(product.productId, "APPROVED");
-    alert("✅ Product Approved Successfully");
+                                  const updated =
+                                    await productControllers.getProductById(id);
+                                  setProduct(
+                                    updated.data?.data || updated.data
+                                  );
+                                } catch (err) {
+                                  alert("❌ Failed to Approve Product");
+                                  console.log(err);
+                                }
+                              }}
+                              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                            >
+                              Approve
+                            </button>
 
-    const updated = await productControllers.getProductById(id);
-    setProduct(updated.data?.data || updated.data);
-  } catch (err) {
-    alert("❌ Failed to Approve Product");
-    console.log(err);
-  }
-}}
-
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-        >
-          Approve
-        </button>
-
-        <button
-          onClick={() => setShowRejectModal(true)}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-        >
-          Reject
-        </button>
-      </div>
-    ) : product.admin_approval_status === "REJECTED" ? (
-    
-      <div className="space-y-2">
-        <span className="bg-red-100 text-red-700 px-4 py- 2 rounded-lg font-semibold">
-          Rejected
-        </span>
-        {product.adminRemarks && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
-            <strong>Reason:</strong> {product.adminRemarks}
-          </p>
-        )}
-      </div>
-    ) : (
-    
-      <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-        Approved (Auto)
-      </span>
-    )
-
-  ) : (
-  
-    <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-      Approved
-    </span>
-  )}
-
-</div>
-
+                            <button
+                              onClick={() => setShowRejectModal(true)}
+                              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : product.admin_approval_status === "REJECTED" ? (
+                          <div className="space-y-2">
+                            <span className="bg-red-100 text-red-700 px-4 py- 2 rounded-lg font-semibold">
+                              Rejected
+                            </span>
+                            {product.adminRemarks && (
+                              <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
+                                <strong>Reason:</strong> {product.adminRemarks}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                            Approved (Auto)
+                          </span>
+                        )
+                      ) : (
+                        <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                          Approved
+                        </span>
+                      )}
+                    </div>
 
                     {product?.material && (
                       <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -791,23 +755,42 @@ useEffect(() => {
             </div>
             <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Product <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="productId"
-                  value={createStepForm.productId}
-                  onChange={handleCreateStepFormChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                >
-                  <option value="">Choose a product...</option>
-                  {products.map((prod) => (
-                    <option key={prod.productId} value={prod.productId}>
-                      {prod.product_name || "Unnamed Product"}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Product
+                  </label>
+
+                  <div
+                    onScroll={(e) => {
+                      const bottom =
+                        e.target.scrollHeight - e.target.scrollTop ===
+                        e.target.clientHeight;
+                      if (bottom && hasMoreProducts && !productLoading) {
+                        setProductPage((prev) => prev + 1);
+                      }
+                    }}
+                    className="w-full max-h-48 overflow-auto border border-gray-300 rounded-lg"
+                  >
+                    <select
+                      name="productId"
+                      value={assignForm.productId}
+                      onChange={handleAssignFormChange}
+                      className="w-full px-3 py-2"
+                      size="6"
+                      required
+                    >
+                      {products.map((p) => (
+                        <option key={p.productId} value={p.productId}>
+                          {p.product_name}
+                        </option>
+                      ))}
+
+                      {productLoading && (
+                        <option disabled>Loading more...</option>
+                      )}
+                    </select>
+                  </div>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -959,149 +942,187 @@ useEffect(() => {
       )}
       {/* Assign Steps to Artisan Modal */}
       {showAssignForm && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Create Assigned Step
+              </h2>
+              <button
+                onClick={() => setShowAssignForm(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Assign Step</h2>
-        <button onClick={() => setShowAssignForm(false)} className="p-2 hover:bg-gray-100 rounded-full">
-          <X className="w-5 h-5 text-gray-500" />
-        </button>
-      </div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const payload = {
+                  productId: assignForm.productId,
+                  buildStepId: assignForm.buildStepId,
+                  artisanId: assignForm.artisanId,
+                };
+                try {
+                  await productControllers.assignStepToArtisan(payload);
+                  alert("✅ Assigned Successfully");
+                  setShowAssignForm(false);
+                  fetchBuildSteps();
+                } catch (err) {
+                  alert("❌ Failed to Assign");
+                }
+              }}
+              className="space-y-4"
+            >
+              {/* Product Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Product
+                </label>
+                <select
+                  name="productId"
+                  value={assignForm.productId}
+                  onChange={handleAssignFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                >
+                  <option value="">Choose product...</option>
+                  {products.map((p) => (
+                    <option key={p.productId} value={p.productId}>
+                      {p.product_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-      <form onSubmit={handleAssignFormSubmit} className="space-y-4">
+              {/* Build Step Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Build Step
+                </label>
+                <select
+                  name="buildStepId"
+                  value={assignForm.buildStepId}
+                  onChange={handleAssignFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                >
+                  <option value="">Choose step...</option>
+                  {buildSteps.map((step) => (
+                    <option key={step.buildStepId} value={step.buildStepId}>
+                      Step {step.sequence} - {step.stepName}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        {/* Artisan Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Artisan <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="artisanId"
-            value={assignForm.artisanId}
-            onChange={handleAssignFormChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-          >
-            <option value="">Choose artisan...</option>
-            {artisans.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+              {/* Artisan Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Artisan
+                </label>
+                <select
+                  name="artisanId"
+                  value={assignForm.artisanId}
+                  onChange={handleAssignFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                >
+                  <option value="">Choose artisan...</option>
+                  {artisans.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Submit */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAssignForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Assign
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        {/* Steps Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Step
-          </label>
-          <select
-            name="stepIds"
-            value={assignForm.stepIds}
-            onChange={handleAssignFormChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-          >
-            <option value="">Choose step...</option>
-            {buildSteps.map((step) => (
-              <option key={step.buildStepId} value={step.buildStepId}>
-                Step {step.sequence} - {step.stepName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={() => setShowAssignForm(false)}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            disabled={loading || !assignForm.stepIds}
-            className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
-          >
-            {loading ? "Assigning..." : "Assign"}
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
-)}
-
-  
+      )}
     </div>
   );
 
   {
-    
   }
-{showRejectModal && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">Reject Product</h2>
-        <button onClick={() => setShowRejectModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
-          <X className="w-5 h-5 text-gray-500" />
-        </button>
+  {
+    showRejectModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Reject Product</h2>
+            <button
+              onClick={() => setShowRejectModal(false)}
+              className="p-2 hover:bg-gray-100 rounded-full"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          <textarea
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Enter rejection reason..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          />
+
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => setShowRejectModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              disabled={!rejectReason.trim()}
+              onClick={async () => {
+                try {
+                  await productControllers.updateProductStatus(
+                    product.productId,
+                    "REJECTED",
+                    rejectReason.trim()
+                  );
+
+                  alert(" Product Rejected Successfully");
+
+                  const updated = await productControllers.getProductById(id);
+                  setProduct(updated.data?.data || updated.data);
+
+                  setShowRejectModal(false);
+                  setRejectReason("");
+                } catch (err) {
+                  alert(" Failed to Reject Product");
+                  console.log(err);
+                }
+              }}
+              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
+            >
+              Confirm Reject
+            </button>
+          </div>
+        </div>
       </div>
-
-      <textarea
-        rows={4}
-        value={rejectReason}
-        onChange={(e) => setRejectReason(e.target.value)}
-        placeholder="Enter rejection reason..."
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-      />
-
-      <div className="flex gap-3 mt-4">
-        <button
-          onClick={() => setShowRejectModal(false)}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-
-        <button
-          disabled={!rejectReason.trim()}
-          onClick={async () => {
-  try {
-    await productControllers.updateProductStatus(
-      product.productId,
-      "REJECTED",
-      rejectReason.trim()
     );
-
-    alert(" Product Rejected Successfully");
-
-    const updated = await productControllers.getProductById(id);
-    setProduct(updated.data?.data || updated.data);
-
-    setShowRejectModal(false);
-    setRejectReason("");
-  } catch (err) {
-    alert(" Failed to Reject Product");
-    console.log(err);
   }
-}}
-
-          className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
-        >
-          Confirm Reject
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
 };
 export default ProductDetails;
