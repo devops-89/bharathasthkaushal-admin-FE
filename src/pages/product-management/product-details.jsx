@@ -171,11 +171,11 @@ const ProductDetails = () => {
 
       await productControllers.assignStepToArtisan(payload);
 
-      alert("✅ Step Assigned Successfully!");
+      alert(" Step Assigned Successfully!");
       setShowAssignForm(false);
       fetchBuildSteps();
     } catch (err) {
-      alert("❌ Failed to assign step");
+      alert(" Failed to assign step");
     } finally {
       setLoading(false);
     }

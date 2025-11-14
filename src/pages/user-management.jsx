@@ -86,7 +86,7 @@ function UserManagement() {
             <NavLink to="/Dashboard">Dashboard</NavLink>
             <span>•</span>
             <NavLink to="/user-management" className="font-semibold">
-              UserManagement
+              User Management
             </NavLink>
           </nav>
         </div>
