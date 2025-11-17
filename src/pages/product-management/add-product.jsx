@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { productControllers } from "../../api/product";
 import { categoryControllers } from "../../api/category";
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -50,7 +51,6 @@ const AddProduct = () => {
     }
   };
 
-  // };
 
   useEffect(() => {
     fetchCategories();

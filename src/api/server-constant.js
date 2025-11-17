@@ -1,4 +1,3 @@
-
 //const baseUrl = "http://157.20.214.239
 const baseUrl = "https://api.dev.bharathastkaushal.com";
 export const serverConstants = { 

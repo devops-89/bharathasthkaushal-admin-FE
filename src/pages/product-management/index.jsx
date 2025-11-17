@@ -19,7 +19,7 @@ export default function ProductManagement() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const filteredProducts = products?.docs || [];
+  const filteredProducts = products?.docs || []; 
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -27,7 +27,6 @@ export default function ProductManagement() {
     indexOfLastItem
   );
   const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
-
   const fetchProducts = async () => {
     productControllers
       .getAllProducts()
@@ -36,7 +35,7 @@ export default function ProductManagement() {
         setProducts(response);
       })
       .catch((err) => {
-        console.log("sdsds", err);
+        console.log("sdsds", err);  // todo
       });
   };
 
@@ -111,10 +110,11 @@ export default function ProductManagement() {
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
+                  
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <div className="relative mb-4">
-                    {product.images && product.images.length  ? (
+                    {product.images && product.images.length ? (
                       <img
                         src={product.images[0].imageUrl}
                         alt={product.name}

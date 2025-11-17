@@ -25,12 +25,10 @@ const ProductDetails = () => {
   const [showCreateStepForm, setShowCreateStepForm] = useState(false);
   const [buildSteps, setBuildSteps] = useState([]);
   const [expandedStep, setExpandedStep] = useState(null);
- 
   const [products, setProducts] = useState([]);
   const [productPage, setProductPage] = useState(1);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [productLoading, setProductLoading] = useState(false);
-
   const [referenceImages, setReferenceImages] = useState([]);
   const [assignForm, setAssignForm] = useState({
     productId: "",
@@ -49,7 +47,6 @@ const ProductDetails = () => {
     instructions: "",
   });
   const [artisans, setArtisans] = useState([]);
-
   useEffect(() => {
     userControllers.getUserListGroup("ARTISAN").then((res) => {
       let data = res.data.data.docs.map((a) => ({
@@ -62,7 +59,6 @@ const ProductDetails = () => {
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
-
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -91,7 +87,7 @@ const ProductDetails = () => {
       setLoading(false);
     }
   }, [id]);
-  
+
   const fetchProducts = async (page = 1) => {
     try {
       setProductLoading(true);
@@ -113,7 +109,6 @@ const ProductDetails = () => {
   useEffect(() => {
     fetchProducts(productPage);
   }, [productPage]);
-
   const fetchBuildSteps = async () => {
     try {
       const res = await productControllers.getBuildSteps(id);
@@ -157,20 +152,16 @@ const ProductDetails = () => {
       }));
     }
   };
-
   const handleAssignFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const payload = {
-        buildStepId: assignForm.stepIds,
-        artisanId: assignForm.artisanId,
-        productId: id,
+        productId: Number(assignForm.productId),
+        buildStepId: Number(assignForm.buildStepId),
+        artisanId: Number(assignForm.artisanId),
       };
-
       await productControllers.assignStepToArtisan(payload);
-
       alert(" Step Assigned Successfully!");
       setShowAssignForm(false);
       fetchBuildSteps();
@@ -180,7 +171,6 @@ const ProductDetails = () => {
       setLoading(false);
     }
   };
-
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
     setCreateStepForm((prev) => ({
@@ -191,9 +181,7 @@ const ProductDetails = () => {
 
   const handleCreateStepFormSubmit = (e) => {
     e.preventDefault();
-    if (!createStepForm.productId) {
-      return alert("Please select a product.");
-    }
+   
     setLoading(true);
     const formData = new FormData();
     formData.append("productId", createStepForm.productId);
@@ -388,7 +376,14 @@ const ProductDetails = () => {
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
-                    onClick={() => setShowCreateStepForm(true)}
+                  
+                    onClick={() => {
+                      setCreateStepForm((prev) => ({
+                        ...prev,
+                        productId: product.productId, 
+                      }));
+                      setShowCreateStepForm(true);
+                    }}
                     className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                   >
                     <FileText className="w-3 h-5" />
@@ -401,6 +396,8 @@ const ProductDetails = () => {
                     <Users className="w-5 h-5" />
                     Create Assigned Step
                   </button>
+                
+
                 </div>
                 {/* Build Steps FAQ Section */}
                 <div className="mt-8">
@@ -599,7 +596,7 @@ const ProductDetails = () => {
                                     product.productId,
                                     "APPROVED"
                                   );
-                                  alert("✅ Product Approved Successfully");
+                                  alert(" Product Approved Successfully");
 
                                   const updated =
                                     await productControllers.getProductById(id);
@@ -607,7 +604,7 @@ const ProductDetails = () => {
                                     updated.data?.data || updated.data
                                   );
                                 } catch (err) {
-                                  alert("❌ Failed to Approve Product");
+                                  alert("Failed to Approve Product");
                                   console.log(err);
                                 }
                               }}
@@ -771,7 +768,7 @@ const ProductDetails = () => {
                     }}
                     className="w-full max-h-48 overflow-auto border border-gray-300 rounded-lg"
                   >
-                    <select
+                    {/* <select
                       name="productId"
                       value={assignForm.productId}
                       onChange={handleAssignFormChange}
@@ -788,6 +785,31 @@ const ProductDetails = () => {
                       {productLoading && (
                         <option disabled>Loading more...</option>
                       )}
+                    </select> */}
+                    {/* <select
+                  name="productId"
+                  value={assignForm.productId}
+                  onChange={handleAssignFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                >
+                  <option value="">Choose product...</option>
+                  {products.map((p) => (
+                    <option key={p.productId} value={p.productId}>
+                      {p.product_name}
+                    </option>
+                  ))}
+                </select> */}
+                    <select
+                      name="productId"
+                      value={createStepForm.productId}
+                      onChange={handleCreateStepFormChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value={product.productId}>
+                        {product.product_name}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -923,6 +945,7 @@ const ProductDetails = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
+                  // onClick={() => setShowCreateStepForm(false)}
                   onClick={() => setShowCreateStepForm(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -948,6 +971,7 @@ const ProductDetails = () => {
               <h2 className="text-2xl font-bold text-gray-900">
                 Create Assigned Step
               </h2>
+
               <button
                 onClick={() => setShowAssignForm(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"
@@ -956,25 +980,7 @@ const ProductDetails = () => {
               </button>
             </div>
 
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const payload = {
-                  productId: assignForm.productId,
-                  buildStepId: assignForm.buildStepId,
-                  artisanId: assignForm.artisanId,
-                };
-                try {
-                  await productControllers.assignStepToArtisan(payload);
-                  alert("✅ Assigned Successfully");
-                  setShowAssignForm(false);
-                  fetchBuildSteps();
-                } catch (err) {
-                  alert("❌ Failed to Assign");
-                }
-              }}
-              className="space-y-4"
-            >
+            <form onSubmit={handleAssignFormSubmit}>
               {/* Product Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -987,15 +993,11 @@ const ProductDetails = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   required
                 >
-                  <option value="">Choose product...</option>
-                  {products.map((p) => (
-                    <option key={p.productId} value={p.productId}>
-                      {p.product_name}
-                    </option>
-                  ))}
+                  <option value={product.productId}>
+                    {product.product_name}
+                  </option>
                 </select>
               </div>
-
               {/* Build Step Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1010,24 +1012,24 @@ const ProductDetails = () => {
                 >
                   <option value="">Choose step...</option>
                   {buildSteps.map((step) => (
-                    <option key={step.buildStepId} value={step.buildStepId}>
+                    // <option key={step.buildStepId} value={step.buildStepId}>
+                    <option key={step.id} value={step.id}>
                       Step {step.sequence} - {step.stepName}
                     </option>
                   ))}
                 </select>
               </div>
-
               {/* Artisan Dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Artisan
                 </label>
+
                 <select
                   name="artisanId"
                   value={assignForm.artisanId}
                   onChange={handleAssignFormChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
                 >
                   <option value="">Choose artisan...</option>
                   {artisans.map((a) => (
@@ -1037,18 +1039,20 @@ const ProductDetails = () => {
                   ))}
                 </select>
               </div>
-
               {/* Submit */}
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
+                  // onClick={() => setShowCreateStepForm(false)}
+
                   onClick={() => setShowAssignForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+
                   className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
                 >
                   Assign
@@ -1061,8 +1065,6 @@ const ProductDetails = () => {
     </div>
   );
 
-  {
-  }
   {
     showRejectModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

@@ -13,6 +13,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+
 import { toast } from "react-toastify";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
@@ -82,39 +83,45 @@ const ArtisanManagement = () => {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
+  const fetchArtisans = async (page = 1, limit)  => {
+  try {
+    const response = await userControllers.getUserListGroup(
+      "ARTISAN",
+      page,
+      limit
+    );
 
-  const fetchArtisans = async () => {
-    try {
-      const response = await userControllers.getUserListGroup("ARTISAN");
-      let artisans =
-        response.data?.data?.docs || response.data?.docs || response.data || [];
+    let artisans =
+      response.data?.data?.docs ||
+      response.data?.docs ||
+      response.data ||
+      [];
 
-      const mappedData = artisans.map((user, index) => ({
-        id: user._id || user.id || `temp-id-${index + 1}`,
-        firstName:
-          user.firstName || (user.email ? user.email.split("@")[0] : "—"),
-        lastName: user.lastName || "—",
-        email: user.email || "—",
-        phoneNo: user.phoneNo || "—",
-        countryCode: user.countryCode || "+91",
-        expertizeField: user.expertizeField || "Not Specified",
-        location: user.location || "—",
-        gstNumber: user.gstNumber || "—",
-        user_caste_category: user.user_caste_category || "—",
-        joinedDate: user.createdAt
-          ? new Date(user.createdAt).toISOString().split("T")[0]
-          : "—",
-        verify_status: user.verify_status,
-        status: user.status || "Approved Artisan",
-        user_group: user.user_group || "ARTISAN",
-      }));
+    const mappedData = artisans.map((user, index) => ({
+      id: user._id || user.id || `temp-id-${index + 1}`,
+      firstName: user.firstName || (user.email ? user.email.split("@")[0] : "—"),
+      lastName: user.lastName || "—",
+      email: user.email || "—",
+      phoneNo: user.phoneNo || "—",
+      countryCode: user.countryCode || "+91",
+      expertizeField: user.expertizeField || "Not Specified",
+      location: user.location || "—",
+      gstNumber: user.gstNumber || "—",
+      user_caste_category: user.user_caste_category || "—",
+      joinedDate: user.createdAt
+        ? new Date(user.createdAt).toISOString().split("T")[0]
+        : "—",
+      verify_status: user.verify_status,
+      status: user.status || "Approved Artisan",
+      user_group: user.user_group || "ARTISAN",
+    }));
 
-      setPartnersData(mappedData);
-      // toast.success("Artisans Loaded Successfully ");
-    } catch (error) {
-      // toast.error("Failed to load artisans ");
-    }
-  };
+    setPartnersData(mappedData);
+  } catch (error) {
+    console.error("Failed to load artisans", error);
+  }
+};
+
 
   useEffect(() => {
     fetchArtisans();
@@ -139,6 +146,7 @@ const ArtisanManagement = () => {
       return newFormData;
     });
   };
+
   const handleAddEmployee = async () => {
     try {
       const payload = {
@@ -203,10 +211,10 @@ const ArtisanManagement = () => {
   ].filter((field) => field && field !== "Not Specified");
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentPartners = filteredPartners.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
+  // const currentPartners = filteredPartners.slice(
+  //   indexOfFirstItem,
+  //   indexOfLastItem
+  // );
   const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
 
   return (
@@ -658,7 +666,7 @@ const ArtisanManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentPartners.map((partner) => (
+                {filteredPartners.map((partner) => (
                   <tr
                     key={partner.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -757,7 +765,7 @@ const ArtisanManagement = () => {
       <div className="flex items-center justify-between p-4 border-t bg-white mt-4 rounded-b-xl">
   <div className="flex items-center gap-2 text-sm">
     <span className="text-gray-700">Rows per page:</span>
-    <select
+    {/* <select
       value={rowsPerPage}
       onChange={(e) => {
         setRowsPerPage(Number(e.target.value));
@@ -769,7 +777,24 @@ const ArtisanManagement = () => {
       <option value={25}>25</option>
       <option value={50}>50</option>
       <option value={100}>100</option>
-    </select>
+    </select> */}
+    <select
+  value={rowsPerPage}
+  onChange={(e) => {
+    const newLimit = Number(e.target.value);
+    setRowsPerPage(newLimit);
+    setCurrentPage(1);
+
+    fetchArtisans(1, newLimit); // IMPORTANT CALL
+  }}
+  className="border rounded px-2 py-1"
+>
+  <option value={10}>10</option>
+  <option value={25}>25</option>
+  <option value={50}>50</option>
+  <option value={100}>100</option>
+</select>
+
   </div>
 
   <div className="text-sm text-gray-600">

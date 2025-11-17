@@ -7,9 +7,26 @@ export const productControllers = {
       },
     });
   },
-  getAllProducts: () => {
-    return productSecuredApi.get("/product/admin/all-products");
-  },
+  // getAllProducts: () => {
+  //   return productSecuredApi.get("/product/admin/all-products", {
+  //     headers:{
+  //      " x-company-id" : "2917DA28-C412-5525-E814-A3E1E80638CB",
+  //     }
+  //   });
+  // },
+  getAllProducts: (page = 1, pageSize = 10) => {
+  return productSecuredApi.get("/product/admin/all-products", {
+    params: {
+      page,
+      pageSize,
+    },
+    headers: {
+      "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
+    },
+  });
+},
+
+
   getAllProductsReady: () => {
     return productSecuredApi.get(
       "/product/admin/all-products?buildStatus=READY_FOR_AUCTION"
