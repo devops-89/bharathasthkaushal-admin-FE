@@ -47,10 +47,11 @@ const ProductDetails = () => {
     instructions: "",
   });
   const [artisans, setArtisans] = useState([]);
+
   useEffect(() => {
     userControllers.getUserListGroup("ARTISAN").then((res) => {
       let data = res.data.data.docs.map((a) => ({
-        id: a._id,
+        id: a.id,
         name: `${a.firstName} ${a.lastName}`,
       }));
       setArtisans(data);
@@ -136,8 +137,17 @@ const ProductDetails = () => {
       );
     }
   };
+
+  const [artisanID, setArtisanID] = useState("");
+
   const handleAssignFormChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    if (name === "artisanId") {
+      console.log("Selected artisanId:", value);
+      setArtisanID(value);
+    }
+
     if (name === "stepIds") {
       setAssignForm((prev) => ({
         ...prev,
@@ -152,15 +162,18 @@ const ProductDetails = () => {
       }));
     }
   };
+
+
   const handleAssignFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const payload = {
-        productId: Number(assignForm.productId),
+        productId: product.productId,
         buildStepId: Number(assignForm.buildStepId),
-        artisanId: Number(assignForm.artisanId),
+        artisanId: artisanID,
       };
+      console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
       alert(" Step Assigned Successfully!");
       setShowAssignForm(false);
@@ -171,6 +184,7 @@ const ProductDetails = () => {
       setLoading(false);
     }
   };
+
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
     setCreateStepForm((prev) => ({
@@ -181,7 +195,7 @@ const ProductDetails = () => {
 
   const handleCreateStepFormSubmit = (e) => {
     e.preventDefault();
-   
+
     setLoading(true);
     const formData = new FormData();
     formData.append("productId", createStepForm.productId);
@@ -376,11 +390,10 @@ const ProductDetails = () => {
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
-                  
                     onClick={() => {
                       setCreateStepForm((prev) => ({
                         ...prev,
-                        productId: product.productId, 
+                        productId: product.productId,
                       }));
                       setShowCreateStepForm(true);
                     }}
@@ -396,8 +409,6 @@ const ProductDetails = () => {
                     <Users className="w-5 h-5" />
                     Create Assigned Step
                   </button>
-                
-
                 </div>
                 {/* Build Steps FAQ Section */}
                 <div className="mt-8">
@@ -445,8 +456,26 @@ const ProductDetails = () => {
                                 <ChevronDown className="w-5 h-5 text-gray-500" />
                               )}
                             </button>
+
                             {expandedStep === step.id && (
                               <div className="px-4 pb-4 bg-gray-50">
+                                {/* Assigned Artisan Name */}
+                                {step.artisan && (
+                                  <div className="md:col-span-2">
+                                    <h4 className="font-semibold text-gray-700 mb-2">
+                                      Assigned Artisan
+                                    </h4>
+                                    <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-lg">
+                                      {step.artisan.firstName ||
+                                      step.artisan.lastName
+                                        ? `${step.artisan.firstName ?? ""} ${
+                                            step.artisan.lastName ?? ""
+                                          }`
+                                        : "No Artisan Assigned"}
+                                    </p>
+                                  </div>
+                                )}
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                                   <div>
                                     <h4 className="font-semibold text-gray-700 mb-2">
@@ -478,7 +507,7 @@ const ProductDetails = () => {
                                   )}
                                   <div className="md:col-span-2">
                                     <h4 className="font-semibold text-gray-700 mb-2">
-                                      Created Date
+                                      Due Date
                                     </h4>
                                     <p className="text-gray-600 text-sm">
                                       {new Date(
@@ -580,16 +609,6 @@ const ProductDetails = () => {
                         product.admin_approval_status === "PENDING" ? (
                           <div className="flex gap-4">
                             <button
-                              // onClick={async () => {
-                              //   try {
-                              //     await productControllers.updateProductStatus(product.productId, "APPROVED");
-                              //     alert("Product Approved ");
-                              //     const updated = await productControllers.getProductById(id);
-                              //     setProduct(updated.data?.data || updated.data);
-                              //   } catch (err) {
-                              //     alert("Failed to Approve ");
-                              //   }
-                              // }}
                               onClick={async () => {
                                 try {
                                   await productControllers.updateProductStatus(
@@ -658,7 +677,7 @@ const ProductDetails = () => {
                     )}
                     {product?.color && (
                       <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                        <Palette className="w-5 h-5 text-purple-600" />
+                        <Palette className="w-5 h-5 text-orange-600" />
                         <div>
                           <span className="text-gray-700 font-medium">
                             Color:
@@ -671,7 +690,7 @@ const ProductDetails = () => {
                     )}
                     {product?.size?.length > 0 && (
                       <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <Ruler className="w-5 h-5 text-green-600" />
+                        <Ruler className="w-5 h-5 text-orange-600" />
                         <div>
                           <span className="text-gray-700 font-medium">
                             Size:
@@ -684,7 +703,7 @@ const ProductDetails = () => {
                     )}
                     {product?.netWeight && (
                       <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
-                        <Package className="w-5 h-5 text-yellow-600" />
+                        <Package className="w-5 h-5 text-orange-600" />
                         <div>
                           <span className="text-gray-700 font-medium">
                             Net Weight:
@@ -697,7 +716,7 @@ const ProductDetails = () => {
                     )}
                     {product?.dimension && (
                       <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-                        <Ruler className="w-5 h-5 text-indigo-600" />
+                        <Ruler className="w-5 h-5 text-orange-600" />
                         <div>
                           <span className="text-gray-700 font-medium">
                             Dimensions:
@@ -768,38 +787,7 @@ const ProductDetails = () => {
                     }}
                     className="w-full max-h-48 overflow-auto border border-gray-300 rounded-lg"
                   >
-                    {/* <select
-                      name="productId"
-                      value={assignForm.productId}
-                      onChange={handleAssignFormChange}
-                      className="w-full px-3 py-2"
-                      size="6"
-                      required
-                    >
-                      {products.map((p) => (
-                        <option key={p.productId} value={p.productId}>
-                          {p.product_name}
-                        </option>
-                      ))}
-
-                      {productLoading && (
-                        <option disabled>Loading more...</option>
-                      )}
-                    </select> */}
-                    {/* <select
-                  name="productId"
-                  value={assignForm.productId}
-                  onChange={handleAssignFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                >
-                  <option value="">Choose product...</option>
-                  {products.map((p) => (
-                    <option key={p.productId} value={p.productId}>
-                      {p.product_name}
-                    </option>
-                  ))}
-                </select> */}
+          
                     <select
                       name="productId"
                       value={createStepForm.productId}
@@ -1052,7 +1040,6 @@ const ProductDetails = () => {
                 </button>
                 <button
                   type="submit"
-
                   className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
                 >
                   Assign
