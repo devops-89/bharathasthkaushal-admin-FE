@@ -102,7 +102,7 @@ const Dashboard = () => {
           {/* Line Chart */}
           <div className="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Orders Requests
+               Monthly Auction Stats
             </h3>
             <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
@@ -131,7 +131,7 @@ const Dashboard = () => {
           {/* Pie Chart */}
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Orders Status
+              Auction Status
             </h3>
             <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">

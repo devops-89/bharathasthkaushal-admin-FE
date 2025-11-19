@@ -77,7 +77,6 @@ const ArtisanManagement = () => {
         selectedArtisan.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
 
       await userControllers.updateUserStatus(selectedArtisan.id, newStatus);
-
       // UI update instantly
       setPartnersData((prev) =>
         prev.map((a) =>
@@ -525,14 +524,6 @@ const ArtisanManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Gst Number
                     </label>
-                    {/* <input
-                      type="text"
-                      name="gstNumber"
-                      value={formData.gstNumber}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="BNH456fd646458674"
-                    /> */}
                     <input
                       type="text"
                       name="gstNumber"
@@ -745,9 +736,6 @@ const ArtisanManagement = () => {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {/* <div className="text-sm font-medium text-gray-900">
-                        {[partner.firstName, partner.lastName].join(" ")}
-                      </div> */}
                       <div className="text-sm font-medium text-gray-900">
                         {[partner.firstName, partner.lastName]
                           .join(" ")
@@ -778,20 +766,6 @@ const ArtisanManagement = () => {
                             : "")}
                       </div>
                     </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                      <div
-                        className={`text-sm font-semibold px-3 py-1 rounded-full w-fit ${
-                          partner.verify_status === "VERIFIED"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {partner.verify_status === "VERIFIED"
-                          ? "Verified"
-                          : "Pending"}
-                      </div>
-                    </td> */}
-
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Switch
                         checked={partner.status === "ACTIVE"}

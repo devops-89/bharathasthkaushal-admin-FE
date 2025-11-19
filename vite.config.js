@@ -6,17 +6,18 @@ export default defineConfig({
   plugins: [react()],
 })
 */
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import mkcert from 'vite-plugin-mkcert'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), mkcert()],
   server: {
     port: 3000,
-    open: true
-  }
-})
+    open: true,
+  },
+});
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";
 // import fs from "fs";

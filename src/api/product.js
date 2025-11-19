@@ -7,25 +7,17 @@ export const productControllers = {
       },
     });
   },
-  // getAllProducts: () => {
-  //   return productSecuredApi.get("/product/admin/all-products", {
-  //     headers:{
-  //      " x-company-id" : "2917DA28-C412-5525-E814-A3E1E80638CB",
-  //     }
-  //   });
-  // },
   getAllProducts: (page = 1, pageSize = 10) => {
-  return productSecuredApi.get("/product/admin/all-products", {
-    params: {
-      page,
-      pageSize,
-    },
-    headers: {
-      "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
-    },
-  });
-},
-
+    return productSecuredApi.get("/product/admin/all-products", {
+      params: {
+        page,
+        pageSize,
+      },
+      headers: {
+        "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
+      },
+    });
+  },
 
   getAllProductsReady: () => {
     return productSecuredApi.get(
@@ -35,6 +27,21 @@ export const productControllers = {
   getProductById: (id) => {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
+  updateBuildStepStatus: (stepId, status, adminRemarks = "") => {
+  const payload = {
+    status: status,
+  };
+
+  if (status === "REJECTED") {
+    payload.admin_remarks = adminRemarks;
+  }
+
+  return productSecuredApi.post(
+    `/build-step/admin/approve/${stepId}`,
+    payload
+  );
+},
+
 
   updateProductStatus: (id, status, adminRemarks = "") => {
     const payload = {
@@ -56,13 +63,21 @@ export const productControllers = {
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
   },
- assignStepToArtisan: (data) => {
-  return productSecuredApi.patch("/build-step/assign-artisan", data);
+
+  getBuildStepDetails: (stepId) => {
+  return productSecuredApi.get(`/build-step/details/${stepId}`);
 },
 
-getAssignedSteps: () => {
-  return productSecuredApi.get("/build-step/artisan/my-steps");
-},
+
+
+
+  assignStepToArtisan: (data) => {
+    return productSecuredApi.patch("/build-step/assign-artisan", data);
+  },
+
+  getAssignedSteps: () => {
+    return productSecuredApi.get("/build-step/artisan/my-steps");
+  },
 
   getAllAuctions: (params = {}) => {
     return productSecuredApi.get("/auction", { params });

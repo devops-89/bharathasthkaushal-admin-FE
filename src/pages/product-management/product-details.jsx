@@ -11,10 +11,13 @@ import {
   ChevronDown,
   ChevronUp,
   Users,
+  Eye,
   FileText,
 } from "lucide-react";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
+import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -47,7 +50,8 @@ const ProductDetails = () => {
     instructions: "",
   });
   const [artisans, setArtisans] = useState([]);
-
+  const [showStepDetails, setShowStepDetails] = useState(false);
+  const [selectedStepId, setSelectedStepId] = useState(null);
   useEffect(() => {
     userControllers.getUserListGroup("ARTISAN").then((res) => {
       let data = res.data.data.docs.map((a) => ({
@@ -57,7 +61,8 @@ const ProductDetails = () => {
       setArtisans(data);
     });
   }, []);
-
+  console.log("buildstep", buildSteps);
+  console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   useEffect(() => {
@@ -406,7 +411,7 @@ const ProductDetails = () => {
                     className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                   >
                     <Users className="w-5 h-5" />
-                    Create Assigned Step
+                    Assigned Step To Artisan
                   </button>
                 </div>
                 {/* Build Steps FAQ Section */}
@@ -456,6 +461,13 @@ const ProductDetails = () => {
                               )}
                             </button>
 
+                            {/* {showStepDetails && (
+                              <BuildStepDetailsModal
+                                stepId={selectedStepId}
+                                onClose={() => setShowStepDetails(false)}
+                              />
+                            )} */}
+
                             {expandedStep === step.id && (
                               <div className="px-4 pb-4 bg-gray-50">
                                 {/* Assigned Artisan Name */}
@@ -464,7 +476,7 @@ const ProductDetails = () => {
                                     <h4 className="font-semibold text-gray-700 mb-2">
                                       Assigned Artisan
                                     </h4>
-                                    <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-lg">
+                                    <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm">
                                       {step.artisan.firstName ||
                                       step.artisan.lastName
                                         ? `${step.artisan.firstName ?? ""} ${
@@ -476,6 +488,18 @@ const ProductDetails = () => {
                                 )}
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                                  <div className="  md:col-span-2 ">
+                                    <h4 className="font-semibold text-gray-700 mb-2">
+                                      Build Steps Details
+                                    </h4>
+                                    <Eye
+                                      className="w-5 h-5 text-gray-600 cursor-pointer hover:text-orange-600"
+                                      onClick={() => {
+                                        setSelectedStepId(step.id);
+                                        setShowStepDetails(true);
+                                      }}
+                                    />
+                                  </div>
                                   <div>
                                     <h4 className="font-semibold text-gray-700 mb-2">
                                       Description
@@ -494,6 +518,7 @@ const ProductDetails = () => {
                                         step.proposedPrice}
                                     </p>
                                   </div>
+
                                   {step.admin_remarks && (
                                     <div className="md:col-span-2">
                                       <h4 className="font-semibold text-gray-700 mb-2">
@@ -540,11 +565,16 @@ const ProductDetails = () => {
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
                   <div className="flex items-center gap-4 mb-3">
                     <span className="text-4xl font-bold text-orange-600">
-                      ₹{product?.mrp || 0}
+                     ₹
+                          {parseInt(product.productPricePerPiece) *
+                            product.quantity}
                     </span>
                     {product?.discount > 0 && (
                       <span className="text-xl text-gray-500 line-through">
-                        ₹{calculateDiscountedPrice()}
+                        {/* ₹{calculateDiscountedPrice()} */}
+                        {/* ₹
+                          {parseInt(product.productPricePerPiece) *
+                            product.quantity} */}
                       </span>
                     )}
                   </div>
@@ -605,61 +635,6 @@ const ProductDetails = () => {
                     )}
 
                     <div className="mt-3 mb-3 ml-6 mr-6">
-                      {/* If status is PENDING → show Approve + Reject buttons */}
-                      {/* {product.admin_approval_status === "PENDING" && (
-                        <div className="flex gap-4">
-                          <button
-                            onClick={async () => {
-                              try {
-                                await productControllers.updateProductStatus(
-                                  product.productId,
-                                  "APPROVED"
-                                );
-                                alert("Product Approved Successfully");
-
-                                const updated =
-                                  await productControllers.getProductById(id);
-                                setProduct(updated.data?.data || updated.data);
-                              } catch (err) {
-                                alert("Failed to Approve Product");
-                                console.log(err);
-                              }
-                            }}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            onClick={() => setShowRejectModal(true)}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )} */}
-
-                      {/* If status is APPROVED → show Approved badge */}
-                      {/* {product.admin_approval_status === "APPROVED" && (
-                        <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-                          Approved
-                        </span>
-                      )} */}
-
-                      {/* If status is REJECTED → show rejected + reason */}
-                      {/* {product.admin_approval_status === "REJECTED" && (
-                        <div className="space-y-2">
-                          <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
-                            Rejected
-                          </span>
-
-                          {product.adminRemarks && (
-                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
-                              <strong>Reason:</strong> {product.adminRemarks}
-                            </p>
-                          )}
-                        </div>
-                      )} */}
                       {showRejectModal && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
@@ -1083,7 +1058,6 @@ const ProductDetails = () => {
               <h2 className="text-2xl font-bold text-gray-900">
                 Create Assigned Step
               </h2>
-
               <button
                 onClick={() => setShowAssignForm(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"
@@ -1124,7 +1098,6 @@ const ProductDetails = () => {
                 >
                   <option value="">Choose step...</option>
                   {buildSteps.map((step) => (
-                    // <option key={step.buildStepId} value={step.buildStepId}>
                     <option key={step.id} value={step.id}>
                       Step {step.sequence} - {step.stepName}
                     </option>
@@ -1155,8 +1128,6 @@ const ProductDetails = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  // onClick={() => setShowCreateStepForm(false)}
-
                   onClick={() => setShowAssignForm(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -1172,6 +1143,12 @@ const ProductDetails = () => {
             </form>
           </div>
         </div>
+      )}
+      {showStepDetails && (
+        <BuildStepDetailsModal
+          stepId={selectedStepId}
+          onClose={() => setShowStepDetails(false)}
+        />
       )}
     </div>
   );
