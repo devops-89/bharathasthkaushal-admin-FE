@@ -17,6 +17,7 @@ function UserManagement() {
   useEffect(() => {
     fetchUsers();
   }, []);
+  
   const fetchUsers = async () => {
     try {
       let response = await userControllers.getUserListGroup("USER");
@@ -66,7 +67,6 @@ function UserManagement() {
     setOpenModal(false);
   };
 
-  
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
@@ -137,48 +137,57 @@ function UserManagement() {
               ))}
             </tbody>
           </table>
-      <div className="flex items-center justify-between p-4 border-t bg-white">
-  <div className="flex items-center gap-2 text-sm">
-    <span className="text-gray-700">Rows per page:</span>
-    <select
-      value={rowsPerPage}
-      onChange={(e) => {
-        setRowsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-      }}
-      className="border rounded px-2 py-1"
-    >
-      <option value={10}>10</option>
-      <option value={25}>25</option>
-      <option value={50}>50</option>
-      <option value={100}>100</option>
-    </select>
-  </div>
+          <div className="flex items-center justify-between p-4 border-t bg-white">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-700">Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="border rounded px-2 py-1"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
 
-  <div className="text-sm text-gray-600">
-    {indexOfFirstItem + 1}–
-    {Math.min(indexOfLastItem, users.length)} of {users.length}
-  </div>
+            <div className="text-sm text-gray-600">
+              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, users.length)}{" "}
+              of {users.length}
+            </div>
 
-  <div className="flex items-center gap-1">
-    <button
-      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-      disabled={currentPage === 1}
-      className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ‹
-    </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
+                disabled={currentPage === 1}
+                className={`px-2 py-1 rounded ${
+                  currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                }`}
+              >
+                ‹
+              </button>
 
-    <button
-      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ›
-    </button>
-  </div>
-</div>
-
+              <button
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+                disabled={currentPage === totalPages}
+                className={`px-2 py-1 rounded ${
+                  currentPage === totalPages
+                    ? "text-gray-400"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                ›
+              </button>
+            </div>
+          </div>
         </div>
 
         {openModal && (

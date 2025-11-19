@@ -163,7 +163,6 @@ const ProductDetails = () => {
     }
   };
 
-
   const handleAssignFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -604,9 +603,132 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     )}
+
                     <div className="mt-3 mb-3 ml-6 mr-6">
-                      {product.artisanId && product.artisanAddress == null ? (
-                        product.admin_approval_status === "PENDING" ? (
+                      {/* If status is PENDING → show Approve + Reject buttons */}
+                      {/* {product.admin_approval_status === "PENDING" && (
+                        <div className="flex gap-4">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await productControllers.updateProductStatus(
+                                  product.productId,
+                                  "APPROVED"
+                                );
+                                alert("Product Approved Successfully");
+
+                                const updated =
+                                  await productControllers.getProductById(id);
+                                setProduct(updated.data?.data || updated.data);
+                              } catch (err) {
+                                alert("Failed to Approve Product");
+                                console.log(err);
+                              }
+                            }}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                          >
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={() => setShowRejectModal(true)}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )} */}
+
+                      {/* If status is APPROVED → show Approved badge */}
+                      {/* {product.admin_approval_status === "APPROVED" && (
+                        <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                          Approved
+                        </span>
+                      )} */}
+
+                      {/* If status is REJECTED → show rejected + reason */}
+                      {/* {product.admin_approval_status === "REJECTED" && (
+                        <div className="space-y-2">
+                          <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
+                            Rejected
+                          </span>
+
+                          {product.adminRemarks && (
+                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
+                              <strong>Reason:</strong> {product.adminRemarks}
+                            </p>
+                          )}
+                        </div>
+                      )} */}
+                      {showRejectModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+                            <div className="flex items-center justify-between mb-4">
+                              <h2 className="text-xl font-bold text-gray-900">
+                                Reject Product
+                              </h2>
+                              <button
+                                onClick={() => setShowRejectModal(false)}
+                                className="p-2 hover:bg-gray-100 rounded-full"
+                              >
+                                <X className="w-5 h-5 text-gray-500" />
+                              </button>
+                            </div>
+
+                            <textarea
+                              rows={4}
+                              value={rejectReason}
+                              onChange={(e) => setRejectReason(e.target.value)}
+                              placeholder="Enter rejection reason..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            />
+
+                            <div className="flex gap-3 mt-4">
+                              <button
+                                onClick={() => setShowRejectModal(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                              >
+                                Cancel
+                              </button>
+
+                              <button
+                                disabled={!rejectReason.trim()}
+                                onClick={async () => {
+                                  try {
+                                    await productControllers.updateProductStatus(
+                                      product.productId,
+                                      "REJECTED",
+                                      rejectReason.trim()
+                                    );
+
+                                    alert("Product Rejected Successfully");
+
+                                    const updated =
+                                      await productControllers.getProductById(
+                                        id
+                                      );
+                                    setProduct(
+                                      updated.data?.data || updated.data
+                                    );
+
+                                    setShowRejectModal(false);
+                                    setRejectReason("");
+                                  } catch (err) {
+                                    alert("Failed to Reject Product");
+                                    console.log(err);
+                                  }
+                                }}
+                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
+                              >
+                                Confirm Reject
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div className="mt-3 mb-3 ml-6 mr-6">
+                        {/* PENDING → show Approve + Reject buttons */}
+                        {product.admin_approval_status === "PENDING" && (
                           <div className="flex gap-4">
                             <button
                               onClick={async () => {
@@ -615,7 +737,7 @@ const ProductDetails = () => {
                                     product.productId,
                                     "APPROVED"
                                   );
-                                  alert(" Product Approved Successfully");
+                                  alert("Product Approved Successfully");
 
                                   const updated =
                                     await productControllers.getProductById(id);
@@ -639,27 +761,30 @@ const ProductDetails = () => {
                               Reject
                             </button>
                           </div>
-                        ) : product.admin_approval_status === "REJECTED" ? (
+                        )}
+
+                        {/* APPROVED → just show Approved */}
+                        {product.admin_approval_status === "APPROVED" && (
+                          <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
+                            Approved
+                          </span>
+                        )}
+
+                        {/* REJECTED → show Rejected + Reason */}
+                        {product.admin_approval_status === "REJECTED" && (
                           <div className="space-y-2">
-                            <span className="bg-red-100 text-red-700 px-4 py- 2 rounded-lg font-semibold">
+                            <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
                               Rejected
                             </span>
+
                             {product.adminRemarks && (
                               <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
                                 <strong>Reason:</strong> {product.adminRemarks}
                               </p>
                             )}
                           </div>
-                        ) : (
-                          <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-                            Approved (Auto)
-                          </span>
-                        )
-                      ) : (
-                        <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-                          Approved
-                        </span>
-                      )}
+                        )}
+                      </div>
                     </div>
 
                     {product?.material && (
@@ -787,7 +912,6 @@ const ProductDetails = () => {
                     }}
                     className="w-full max-h-48 overflow-auto border border-gray-300 rounded-lg"
                   >
-          
                     <select
                       name="productId"
                       value={createStepForm.productId}

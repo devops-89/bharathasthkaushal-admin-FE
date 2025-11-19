@@ -14,10 +14,14 @@ import {
   MapPin,
 } from "lucide-react";
 
-import { toast } from "react-toastify";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
 import { categoryControllers } from "../api/category";
+import { Switch } from "@headlessui/react";
+import DisableModal from "../components/DisableModal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -29,6 +33,11 @@ const ArtisanManagement = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedArtisan, setSelectedArtisan] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const aadhaarRegex = /^[0-9]{12}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -57,6 +66,37 @@ const ArtisanManagement = () => {
     SC: ["Chamar", "Pasi", "Dhobi", "Kori"],
     ST: ["Gond", "Bhil", "Santhal", "Munda"],
   };
+  const handleToggleStatus = (artisan) => {
+    setSelectedArtisan(artisan);
+    setShowStatusModal(true);
+  };
+
+  const confirmStatusChange = async () => {
+    try {
+      const newStatus =
+        selectedArtisan.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
+
+      await userControllers.updateUserStatus(selectedArtisan.id, newStatus);
+
+      // UI update instantly
+      setPartnersData((prev) =>
+        prev.map((a) =>
+          a.id === selectedArtisan.id ? { ...a, status: newStatus } : a
+        )
+      );
+
+      toast.success(
+        `Artisan ${
+          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        } Successfully!`
+      );
+    } catch (error) {
+      toast.error("Something went wrong!");
+    }
+
+    setShowStatusModal(false);
+  };
+
   const getallSubcategory = async (categoryId) => {
     try {
       const resultData = await categoryControllers.getallSubcategory(
@@ -83,45 +123,45 @@ const ArtisanManagement = () => {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
-  const fetchArtisans = async (page = 1, limit)  => {
-  try {
-    const response = await userControllers.getUserListGroup(
-      "ARTISAN",
-      page,
-      limit
-    );
+  const fetchArtisans = async (page = 1, limit) => {
+    try {
+      const response = await userControllers.getUserListGroup(
+        "ARTISAN",
+        page,
+        limit
+      );
 
-    let artisans =
-      response.data?.data?.docs ||
-      response.data?.docs ||
-      response.data ||
-      [];
+      let artisans =
+        response.data?.data?.docs || response.data?.docs || response.data || [];
 
-    const mappedData = artisans.map((user, index) => ({
-      id: user._id || user.id || `temp-id-${index + 1}`,
-      firstName: user.firstName || (user.email ? user.email.split("@")[0] : "—"),
-      lastName: user.lastName || "—",
-      email: user.email || "—",
-      phoneNo: user.phoneNo || "—",
-      countryCode: user.countryCode || "+91",
-      expertizeField: user.expertizeField || "Not Specified",
-      location: user.location || "—",
-      gstNumber: user.gstNumber || "—",
-      user_caste_category: user.user_caste_category || "—",
-      joinedDate: user.createdAt
-        ? new Date(user.createdAt).toISOString().split("T")[0]
-        : "—",
-      verify_status: user.verify_status,
-      status: user.status || "Approved Artisan",
-      user_group: user.user_group || "ARTISAN",
-    }));
+      const mappedData = artisans.map((user, index) => ({
+        id: user._id || user.id || `temp-id-${index + 1}`,
+        firstName:
+          user.firstName || (user.email ? user.email.split("@")[0] : "—"),
+        lastName: user.lastName || "—",
+        email: user.email || "—",
+        phoneNo: user.phoneNo || "—",
+        countryCode: user.countryCode || "+91",
+        expertizeField: user.expertizeField || "Not Specified",
+        location: user.location || "—",
+        gstNumber: user.gstNumber || "—",
+        user_caste_category: user.user_caste_category || "—",
+        joinedDate: user.createdAt
+          ? new Date(user.createdAt).toISOString().split("T")[0]
+          : "—",
+          aadhaarNumber: user.aadhaarNumber || "N/A", 
+          subCaste: user.subCaste || "_",
 
-    setPartnersData(mappedData);
-  } catch (error) {
-    console.error("Failed to load artisans", error);
-  }
-};
+        verify_status: user.verify_status,
+        status: user.status || "Approved Artisan",
+        user_group: user.user_group || "ARTISAN",
+      }));
 
+      setPartnersData(mappedData);
+    } catch (error) {
+      console.error("Failed to load artisans", error);
+    }
+  };
 
   useEffect(() => {
     fetchArtisans();
@@ -211,12 +251,7 @@ const ArtisanManagement = () => {
   ].filter((field) => field && field !== "Not Specified");
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  // const currentPartners = filteredPartners.slice(
-  //   indexOfFirstItem,
-  //   indexOfLastItem
-  // );
   const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
@@ -347,11 +382,17 @@ const ArtisanManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Email Address *
                     </label>
+
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
+                      onBlur={() => {
+                        if (!emailRegex.test(formData.email)) {
+                          toast.error("Please enter a valid email address");
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="example@yopmail.com"
                     />
@@ -393,7 +434,13 @@ const ArtisanManagement = () => {
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
-                        onChange={handleFormChange}
+                        maxLength={10}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setFormData({ ...formData, phoneNo: value });
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="9876543210"
                       />
@@ -420,15 +467,21 @@ const ArtisanManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number (Optional)
+                      Aadhaar Number
                     </label>
                     <input
                       type="text"
                       name="aadhaarNumber"
                       value={formData.aadhaarNumber}
-                      onChange={handleFormChange}
+                      maxLength={12}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        if (value.length <= 12) {
+                          setFormData({ ...formData, aadhaarNumber: value });
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="2376643876543240"
+                      placeholder="12 digit Aadhaar"
                     />
                   </div>
                   <div>
@@ -472,13 +525,35 @@ const ArtisanManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Gst Number
                     </label>
-                    <input
+                    {/* <input
                       type="text"
                       name="gstNumber"
                       value={formData.gstNumber}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="BNH456fd646458674"
+                    /> */}
+                    <input
+                      type="text"
+                      name="gstNumber"
+                      value={formData.gstNumber.toUpperCase()}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          gstNumber: e.target.value.toUpperCase(),
+                        });
+                      }}
+                      onBlur={() => {
+                        if (
+                          formData.gstNumber &&
+                          !gstRegex.test(formData.gstNumber)
+                        ) {
+                          toast.error("Invalid GST Number Format");
+                        }
+                      }}
+                      maxLength={15}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="GST Number"
                     />
                   </div>
                   <div className="flex gap-3 pt-4">
@@ -506,14 +581,12 @@ const ArtisanManagement = () => {
             <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  {/* <h2 className="text-xl font-bold text-gray-900">
-                    Artisan Details
-                  </h2> */}
+                 
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     Artisan Details
                     {selectedPartner.verify_status === "VERIFIED" && (
                       <span className="text-green-600 text-sm font-semibold px-3 py-1 border border-green-500 rounded-full">
-                        ✅ Verified Artisan
+                        Verified Artisan
                       </span>
                     )}
                   </h2>
@@ -658,10 +731,10 @@ const ArtisanManagement = () => {
                     Expertise Field
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Actions
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    Status
                   </th>
                 </tr>
               </thead>
@@ -672,9 +745,19 @@ const ArtisanManagement = () => {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      {/* <div className="text-sm font-medium text-gray-900">
                         {[partner.firstName, partner.lastName].join(" ")}
+                      </div> */}
+                      <div className="text-sm font-medium text-gray-900">
+                        {[partner.firstName, partner.lastName]
+                          .join(" ")
+                          .slice(0, 20) +
+                          ([partner.firstName, partner.lastName].join(" ")
+                            .length > 20
+                            ? "..."
+                            : "")}
                       </div>
+
                       <div className="text-xs text-gray-500">
                         Joined: {partner.joinedDate || "N/A"}
                       </div>
@@ -686,10 +769,16 @@ const ArtisanManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {partner.expertizeField || "Not Specified"}
+                        {(partner.expertizeField || "Not Specified").slice(
+                          0,
+                          20
+                        ) +
+                          ((partner.expertizeField || "").length > 20
+                            ? "..."
+                            : "")}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    {/* <td className="px-6 py-4 whitespace-nowrap">
                       <div
                         className={`text-sm font-semibold px-3 py-1 rounded-full w-fit ${
                           partner.verify_status === "VERIFIED"
@@ -701,6 +790,21 @@ const ArtisanManagement = () => {
                           ? "Verified"
                           : "Pending"}
                       </div>
+                    </td> */}
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Switch
+                        checked={partner.status === "ACTIVE"}
+                        onChange={() => handleToggleStatus(partner)}
+                        className={`${
+                          partner.status === "ACTIVE"
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
+                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                      >
+                        <span className="sr-only">Toggle Status</span>
+                        <span className="translate-x-1 inline-block h-[18px] w-[18px] bg-white rounded-full transition" />
+                      </Switch>
                     </td>
 
                     <th className="px-6 py-4 whitespace-nowrap">
@@ -730,18 +834,16 @@ const ArtisanManagement = () => {
                               onClick={() => handleVerifyArtisan(partner.id)}
                               className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
                             >
-                              ✅ Verify Artisan
+                              Verify Artisan
                             </button>
                           ) : (
                             <button
                               onClick={() =>
-                                toast.info(
-                                  "This artisan is already verified ✅"
-                                )
+                                toast.info("This artisan is already verified ")
                               }
                               className="flex items-center w-full px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
                             >
-                              ✔ Already Verified
+                              Already Verified
                             </button>
                           )}
                         </div>
@@ -763,64 +865,64 @@ const ArtisanManagement = () => {
       </div>
 
       <div className="flex items-center justify-between p-4 border-t bg-white mt-4 rounded-b-xl">
-  <div className="flex items-center gap-2 text-sm">
-    <span className="text-gray-700">Rows per page:</span>
-    {/* <select
-      value={rowsPerPage}
-      onChange={(e) => {
-        setRowsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-      }}
-      className="border rounded px-2 py-1"
-    >
-      <option value={10}>10</option>
-      <option value={25}>25</option>
-      <option value={50}>50</option>
-      <option value={100}>100</option>
-    </select> */}
-    <select
-  value={rowsPerPage}
-  onChange={(e) => {
-    const newLimit = Number(e.target.value);
-    setRowsPerPage(newLimit);
-    setCurrentPage(1);
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-700">Rows per page:</span>
 
-    fetchArtisans(1, newLimit); // IMPORTANT CALL
-  }}
-  className="border rounded px-2 py-1"
->
-  <option value={10}>10</option>
-  <option value={25}>25</option>
-  <option value={50}>50</option>
-  <option value={100}>100</option>
-</select>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => {
+              const newLimit = Number(e.target.value);
+              setRowsPerPage(newLimit);
+              setCurrentPage(1);
 
-  </div>
+              fetchArtisans(1, newLimit);
+            }}
+            className="border rounded px-2 py-1"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
 
-  <div className="text-sm text-gray-600">
-    {indexOfFirstItem + 1}–
-    {Math.min(indexOfLastItem, filteredPartners.length)} of {filteredPartners.length}
-  </div>
+        <div className="text-sm text-gray-600">
+          {indexOfFirstItem + 1}–
+          {Math.min(indexOfLastItem, filteredPartners.length)} of{" "}
+          {filteredPartners.length}
+        </div>
 
-  <div className="flex items-center gap-1">
-    <button
-      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-      disabled={currentPage === 1}
-      className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ‹
-    </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-2 py-1 rounded ${
+              currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+            }`}
+          >
+            ‹
+          </button>
 
-    <button
-      onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ›
-    </button>
-  </div>
-</div>
-
+          <button
+            onClick={() =>
+              currentPage < totalPages && setCurrentPage(currentPage + 1)
+            }
+            disabled={currentPage === totalPages}
+            className={`px-2 py-1 rounded ${
+              currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"
+            }`}
+          >
+            ›
+          </button>
+        </div>
+        {showStatusModal && (
+          <DisableModal
+            onClose={() => setShowStatusModal(false)}
+            onConfirm={confirmStatusChange}
+            message="Are you sure you want to permanently block this artisan?"
+          />
+        )}
+      </div>
     </div>
   );
 };
