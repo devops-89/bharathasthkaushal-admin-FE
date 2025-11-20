@@ -6,6 +6,8 @@ import handicraftsImage from "/src/assets/Handicraft.jpg";
 import { categoryControllers } from "../api/category";
 import { useParams } from "react-router-dom";
 import { NavLink } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const CategoryManagement = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("grid");
@@ -16,8 +18,7 @@ const CategoryManagement = () => {
   const page = paramPage ? parseInt(paramPage, 10) : 1;
   const pageSize = paramPageSize ? parseInt(paramPageSize, 10) : 10;
   const [currentPage, setCurrentPage] = useState(1);
-const [rowsPerPage, setRowsPerPage] = useState(10); // default 10
-
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [formData, setFormData] = useState({
     category_name: "",
     category_logo: null,
@@ -27,11 +28,15 @@ const [rowsPerPage, setRowsPerPage] = useState(10); // default 10
   const filteredCategories = categories.filter((cat) =>
     (cat.category_name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
-const indexOfLastItem = currentPage * rowsPerPage;
-const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-const currentCategories = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
-const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
 
+  const indexOfLastItem = currentPage * rowsPerPage;
+  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+  const currentCategories = filteredCategories.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  
+  const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
   const getCategoriesList = () => {
     categoryControllers
       .getCategory(page, pageSize)
@@ -73,7 +78,7 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
     e.preventDefault();
     try {
       await categoryControllers.addCategory(formData);
-      alert("Category added successfully!");
+      toast.success("Category added successfully!");
       setFormData({
         category_name: "",
         category_logo: null,
@@ -82,10 +87,12 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
       setShowForm(false);
       getCategoriesList();
     } catch (err) {
-      alert("Failed to add category");
+      toast.error("Failed to add category!");
+
       console.error(err);
     }
   };
+
   const resetForm = () => {
     setFormData({
       category_name: "",
@@ -105,37 +112,35 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
         {/* <div className="ml-64 pt-20 p-6"> */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-                Category Management
-              </h1>
-            
-              {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
-              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-                <NavLink
-                  to="/Dashboard"
-                  className={({ isActive }) =>
-                    isActive ? "text-orange-600 font-semibold" : ""
-                  }
-                >
-                  Dashboard
-                </NavLink>
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+                    Category Management
+                  </h1>
+                  <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                    <NavLink
+                      to="/Dashboard"
+                      className={({ isActive }) =>
+                        isActive ? "text-orange-600 font-semibold" : ""
+                      }
+                    >
+                      Dashboard
+                    </NavLink>
 
-                <span>•</span>
-                <NavLink
-                  to="/category-management"
-                  className={({ isActive }) =>
-                    isActive ? "text-orange-600 font-semibold" : ""
-                  }
-                >
-                  Category Management
-                </NavLink>
-              </nav>
-            </div>
-            </div>
+                    <span>•</span>
+                    <NavLink
+                      to="/category-management"
+                      className={({ isActive }) =>
+                        isActive ? "text-orange-600 font-semibold" : ""
+                      }
+                    >
+                      Category Management
+                    </NavLink>
+                  </nav>
+                </div>
+              </div>
             </div>
             <div className="flex gap-3">
               <div className="flex border border-gray-200 rounded-lg">
@@ -172,10 +177,7 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
           {/* Search */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
-              
-              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search categories..."
@@ -184,7 +186,6 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
-        
           </div>
         </div>
 
@@ -340,52 +341,59 @@ const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
         )}
       </div>
       {/* Pagination Controls */}
-{filteredCategories.length > 0 && (
-  <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-b-xl shadow-sm">
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-gray-700">Rows per page:</span>
-      <select
-        value={rowsPerPage}
-        onChange={(e) => {
-          setRowsPerPage(Number(e.target.value));
-          setCurrentPage(1);
-        }}
-        className="border rounded px-2 py-1"
-      >
-        <option value={10}>10</option>
-        <option value={25}>25</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
-    </div>
+      {filteredCategories.length > 0 && (
+        <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-b-xl shadow-sm">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-700">Rows per page:</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
 
-    <div className="text-sm text-gray-600">
-      {indexOfFirstItem + 1}–
-      {Math.min(indexOfLastItem, filteredCategories.length)} of {filteredCategories.length}
-    </div>
+          <div className="text-sm text-gray-600">
+            {indexOfFirstItem + 1}–
+            {Math.min(indexOfLastItem, filteredCategories.length)} of{" "}
+            {filteredCategories.length}
+          </div>
 
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ‹
-      </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 rounded ${
+                currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+              }`}
+            >
+              ‹
+            </button>
 
-      <button
-        onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ›
-      </button>
+            <button
+              onClick={() =>
+                currentPage < totalPages && setCurrentPage(currentPage + 1)
+              }
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 rounded ${
+                currentPage === totalPages
+                  ? "text-gray-400"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
-
-    </div>
-    
   );
 };
 

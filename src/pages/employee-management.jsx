@@ -52,8 +52,8 @@ const ArtisanManagement = () => {
       console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
       if (!Array.isArray(artisans)) {
-        console.error("Expected docs to be an array, got:", artisans);
-        alert("Unexpected data format from API: docs is not an array");
+        toast.error("Expected docs to be an array, got:", artisans);
+        toast.error("Unexpected data format from API: docs is not an array");
         return;
       }
       const mappedData = artisans.map((user, index) => ({
@@ -72,8 +72,8 @@ const ArtisanManagement = () => {
       }));
       setPartnersData(mappedData);
     } catch (error) {
-      console.error("Error fetching artisans:", error);
-      alert("Error fetching employee data: " + error.message);
+      toast.error("Error fetching artisans:", error);
+      toast.error("Error fetching employee data: " + error.message);
     }
   };
 

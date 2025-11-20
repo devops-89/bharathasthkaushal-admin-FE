@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Search,
   Filter,
@@ -30,7 +32,6 @@ const NeedAssistanceDashboard = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -53,7 +54,7 @@ const NeedAssistanceDashboard = () => {
         response.data?.data?.docs || response.data?.docs || response.data || [];
       if (!Array.isArray(tickets)) {
         console.error("Expected tickets to be an array, got:", tickets);
-        alert("Unexpected data format from API: tickets is not an array");
+        toast.error("Unexpected data format from API: tickets is not an array");
         tickets = [];
       }
       const mappedData = tickets.map((ticket, index) => {
@@ -66,7 +67,6 @@ const NeedAssistanceDashboard = () => {
           (createdByUser?.email
             ? createdByUser.email.split("@")[0]
             : "Unknown User");
-
         const userEmail = createdByUser?.email
           ? createdByUser.email.split("@")[0]
           : "Unknown User";
@@ -94,8 +94,8 @@ const NeedAssistanceDashboard = () => {
       console.log("Mapped Data:", mappedData);
       setData(mappedData);
     } catch (error) {
-      console.error("Error fetching need assistance:", error);
-      alert("Error fetching need assistance data: " + error.message);
+      toast.error("Error fetching need assistance:", error);
+      toast.error("Error fetching need assistance data: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -133,7 +133,7 @@ const NeedAssistanceDashboard = () => {
       setAdminRemarks(detailedTicket.adminRemarks || "");
       setShowModal(true);
     } catch (error) {
-      console.error("Error fetching ticket details:", error);
+      toast.error("Error fetching ticket details:", error);
       setSelectedTicket(ticket);
       setNewStatus(ticket.status);
       setAdminRemarks(ticket.adminRemarks || "");
@@ -165,11 +165,11 @@ const NeedAssistanceDashboard = () => {
             : item
         )
       );
-      alert("Status updated successfully!");
+      toast.success("Status updated successfully!");
       setShowModal(false);
     } catch (error) {
-      console.error("Update error:", error);
-      alert("Error updating status: " + error.message);
+      toast.error("Update error:", error);
+      toast.error("Error updating status: " + error.message);
     } finally {
       setUpdating(false);
     }
@@ -603,6 +603,8 @@ const NeedAssistanceDashboard = () => {
           </div>
         )}
       </div>
+      <ToastContainer position="top-right" autoClose={2000} />
+
     </div>
   );
 };

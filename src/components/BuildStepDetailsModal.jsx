@@ -7,7 +7,6 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
   const [stepDetails, setStepDetails] = useState(null);
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [remarks, setRemarks] = useState("");
-
   useEffect(() => {
     if (!stepId) return;
     const fetchDetails = async () => {
@@ -26,13 +25,15 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
   if (!stepId) return null;
   const handleApprove = async () => {
     try {
-      await productControllers.updateBuildStepStatus(stepId, "APPROVED");
-
+      const res = await productControllers.updateBuildStepStatus(
+        stepId,
+        "APPROVED"
+      );
+      console.log("Reject API Response:", res.data); // IMPORTANT
       setStepDetails((prev) => ({
         ...prev,
         status: "APPROVED",
       }));
-
       alert("Approved Successfully!");
     } catch (err) {
       console.log(err);
@@ -42,11 +43,12 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
   const handleRejectSubmit = async () => {
     try {
-      await productControllers.updateBuildStepStatus(
+      const res = await productControllers.updateBuildStepStatus(
         stepId,
         "REJECTED",
         remarks
       );
+      console.log("Reject API Response:", res.data);
 
       setStepDetails((prev) => ({
         ...prev,
@@ -76,9 +78,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
         {loading ? (
           <p className="text-center py-10">Loading details...</p>
         ) : (
-
           <>
-          
             {/* Step Name */}
             <p className="text-lg font-semibold mb-2">
               {stepDetails?.stepName}
@@ -86,7 +86,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
             {/* Description */}
             <p className="text-gray-700 mb-4">{stepDetails?.description}</p>
-            <h3 className="text-lg font-semibold mt-4">
+            {/* <h3 className="text-lg font-semibold mt-4">
               Status:{" "}
               <span
                 className={
@@ -98,6 +98,21 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 }
               >
                 {stepDetails?.status || "PENDING"}
+              </span>
+            </h3> */}
+
+            <h3 className="text-lg font-semibold mt-4">
+              Status:{" "}
+              <span
+                className={
+                  stepDetails?.buildStatus === "APPROVED"
+                    ? "text-green-600"
+                    : stepDetails?.buildStatus === "REJECTED"
+                    ? "text-red-600"
+                    : "text-gray-600"
+                }
+              >
+                {stepDetails?.buildStatus || "PENDING"}
               </span>
             </h3>
 
@@ -190,7 +205,6 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                   <h2 className="text-xl font-semibold mb-3">
                     Reason for Rejection
                   </h2>
-
                   <textarea
                     className="w-full border p-2 rounded-md"
                     rows="4"
@@ -206,7 +220,6 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                     >
                       Cancel
                     </button>
-
                     <button
                       onClick={handleRejectSubmit}
                       className="px-3 py-1 bg-red-600 text-white rounded-md"

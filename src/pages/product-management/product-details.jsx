@@ -12,12 +12,10 @@ import {
   ChevronUp,
   Users,
   Eye,
-  FileText,
-} from "lucide-react";
+  FileText,} from "lucide-react";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
-
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -79,7 +77,7 @@ const ProductDetails = () => {
             return productData;
           })
           .catch((err) => {
-            console.error(
+            toast.error(
               "Error fetching product:",
               err.response?.data || err.message
             );
@@ -104,7 +102,7 @@ const ProductDetails = () => {
       setProducts((prev) => [...prev, ...newProducts]);
       setHasMoreProducts(newProducts.length > 0);
     } catch (err) {
-      console.error(
+      toast.error(
         "Error fetching products:",
         err.response?.data || err.message
       );
@@ -121,7 +119,7 @@ const ProductDetails = () => {
       console.log("Build steps API response:", res.data);
       setBuildSteps(res.data?.data || res.data || []);
     } catch (err) {
-      console.error(
+      toast.error(
         "Error fetching build steps:",
         err.response?.data || err.message
       );

@@ -83,7 +83,7 @@ function UserManagement() {
           </h1>
 
           <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-            <NavLink to="/Dashboard">Dashboard</NavLink>
+            <NavLink to="/Dashboard">dashboard</NavLink>
             <span>•</span>
             <NavLink to="/user-management" className="font-semibold">
               User Management
