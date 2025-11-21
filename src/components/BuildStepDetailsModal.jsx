@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { X, Eye } from "lucide-react";
 import axios from "axios";
 import { productControllers } from "../api/product";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const BuildStepDetailsModal = ({ stepId, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [stepDetails, setStepDetails] = useState(null);
@@ -14,7 +17,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
         const res = await productControllers.getBuildStepDetails(stepId);
         setStepDetails(res.data?.data || res.data);
       } catch (err) {
-        console.error("Error fetching build step details:", err);
+        toast.error("Error fetching build step details:", err);
       } finally {
         setLoading(false);
       }
@@ -29,17 +32,18 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
         stepId,
         "APPROVED"
       );
-      console.log("Reject API Response:", res.data); // IMPORTANT
+      console.log("Reject API Response:", res.data);
       setStepDetails((prev) => ({
         ...prev,
         status: "APPROVED",
       }));
-      alert("Approved Successfully!");
+      toast.info("Approved Successfully!");
     } catch (err) {
       console.log(err);
-      alert("Approval failed");
+      toast.info("Approval failed");
     }
   };
+  const currentStatus = stepDetails?.buildStatus || stepDetails?.status;
 
   const handleRejectSubmit = async () => {
     try {
@@ -55,11 +59,11 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
         status: "REJECTED",
       }));
 
-      alert("Rejected Successfully!");
+      toast.info("Rejected Successfully!");
       setShowRejectPopup(false);
     } catch (err) {
       console.log(err);
-      alert("Rejection failed");
+      toast.info("Rejection failed");
     }
   };
   return (
@@ -86,20 +90,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
             {/* Description */}
             <p className="text-gray-700 mb-4">{stepDetails?.description}</p>
-            {/* <h3 className="text-lg font-semibold mt-4">
-              Status:{" "}
-              <span
-                className={
-                  stepDetails?.status === "APPROVED"
-                    ? "text-green-600"
-                    : stepDetails?.status === "REJECTED"
-                    ? "text-red-600"
-                    : "text-gray-600"
-                }
-              >
-                {stepDetails?.status || "PENDING"}
-              </span>
-            </h3> */}
+  
 
             <h3 className="text-lg font-semibold mt-4">
               Status:{" "}
@@ -115,6 +106,16 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 {stepDetails?.buildStatus || "PENDING"}
               </span>
             </h3>
+            {/*artisianRemarks  */}
+
+            {stepDetails?.artisianRemarks && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Artisan Remarks
+                </h3>
+                <p className="text-gray-700">{stepDetails.artisianRemarks}</p>
+              </div>
+            )}
 
             {/* Instructions */}
             {stepDetails?.instructions && (
@@ -180,8 +181,12 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
               </p>
             )}
             <div className="flex gap-20 mt-6"></div>
-            {stepDetails?.imagesAddedByArtisan &&
-              stepDetails.imagesAddedByArtisan.length > 0 && (
+
+            {stepDetails?.imagesAddedByArtisan?.length > 0 &&
+              currentStatus !== "APPROVED" &&
+              currentStatus !== "ADMIN_APPROVED" &&
+              currentStatus !== "REJECTED" &&
+              currentStatus !== "ADMIN_REJECTED" && (
                 <div className="flex gap-20 mt-6">
                   <button
                     onClick={handleApprove}
@@ -198,6 +203,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                   </button>
                 </div>
               )}
+
             {/* Reject Popup */}
             {showRejectPopup && (
               <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -233,6 +239,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
           </>
         )}
       </div>
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 };

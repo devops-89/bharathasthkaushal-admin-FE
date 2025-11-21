@@ -12,10 +12,14 @@ import {
   ChevronUp,
   Users,
   Eye,
-  FileText,} from "lucide-react";
+  FileText,
+} from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
+  
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -177,11 +181,11 @@ const ProductDetails = () => {
       };
       console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
-      alert(" Step Assigned Successfully!");
+      toast.info(" Step Assigned Successfully!");
       setShowAssignForm(false);
       fetchBuildSteps();
     } catch (err) {
-      alert(" Failed to assign step");
+      toast.info(" Failed to assign step");
     } finally {
       setLoading(false);
     }
@@ -195,54 +199,51 @@ const ProductDetails = () => {
     }));
   };
 
-  const handleCreateStepFormSubmit = (e) => {
+  const handleCreateStepFormSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true);
-    const formData = new FormData();
-    formData.append("productId", createStepForm.productId);
-    formData.append("sequence", createStepForm.sequence);
-    formData.append("stepName", createStepForm.stepName);
-    formData.append("description", createStepForm.description);
-    formData.append("proposedPrice", createStepForm.proposedPrice);
-    formData.append("admin_remarks", createStepForm.admin_remarks || "");
-    formData.append("dueDate", createStepForm.dueDate);
-    formData.append("materials", createStepForm.materials || "");
-    formData.append("instructions", createStepForm.instructions || "");
-    referenceImages.forEach((file) => {
-      formData.append("reference_images", file);
-    });
+    try {
+      const formData = new FormData();
+      formData.append("productId", createStepForm.productId);
+      formData.append("sequence", createStepForm.sequence);
+      formData.append("stepName", createStepForm.stepName);
+      formData.append("description", createStepForm.description);
+      formData.append("proposedPrice", createStepForm.proposedPrice);
+      formData.append("admin_remarks", createStepForm.admin_remarks || "");
+      formData.append("dueDate", createStepForm.dueDate);
+      formData.append("materials", createStepForm.materials || "");
+      formData.append("instructions", createStepForm.instructions || "");
+      referenceImages.forEach((file) => {
+        formData.append("reference_images", file);
+      });
 
-    productControllers
-      .createBuildStep(formData)
-      .then((res) => {
-        console.log("Create build step API response:", res.data);
-        alert("Build step created successfully!");
-        setCreateStepForm({
-          productId: "",
-          sequence: "",
-          stepName: "",
-          description: "",
-          proposedPrice: "",
-          admin_remarks: "",
-          dueDate: "",
-          materials: "",
-          instructions: "",
-        });
-        setReferenceImages([]);
-        if (createStepForm.productId === id) {
-          fetchBuildSteps();
-        }
-        setShowCreateStepForm(false);
-      })
-      .catch((err) => {
-        console.error(
-          "Error creating build step:",
-          err.response?.data || err.message
-        );
-        alert("Error creating build step. Please try again.");
-      })
-      .finally(() => setLoading(false));
+      const res = await productControllers.createBuildStep(formData);
+      console.log("Create build step API response:", res.data);
+      const newStep = res.data?.data || res.data;
+      toast.info("Build step created successfully!");
+      setCreateStepForm({
+        productId: "",
+        sequence: "",
+        stepName: "",
+        description: "",
+        proposedPrice: "",
+        admin_remarks: "",
+        dueDate: "",
+        materials: "",
+        instructions: "",
+      });
+      setReferenceImages([]);
+      setShowCreateStepForm(false);
+      await fetchBuildSteps();
+    } catch (err) {
+      console.error(
+        "Error creating build step:",
+        err.response?.data || err.message
+      );
+      toast.error("Error creating build step. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleStepExpanded = (stepId) => {
@@ -393,6 +394,12 @@ const ProductDetails = () => {
                 <div className="space-y-3">
                   <button
                     onClick={() => {
+                      if (buildSteps.length >= 10) {
+                        toast.error(
+                          "You can create only up to 10 build steps!"
+                        );
+                        return;
+                      }
                       setCreateStepForm((prev) => ({
                         ...prev,
                         productId: product.productId,
@@ -458,13 +465,6 @@ const ProductDetails = () => {
                                 <ChevronDown className="w-5 h-5 text-gray-500" />
                               )}
                             </button>
-
-                            {/* {showStepDetails && (
-                              <BuildStepDetailsModal
-                                stepId={selectedStepId}
-                                onClose={() => setShowStepDetails(false)}
-                              />
-                            )} */}
 
                             {expandedStep === step.id && (
                               <div className="px-4 pb-4 bg-gray-50">
@@ -563,17 +563,12 @@ const ProductDetails = () => {
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
                   <div className="flex items-center gap-4 mb-3">
                     <span className="text-4xl font-bold text-orange-600">
-                     ₹
-                          {parseInt(product.productPricePerPiece) *
-                            product.quantity}
+                      ₹
+                      {parseInt(product.productPricePerPiece) *
+                        product.quantity}
                     </span>
                     {product?.discount > 0 && (
-                      <span className="text-xl text-gray-500 line-through">
-                        {/* ₹{calculateDiscountedPrice()} */}
-                        {/* ₹
-                          {parseInt(product.productPricePerPiece) *
-                            product.quantity} */}
-                      </span>
+                      <span className="text-xl text-gray-500 line-through"></span>
                     )}
                   </div>
                   {product?.discount > 0 && (
@@ -845,7 +840,7 @@ const ProductDetails = () => {
                   onClick={() => navigate(-1)}
                   className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 border border-gray-300"
                 >
-                  ← Go Back
+                  ← Go Back to Product Management
                 </button>
               </div>
             </div>
@@ -1030,7 +1025,6 @@ const ProductDetails = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  // onClick={() => setShowCreateStepForm(false)}
                   onClick={() => setShowCreateStepForm(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
@@ -1209,6 +1203,7 @@ const ProductDetails = () => {
             </button>
           </div>
         </div>
+        <ToastContainer position="top-right" autoClose={2000} />
       </div>
     );
   }

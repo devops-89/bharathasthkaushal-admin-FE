@@ -247,7 +247,7 @@ const NeedAssistanceDashboard = () => {
           </h1>
           <nav className="mt-2 text-sm text-orange-600">
             <NavLink
-              to="/Dashboard"
+              to="/dashboard"
               className={({ isActive }) =>
                 isActive ? "text-orange-600 font-semibold" : ""
               }

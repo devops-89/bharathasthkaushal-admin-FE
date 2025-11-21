@@ -58,7 +58,7 @@ export default function ProductManagement() {
               </h1>
               <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
                 <NavLink
-                  to="/Dashboard"
+                  to="/dashboard"
                   className={({ isActive }) =>
                     isActive ? "text-orange-600 font-semibold" : ""
                   }

@@ -141,7 +141,7 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
             <h1 className="text-2xl font-bold text-gray-900">
               {categoryName} Subcategories
             </h1>
-            <p className="text-gray-600">Dashboard • Categories • {categoryName}</p>
+            <p className="text-gray-600">dashboard • Categories • {categoryName}</p>
           </div>
           <div className="flex gap-3">
             <div className="flex border border-gray-200 rounded-lg">
