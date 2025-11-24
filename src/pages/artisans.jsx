@@ -13,7 +13,6 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
-
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
 import { categoryControllers } from "../api/category";
@@ -21,7 +20,6 @@ import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -38,6 +36,7 @@ const ArtisanManagement = () => {
   const aadhaarRegex = /^[0-9]{12}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -78,7 +77,6 @@ const ArtisanManagement = () => {
         selectedArtisan.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
 
       await userControllers.updateUserStatus(selectedArtisan.id, newStatus);
-      // UI update instantly
       setPartnersData((prev) =>
         prev.map((a) =>
           a.id === selectedArtisan.id ? { ...a, status: newStatus } : a
@@ -130,10 +128,8 @@ const ArtisanManagement = () => {
         page,
         limit
       );
-
       let artisans =
         response.data?.data?.docs || response.data?.docs || response.data || [];
-
       const mappedData = artisans.map((user, index) => ({
         id: user._id || user.id || `temp-id-${index + 1}`,
         firstName:
@@ -151,8 +147,9 @@ const ArtisanManagement = () => {
           : "—",
         aadhaarNumber: user.aadhaarNumber || "N/A",
         subCaste: user.subCaste || "_",
+        // verify_status: user.verify_status,
+        verify_status: user.verifyStatus,
 
-        verify_status: user.verify_status,
         status: user.status || "Approved Artisan",
         user_group: user.user_group || "ARTISAN",
         introVideo: user.introVideo || null,
@@ -705,19 +702,15 @@ const ArtisanManagement = () => {
                       View Intro Video
                     </button>
                   )}
-
-                  {selectedPartner?.verify_status !== "VERIFIED" ? (
-                    <button
-                      onClick={() => handleVerifyArtisan(selectedPartner.id)}
-                      className="px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-all"
-                    >
-                      Verify Artisan
-                    </button>
-                  ) : (
-                    <span className="px-5 py-2.5 bg-green-100 text-green-800 font-medium rounded-lg shadow-sm">
-                      ✔ Verified
-                    </span>
-                  )}
+                  {selectedPartner?.user_group === "ARTISAN" &&
+                    selectedPartner?.verify_status !== "VERIFIED" && (
+                      <button
+                        onClick={() => handleVerifyArtisan(selectedPartner.id)}
+                        className="px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-all"
+                      >
+                        Verify Artisan
+                      </button>
+                    )}
                 </div>
 
                 <div className="flex justify-end mt-6 pt-4 border-t">
