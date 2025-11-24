@@ -22,7 +22,6 @@ const AddProduct = () => {
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-
   const fetchCategories = async () => {
     try {
       const res = await categoryControllers.getCategory();
@@ -50,7 +49,6 @@ const AddProduct = () => {
       console.log("SubCategory Fetch Error:", error);
     }
   };
-
 
   useEffect(() => {
     fetchCategories();

@@ -7,6 +7,12 @@ export const productControllers = {
       },
     });
   },
+  updateProduct: (id, formData) => {
+    return productSecuredApi.patch(`/product/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
   getAllProducts: (page = 1, pageSize = 10) => {
     return productSecuredApi.get("/product/admin/all-products", {
       params: {

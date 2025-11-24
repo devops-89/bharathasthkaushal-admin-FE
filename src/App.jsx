@@ -14,6 +14,7 @@ import PermissionManagement from "./pages/permission-management";
 import ProductManagement from "./pages/product-management";
 import AddProduct from "./pages/product-management/add-product";
 import ProductDetails from "./pages/product-management/product-details";
+import EditProduct from "./pages/EditProduct";
 //import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
@@ -49,6 +50,8 @@ function App() {
           path="/product-management/add-product"
           element={<AddProduct />}
         />
+        <Route path="/edit-product/:id" element={<EditProduct />} />
+
         <Route 
         path="/product-management/product-details/:id"
         element={<ProductDetails/>} 

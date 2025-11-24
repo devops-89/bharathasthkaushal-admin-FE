@@ -35,7 +35,7 @@ export default function ProductManagement() {
         setProducts(response);
       })
       .catch((err) => {
-        console.log("sdsds", err);  // todo
+        console.log("sdsds", err);  
       });
   };
 

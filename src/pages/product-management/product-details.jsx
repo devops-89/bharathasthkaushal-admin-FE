@@ -352,11 +352,10 @@ const ProductDetails = () => {
                             <button
                               key={index}
                               onClick={() => setSelectedImageIndex(index)}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                selectedImageIndex === index
+                              className={`w-2 h-2 rounded-full transition-all ${selectedImageIndex === index
                                   ? "bg-white scale-125"
                                   : "bg-white bg-opacity-50 hover:bg-opacity-75"
-                              }`}
+                                }`}
                             />
                           ))}
                         </div>
@@ -375,11 +374,10 @@ const ProductDetails = () => {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImageIndex === index
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
                             ? "border-orange-500 shadow-lg scale-105"
                             : "border-gray-200 hover:border-orange-300"
-                        }`}
+                          }`}
                       >
                         <img
                           src={img.imageUrl}
@@ -477,10 +475,9 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm">
                                       {step.artisan.firstName ||
-                                      step.artisan.lastName
-                                        ? `${step.artisan.firstName ?? ""} ${
-                                            step.artisan.lastName ?? ""
-                                          }`
+                                        step.artisan.lastName
+                                        ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
+                                        }`
                                         : "No Artisan Assigned"}
                                     </p>
                                   </div>
@@ -513,8 +510,8 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-orange-600 font-bold text-lg">
                                       ₹
-                                      { step.proposed_price ||
-                                        step.proposedPrice }
+                                      {step.proposed_price ||
+                                        step.proposedPrice}
                                     </p>
                                   </div>
 
@@ -534,7 +531,10 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-gray-600 text-sm">
                                       {/* {moment(step.dueDate).format("DD/MM/YYYY hh:mm A")} */}
-                                      {moment(step.dueDate, "YYYY-MM-DDTHH:mm").format("DD/MM/YYYY hh:mm A")}
+                                      {moment(
+                                        step.dueDate,
+                                        "YYYY-MM-DDTHH:mm"
+                                      ).format("DD/MM/YYYY hh:mm A")}
                                     </p>
                                   </div>
                                 </div>
@@ -553,10 +553,40 @@ const ProductDetails = () => {
             <div className="lg:col-span-5 p-8 bg-gradient-to-br from-gray-50 to-white">
               <div className="space-y-6">
                 {/* Product Title */}
-                <div>
+                {/* <div>
+                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                    {product?.  product_name || "Unnamed Product"}
+                  </h1>
+                </div> */}
+                <div className="flex items-center justify-between">
                   <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                     {product?.product_name || "Unnamed Product"}
                   </h1>
+
+                  {product.admin_approval_status !== "APPROVED" && (
+                    <button
+                      onClick={() =>
+                        navigate(`/edit-product/${product.productId}`)
+                      }
+                      className="p-2 rounded-full hover:bg-gray-200 transition"
+                      title="Edit Product"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6 text-orange-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536M9 11l6-6 3.536 3.536-6 6H9v-3.536z"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
 
                 {/* Price Section */}
@@ -588,18 +618,16 @@ const ProductDetails = () => {
                     Availability:
                   </span>
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
-                      parseInt(product?.quantity || 0) < 10
+                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.quantity || 0) < 10
                         ? "bg-red-100 text-red-700"
                         : "bg-green-100 text-green-700"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        parseInt(product?.quantity || 0) < 10
+                      className={`w-2 h-2 rounded-full ${parseInt(product?.quantity || 0) < 10
                           ? "bg-red-500"
                           : "bg-green-500"
-                      }`}
+                        }`}
                     ></div>
                     {parseInt(product?.quantity || 0) < 10
                       ? "Low Stock"
@@ -1143,7 +1171,6 @@ const ProductDetails = () => {
       )}
     </div>
   );
-
   {
     showRejectModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
