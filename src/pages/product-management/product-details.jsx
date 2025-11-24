@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import moment from "moment";
+
 import {
   Package,
   Palette,
@@ -19,7 +21,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
-  
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -512,8 +513,8 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-orange-600 font-bold text-lg">
                                       ₹
-                                      {step.proposed_price ||
-                                        step.proposedPrice}
+                                      { step.proposed_price ||
+                                        step.proposedPrice }
                                     </p>
                                   </div>
 
@@ -532,9 +533,8 @@ const ProductDetails = () => {
                                       Due Date
                                     </h4>
                                     <p className="text-gray-600 text-sm">
-                                      {new Date(
-                                        step.createdAt
-                                      ).toLocaleDateString()}
+                                      {/* {moment(step.dueDate).format("DD/MM/YYYY hh:mm A")} */}
+                                      {moment(step.dueDate, "YYYY-MM-DDTHH:mm").format("DD/MM/YYYY hh:mm A")}
                                     </p>
                                   </div>
                                 </div>
@@ -960,13 +960,12 @@ const ProductDetails = () => {
                   Due Date <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   name="dueDate"
                   value={createStepForm.dueDate}
                   onChange={handleCreateStepFormChange}
                   required
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
               <div>

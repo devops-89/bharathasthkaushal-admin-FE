@@ -53,6 +53,7 @@ const ArtisanManagement = () => {
     introVideo: "",
     gstNumber: "",
   });
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const [partnersData, setPartnersData] = useState(() => {
     const savedData = localStorage.getItem("partnersData");
@@ -148,12 +149,13 @@ const ArtisanManagement = () => {
         joinedDate: user.createdAt
           ? new Date(user.createdAt).toISOString().split("T")[0]
           : "—",
-          aadhaarNumber: user.aadhaarNumber || "N/A", 
-          subCaste: user.subCaste || "_",
+        aadhaarNumber: user.aadhaarNumber || "N/A",
+        subCaste: user.subCaste || "_",
 
         verify_status: user.verify_status,
         status: user.status || "Approved Artisan",
         user_group: user.user_group || "ARTISAN",
+        introVideo: user.introVideo || null,
       }));
 
       setPartnersData(mappedData);
@@ -572,7 +574,6 @@ const ArtisanManagement = () => {
             <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                 
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     Artisan Details
                     {selectedPartner.verify_status === "VERIFIED" && (
@@ -694,6 +695,31 @@ const ArtisanManagement = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="flex flex-wrap items-center gap-3 mt-6">
+                  {selectedPartner?.introVideo && (
+                    <button
+                      onClick={() => setShowVideoModal(true)}
+                      className="px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg shadow-sm hover:bg-orange-700 transition-all"
+                    >
+                      View Intro Video
+                    </button>
+                  )}
+
+                  {selectedPartner?.verify_status !== "VERIFIED" ? (
+                    <button
+                      onClick={() => handleVerifyArtisan(selectedPartner.id)}
+                      className="px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-all"
+                    >
+                      Verify Artisan
+                    </button>
+                  ) : (
+                    <span className="px-5 py-2.5 bg-green-100 text-green-800 font-medium rounded-lg shadow-sm">
+                      ✔ Verified
+                    </span>
+                  )}
+                </div>
+
                 <div className="flex justify-end mt-6 pt-4 border-t">
                   <button
                     onClick={() => setShowDetailsModal(false)}
@@ -803,23 +829,6 @@ const ArtisanManagement = () => {
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </button>
-                          {partner.verify_status !== "VERIFIED" ? (
-                            <button
-                              onClick={() => handleVerifyArtisan(partner.id)}
-                              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
-                            >
-                              Verify Artisan
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                toast.info("This artisan is already verified ")
-                              }
-                              className="flex items-center w-full px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
-                            >
-                              Already Verified
-                            </button>
-                          )}
                         </div>
                       )}
                     </td>
@@ -895,6 +904,28 @@ const ArtisanManagement = () => {
             onConfirm={confirmStatusChange}
             message="Are you sure you want to permanently block this artisan?"
           />
+        )}
+        {showVideoModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-4 relative shadow-xl">
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="absolute top-2 right-2 text-gray-600 hover:text-black"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <h2 className="text-lg font-bold mb-3 text-center">
+                Intro Video
+              </h2>
+
+              <video
+                src={selectedPartner.introVideo}
+                controls
+                className="w-full h-[250px] rounded-lg object-cover"
+              ></video>
+            </div>
+          </div>
         )}
       </div>
     </div>
