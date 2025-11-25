@@ -15,6 +15,10 @@ import {
   Users,
   Eye,
   FileText,
+  Clock,
+  Brush,
+  Layers,
+  Droplets,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -353,8 +357,8 @@ const ProductDetails = () => {
                               key={index}
                               onClick={() => setSelectedImageIndex(index)}
                               className={`w-2 h-2 rounded-full transition-all ${selectedImageIndex === index
-                                  ? "bg-white scale-125"
-                                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                                ? "bg-white scale-125"
+                                : "bg-white bg-opacity-50 hover:bg-opacity-75"
                                 }`}
                             />
                           ))}
@@ -375,8 +379,8 @@ const ProductDetails = () => {
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
                         className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                            ? "border-orange-500 shadow-lg scale-105"
-                            : "border-gray-200 hover:border-orange-300"
+                          ? "border-orange-500 shadow-lg scale-105"
+                          : "border-gray-200 hover:border-orange-300"
                           }`}
                       >
                         <img
@@ -619,14 +623,14 @@ const ProductDetails = () => {
                   </span>
                   <span
                     className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.quantity || 0) < 10
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
                       }`}
                   >
                     <div
                       className={`w-2 h-2 rounded-full ${parseInt(product?.quantity || 0) < 10
-                          ? "bg-red-500"
-                          : "bg-green-500"
+                        ? "bg-red-500"
+                        : "bg-green-500"
                         }`}
                     ></div>
                     {parseInt(product?.quantity || 0) < 10
@@ -636,215 +640,299 @@ const ProductDetails = () => {
                   </span>
                 </div>
                 {/* Product Details */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                    Product Details
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {product?.artisan && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <Award className="w-5 h-5 text-blue-600" />
-                        <div>
-                          <span className="text-gray-700 font-medium">
-                            Artisan:
-                          </span>
-                          <span className="ml-2 text-blue-600 font-semibold">
-                            {product.artisan?.name || product.artisan}
-                          </span>
+                {/* Admin Actions */}
+                <div className="py-4 border-b border-gray-200 mb-4">
+                  {showRejectModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-bold text-gray-900">
+                            Reject Product
+                          </h2>
+                          <button
+                            onClick={() => setShowRejectModal(false)}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <X className="w-5 h-5 text-gray-500" />
+                          </button>
                         </div>
-                      </div>
-                    )}
 
-                    <div className="mt-3 mb-3 ml-6 mr-6">
-                      {showRejectModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-                            <div className="flex items-center justify-between mb-4">
-                              <h2 className="text-xl font-bold text-gray-900">
-                                Reject Product
-                              </h2>
-                              <button
-                                onClick={() => setShowRejectModal(false)}
-                                className="p-2 hover:bg-gray-100 rounded-full"
-                              >
-                                <X className="w-5 h-5 text-gray-500" />
-                              </button>
-                            </div>
+                        <textarea
+                          rows={4}
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          placeholder="Enter rejection reason..."
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                        />
 
-                            <textarea
-                              rows={4}
-                              value={rejectReason}
-                              onChange={(e) => setRejectReason(e.target.value)}
-                              placeholder="Enter rejection reason..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                            />
+                        <div className="flex gap-3 mt-6">
+                          <button
+                            onClick={() => setShowRejectModal(false)}
+                            className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
 
-                            <div className="flex gap-3 mt-4">
-                              <button
-                                onClick={() => setShowRejectModal(false)}
-                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                              >
-                                Cancel
-                              </button>
+                          <button
+                            disabled={!rejectReason.trim()}
+                            onClick={async () => {
+                              try {
+                                await productControllers.updateProductStatus(
+                                  product.productId,
+                                  "REJECTED",
+                                  rejectReason.trim()
+                                );
 
-                              <button
-                                disabled={!rejectReason.trim()}
-                                onClick={async () => {
-                                  try {
-                                    await productControllers.updateProductStatus(
-                                      product.productId,
-                                      "REJECTED",
-                                      rejectReason.trim()
-                                    );
+                                alert("Product Rejected Successfully");
 
-                                    alert("Product Rejected Successfully");
+                                const updated =
+                                  await productControllers.getProductById(
+                                    id
+                                  );
+                                setProduct(
+                                  updated.data?.data || updated.data
+                                );
 
-                                    const updated =
-                                      await productControllers.getProductById(
-                                        id
-                                      );
-                                    setProduct(
-                                      updated.data?.data || updated.data
-                                    );
-
-                                    setShowRejectModal(false);
-                                    setRejectReason("");
-                                  } catch (err) {
-                                    alert("Failed to Reject Product");
-                                    console.log(err);
-                                  }
-                                }}
-                                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
-                              >
-                                Confirm Reject
-                              </button>
-                            </div>
-                          </div>
+                                setShowRejectModal(false);
+                                setRejectReason("");
+                              } catch (err) {
+                                alert("Failed to Reject Product");
+                                console.log(err);
+                              }
+                            }}
+                            className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-red-200"
+                          >
+                            Confirm Reject
+                          </button>
                         </div>
-                      )}
-                      <div className="mt-3 mb-3 ml-6 mr-6">
-                        {/* PENDING → show Approve + Reject buttons */}
-                        {product.admin_approval_status === "PENDING" && (
-                          <div className="flex gap-4">
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await productControllers.updateProductStatus(
-                                    product.productId,
-                                    "APPROVED"
-                                  );
-                                  alert("Product Approved Successfully");
-
-                                  const updated =
-                                    await productControllers.getProductById(id);
-                                  setProduct(
-                                    updated.data?.data || updated.data
-                                  );
-                                } catch (err) {
-                                  alert("Failed to Approve Product");
-                                  console.log(err);
-                                }
-                              }}
-                              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
-                            >
-                              Approve
-                            </button>
-
-                            <button
-                              onClick={() => setShowRejectModal(true)}
-                              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
-
-                        {/* APPROVED → just show Approved */}
-                        {product.admin_approval_status === "APPROVED" && (
-                          <span className="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-semibold">
-                            Approved
-                          </span>
-                        )}
-
-                        {/* REJECTED → show Rejected + Reason */}
-                        {product.admin_approval_status === "REJECTED" && (
-                          <div className="space-y-2">
-                            <span className="bg-red-100 text-red-700 px-4 py-2 rounded-lg font-semibold">
-                              Rejected
-                            </span>
-
-                            {product.adminRemarks && (
-                              <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-3 rounded-lg">
-                                <strong>Reason:</strong> {product.adminRemarks}
-                              </p>
-                            )}
-                          </div>
-                        )}
                       </div>
                     </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-700 font-medium">Status:</span>
+                    <div className="flex items-center gap-3">
+                      {product.admin_approval_status === "PENDING" && (
+                        <>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await productControllers.updateProductStatus(
+                                  product.productId,
+                                  "APPROVED"
+                                );
+                                alert("Product Approved Successfully");
+
+                                const updated =
+                                  await productControllers.getProductById(id);
+                                setProduct(
+                                  updated.data?.data || updated.data
+                                );
+                              } catch (err) {
+                                alert("Failed to Approve Product");
+                                console.log(err);
+                              }
+                            }}
+                            className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-green-200"
+                          >
+                            Approve
+                          </button>
+
+                          <button
+                            onClick={() => setShowRejectModal(true)}
+                            className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-red-200"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+
+                      {product.admin_approval_status === "APPROVED" && (
+                        <span className="bg-green-100 text-green-700 px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+                          <Award className="w-4 h-4" /> Approved
+                        </span>
+                      )}
+
+                      {product.admin_approval_status === "REJECTED" && (
+                        <div className="text-right">
+                          <span className="bg-red-100 text-red-700 px-4 py-2 rounded-xl font-bold inline-flex items-center gap-2">
+                            <X className="w-4 h-4" /> Rejected
+                          </span>
+                          {product.adminRemarks && (
+                            <p className="text-xs text-red-600 mt-1 max-w-[200px]">
+                              Reason: {product.adminRemarks}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Details Grid */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-orange-500" />
+                    Product Specifications
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {product?.artisan && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Award className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Artisan
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.artisan?.name || product.artisan}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {product?.material && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Package className="w-5 h-5 text-gray-600" />
+                      <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-amber-100 rounded-lg">
+                          <Package className="w-5 h-5 text-amber-600" />
+                        </div>
                         <div>
-                          <span className="text-gray-700 font-medium">
-                            Material:
-                          </span>
-                          <span className="ml-2 text-gray-900 font-medium">
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Material
+                          </p>
+                          <p className="text-gray-900 font-semibold">
                             {product.material}
-                          </span>
+                          </p>
                         </div>
                       </div>
                     )}
+
                     {product?.color && (
-                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                        <Palette className="w-5 h-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Palette className="w-5 h-5 text-purple-600" />
+                        </div>
                         <div>
-                          <span className="text-gray-700 font-medium">
-                            Color:
-                          </span>
-                          <span className="ml-2 text-gray-900 font-medium">
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Color
+                          </p>
+                          <p className="text-gray-900 font-semibold">
                             {product.color}
-                          </span>
+                          </p>
                         </div>
                       </div>
                     )}
+
                     {product?.size?.length > 0 && (
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <Ruler className="w-5 h-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <Ruler className="w-5 h-5 text-green-600" />
+                        </div>
                         <div>
-                          <span className="text-gray-700 font-medium">
-                            Size:
-                          </span>
-                          <span className="ml-2 text-gray-900 font-medium">
-                            {product.size.join(", ")}
-                          </span>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Size
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {Array.isArray(product.size) ? product.size.join(", ") : product.size}
+                          </p>
                         </div>
                       </div>
                     )}
+
                     {product?.netWeight && (
-                      <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
-                        <Package className="w-5 h-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-rose-100 rounded-lg">
+                          <Package className="w-5 h-5 text-rose-600" />
+                        </div>
                         <div>
-                          <span className="text-gray-700 font-medium">
-                            Net Weight:
-                          </span>
-                          <span className="ml-2 text-gray-900 font-medium">
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Net Weight
+                          </p>
+                          <p className="text-gray-900 font-semibold">
                             {product.netWeight}
-                          </span>
+                          </p>
                         </div>
                       </div>
                     )}
+
                     {product?.dimension && (
-                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
-                        <Ruler className="w-5 h-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-indigo-100 rounded-lg">
+                          <Ruler className="w-5 h-5 text-indigo-600" />
+                        </div>
                         <div>
-                          <span className="text-gray-700 font-medium">
-                            Dimensions:
-                          </span>
-                          <span className="ml-2 text-gray-900 font-medium">
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Dimensions
+                          </p>
+                          <p className="text-gray-900 font-semibold">
                             {product.dimension}
-                          </span>
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {product?.timeToMake && (
+                      <div className="flex items-center gap-3 p-3 bg-cyan-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-cyan-100 rounded-lg">
+                          <Clock className="w-5 h-5 text-cyan-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Time to Make
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.timeToMake} Days
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {product?.texture && (
+                      <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-teal-100 rounded-lg">
+                          <Layers className="w-5 h-5 text-teal-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Texture/Finish
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.texture}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {product?.artUsed && (
+                      <div className="flex items-center gap-3 p-3 bg-fuchsia-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-fuchsia-100 rounded-lg">
+                          <Brush className="w-5 h-5 text-fuchsia-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Art Used
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.artUsed}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {product?.washCare && (
+                      <div className="flex items-center gap-3 p-3 bg-sky-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-sky-100 rounded-lg">
+                          <Droplets className="w-5 h-5 text-sky-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Wash Care
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.washCare}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -1171,67 +1259,6 @@ const ProductDetails = () => {
       )}
     </div>
   );
-  {
-    showRejectModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Reject Product</h2>
-            <button
-              onClick={() => setShowRejectModal(false)}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
 
-          <textarea
-            rows={4}
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-            placeholder="Enter rejection reason..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-          />
-
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={() => setShowRejectModal(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-
-            <button
-              disabled={!rejectReason.trim()}
-              onClick={async () => {
-                try {
-                  await productControllers.updateProductStatus(
-                    product.productId,
-                    "REJECTED",
-                    rejectReason.trim()
-                  );
-
-                  alert(" Product Rejected Successfully");
-
-                  const updated = await productControllers.getProductById(id);
-                  setProduct(updated.data?.data || updated.data);
-
-                  setShowRejectModal(false);
-                  setRejectReason("");
-                } catch (err) {
-                  alert(" Failed to Reject Product");
-                  console.log(err);
-                }
-              }}
-              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
-            >
-              Confirm Reject
-            </button>
-          </div>
-        </div>
-        <ToastContainer position="top-right" autoClose={2000} />
-      </div>
-    );
-  }
 };
 export default ProductDetails;

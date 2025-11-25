@@ -1,37 +1,46 @@
 import { ArrowLeft } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { productControllers } from "../../api/product";
 import { categoryControllers } from "../../api/category";
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     product_name: "",
     categoryId: "",
     subCategoryId: "",
-    mrp: "",
+    productPricePerPiece: "",
     quantity: "",
     discount: "",
     material: "",
     color: "",
-    size: [],
-    netWeight: "",
-    dimension: "",
+    sizeInput: "",
+    weightValue: "",
+    weightUnit: "gm",
+    length: "",
+    breadth: "",
+    height: "",
+    dimensionUnit: "cm",
     description: "",
+    timeToMake: "",
+    texture: "",
+    artUsed: "",
   });
+
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+
   const fetchCategories = async () => {
     try {
       const res = await categoryControllers.getCategory();
-
       console.log("CATEGORY RESPONSE:", res.data.data.docs);
       setCategories(res.data?.data?.docs || []);
     } catch (error) {
       console.log("Category Fetch Error:", error);
     }
   };
+
   const handleCategoryChange = async (e) => {
     const selectedCategoryId = e.target.value;
     setFormData((prev) => ({ ...prev, categoryId: selectedCategoryId }));
@@ -56,6 +65,7 @@ const AddProduct = () => {
 
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -72,9 +82,30 @@ const AddProduct = () => {
     setLoading(true);
     try {
       const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        data.append(key, value);
-      });
+
+      // Construct composite fields
+      const dimension = `${formData.length}x${formData.breadth}x${formData.height} ${formData.dimensionUnit}`;
+      const netWeight = `${formData.weightValue} ${formData.weightUnit}`;
+
+      // Append fields
+      data.append("product_name", formData.product_name);
+      data.append("categoryId", formData.categoryId);
+      data.append("subCategoryId", formData.subCategoryId);
+      data.append("productPricePerPiece", formData.productPricePerPiece);
+      data.append("quantity", formData.quantity);
+      data.append("discount", formData.discount);
+      data.append("material", formData.material);
+      data.append("color", formData.color);
+      data.append("description", formData.description);
+      data.append("timeToMake", formData.timeToMake);
+      data.append("texture", formData.texture);
+      data.append("artUsed", formData.artUsed);
+      data.append("dimension", dimension);
+      data.append("netWeight", netWeight);
+
+      // Send size as array (even if single value)
+      data.append("size", formData.sizeInput);
+
       if (images.length > 0) {
         images.forEach((file) => {
           data.append("images", file);
@@ -96,9 +127,13 @@ const AddProduct = () => {
       setLoading(false);
     }
   };
+
   const handleGoBack = () => {
     navigate(-1);
   };
+
+  const totalPrice = (parseFloat(formData.productPricePerPiece) || 0) * (parseFloat(formData.quantity) || 0);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-4xl mx-auto">
@@ -184,15 +219,15 @@ const AddProduct = () => {
               </select>
             </div>
 
-            {/* MRP */}
+            {/* Product Price Per Piece */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                MRP (₹) *
+                Price Per Piece (₹) *
               </label>
               <input
                 type="number"
-                name="mrp"
-                value={formData.mrp}
+                name="productPricePerPiece"
+                value={formData.productPricePerPiece}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="0.00"
@@ -216,6 +251,19 @@ const AddProduct = () => {
               />
             </div>
 
+            {/* Total Price Display */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Total Price (₹)
+              </label>
+              <input
+                type="text"
+                value={totalPrice.toFixed(2)}
+                readOnly
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+              />
+            </div>
+
             {/* Discount */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -231,6 +279,21 @@ const AddProduct = () => {
               />
             </div>
 
+            {/* Time to Make */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Time to Make (Days)
+              </label>
+              <input
+                type="text"
+                name="timeToMake"
+                value={formData.timeToMake}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="e.g. 5 days"
+              />
+            </div>
+
             {/* Material */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -243,6 +306,36 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="Cotton, Silk, etc."
+              />
+            </div>
+
+            {/* Finish/Texture */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Finish / Texture
+              </label>
+              <input
+                type="text"
+                name="texture"
+                value={formData.texture}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Smooth, Rough, Matte, etc."
+              />
+            </div>
+
+            {/* Art Used */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Art Used
+              </label>
+              <input
+                type="text"
+                name="artUsed"
+                value={formData.artUsed}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Madhubani, Warli, etc."
               />
             </div>
 
@@ -268,15 +361,11 @@ const AddProduct = () => {
               </label>
               <input
                 type="text"
-                name="size"
-                value={formData.size.join(", ")}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    size: e.target.value.split(",").map((s) => s.trim()),
-                  })
-                }
+                name="sizeInput"
+                value={formData.sizeInput}
+                onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="Enter size (e.g. XL, 42, etc.)"
               />
             </div>
 
@@ -285,29 +374,67 @@ const AddProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Net Weight
               </label>
-              <input
-                type="text"
-                name="netWeight"
-                value={formData.netWeight}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="500g, 1kg"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  name="weightValue"
+                  value={formData.weightValue}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Weight"
+                />
+                <select
+                  name="weightUnit"
+                  value={formData.weightUnit}
+                  onChange={handleInputChange}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="gm">gm</option>
+                  <option value="kg">kg</option>
+                </select>
+              </div>
             </div>
 
             {/* Dimension */}
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
-                Dimension
+                Dimensions
               </label>
-              <input
-                type="text"
-                name="dimension"
-                value={formData.dimension}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="10x20 cm"
-              />
+              <div className="grid grid-cols-4 gap-2">
+                <input
+                  type="number"
+                  name="length"
+                  value={formData.length}
+                  onChange={handleInputChange}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Length"
+                />
+                <input
+                  type="number"
+                  name="breadth"
+                  value={formData.breadth}
+                  onChange={handleInputChange}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Breadth"
+                />
+                <input
+                  type="number"
+                  name="height"
+                  value={formData.height}
+                  onChange={handleInputChange}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Height"
+                />
+                <select
+                  name="dimensionUnit"
+                  value={formData.dimensionUnit}
+                  onChange={handleInputChange}
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="cm">cm</option>
+                  <option value="inches">inches</option>
+                </select>
+              </div>
             </div>
 
             {/* Description */}
