@@ -50,33 +50,34 @@ const EditProduct = () => {
           return;
         }
 
-        // Helper to find the correct ID for the dropdown
         const resolveId = (val, list) => {
           if (!val) return "";
 
-          let lookupValue = val;
 
-          // If it's an object, prefer category_id if available, otherwise use _id for lookup
           if (typeof val === "object") {
             if (val.category_id) return val.category_id;
-            lookupValue = val._id || val.id;
+         
+            const match = list.find((c) => c._id === val._id || c.id === val._id);
+            return match ? match.category_id : val._id || "";
           }
 
-          // 1. Try to find by category_id (exact match)
-          const matchByCatId = list.find((c) => c.category_id == lookupValue);
+          const matchByCatId = list.find((c) => c.category_id == val);
           if (matchByCatId) return matchByCatId.category_id;
 
-          // 2. Try to find by _id (match ObjectId)
-          const matchByObjId = list.find((c) => c._id == lookupValue || c.id == lookupValue);
+          
+          const matchByObjId = list.find(
+            (c) => c._id == val || c.id == val
+          );
           if (matchByObjId) return matchByObjId.category_id;
 
-          // 3. If it was a string and we didn't find it, maybe it IS the category_id (even if not in list?)
-          if (typeof val !== "object") return val;
-
-          return "";
+          return val;
         };
 
-        const catId = resolveId(p.categoryId, cats);
+        const rawCat = p.categoryId || p.category || p.category_id;
+        const rawSubCat = p.subCategoryId || p.subCategory || p.sub_category_id;
+
+        const catId = resolveId(rawCat, cats);
+        console.log("Resolved Cat ID:", catId);
 
         let subCats = [];
         let subCatId = "";
@@ -87,17 +88,20 @@ const EditProduct = () => {
             subCats = (res2.data?.data?.docs || []).filter(
               (item) => item.type === "Sub-Category"
             );
-            setSubCategories(subCats);
-
-            subCatId = resolveId(p.subCategoryId, subCats);
+            setSubCategories(subCats)
+            subCatId = resolveId(rawSubCat, subCats);
+            console.log("Resolved SubCat ID:", subCatId);
           } catch (err) {
-            console.log("SubCategory Fetch Error");
+            console.log("SubCategory Fetch Error", err);
           }
-        } else {
+        }
 
-          if (typeof p.subCategoryId === "object") {
-            subCatId = p.subCategoryId.category_id || "";
-          }
+        if (
+          !subCatId &&
+          typeof rawSubCat === "object" &&
+          rawSubCat.category_id
+        ) {
+          subCatId = rawSubCat.category_id;
         }
 
         console.log("Fetched Product:", p);
@@ -107,7 +111,7 @@ const EditProduct = () => {
           description: p.description || "",
           categoryId: catId || "",
           subCategoryId: subCatId || "",
-          productPricePerPiece: p.productPricePerPiece || "",
+          productPricePerPiece: p.productPricePerPiece || p.mrp || "",
           adminRemarks: p.adminRemarks || p.admin_remarks || "",
           timeToMake: p.timeToMake || "",
           texture: p.texture || "",
@@ -118,7 +122,7 @@ const EditProduct = () => {
           netWeight: p.netWeight || "",
           dimension: p.dimension || "",
           color: p.color || "",
-          size: p.size || "",
+          size: Array.isArray(p.size) ? p.size.join(", ") : (p.size || ""),
         });
 
       } catch (err) {
@@ -353,6 +357,28 @@ const EditProduct = () => {
               type="number"
               name="discount"
               value={productData.discount || ""}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="font-medium">Net Weight</label>
+            <input
+              type="text"
+              name="netWeight"
+              value={productData.netWeight || ""}
+              onChange={handleChange}
+              className="w-full p-2 border rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="font-medium">Dimension</label>
+            <input
+              type="text"
+              name="dimension"
+              value={productData.dimension || ""}
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             />
