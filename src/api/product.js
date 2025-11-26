@@ -117,4 +117,7 @@ export const productControllers = {
   getAuctionStatusSummary: () => {
     return productSecuredApi.get("/auction/status/summary");
   },
+  getUserAuctionStats: (userId) => {
+    return productSecuredApi.get(`/auction/stats/${userId}`);
+  },
 };

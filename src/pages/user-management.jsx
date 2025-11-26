@@ -14,10 +14,12 @@ function UserManagement() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   useEffect(() => {
     fetchUsers();
   }, []);
-  
+
   const fetchUsers = async () => {
     try {
       let response = await userControllers.getUserListGroup("USER");
@@ -56,8 +58,7 @@ function UserManagement() {
         )
       );
       toast.success(
-        `Profile ${
-          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        `Profile ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`
       );
     } catch (err) {
@@ -67,10 +68,22 @@ function UserManagement() {
     setOpenModal(false);
   };
 
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      (user.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.firstName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.lastName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.email || "").toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === "ALL" || user.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(users.length / rowsPerPage);
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -89,6 +102,26 @@ function UserManagement() {
               User Management
             </NavLink>
           </nav>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[150px]"
+          >
+            <option value="ALL">All Status</option>
+            <option value="ACTIVE">Active</option>
+            <option value="BLOCKED">Blocked</option>
+          </select>
         </div>
 
         <div className="bg-white rounded-lg shadow border overflow-hidden">
@@ -111,11 +144,10 @@ function UserManagement() {
                     <Switch
                       checked={user?.status === "ACTIVE"}
                       onChange={() => handleToggle(user)}
-                      className={`${
-                        user?.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
-                      } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                      className={`${user?.status === "ACTIVE"
+                        ? "bg-orange-600"
+                        : "bg-gray-300"
+                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                     >
                       <span className="sr-only">Toggle Status</span>
                       <span className="translate-x-1 inline-block h-[18px] w-[18px] bg-white rounded-full transition" />
@@ -156,8 +188,8 @@ function UserManagement() {
             </div>
 
             <div className="text-sm text-gray-600">
-              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, users.length)}{" "}
-              of {users.length}
+              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredUsers.length)}{" "}
+              of {filteredUsers.length}
             </div>
 
             <div className="flex items-center gap-1">
@@ -166,9 +198,8 @@ function UserManagement() {
                   currentPage > 1 && setCurrentPage(currentPage - 1)
                 }
                 disabled={currentPage === 1}
-                className={`px-2 py-1 rounded ${
-                  currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
-                }`}
+                className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                  }`}
               >
                 ‹
               </button>
@@ -178,11 +209,10 @@ function UserManagement() {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
                 disabled={currentPage === totalPages}
-                className={`px-2 py-1 rounded ${
-                  currentPage === totalPages
-                    ? "text-gray-400"
-                    : "hover:bg-gray-100"
-                }`}
+                className={`px-2 py-1 rounded ${currentPage === totalPages
+                  ? "text-gray-400"
+                  : "hover:bg-gray-100"
+                  }`}
               >
                 ›
               </button>

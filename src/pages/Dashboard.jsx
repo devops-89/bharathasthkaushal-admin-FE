@@ -76,8 +76,8 @@ const Dashboard = () => {
           item.status === "LIVE"
             ? "#0ea5e9"
             : item.status === "ENDED"
-            ? "#d97706"
-            : "#6b7280",
+              ? "#d97706"
+              : "#6b7280",
       }));
       setPieData(formatted);
     } catch (err) {
@@ -102,7 +102,7 @@ const Dashboard = () => {
           {/* Line Chart */}
           <div className="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-               Monthly Auction Stats
+              Monthly Auction Stats
             </h3>
             <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
@@ -144,9 +144,15 @@ const Dashboard = () => {
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="value"
+                    style={{ outline: "none" }}
                   >
                     {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke="none"
+                        style={{ outline: "none" }}
+                      />
                     ))}
                   </Pie>
                 </PieChart>

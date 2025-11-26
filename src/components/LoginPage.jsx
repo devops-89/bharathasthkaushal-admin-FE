@@ -4,6 +4,8 @@ import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { Eye, EyeOff } from "lucide-react";
 import { loginValidation } from "../utils/validationSchema";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function LoginPage({ onLogin }) {
   const [state, setState] = useState({
     email: "",
@@ -12,164 +14,120 @@ export default function LoginPage({ onLogin }) {
   const [errors, setErrors] = useState({
     email: "",
     password: "",
-    general: "",                      
+    general: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+const emailTrimmed = state.email.trim();
+
+  // const inputHandler = (e) => {
+  //   const { id, value } = e.target;
+  //   setState({ ...state, [id]: value });
+  //   setErrors({
+  //     email: "",
+  //     password: "",
+  //     general: "",
+  //   });
+  // };
   const inputHandler = (e) => {
-    const { id, value } = e.target;
-    setState({ ...state, [id]: value });
-    setErrors({
-      email: "",
-      password: "",
-      general: "",
-    });
-  };
+  const { id, value } = e.target;
+
+  // email ke liye starting & extra spaces remove
+  const cleanedValue =
+    id === "email" ? value.replace(/\s+/g, "").trimStart() : value;
+
+  setState({ ...state, [id]: cleanedValue });
+
+  setErrors({
+    email: "",
+    password: "",
+    general: "",
+  });
+};
+
+
   const handleSubmit = () => {
     let frontendErrors = { email: "", password: "", general: "" };
     const emailTrimmed = state.email.trim();
+
+    // Update state with trimmed email if it differs
+    if (state.email !== emailTrimmed) {
+      setState(prev => ({ ...prev, email: emailTrimmed }));
+    }
+
     if (!emailTrimmed) {
       frontendErrors.email = "Invalid email";
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Stricter regex to catch trailing commas and invalid chars
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(emailTrimmed)) {
         frontendErrors.email = "Invalid email";
-      } else {
-       
-        const domainPart = emailTrimmed.split('@')[1];
-        if (domainPart) {
-          const lastPart = domainPart.split('.').pop();
-          
-    
-          const commonTLDs = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'in', 'uk', 'us', 'au', 'ca', 'de', 'fr', 'jp', 'cn', 'ru', 'br', 'mx', 'it', 'es', 'nl', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'ie', 'pt', 'be', 'at', 'ch', 'nz', 'sg', 'hk', 'my', 'th', 'ph', 'id', 'vn', 'kr', 'tw', 'tr', 'ae', 'sa', 'eg', 'za', 'info', 'biz', 'xyz', 'tech', 'online', 'site', 'website', 'app', 'dev', 'cloud', 'email', 'mail', 'me', 'tv', 'cc', 'ws', 'name', 'mobi', 'asia', 'tel', 'travel', 'jobs', 'pro', 'museum', 'aero', 'coop', 'int', 'mil'];
-          
-          if (!lastPart || lastPart.length < 2) {
-    
-            frontendErrors.email = "Invalid email";
-          } else if (/^\d+$/.test(lastPart)) {
-       
-            frontendErrors.email = "Invalid email";
-          } else if (lastPart.length > 15) {
-     
-            frontendErrors.email = "Invalid email";
-          } else if (/[^a-zA-Z]/.test(lastPart)) {
-       
-            frontendErrors.email = "Invalid email";
-          } else if (!commonTLDs.includes(lastPart.toLowerCase())) {
-     
-            const commonTypos = ['comm', 'commm', 'commmm', 'room', 'roomm', 'roommm', 'conj', 'con', 'coom', 'coomm', 'rrrm', 'rrr', 'rrrr'];
-            if (commonTypos.includes(lastPart.toLowerCase()) || lastPart.length > 6) {
-              frontendErrors.email = "Invalid email";
-            }
-            // For other uncommon TLDs, let backend validate (don't block in frontend)
-          }
-        }
       }
     }
+
     if (!state.password.trim()) {
       frontendErrors.password = "Invalid password";
     }
+
     const hasEmailError = frontendErrors.email !== "";
     const hasPasswordError = frontendErrors.password !== "";
-    
+
     if (hasEmailError || hasPasswordError) {
       setErrors(frontendErrors);
-      
+      if (hasEmailError) toast.error(frontendErrors.email);
+      if (hasPasswordError) toast.error(frontendErrors.password);
       return;
     }
+
     let body = {
       identity: emailTrimmed,
       password: state.password,
     };
     setIsLoading(true);
-    
-
     setErrors({ email: "", password: "", general: "" });
-    
+
     authControllers
       .login(body)
       .then((res) => {
         const response = res.data.data;
         localStorage.setItem("accessToken", response.accessToken);
+        toast.success("Login successful!");
         navigate("/dashboard");
         setIsLoading(false);
       })
       .catch((err) => {
-        let errMessage = err?.response?.data?.message || "";
-        const errorMsgLower = errMessage.toLowerCase();
-        
-        
-        let apiErrors = { email: "", password: "", general: "" };
-        
- 
+        let errMessage = err?.response?.data?.message || "Login failed";
+        let errorMsgLower = errMessage.toLowerCase();
+
+        // Handle specific backend errors that should be shown as "Invalid email"
         if (errorMsgLower.includes("phone")) {
-
-          apiErrors.password = "Invalid password";
+          errMessage = "Invalid email";
+          errorMsgLower = "invalid email";
         }
-       
-        else if (errorMsgLower.includes("password") && 
-                 (errorMsgLower.includes("incorrect") || 
-                  errorMsgLower.includes("wrong") || 
-                  errorMsgLower.includes("invalid"))) {
 
+        toast.error(errMessage);
+
+        let apiErrors = { email: "", password: "", general: "" };
+
+        if (errorMsgLower.includes("password") ||
+          errorMsgLower.includes("incorrect") ||
+          errorMsgLower.includes("wrong") ||
+          errorMsgLower.includes("invalid credential")) {
           apiErrors.password = "Invalid password";
-        }
-       
-        else if (errorMsgLower.includes("user not found") || 
-                 errorMsgLower.includes("email not found") ||
-                 errorMsgLower.includes("no user") ||
-                 errorMsgLower.includes("account not found") ||
-                 errorMsgLower.includes("invalid email") ||
-                 errorMsgLower.includes("email invalid") ||
-                 (errorMsgLower.includes("user") && errorMsgLower.includes("not found")) ||
-                 errorMsgLower.includes("user does not exist")) {
-         
+        } else if (errorMsgLower.includes("user") ||
+          errorMsgLower.includes("email") ||
+          errorMsgLower.includes("account") ||
+          errorMsgLower.includes("not found") ||
+          errorMsgLower.includes("exist")) {
           apiErrors.email = "Invalid email";
         }
-      
-        else {
-          const domainPart = emailTrimmed.split('@')[1];
-          let emailLooksInvalid = false;
-          
-          if (domainPart) {
-            const lastPart = domainPart.split('.').pop();
-            const commonTLDs = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'in', 'uk', 'us', 'au', 'ca', 'de', 'fr', 'jp', 'cn', 'ru', 'br', 'mx', 'it', 'es', 'nl', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'ie', 'pt', 'be', 'at', 'ch', 'nz', 'sg', 'hk', 'my', 'th', 'ph', 'id', 'vn', 'kr', 'tw', 'tr', 'ae', 'sa', 'eg', 'za', 'info', 'biz', 'xyz', 'tech', 'online', 'site', 'website', 'app', 'dev', 'cloud', 'email', 'mail', 'me', 'tv', 'cc', 'ws', 'name', 'mobi', 'asia', 'tel', 'travel', 'jobs', 'pro', 'museum', 'aero', 'coop', 'int', 'mil', 'yopmail', 'gmail', 'yahoo', 'hotmail', 'outlook', 'live', 'msn', 'aol', 'icloud', 'mail', 'pm', 'gm', 'ru', 'ua', 'by', 'kz', 'uz', 'tj', 'kg', 'md', 'am', 'az', 'ge', 'lv', 'lt', 'ee', 'is', 'li', 'lu', 'mc', 'ad', 'sm', 'va', 'mt', 'cy', 'gi', 'je', 'gg', 'im', 'fo', 'gl', 'sj', 'ax', 'bg', 'ro', 'hu', 'sk', 'si', 'hr', 'ba', 'rs', 'me', 'mk', 'al', 'xk'];
-         
-            if (!lastPart || lastPart.length < 2) {
-            
-              emailLooksInvalid = true;
-            } else if (/^\d+$/.test(lastPart)) {
-            
-              emailLooksInvalid = true;
-            } else if (lastPart.length > 15) {
-       
-              emailLooksInvalid = true;
-            } else if (/[^a-zA-Z]/.test(lastPart)) {
-             
-              emailLooksInvalid = true;
-            } else if (!commonTLDs.includes(lastPart.toLowerCase())) {
-              
-              emailLooksInvalid = true;
-            }
-          } else {
-            // No domain part found
-            emailLooksInvalid = true;
-          }
-          
-          // If email looks suspicious and backend rejected it, show email error
-          // Otherwise, assume password is wrong
-          if (emailLooksInvalid) {
-            apiErrors.email = "Invalid email";
-          } else {
-            apiErrors.password = "Invalid password";
-          }
-        }
-        
+
         setErrors(apiErrors);
         setIsLoading(false);
       });
   };
+
   const containerStyle = {
     height: "100vh",
     display: "flex",
@@ -180,7 +138,7 @@ export default function LoginPage({ onLogin }) {
     overflow: "hidden",
     fontFamily: "system-ui, -apple-system, sans-serif",
   };
-  
+
   const cardStyle = {
     width: "100%",
     maxWidth: "384px",
@@ -219,7 +177,7 @@ export default function LoginPage({ onLogin }) {
     color: "#92400e",
     marginBottom: "4px",
   };
-  
+
   const inputStyle = {
     width: "100%",
     padding: "10px 12px",
@@ -268,6 +226,7 @@ export default function LoginPage({ onLogin }) {
   };
   return (
     <div style={containerStyle}>
+      <ToastContainer />
       <div style={cardStyle}>
         {/* Logo Section */}
         <div style={logoContainerStyle}>
@@ -298,7 +257,7 @@ export default function LoginPage({ onLogin }) {
               <label htmlFor="email" style={labelStyle}>
                 Email Address
               </label>
-              <input
+              {/* <input
                 id="email"
                 type="email"
                 value={state.email}
@@ -306,13 +265,28 @@ export default function LoginPage({ onLogin }) {
                 onChange={inputHandler}
                 style={inputStyle}
                 placeholder="Enter your email"
-              />
+              /> */}
+              <input
+  id="email"
+  type="email"
+  value={state.email}
+  required
+  autoComplete="off"
+  spellCheck="false"
+  onChange={inputHandler}
+  onBlur={(e) =>
+    setState(prev => ({ ...prev, email: e.target.value.trim() }))
+  }
+  style={inputStyle}
+  placeholder="Enter your email"
+/>
+
               {errors.email && (
                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
                   {errors.email}
                 </p>
               )}
-              
+
             </div>
 
             <div style={fieldContainerStyle}>
