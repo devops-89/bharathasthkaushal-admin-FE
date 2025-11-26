@@ -122,7 +122,7 @@ const PaymentManagement = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Payment Management</h1>
+            <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Payment Management</h1>
             
                       {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
                                     <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">

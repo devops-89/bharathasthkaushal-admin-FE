@@ -116,7 +116,7 @@ const CategoryManagement = () => {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                     Category Management
                   </h1>
                   <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">

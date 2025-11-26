@@ -273,7 +273,7 @@ const PermissionManagement = () => {
               <Shield className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                  Permission Management
               </h1>
               <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">

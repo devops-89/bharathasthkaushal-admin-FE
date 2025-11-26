@@ -242,7 +242,7 @@ const NeedAssistanceDashboard = () => {
     <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
             Need Assistance
           </h1>
           <nav className="mt-2 text-sm text-orange-600">
