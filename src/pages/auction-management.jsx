@@ -116,9 +116,8 @@ const AuctionManagement = () => {
       WON: "bg-teal-200 text-teal-800",
       ACTIVE: "bg-green-200 text-green-800",
     };
-    return `px-3 py-1 rounded-full text-sm font-medium ${
-      statusMap[status] || "bg-gray-200 text-gray-800"
-    }`;
+    return `px-3 py-1 rounded-full text-sm font-medium ${statusMap[status] || "bg-gray-200 text-gray-800"
+      }`;
   };
   const handleAddAuction = async () => {
     if (
@@ -137,9 +136,9 @@ const AuctionManagement = () => {
       productId: parseInt(newAuction.productId),
       start_price: parseFloat(newAuction.startingBid),
       reserve_price: parseFloat(newAuction.reservePrice),
-      hard_close_at: `${newAuction.endDate}T23:59:59Z`,
+      hard_close_at: new Date(newAuction.endDate).toISOString(),
       min_bid_amount: parseFloat(newAuction.minBidAmount),
-      start_date: `${newAuction.startDate}T00:00:00Z`,
+      start_date: new Date(newAuction.startDate).toISOString(),
       quantity: parseInt(newAuction.quantity),
     };
 
@@ -173,7 +172,7 @@ const AuctionManagement = () => {
           res.data.data.status === "LIVE"
             ? "Active"
             : res.data.data.status.charAt(0).toUpperCase() +
-              res.data.data.status.slice(1).toLowerCase(),
+            res.data.data.status.slice(1).toLowerCase(),
         description:
           products.find((p) => p.productId === parseInt(newAuction.productId))
             ?.description || "No description",
@@ -208,11 +207,11 @@ const AuctionManagement = () => {
       );
       setError(
         "Error creating auction: " +
-          (err.response?.data?.message || err.message || "Unknown error")
+        (err.response?.data?.message || err.message || "Unknown error")
       );
       alert(
         "Error creating auction: " +
-          (err.response?.data?.message || err.message || "Unknown error")
+        (err.response?.data?.message || err.message || "Unknown error")
       );
     } finally {
       setLoading(false);
@@ -260,7 +259,7 @@ const AuctionManagement = () => {
           details.status === "LIVE"
             ? "Active"
             : details.status.charAt(0).toUpperCase() +
-              details.status.slice(1).toLowerCase(),
+            details.status.slice(1).toLowerCase(),
         description: details.product?.description || "No description",
         dimensions: details.product?.dimension || "Not specified",
         weight: details.product?.netWeight || "Not specified",
@@ -296,11 +295,11 @@ const AuctionManagement = () => {
       );
       setError(
         "Error starting auction: " +
-          (err.response?.data?.message || err.message)
+        (err.response?.data?.message || err.message)
       );
       alert(
         "Error starting auction: " +
-          (err.response?.data?.message || err.message)
+        (err.response?.data?.message || err.message)
       );
     } finally {
       setLoading(false);
@@ -315,7 +314,7 @@ const AuctionManagement = () => {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
             Auction Management
           </h1>
-          
+
           <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
             <NavLink
               to="/dashboard"
@@ -383,7 +382,7 @@ const AuctionManagement = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentAuctions.map((auction) =>(
+            {currentAuctions.map((auction) => (
               <tr key={auction.auction_id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -666,41 +665,58 @@ const AuctionManagement = () => {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-4">
-                    Bids
-                  </h3>
-                  {selectedAuction.bids.length > 0 ? (
-                    <div className="space-y-3">
-                      {selectedAuction.bids.map((bid) => (
-                        <div
-                          key={bid.bid_id}
-                          className="bg-white p-3 rounded-lg border border-blue-100"
-                        >
-                          <p className="text-sm text-gray-900">
-                            Bid ID: {bid.bid_id}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            User ID: {bid.user_id}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            Amount: ₹
-                            {parseFloat(bid.bid_amount).toLocaleString()}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            Status: {bid.status}
-                          </p>
-                          <p className="text-sm text-gray-900">
-                            Deposit: ₹
-                            {parseFloat(bid.deposit.amount).toLocaleString()} (
-                            {bid.deposit.status})
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-900">No bids placed yet.</p>
-                  )}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 h-96 flex flex-col">
+                  <div className="flex justify-between items-center mb-4 shrink-0">
+                    <h3 className="text-lg font-semibold text-blue-900">
+                      Bids History
+                    </h3>
+                    <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                      Total Bids: {selectedAuction.bids.length}
+                    </span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                    {selectedAuction.bids.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedAuction.bids.map((bid) => (
+                          <div
+                            key={bid.bid_id}
+                            className="bg-white p-3 rounded-lg border border-blue-100 shadow-sm flex justify-between items-center hover:shadow-md transition-shadow"
+                          >
+                            <div>
+                              <p className="font-medium text-gray-900">
+                                {bid.user?.name || `User ID: ${bid.user_id}`}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {new Date(bid.createdAt).toLocaleString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit"
+                                })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-blue-600">
+                                ₹{parseFloat(bid.bid_amount).toLocaleString()}
+                              </p>
+                              <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${bid.status === 'LEADING' ? 'bg-green-100 text-green-800' :
+                                  bid.status === 'OUTBID' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                                }`}>
+                                {bid.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-gray-500">
+                        <p>No bids placed yet.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <button
@@ -808,8 +824,9 @@ const AuctionManagement = () => {
                     Start Date *
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     required
+                    min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     value={newAuction.startDate}
                     onChange={(e) =>
                       setNewAuction({
@@ -882,8 +899,9 @@ const AuctionManagement = () => {
                     End Date *
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     required
+                    min={newAuction.startDate || new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     value={newAuction.endDate}
                     onChange={(e) =>
                       setNewAuction({ ...newAuction, endDate: e.target.value })
@@ -930,45 +948,45 @@ const AuctionManagement = () => {
         </div>
       )}
       <div className="flex items-center justify-between p-4 border-t bg-white">
-  <div className="flex items-center gap-2">
-    <span className="text-sm text-gray-600">Rows per page:</span>
-    <select
-      value={rowsPerPage}
-      onChange={(e) => {
-        setRowsPerPage(Number(e.target.value));
-        setCurrentPage(1);
-      }}
-      className="border px-2 py-1 rounded"
-    >
-      <option value={10}>10</option>
-      <option value={25}>25</option>
-      <option value={50}>50</option>
-      <option value={100}>100</option>
-    </select>
-  </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Rows per page:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="border px-2 py-1 rounded"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
 
-  <div className="text-sm text-gray-600">
-    {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, auctions.length)} of {auctions.length}
-  </div>
+        <div className="text-sm text-gray-600">
+          {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, auctions.length)} of {auctions.length}
+        </div>
 
-  <div className="flex items-center gap-1">
-    <button
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage((prev) => prev - 1)}
-      className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ‹
-    </button>
+        <div className="flex items-center gap-1">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+          >
+            ‹
+          </button>
 
-    <button
-      disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage((prev) => prev + 1)}
-      className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-    >
-      ›
-    </button>
-  </div>
-</div>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+          >
+            ›
+          </button>
+        </div>
+      </div>
 
     </div>
   );

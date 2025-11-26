@@ -9,6 +9,7 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [productData, setProductData] = useState({
+    
     product_name: "",
     description: "",
     categoryId: "",
@@ -20,11 +21,11 @@ const EditProduct = () => {
     patternUsed: "",
     quantity: "",
     material: "",
-    discount: "",
+    // discount: "",
     netWeight: "",
     dimension: "",
-    color: "",
-    size: "",
+    // color: "",
+    // size: "",
   });
 
   const [images, setImages] = useState([]);
@@ -118,11 +119,8 @@ const EditProduct = () => {
           patternUsed: p.patternUsed || "",
           quantity: p.quantity || "",
           material: p.material || "",
-          discount: p.discount || "",
           netWeight: p.netWeight || "",
           dimension: p.dimension || "",
-          color: p.color || "",
-          size: Array.isArray(p.size) ? p.size.join(", ") : (p.size || ""),
         });
 
       } catch (err) {
@@ -329,7 +327,7 @@ const EditProduct = () => {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="font-medium">Color</label>
             <input
               type="text"
@@ -338,9 +336,9 @@ const EditProduct = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             />
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="font-medium">Size</label>
             <input
               type="text"
@@ -349,9 +347,9 @@ const EditProduct = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             />
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="font-medium">Discount (%)</label>
             <input
               type="number"
@@ -360,7 +358,7 @@ const EditProduct = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             />
-          </div>
+          </div> */}
 
           <div>
             <label className="font-medium">Net Weight</label>

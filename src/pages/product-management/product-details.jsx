@@ -19,12 +19,15 @@ import {
   Brush,
   Layers,
   Droplets,
+  Pencil,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
+import EditBuildStepModal from "../../components/EditBuildStepModal";
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -59,6 +62,8 @@ const ProductDetails = () => {
   const [artisans, setArtisans] = useState([]);
   const [showStepDetails, setShowStepDetails] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState(null);
+  const [editStepId, setEditStepId] = useState(null);
+
   useEffect(() => {
     userControllers.getUserListGroup("ARTISAN").then((res) => {
       let data = res.data.data.docs.map((a) => ({
@@ -454,6 +459,13 @@ const ProductDetails = () => {
                                 <span className="font-medium text-gray-900">
                                   {step.stepName}
                                 </span>
+                                <button
+                                  onClick={() => setEditStepId(step.id)}
+                                  className="p-2 rounded-full hover:bg-gray-100"
+                                >
+                                  <Pencil className="w-5 h-5 text-blue-600" />
+                                </button>
+
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
                                     step.status
@@ -686,12 +698,8 @@ const ProductDetails = () => {
                                 alert("Product Rejected Successfully");
 
                                 const updated =
-                                  await productControllers.getProductById(
-                                    id
-                                  );
-                                setProduct(
-                                  updated.data?.data || updated.data
-                                );
+                                  await productControllers.getProductById(id);
+                                setProduct(updated.data?.data || updated.data);
 
                                 setShowRejectModal(false);
                                 setRejectReason("");
@@ -725,9 +733,7 @@ const ProductDetails = () => {
 
                                 const updated =
                                   await productControllers.getProductById(id);
-                                setProduct(
-                                  updated.data?.data || updated.data
-                                );
+                                setProduct(updated.data?.data || updated.data);
                               } catch (err) {
                                 alert("Failed to Approve Product");
                                 console.log(err);
@@ -835,7 +841,9 @@ const ProductDetails = () => {
                             Size
                           </p>
                           <p className="text-gray-900 font-semibold">
-                            {Array.isArray(product.size) ? product.size.join(", ") : product.size}
+                            {Array.isArray(product.size)
+                              ? product.size.join(", ")
+                              : product.size}
                           </p>
                         </div>
                       </div>
@@ -1257,8 +1265,13 @@ const ProductDetails = () => {
           onClose={() => setShowStepDetails(false)}
         />
       )}
+      {editStepId && (
+        <EditBuildStepModal
+          stepId={editStepId}
+          onClose={() => setEditStepId(null)}
+        />
+      )}
     </div>
   );
-
 };
 export default ProductDetails;

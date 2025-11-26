@@ -12,7 +12,11 @@ export const productControllers = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-
+  updateBuildStep: (id, formData) => {
+    return productSecuredApi.put(`/build-step/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
   getAllProducts: (page = 1, pageSize = 10) => {
     return productSecuredApi.get("/product/admin/all-products", {
       params: {
@@ -34,19 +38,19 @@ export const productControllers = {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
   updateBuildStepStatus: (stepId, status, adminRemarks = "") => {
-  const payload = {
-    status: status,
-  };
+    const payload = {
+      status: status,
+    };
 
-  if (status === "REJECTED") {
-    payload.admin_remarks = adminRemarks;
-  }
+    if (status === "REJECTED") {
+      payload.admin_remarks = adminRemarks;
+    }
 
-  return productSecuredApi.post(
-    `/build-step/admin/approve/${stepId}`,
-    payload
-  );
-},
+    return productSecuredApi.post(
+      `/build-step/admin/approve/${stepId}`,
+      payload
+    );
+  },
 
 
   updateProductStatus: (id, status, adminRemarks = "") => {
@@ -71,8 +75,8 @@ export const productControllers = {
   },
 
   getBuildStepDetails: (stepId) => {
-  return productSecuredApi.get(`/build-step/details/${stepId}`);
-},
+    return productSecuredApi.get(`/build-step/details/${stepId}`);
+  },
 
 
 

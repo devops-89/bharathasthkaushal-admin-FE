@@ -12,7 +12,7 @@ const AddProduct = () => {
     subCategoryId: "",
     productPricePerPiece: "",
     quantity: "",
-    discount: "",
+    // discount: "",
     material: "",
     color: "",
     sizeInput: "",
@@ -93,7 +93,7 @@ const AddProduct = () => {
       data.append("subCategoryId", formData.subCategoryId);
       data.append("productPricePerPiece", formData.productPricePerPiece);
       data.append("quantity", formData.quantity);
-      data.append("discount", formData.discount);
+      // data.append("discount", formData.discount);
       data.append("material", formData.material);
       data.append("color", formData.color);
       data.append("description", formData.description);
@@ -265,7 +265,7 @@ const AddProduct = () => {
             </div>
 
             {/* Discount */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Discount (%)
               </label>
@@ -277,7 +277,7 @@ const AddProduct = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="0"
               />
-            </div>
+            </div> */}
 
             {/* Time to Make */}
             <div>
@@ -340,7 +340,7 @@ const AddProduct = () => {
             </div>
 
             {/* Color */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Color
               </label>
@@ -352,10 +352,10 @@ const AddProduct = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="Red, Blue, etc."
               />
-            </div>
+            </div> */}
 
             {/* Size */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Size
               </label>
@@ -367,7 +367,7 @@ const AddProduct = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="Enter size (e.g. XL, 42, etc.)"
               />
-            </div>
+            </div> */}
 
             {/* Net Weight */}
             <div>

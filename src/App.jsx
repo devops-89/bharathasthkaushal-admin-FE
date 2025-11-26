@@ -15,6 +15,7 @@ import ProductManagement from "./pages/product-management";
 import AddProduct from "./pages/product-management/add-product";
 import ProductDetails from "./pages/product-management/product-details";
 import EditProduct from "./pages/EditProduct";
+import Buildstate from "./components/EditBuildStepModal";
 //import ApprovalManagementDetails from "./pages/approval-management-details";
 import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
@@ -79,6 +80,7 @@ function App() {
         element={<UserManagement/>}
         />
       <Route path="/user-profile/:id" element={<UserProfile />} />
+<Route path="/edit-build-step/:id" element={<Buildstate />} />
 
 
         <Route 
