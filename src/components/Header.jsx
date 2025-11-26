@@ -13,13 +13,15 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await authControllers.logout();
-      // toast.success("Logout successful"); // Removed as per user request
-      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      toast.error("Logout failed");
+      // Optional: toast.error("Logout failed"); 
+    } finally {
+      // Always clear local storage and redirect, regardless of API success/failure
+      localStorage.removeItem("accessToken");
+      navigate("/");
+      setIsDropdownOpen(false);
     }
-    setIsDropdownOpen(false);
   };
 
   const handleProfile = () => {
