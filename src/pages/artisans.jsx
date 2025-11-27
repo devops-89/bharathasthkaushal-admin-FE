@@ -6,7 +6,6 @@ import {
   Plus,
   X,
   Eye,
-  MoreVertical,
   Phone,
   Calendar,
   User,
@@ -26,7 +25,6 @@ const ArtisanManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -180,6 +178,7 @@ const ArtisanManagement = () => {
         status: user.status || "Approved Artisan",
         user_group: user.user_group || "ARTISAN",
         introVideo: user.introVideo || null,
+        avatar: user.avatar || null,
       }));
 
       setPartnersData(mappedData);
@@ -196,13 +195,9 @@ const ArtisanManagement = () => {
   }, [currentPage, rowsPerPage]);
 
   console.log("hdwjhed", subCategories);
-  const toggleDropdown = (partnerId) => {
-    setDropdownOpen(dropdownOpen === partnerId ? null : partnerId);
-  };
   const handleViewDetails = (partner) => {
     setSelectedPartner(partner);
     setShowDetailsModal(true);
-    setDropdownOpen(null);
   };
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -708,11 +703,6 @@ const ArtisanManagement = () => {
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     Artisan Details
-                    {selectedPartner.verify_status === "VERIFIED" && (
-                      <span className="text-green-600 text-sm font-semibold px-3 py-1 border border-green-500 rounded-full">
-                        Verified Artisan
-                      </span>
-                    )}
                   </h2>
 
                   <button
@@ -723,34 +713,43 @@ const ArtisanManagement = () => {
                   </button>
                 </div>
                 <div className="space-y-6">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
+                        <img
+                          src={
+                            selectedPartner.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              `${selectedPartner.firstName} ${selectedPartner.lastName}`
+                            )}&background=random`
+                          }
+                          alt={`${selectedPartner.firstName} ${selectedPartner.lastName}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
+                        {selectedPartner.verify_status === "VERIFIED" && (
+                          <span className="text-green-600 text-xs font-semibold px-2 py-0.5 border border-green-500 rounded-full">
+                            Verified
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-gray-500">{selectedPartner.email || "N/A"}</p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
+                      >
+                        {selectedPartner.status || "Approved Artisan"}
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">First Name</p>
-                        <p className="font-medium">
-                          {selectedPartner.firstName || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Last Name</p>
-                        <p className="font-medium">
-                          {selectedPartner.lastName || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">
-                          {selectedPartner.email || "N/A"}
-                        </p>
-                      </div>
-                    </div>
                     <div className="flex items-center space-x-3">
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
@@ -875,10 +874,10 @@ const ArtisanManagement = () => {
                     Expertise Field
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    View Details
                   </th>
                 </tr>
               </thead>
@@ -889,18 +888,33 @@ const ArtisanManagement = () => {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {[partner.firstName, partner.lastName]
-                          .join(" ")
-                          .slice(0, 20) +
-                          ([partner.firstName, partner.lastName].join(" ")
-                            .length > 20
-                            ? "..."
-                            : "")}
-                      </div>
-
-                      <div className="text-xs text-gray-500">
-                        Joined: {partner.joinedDate || "N/A"}
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={
+                              partner.avatar ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                `${partner.firstName} ${partner.lastName}`
+                              )}&background=random`
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {[partner.firstName, partner.lastName]
+                              .join(" ")
+                              .slice(0, 20) +
+                              ([partner.firstName, partner.lastName].join(" ")
+                                .length > 20
+                                ? "..."
+                                : "")}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Joined: {partner.joinedDate || "N/A"}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -937,30 +951,16 @@ const ArtisanManagement = () => {
                       </Switch>
                     </td>
 
-                    <th className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {partner.status || "Approved Artisan"}
-                      </div>
-                    </th>
+
 
                     <td className="px-6 py-4 whitespace-nowrap relative">
                       <button
-                        onClick={() => toggleDropdown(partner.id)}
+                        onClick={() => handleViewDetails(partner)}
                         className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        title="View Details"
                       >
-                        <MoreVertical className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </button>
-                      {dropdownOpen === partner.id && (
-                        <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[150px]">
-                          <button
-                            onClick={() => handleViewDetails(partner)}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </button>
-                        </div>
-                      )}
                     </td>
                   </tr>
                 ))}
