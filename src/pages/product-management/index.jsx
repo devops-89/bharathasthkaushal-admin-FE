@@ -12,6 +12,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
+import { toast } from "react-toastify";
 export default function ProductManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState(null);
@@ -19,7 +20,7 @@ export default function ProductManagement() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const filteredProducts = products?.docs || []; 
+  const filteredProducts = products?.docs || [];
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -35,7 +36,8 @@ export default function ProductManagement() {
         setProducts(response);
       })
       .catch((err) => {
-        console.log("sdsds", err);  
+        console.log("sdsds", err);
+        toast.error("Failed to fetch products");
       });
   };
 
@@ -110,7 +112,7 @@ export default function ProductManagement() {
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
-                  
+
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <div className="relative mb-4">
@@ -121,7 +123,7 @@ export default function ProductManagement() {
                         className="w-full h-48 object-cover rounded-lg"
                       />
                     ) : null}
-                 
+
                     <div className="absolute top-0 right-0">
                       {product.quantity}
                     </div>
@@ -188,9 +190,8 @@ export default function ProductManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`px-2 py-1 rounded ${
-                    currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
-                  }`}
+                  className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                    }`}
                 >
                   ‹
                 </button>
@@ -200,11 +201,10 @@ export default function ProductManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`px-2 py-1 rounded ${
-                    currentPage === totalPages
+                  className={`px-2 py-1 rounded ${currentPage === totalPages
                       ? "text-gray-400"
                       : "hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   ›
                 </button>

@@ -20,6 +20,7 @@ import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import countryCodes from "../utils/countryCodes.json";
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -47,12 +48,34 @@ const ArtisanManagement = () => {
     expertizeField: "",
     location: "",
     aadhaarNumber: "",
-    user_caste_category: "GENERAL",
+    user_caste_category: "",
     subCaste: "",
     introVideo: "",
     gstNumber: "",
   });
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const dropdownRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredCountries = countryCodes.filter(
+    (country) =>
+      country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+      country.dial_code.includes(countrySearchTerm)
+  );
 
   const [partnersData, setPartnersData] = useState(() => {
     const savedData = localStorage.getItem("partnersData");
@@ -84,8 +107,7 @@ const ArtisanManagement = () => {
       );
 
       toast.success(
-        `Artisan ${
-          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        `Artisan ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`
       );
     } catch (error) {
@@ -204,7 +226,7 @@ const ArtisanManagement = () => {
       const response = await authControllers.addArtisan(payload);
       console.log("smkdmk", response, payload);
       if (response.status === 200) {
-        alert(
+        toast.success(
           "Artisan registered successfully! Login credentials sent to email."
         );
         setShowAddForm(false);
@@ -217,17 +239,17 @@ const ArtisanManagement = () => {
           expertizeField: "",
           location: "",
           aadhaarNumber: "",
-          user_caste_category: "GENERAL",
+          user_caste_category: "",
           subCaste: "",
           gstNumber: "",
         });
         await fetchArtisans();
       } else {
-        alert("Error: " + response.data?.message);
+        toast.error(response.data?.message || "Error registering artisan");
       }
     } catch (error) {
-      alert("Error registering artisan: " + error.message);
-      console.log("object".error);
+      toast.error(error.response?.data?.message || "Error registering artisan");
+      console.error("Error registering artisan:", error);
     }
   };
 
@@ -381,7 +403,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address *
+                      Email Address
                     </label>
 
                     <input
@@ -395,7 +417,7 @@ const ArtisanManagement = () => {
                         }
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="example@yopmail.com"
+                      placeholder="Enter email address"
                     />
                   </div>
                   <div>
@@ -403,33 +425,73 @@ const ArtisanManagement = () => {
                       Location
                     </label>
                     <input
-                      type="location"
+                      type="text"
                       name="location"
                       value={formData.location}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder=" enter your location"
+                      placeholder=" Enter your location"
                     />
                   </div>
                   <div className="flex gap-2">
-                    <div className="w-24">
+                    <div className="w-40 relative" ref={dropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Code
                       </label>
-                      <select
-                        name="countryCode"
-                        value={formData.countryCode}
-                        onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      <div
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
+                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
                       >
-                        <option value="+91">+91</option>
-                        <option value="+1">+1</option>
-                        <option value="+44">+44</option>
-                      </select>
+                        <span className="truncate">
+                          {formData.countryCode}
+                        </span>
+                        <span className="ml-2 text-gray-400">▼</span>
+                      </div>
+
+                      {isCountryDropdownOpen && (
+                        <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                            <div className="relative">
+                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                              <input
+                                type="text"
+                                placeholder="Search country..."
+                                value={countrySearchTerm}
+                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto flex-1">
+                            {filteredCountries.length > 0 ? (
+                              filteredCountries.map((country) => (
+                                <div
+                                  key={country.code}
+                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                  onClick={() => {
+                                    setFormData({ ...formData, countryCode: country.dial_code });
+                                    setIsCountryDropdownOpen(false);
+                                    setCountrySearchTerm("");
+                                  }}
+                                >
+                                  <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
+                                  <span className="text-gray-600 truncate">{country.name}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                No countries found
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
+                        Phone Number *
                       </label>
                       <input
                         type="tel"
@@ -443,7 +505,7 @@ const ArtisanManagement = () => {
                           }
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="9876543210"
+                        placeholder="Enter phone Number"
                       />
                     </div>
                   </div>
@@ -468,11 +530,11 @@ const ArtisanManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number
+                      Aadhaar Number *
                     </label>
                     <input
                       type="text"
-                      name="aadhaarNumber"
+                      name="aadhaarNumber "
                       value={formData.aadhaarNumber}
                       maxLength={12}
                       onChange={(e) => {
@@ -482,7 +544,7 @@ const ArtisanManagement = () => {
                         }
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="12 digit Aadhaar"
+                      placeholder="Enter Aadhar Number"
                     />
                   </div>
                   <div>
@@ -495,6 +557,7 @@ const ArtisanManagement = () => {
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
+                      <option value="">Select Caste Category</option>
                       {Object.keys(casteCategories).map((category) => (
                         <option key={category} value={category}>
                           {category}
@@ -513,7 +576,7 @@ const ArtisanManagement = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
                       <option value="">Select Sub Caste</option>
-                      {casteCategories[formData.user_caste_category].map(
+                      {formData.user_caste_category && casteCategories[formData.user_caste_category]?.map(
                         (subCaste) => (
                           <option key={subCaste} value={subCaste}>
                             {subCaste}
@@ -546,7 +609,7 @@ const ArtisanManagement = () => {
                       }}
                       maxLength={15}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="GST Number"
+                      placeholder=" Enter GST Number"
                     />
                   </div>
                   <div className="flex gap-3 pt-4">
@@ -623,9 +686,8 @@ const ArtisanManagement = () => {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium">{`${
-                          selectedPartner.countryCode || ""
-                        } ${selectedPartner.phoneNo || "N/A"}`}</p>
+                        <p className="font-medium">{`${selectedPartner.countryCode || ""
+                          } ${selectedPartner.phoneNo || "N/A"}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -773,9 +835,8 @@ const ArtisanManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{`${
-                        partner.countryCode || ""
-                      } ${partner.phoneNo || "N/A"}`}</div>
+                      <div className="text-sm text-gray-900">{`${partner.countryCode || ""
+                        } ${partner.phoneNo || "N/A"}`}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
@@ -792,14 +853,18 @@ const ArtisanManagement = () => {
                       <Switch
                         checked={partner.status === "ACTIVE"}
                         onChange={() => handleToggleStatus(partner)}
-                        className={`${
-                          partner.status === "ACTIVE"
-                            ? "bg-orange-600"
-                            : "bg-gray-300"
-                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        className={`${partner.status === "ACTIVE"
+                          ? "bg-orange-600"
+                          : "bg-gray-300"
+                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                       >
                         <span className="sr-only">Toggle Status</span>
-                        <span className="translate-x-1 inline-block h-[18px] w-[18px] bg-white rounded-full transition" />
+                        <span
+                          className={`${partner.status === "ACTIVE"
+                            ? "translate-x-6"
+                            : "translate-x-1"
+                            } inline-block h-[18px] w-[18px] transform rounded-full bg-white transition`}
+                        />
                       </Switch>
                     </td>
 
@@ -875,9 +940,8 @@ const ArtisanManagement = () => {
           <button
             onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-2 py-1 rounded ${
-              currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
-            }`}
+            className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+              }`}
           >
             ‹
           </button>
@@ -887,9 +951,8 @@ const ArtisanManagement = () => {
               currentPage < totalPages && setCurrentPage(currentPage + 1)
             }
             disabled={currentPage === totalPages}
-            className={`px-2 py-1 rounded ${
-              currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"
-            }`}
+            className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"
+              }`}
           >
             ›
           </button>
@@ -924,7 +987,7 @@ const ArtisanManagement = () => {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 export default ArtisanManagement;

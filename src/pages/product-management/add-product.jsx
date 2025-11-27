@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
 import { categoryControllers } from "../../api/category";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -117,12 +119,12 @@ const AddProduct = () => {
         console.log(`${key}:`, value);
       }
       const res = await productControllers.addProduct(data);
-      alert("Product added successfully!");
+      toast.success("Product added successfully!");
       console.log("Product Response:", res.data);
       navigate("/product-management", { state: { refresh: true } });
     } catch (err) {
       console.error("Error adding product:", err.response?.data || err);
-      alert(err.response?.data?.message || "Something went wrong!");
+      toast.error(err.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);
     }
