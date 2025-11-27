@@ -56,6 +56,7 @@ const ArtisanManagement = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dropdownRef = React.useRef(null);
 
   useEffect(() => {
@@ -208,7 +209,51 @@ const ArtisanManagement = () => {
   };
 
   const handleAddEmployee = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    console.log("Starting Add Artisan process. Checking validations...");
+
+    const handleValidationError = (message) => {
+      toast.error(message);
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 4000);
+    };
+
+    // Validation
+    if (!formData.firstName.trim()) {
+      console.log("Validation Error: First Name is missing");
+      handleValidationError("First Name is required");
+      return;
+    }
+    if (!formData.lastName.trim()) {
+      console.log("Validation Error: Last Name is missing");
+      handleValidationError("Last Name is required");
+      return;
+    }
+    if (!formData.phoneNo || formData.phoneNo.length !== 10) {
+      console.log("Validation Error: Invalid Phone Number");
+      handleValidationError("Phone Number must be 10 digits");
+      return;
+    }
+    if (formData.email && !emailRegex.test(formData.email)) {
+      console.log("Validation Error: Invalid Email");
+      handleValidationError("Please enter a valid email address");
+      return;
+    }
+    if (!formData.aadhaarNumber || !aadhaarRegex.test(formData.aadhaarNumber)) {
+      console.log("Validation Error: Invalid Aadhaar Number");
+      handleValidationError("Aadhaar Number must be 12 digits");
+      return;
+    }
+    if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
+      console.log("Validation Error: Invalid GST Number");
+      handleValidationError("Invalid GST Number Format");
+      return;
+    }
+
     try {
+      console.log("All validations passed. Preparing API payload...");
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -223,9 +268,10 @@ const ArtisanManagement = () => {
         gstNumber: formData.gstNumber,
         user_group: "ARTISAN",
       };
+      console.log("Sending API request to addArtisan...", payload);
       const response = await authControllers.addArtisan(payload);
-      console.log("smkdmk", response, payload);
-      if (response.status === 200) {
+      console.log("API Response received:", response);
+      if (response.status === 200 || response.status === 201) {
         toast.success(
           "Artisan registered successfully! Login credentials sent to email."
         );
@@ -245,11 +291,17 @@ const ArtisanManagement = () => {
         });
         await fetchArtisans();
       } else {
+        console.warn("API returned error status:", response);
         toast.error(response.data?.message || "Error registering artisan");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error registering artisan");
+      console.error("API Request Failed (Catch Block):", error);
+      toast.error(
+        error.response?.data?.message || error.message || "Error registering artisan"
+      );
       console.error("Error registering artisan:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -330,7 +382,7 @@ const ArtisanManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Expertise Field
+                    Expertise
                   </label>
                   <select
                     value={locationFilter}
@@ -534,7 +586,7 @@ const ArtisanManagement = () => {
                     </label>
                     <input
                       type="text"
-                      name="aadhaarNumber "
+                      name="aadhaarNumber"
                       value={formData.aadhaarNumber}
                       maxLength={12}
                       onChange={(e) => {
@@ -621,9 +673,20 @@ const ArtisanManagement = () => {
                     </button>
                     <button
                       onClick={handleAddEmployee}
-                      className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+                      disabled={isSubmitting}
+                      className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      Register Artisan
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Processing...
+                        </span>
+                      ) : (
+                        "Register Artisan"
+                      )}
                     </button>
                   </div>
                 </div>
@@ -987,7 +1050,7 @@ const ArtisanManagement = () => {
           </div>
         )}
       </div>
-    </div >
+    </div>
   );
 };
 export default ArtisanManagement;
