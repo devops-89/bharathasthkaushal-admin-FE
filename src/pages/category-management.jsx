@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Search, Filter, Grid, List, X, Upload } from "lucide-react";
+import { Plus, Search, Filter, Grid, List, X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import handloomImage from "/src/assets/Handloom.jpg";
 import handicraftsImage from "/src/assets/Handicraft.jpg";
@@ -344,8 +344,8 @@ const CategoryManagement = () => {
       </div>
       {/* Pagination Controls */}
       {totalDocs > 0 && (
-        <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-b-xl shadow-sm">
-          <div className="flex items-center gap-2 text-sm">
+        <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
+          <div className="flex items-center gap-4 text-base font-medium justify-self-start">
             <span className="text-gray-700">Rows per page:</span>
             <select
               value={rowsPerPage}
@@ -353,7 +353,7 @@ const CategoryManagement = () => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border rounded px-2 py-1"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -362,18 +362,20 @@ const CategoryManagement = () => {
             </select>
           </div>
 
-          <div className="text-sm text-gray-600">
+          <div className="text-base text-gray-600 font-medium justify-self-center">
             {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-4 justify-self-end">
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
-              ‹
+              <ChevronLeft className="w-5 h-5" />
             </button>
 
             <button
@@ -381,12 +383,12 @@ const CategoryManagement = () => {
                 currentPage < totalPages && setCurrentPage(currentPage + 1)
               }
               disabled={currentPage === totalPages}
-              className={`px-2 py-1 rounded ${currentPage === totalPages
-                ? "text-gray-400"
-                : "hover:bg-gray-100"
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
-              ›
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>

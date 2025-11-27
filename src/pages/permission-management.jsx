@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  Users, 
-  Shield, 
-  Edit3, 
-  Trash2, 
-  Plus, 
-  Search, 
+import {
+  Users,
+  Shield,
+  Edit3,
+  Trash2,
+  Plus,
+  Search,
   Filter,
   Check,
   X,
@@ -21,7 +21,7 @@ import {
   Building,
   Target,
   TrendingUp,
-  
+
 } from 'lucide-react';
 const PermissionManagement = () => {
   const [users, setUsers] = useState([
@@ -142,7 +142,7 @@ const PermissionManagement = () => {
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState('edit'); 
+  const [modalType, setModalType] = useState('edit');
   const [editingUser, setEditingUser] = useState(null);
   const permissionsList = [
     { id: 'view_all_data', name: 'View All Data', description: 'Access to all national data', level: 1 },
@@ -159,14 +159,14 @@ const PermissionManagement = () => {
     { id: 'manage_state_users', name: 'Manage State Users', description: 'Manage users within the state', level: 3 },
     { id: 'view_state_financials', name: 'View State Financials', description: 'Access to state financial data', level: 3 },
     { id: 'view_area_data', name: 'View Area Data', description: 'Access to area-specific data', level: 4 },
-    { id: 'manage_area_users', name: 'Manage Area Users', description: 'Manage users within the area', level: 4 }, 
+    { id: 'manage_area_users', name: 'Manage Area Users', description: 'Manage users within the area', level: 4 },
     { id: 'view_territory_data', name: 'View Territory Data', description: 'Access to territory-specific data', level: 5 },
     { id: 'manage_territory_team', name: 'Manage Territory Team', description: 'Manage territory team members', level: 5 },
     { id: 'territory_planning', name: 'Territory Planning', description: 'Territory-level planning', level: 5 },
     { id: 'view_sales_data', name: 'View Sales Data', description: 'Access to sales performance data', level: 6 },
     { id: 'manage_sales_team', name: 'Manage Sales Team', description: 'Manage direct sales team', level: 6 },
     { id: 'view_customer_data', name: 'View Customer Data', description: 'Access to customer information', level: 6 },
-  
+
     { id: 'create_reports', name: 'Create Reports', description: 'Generate reports for assigned level', level: 0 },
     { id: 'modify_all_data', name: 'Modify All Data', description: 'Edit data at assigned level', level: 0 },
     { id: 'modify_zone_data', name: 'Modify Zone Data', description: 'Edit zone-specific data', level: 2 },
@@ -180,7 +180,7 @@ const PermissionManagement = () => {
   ];
   const departments = [
     'Country Head',
-    'Zonal Manager', 
+    'Zonal Manager',
     'State Manager',
     'Area Manager',
     'Territory Manager',
@@ -189,7 +189,7 @@ const PermissionManagement = () => {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     return matchesSearch && matchesRole;
   });
@@ -222,7 +222,7 @@ const PermissionManagement = () => {
       };
       setUsers([...users, newUser]);
     } else if (modalType === 'edit') {
-      setUsers(users.map(user => 
+      setUsers(users.map(user =>
         user.id === editingUser.id ? editingUser : user
       ));
     }
@@ -234,15 +234,15 @@ const PermissionManagement = () => {
   };
 
   const toggleUserStatus = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId 
+    setUsers(users.map(user =>
+      user.id === userId
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
         : user
     ));
   };
 
   const getRoleIcon = (role) => {
-    switch(role) {
+    switch (role) {
       case 'Country Head': return <Globe className="w-4 h-4" />;
       case 'Zonal Manager': return <Building className="w-4 h-4" />;
       case 'State Manager': return <MapPin className="w-4 h-4" />;
@@ -274,23 +274,23 @@ const PermissionManagement = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-                 Permission Management
+                Permission Management
               </h1>
               <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
                 <NavLink
                   to="/dashboard"
                   className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""} >
-                          Dashboard
-                        </NavLink>
-                        <span>•</span>
-                        <NavLink
-                          to="/permission-management"
-                          className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
-                        >
-                          Permission  Management 
-                        </NavLink>
-                  </nav>
-      
+                  Dashboard
+                </NavLink>
+                <span>•</span>
+                <NavLink
+                  to="/permission-management"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                >
+                  Permission  Management
+                </NavLink>
+              </nav>
+
             </div>
           </div>
 
@@ -422,11 +422,10 @@ const PermissionManagement = () => {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => toggleUserStatus(user.id)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                          user.status === 'active'
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${user.status === 'active'
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        }`}
+                          }`}
                       >
                         {user.status}
                       </button>
@@ -508,7 +507,7 @@ const PermissionManagement = () => {
                         <p className="text-gray-600">{editingUser?.email}</p>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -525,9 +524,8 @@ const PermissionManagement = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          editingUser?.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${editingUser?.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
                           {editingUser?.status}
                         </span>
                       </div>
@@ -557,7 +555,7 @@ const PermissionManagement = () => {
                           type="text"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
                           value={editingUser?.name || ''}
-                          onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                          onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
                         />
                       </div>
                       <div>
@@ -566,7 +564,7 @@ const PermissionManagement = () => {
                           type="email"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
                           value={editingUser?.email || ''}
-                          onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                          onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                         />
                       </div>
                       <div>
@@ -577,7 +575,7 @@ const PermissionManagement = () => {
                           onChange={(e) => {
                             const selectedRole = roles.find(r => r.name === e.target.value);
                             setEditingUser({
-                              ...editingUser, 
+                              ...editingUser,
                               role: e.target.value,
                               department: e.target.value,
                               permissions: selectedRole ? selectedRole.permissions : []
@@ -595,7 +593,7 @@ const PermissionManagement = () => {
                           type="text"
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
                           value={editingUser?.territory || ''}
-                          onChange={(e) => setEditingUser({...editingUser, territory: e.target.value})}
+                          onChange={(e) => setEditingUser({ ...editingUser, territory: e.target.value })}
                           placeholder="e.g., North Zone, Punjab, Central Territory"
                         />
                       </div>
@@ -614,19 +612,19 @@ const PermissionManagement = () => {
                           const levelPermissions = permissionsList.filter(p => p.level === level);
                           const userRole = roles.find(r => r.name === editingUser?.role);
                           const canAccessLevel = userRole ? userRole.level <= level || level === 0 : false;
-                          
+
                           if (levelPermissions.length === 0) return null;
-                          
+
                           return (
                             <div key={level} className={`${!canAccessLevel ? 'opacity-50' : ''}`}>
                               <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                {level === 0 ? 'Common Permissions' : 
-                                 level === 1 ? 'Country Level' :
-                                 level === 2 ? 'Zonal Level' :
-                                 level === 3 ? 'State Level' :
-                                 level === 4 ? 'Area Level' :
-                                 level === 5 ? 'Territory Level' :
-                                 'Sales Level'}
+                                {level === 0 ? 'Common Permissions' :
+                                  level === 1 ? 'Country Level' :
+                                    level === 2 ? 'Zonal Level' :
+                                      level === 3 ? 'State Level' :
+                                        level === 4 ? 'Area Level' :
+                                          level === 5 ? 'Territory Level' :
+                                            'Sales Level'}
                               </h4>
                               <div className="grid grid-cols-1 gap-2">
                                 {levelPermissions.map((permission) => (
@@ -641,7 +639,7 @@ const PermissionManagement = () => {
                                         const newPermissions = e.target.checked
                                           ? [...(editingUser?.permissions || []), permission.id]
                                           : editingUser?.permissions?.filter(p => p !== permission.id) || [];
-                                        setEditingUser({...editingUser, permissions: newPermissions});
+                                        setEditingUser({ ...editingUser, permissions: newPermissions });
                                       }}
                                     />
                                     <div>
@@ -655,7 +653,7 @@ const PermissionManagement = () => {
                           );
                         })}
                       </div>
-                      
+
                       {/* Permission Summary */}
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                         <p className="text-sm font-medium text-blue-800 mb-2">Selected Permissions Summary:</p>
@@ -677,11 +675,11 @@ const PermissionManagement = () => {
                         <p><strong>Hierarchy Level:</strong> {getHierarchyLevel(editingUser?.role)}</p>
                         <p><strong>Access Level:</strong> {
                           editingUser?.role === 'Country Head' ? 'National Access' :
-                          editingUser?.role === 'Zonal Manager' ? 'Multi-State Access' :
-                          editingUser?.role === 'State Manager' ? 'State-wide Access' :
-                          editingUser?.role === 'Area Manager' ? 'Multi-District Access' :
-                          editingUser?.role === 'Territory Manager' ? 'District Level Access' :
-                          'Local Area Access'
+                            editingUser?.role === 'Zonal Manager' ? 'Multi-State Access' :
+                              editingUser?.role === 'State Manager' ? 'State-wide Access' :
+                                editingUser?.role === 'Area Manager' ? 'Multi-District Access' :
+                                  editingUser?.role === 'Territory Manager' ? 'District Level Access' :
+                                    'Local Area Access'
                         }</p>
                       </div>
                     </div>

@@ -32,6 +32,8 @@ const NeedAssistanceDashboard = () => {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -41,29 +43,35 @@ const NeedAssistanceDashboard = () => {
   const [adminRemarks, setAdminRemarks] = useState("");
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
-  const fetchNeedAssistance = async () => {
+
+  const fetchNeedAssistance = async (page = 1, limit = 10) => {
     setLoading(true);
     try {
       const response = await needAssistanceControllers.getAllNeedAssistance(
-        10,
-        1,
+        limit,
+        page,
         statusFilter === "ALL" ? "" : statusFilter
       );
       console.log("API Response:", JSON.stringify(response.data, null, 2));
-      let tickets =
-        response.data?.data?.docs || response.data?.docs || response.data || [];
+
+      const responseData = response.data?.data || response.data || {};
+      let tickets = responseData.docs || [];
+
       if (!Array.isArray(tickets)) {
         console.error("Expected tickets to be an array, got:", tickets);
-        toast.error("Unexpected data format from API: tickets is not an array");
+        // toast.error("Unexpected data format from API: tickets is not an array"); // Suppress error if it's just empty
         tickets = [];
       }
+
+      setTotalDocs(responseData.totalDocs || 0);
+      setTotalPages(responseData.totalPages || 1);
+
       const mappedData = tickets.map((ticket, index) => {
         const createdByUser = ticket.createdBy;
         const userName =
           createdByUser?.name ||
-          `${createdByUser?.firstName || ""} ${
-            createdByUser?.lastName || ""
-          }`.trim() ||
+          `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
+            }`.trim() ||
           (createdByUser?.email
             ? createdByUser.email.split("@")[0]
             : "Unknown User");
@@ -111,9 +119,8 @@ const NeedAssistanceDashboard = () => {
       const createdByUser = fullTicket.createdBy;
       const userName =
         createdByUser?.name ||
-        `${createdByUser?.firstName || ""} ${
-          createdByUser?.lastName || ""
-        }`.trim() ||
+        `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
+          }`.trim() ||
         (createdByUser?.email
           ? createdByUser.email.split("@")[0]
           : "Unknown User");
@@ -157,11 +164,11 @@ const NeedAssistanceDashboard = () => {
         prev.map((item) =>
           item.id === selectedTicket.id
             ? {
-                ...item,
-                status: newStatus,
-                adminRemarks: updateData.adminRemarks,
-                updatedAt: new Date().toISOString(),
-              }
+              ...item,
+              status: newStatus,
+              adminRemarks: updateData.adminRemarks,
+              updatedAt: new Date().toISOString(),
+            }
             : item
         )
       );
@@ -176,8 +183,8 @@ const NeedAssistanceDashboard = () => {
   };
 
   useEffect(() => {
-    fetchNeedAssistance();
-  }, [statusFilter]);
+    fetchNeedAssistance(currentPage, rowsPerPage);
+  }, [currentPage, rowsPerPage, statusFilter]);
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -232,14 +239,11 @@ const NeedAssistanceDashboard = () => {
       issueTypeFilter === "ALL" || item.issueType === issueTypeFilter;
     return matchesSearch && matchesStatus && matchesIssueType;
   });
-  const indexOfLastItem = currentPage * rowsPerPage;
-  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentTickets = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const currentTickets = filteredData;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
-    <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -389,7 +393,7 @@ const NeedAssistanceDashboard = () => {
                   </tbody>
                 </table>
                 {/* Pagination Controls */}
-                {filteredData.length > 0 && (
+                {totalDocs > 0 && (
                   <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-lg">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-gray-700">Rows per page:</span>
@@ -409,20 +413,19 @@ const NeedAssistanceDashboard = () => {
                     </div>
 
                     <div className="text-sm text-gray-600">
-                      {indexOfFirstItem + 1}–
-                      {Math.min(indexOfLastItem, filteredData.length)} of{" "}
-                      {filteredData.length}
+                      {(currentPage - 1) * rowsPerPage + 1}–
+                      {Math.min(currentPage * rowsPerPage, totalDocs)} of{" "}
+                      {totalDocs}
                     </div>
 
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-2 py-1 rounded ${
-                          currentPage === 1
+                        className={`px-2 py-1 rounded ${currentPage === 1
                             ? "text-gray-400"
                             : "hover:bg-gray-100"
-                        }`}
+                          }`}
                       >
                         ‹
                       </button>
@@ -430,11 +433,10 @@ const NeedAssistanceDashboard = () => {
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-2 py-1 rounded ${
-                          currentPage === totalPages
+                        className={`px-2 py-1 rounded ${currentPage === totalPages
                             ? "text-gray-400"
                             : "hover:bg-gray-100"
-                        }`}
+                          }`}
                       >
                         ›
                       </button>
@@ -442,11 +444,13 @@ const NeedAssistanceDashboard = () => {
                   </div>
                 )}
               </div>
-              {filteredData.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  <p>No assistance requests found</p>
-                </div>
-              )}
+              {
+                filteredData.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>No assistance requests found</p>
+                  </div>
+                )
+              }
             </>
           )}
         </div>

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package } from 'lucide-react';
+import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 const PaymentManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
-  const paymentData = [   
+  const paymentData = [
     {
       id: 'PAY001',
       customerName: 'Priya Sharma',
@@ -24,7 +24,7 @@ const PaymentManagement = () => {
       customerName: 'Rajesh Kumar',
       email: 'rajesh.k@email.com',
       product: 'Wooden Handicraft Set',
-    
+
       category: 'Handicraft',
       amount: 2300.00,
       date: '14 Aug 2025',
@@ -95,9 +95,9 @@ const PaymentManagement = () => {
 
   const filteredPayments = paymentData.filter(payment => {
     const matchesSearch = payment.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         payment.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      payment.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.email.toLowerCase().includes(searchTerm.toLowerCase());
+
     if (selectedFilter === 'All') return matchesSearch;
     return matchesSearch && payment.status === selectedFilter;
   });
@@ -123,25 +123,25 @@ const PaymentManagement = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Payment Management</h1>
-            
-                      {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
-                                    <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-                                      <NavLink
-                          to="/dashboard"
-                          className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
-                        >
-                          Dashboard
-                        </NavLink>
-                                      
-                                      <span>•</span>
-                                       <NavLink
-                          to="/payment-management"
-                          className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
-                        >
-                          Payment Management 
-                        </NavLink>
-                                    </nav>
-                      
+
+            {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
+            <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+              <NavLink
+                to="/dashboard"
+                className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+              >
+                Dashboard
+              </NavLink>
+
+              <span>•</span>
+              <NavLink
+                to="/payment-management"
+                className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+              >
+                Payment Management
+              </NavLink>
+            </nav>
+
           </div>
           <button className="bg-orange-500 to oranage-700 text-white px-4 py-2 rounded-lg hover: transition-colors flex items-center gap-2 ">
             <CreditCard size={20} />
@@ -218,7 +218,7 @@ const PaymentManagement = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              
+
               <select
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={selectedFilter}
@@ -356,8 +356,8 @@ const PaymentManagement = () => {
                     <span className="text-sm text-gray-700">{method}</span>
                     <div className="flex items-center gap-3">
                       <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full" 
+                        <div
+                          className="bg-blue-500 h-2 rounded-full"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -378,7 +378,7 @@ const PaymentManagement = () => {
                 const revenue = categoryPayments.reduce((sum, p) => sum + p.amount, 0);
                 const totalRevenue = paymentData.filter(p => p.status === 'Completed').reduce((sum, p) => sum + p.amount, 0);
                 const percentage = totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0;
-                
+
                 return (
                   <div key={category} className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -388,7 +388,7 @@ const PaymentManagement = () => {
                       <span className="text-sm font-semibold text-gray-900">₹{revenue.toLocaleString()}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full ${category === 'Handloom' ? 'bg-purple-500' : 'bg-orange-500'}`}
                         style={{ width: `${percentage}%` }}
                       ></div>
@@ -402,7 +402,7 @@ const PaymentManagement = () => {
         </div>
 
         {/* Quick Actions */}
-        
+
       </div>
     </div>
   );
