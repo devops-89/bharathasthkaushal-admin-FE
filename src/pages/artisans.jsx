@@ -90,6 +90,9 @@ const ArtisanManagement = () => {
     SC: ["Chamar", "Pasi", "Dhobi", "Kori"],
     ST: ["Gond", "Bhil", "Santhal", "Munda"],
   };
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const handleToggleStatus = (artisan) => {
     setSelectedArtisan(artisan);
     setShowStatusModal(true);
@@ -139,20 +142,21 @@ const ArtisanManagement = () => {
       }
       const response = await userControllers.verifyArtisan(id);
       toast.success("Artisan Verified Successfully ");
-      fetchArtisans();
+      fetchArtisans(currentPage, rowsPerPage);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
-  const fetchArtisans = async (page = 1, limit) => {
+  const fetchArtisans = async (page = 1, limit = 10) => {
     try {
       const response = await userControllers.getUserListGroup(
         "ARTISAN",
         page,
         limit
       );
-      let artisans =
-        response.data?.data?.docs || response.data?.docs || response.data || [];
+      const responseData = response.data?.data || response.data || {};
+      let artisans = responseData.docs || responseData || [];
+
       const mappedData = artisans.map((user, index) => ({
         id: user._id || user.id || `temp-id-${index + 1}`,
         firstName:
@@ -179,15 +183,18 @@ const ArtisanManagement = () => {
       }));
 
       setPartnersData(mappedData);
+      setTotalDocs(responseData.totalDocs || 0);
+      setTotalPages(responseData.totalPages || 1);
     } catch (error) {
       console.error("Failed to load artisans", error);
     }
   };
 
   useEffect(() => {
-    fetchArtisans();
+    fetchArtisans(currentPage, rowsPerPage);
     getallSubcategory("categoryId");
-  }, []);
+  }, [currentPage, rowsPerPage]);
+
   console.log("hdwjhed", subCategories);
   const toggleDropdown = (partnerId) => {
     setDropdownOpen(dropdownOpen === partnerId ? null : partnerId);
@@ -289,7 +296,7 @@ const ArtisanManagement = () => {
           subCaste: "",
           gstNumber: "",
         });
-        await fetchArtisans();
+        await fetchArtisans(currentPage, rowsPerPage);
       } else {
         console.warn("API returned error status:", response);
         toast.error(response.data?.message || "Error registering artisan");
@@ -321,9 +328,9 @@ const ArtisanManagement = () => {
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.expertizeField)),
   ].filter((field) => field && field !== "Not Specified");
-  const indexOfLastItem = currentPage * rowsPerPage;
-  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
+
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
@@ -994,9 +1001,7 @@ const ArtisanManagement = () => {
         </div>
 
         <div className="text-sm text-gray-600">
-          {indexOfFirstItem + 1}–
-          {Math.min(indexOfLastItem, filteredPartners.length)} of{" "}
-          {filteredPartners.length}
+          {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
         </div>
 
         <div className="flex items-center gap-1">
@@ -1054,6 +1059,7 @@ const ArtisanManagement = () => {
             </div>
           </div>
         )}
+        <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </div>
   );
