@@ -568,6 +568,13 @@ const ProductDetails = () => {
 
             {/* Product Information - Right Side */}
             <div className="lg:col-span-5 p-8 bg-gradient-to-br from-gray-50 to-white">
+              <button
+                onClick={() => navigate(-1)}
+                className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                Back
+              </button>
               <div className="space-y-6">
                 {/* Product Title */}
                 {/* <div>
@@ -995,12 +1002,7 @@ const ProductDetails = () => {
                   </div>
                 )}
                 {/* Back Button */}
-                <button
-                  onClick={() => navigate(-1)}
-                  className="w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all duration-300 border border-gray-300"
-                >
-                  ← Go Back to Product Management
-                </button>
+
               </div>
             </div>
           </div>

@@ -5,7 +5,6 @@ import {
   Plus,
   X,
   Eye,
-  MoreVertical,
   Phone,
   Calendar,
   User,
@@ -15,26 +14,33 @@ import {
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
 import { NavLink } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import countryCodes from "../utils/countryCodes.json";
+import { Switch } from "@headlessui/react";
+import DisableModal from "../components/DisableModal";
+
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phoneNo: "",
+    secondaryPhoneNo: "",
     countryCode: "+91",
+    secondaryCountryCode: "+91",
     user_group: "EMPLOYEE",
     location: "",
-    latitude: "",
-    longitude: "",
+    aadhaarNumber: "",
   });
   const [errors, setErrors] = useState({
     firstName: "",
@@ -42,13 +48,35 @@ const ArtisanManagement = () => {
     email: "",
     phoneNo: "",
     location: "",
+    aadhaarNumber: "",
   });
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isSecondaryCountryDropdownOpen, setIsSecondaryCountryDropdownOpen] = useState(false);
+  const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [secondaryCountrySearchTerm, setSecondaryCountrySearchTerm] = useState("");
+  const dropdownRef = React.useRef(null);
+  const secondaryDropdownRef = React.useRef(null);
+
+  const filteredCountries = countryCodes.filter(
+    (country) =>
+      country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
+      country.dial_code.includes(countrySearchTerm)
+  );
+
+  const filteredSecondaryCountries = countryCodes.filter(
+    (country) =>
+      country.name.toLowerCase().includes(secondaryCountrySearchTerm.toLowerCase()) ||
+      country.dial_code.includes(secondaryCountrySearchTerm)
+  );
   const [partnersData, setPartnersData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const fetchArtisans = async () => {
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchArtisans = async (page = 1, limit = 10) => {
     try {
-      const response = await userControllers.getUserListGroup("EMPLOYEE");
+      const response = await userControllers.getUserListGroup("EMPLOYEE", page, limit);
       console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
       if (!Array.isArray(artisans)) {
@@ -69,8 +97,13 @@ const ArtisanManagement = () => {
         location: user.location || "",
         latitude: user.latitude || 0,
         longitude: user.longitude || 0,
+        status: user.status || "ACTIVE",
+        avatar: user.avatar || null,
+        aadhaarNumber: user.aadhaarNumber || "",
       }));
       setPartnersData(mappedData);
+      setTotalDocs(response.data?.data?.totalDocs || 0);
+      setTotalPages(response.data?.data?.totalPages || 1);
     } catch (error) {
       toast.error("Error fetching artisans:", error);
       toast.error("Error fetching employee data: " + error.message);
@@ -78,20 +111,44 @@ const ArtisanManagement = () => {
   };
 
   useEffect(() => {
-    fetchArtisans();
-  }, []);
+    fetchArtisans(currentPage, rowsPerPage);
+  }, [currentPage, rowsPerPage]);
 
-  const toggleDropdown = (partnerId) => {
-    setDropdownOpen(dropdownOpen === partnerId ? null : partnerId);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, locationFilter]);
+
+  const handleToggleStatus = (employee) => {
+    setSelectedEmployee(employee);
+    setShowStatusModal(true);
   };
+
+  const confirmStatusChange = async () => {
+    try {
+      const newStatus =
+        selectedEmployee.status === "ACTIVE" ? "BLOCKED" : "ACTIVE";
+
+      await userControllers.updateUserStatus(selectedEmployee.id, newStatus);
+      setPartnersData((prev) =>
+        prev.map((a) =>
+          a.id === selectedEmployee.id ? { ...a, status: newStatus } : a
+        )
+      );
+
+      toast.success(
+        `Employee ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        } Successfully!`
+      );
+    } catch (error) {
+      toast.error("Something went wrong!");
+    }
+
+    setShowStatusModal(false);
+  };
+
   const handleViewDetails = (partner) => {
     setSelectedPartner(partner);
     setShowDetailsModal(true);
-    setDropdownOpen(null);
-  };
-
-  const closeDropdown = () => {
-    setDropdownOpen(null);
   };
 
   const handleFormChange = (e) => {
@@ -127,35 +184,41 @@ const ArtisanManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
   const handleAddEmployee = async () => {
-    if (
-      errors.email ||
-      errors.phoneNo ||
-      errors.firstName ||
-      errors.lastName ||
-      errors.location
-    ) {
-      return toast.error("Please fill correct data .");
+    // Validation
+    if (!formData.firstName.trim()) {
+      return toast.error("First Name is required");
     }
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.phoneNo ||
-      !formData.location
-    ) {
-      return toast.error("All required fields must be filled.");
+    if (!formData.lastName.trim()) {
+      return toast.error("Last Name is required");
     }
+    if (!formData.email.trim() || !formData.email.includes("@")) {
+      return toast.error("Enter a valid email address");
+    }
+    if (!formData.phoneNo || formData.phoneNo.length !== 10) {
+      return toast.error("Phone Number must be 10 digits");
+    }
+    if (formData.secondaryPhoneNo && formData.secondaryPhoneNo.length !== 10) {
+      return toast.error("Secondary Phone Number must be 10 digits");
+    }
+    if (!formData.aadhaarNumber || formData.aadhaarNumber.length !== 12) {
+      return toast.error("Aadhaar Number must be 12 digits");
+    }
+    if (!formData.location.trim()) {
+      return toast.error("Location is required");
+    }
+
     try {
       const payload = {
         email: formData.email.trim(),
         phoneNo: formData.phoneNo.trim(),
+        secondaryPhoneNo: formData.secondaryPhoneNo ? formData.secondaryPhoneNo.trim() : "",
         user_group: "EMPLOYEE",
         countryCode: formData.countryCode,
+        secondaryCountryCode: formData.secondaryCountryCode,
         location: formData.location.trim(),
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        latitude: formData.latitude ? parseFloat(formData.latitude) : 0,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : 0,
+        aadhaarNumber: formData.aadhaarNumber.trim(),
       };
       const response = await authControllers.addEmployee(payload);
 
@@ -176,18 +239,18 @@ const ArtisanManagement = () => {
           lastName: "",
           email: "",
           phoneNo: "",
+          secondaryPhoneNo: "",
           countryCode: "+91",
           user_group: "EMPLOYEE",
           location: "",
-          latitude: "",
-          longitude: "",
+          aadhaarNumber: "",
         });
         setErrors({});
       } else {
         toast.error(response.data?.message || "Something went wrong.");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message || "Error registering employee");
     }
   };
   const filteredPartners = partnersData.filter((partner) => {
@@ -202,13 +265,8 @@ const ArtisanManagement = () => {
 
     return matchesSearch && matchesLocation && matchesTab;
   });
-  const indexOfLastItem = currentPage * rowsPerPage;
-  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentPartners = filteredPartners.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredPartners.length / rowsPerPage);
+
+  const currentPartners = filteredPartners;
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.location.split(",")[0])),
   ];
@@ -320,7 +378,7 @@ const ArtisanManagement = () => {
                         value={formData.firstName}
                         onChange={handleFormChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                        placeholder="Aadil"
+                        placeholder="Enter First Name"
                         required
                       />
                     </div>
@@ -335,7 +393,7 @@ const ArtisanManagement = () => {
                         value={formData.lastName}
                         onChange={handleFormChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                        placeholder="Ansari"
+                        placeholder="Enter Last Name"
                         required
                       />
                     </div>
@@ -351,27 +409,67 @@ const ArtisanManagement = () => {
                       value={formData.email}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="example@yopmail.com"
+                      placeholder="Enter Email Address"
                     />
                     {errors.email && (
                       <p className="text-red-500 text-xs">{errors.email}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <div className="w-24">
+                    <div className="w-40 relative" ref={dropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Code
                       </label>
-                      <select
-                        name="countryCode"
-                        value={formData.countryCode}
-                        onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      <div
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
+                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
                       >
-                        <option value="+91">+91</option>
-                        <option value="+1">+1</option>
-                        <option value="+44">+44</option>
-                      </select>
+                        <span className="truncate">
+                          {formData.countryCode}
+                        </span>
+                        <span className="ml-2 text-gray-400">▼</span>
+                      </div>
+
+                      {isCountryDropdownOpen && (
+                        <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                            <div className="relative">
+                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                              <input
+                                type="text"
+                                placeholder="Search country..."
+                                value={countrySearchTerm}
+                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto flex-1">
+                            {filteredCountries.length > 0 ? (
+                              filteredCountries.map((country) => (
+                                <div
+                                  key={country.code}
+                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                  onClick={() => {
+                                    setFormData({ ...formData, countryCode: country.dial_code });
+                                    setIsCountryDropdownOpen(false);
+                                    setCountrySearchTerm("");
+                                  }}
+                                >
+                                  <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
+                                  <span className="text-gray-600 truncate">{country.name}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                No countries found
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -381,18 +479,120 @@ const ArtisanManagement = () => {
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
-                        onChange={handleFormChange}
+                        maxLength={10}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setFormData((prev) => ({ ...prev, phoneNo: value }));
+                          }
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="9876543210"
+                        placeholder="Enter Phone Number"
                       />
                       {errors.phoneNo && (
                         <p className="text-red-500 text-xs">{errors.phoneNo}</p>
                       )}
                     </div>
                   </div>
+                  <div className="flex gap-2">
+                    <div className="w-40 relative" ref={secondaryDropdownRef}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Code
+                      </label>
+                      <div
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
+                        onClick={() => setIsSecondaryCountryDropdownOpen(!isSecondaryCountryDropdownOpen)}
+                      >
+                        <span className="truncate">
+                          {formData.secondaryCountryCode}
+                        </span>
+                        <span className="ml-2 text-gray-400">▼</span>
+                      </div>
+
+                      {isSecondaryCountryDropdownOpen && (
+                        <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                            <div className="relative">
+                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                              <input
+                                type="text"
+                                placeholder="Search country..."
+                                value={secondaryCountrySearchTerm}
+                                onChange={(e) => setSecondaryCountrySearchTerm(e.target.value)}
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto flex-1">
+                            {filteredSecondaryCountries.length > 0 ? (
+                              filteredSecondaryCountries.map((country) => (
+                                <div
+                                  key={country.code}
+                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                  onClick={() => {
+                                    setFormData({ ...formData, secondaryCountryCode: country.dial_code });
+                                    setIsSecondaryCountryDropdownOpen(false);
+                                    setSecondaryCountrySearchTerm("");
+                                  }}
+                                >
+                                  <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
+                                  <span className="text-gray-600 truncate">{country.name}</span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                No countries found
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Secondary Phone Number (Optional)
+                      </label>
+                      <input
+                        type="tel"
+                        name="secondaryPhoneNo"
+                        value={formData.secondaryPhoneNo}
+                        maxLength={10}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setFormData((prev) => ({ ...prev, secondaryPhoneNo: value }));
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        placeholder="Enter Secondary Phone Number"
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location *
+                      Aadhaar Number *
+                    </label>
+                    <input
+                      type="text"
+                      name="aadhaarNumber"
+                      value={formData.aadhaarNumber}
+                      maxLength={12}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        if (value.length <= 12) {
+                          setFormData((prev) => ({ ...prev, aadhaarNumber: value }));
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      placeholder="Enter Aadhaar Number"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location
                     </label>
                     <input
                       type="text"
@@ -400,38 +600,8 @@ const ArtisanManagement = () => {
                       value={formData.location}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="Mumbai, India"
+                      placeholder="Enter Location"
                     />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Latitude
-                      </label>
-                      <input
-                        type="number"
-                        step="any"
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="12.356784"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Longitude
-                      </label>
-                      <input
-                        type="number"
-                        step="any"
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="12.345634"
-                      />
-                    </div>
                   </div>
                   <div className="flex gap-3 pt-4">
                     <button
@@ -469,22 +639,39 @@ const ArtisanManagement = () => {
                   </button>
                 </div>
                 <div className="space-y-6">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
+                        <img
+                          src={
+                            selectedPartner.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              selectedPartner.name
+                            )}&background=random`
+                          }
+                          alt={selectedPartner.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {selectedPartner.name}
+                      </h3>
+                      <p className="text-gray-500">{selectedPartner.email}</p>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
+                      >
+                        {selectedPartner.status || "ACTIVE"}
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-3">
-                      <User className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Name</p>
-                        <p className="font-medium">{selectedPartner.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">{selectedPartner.email}</p>
-                      </div>
-                    </div>
                     <div className="flex items-center space-x-3">
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
@@ -510,27 +697,6 @@ const ArtisanManagement = () => {
                         <p className="text-sm text-gray-500">Joined Date</p>
                         <p className="font-medium">
                           {selectedPartner.joinedDate}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Coordinates */}
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold text-gray-900 mb-3">
-                      Coordinates
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Latitude</p>
-                        <p className="font-medium">
-                          {selectedPartner.latitude}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Longitude</p>
-                        <p className="font-medium">
-                          {selectedPartner.longitude}
                         </p>
                       </div>
                     </div>
@@ -566,10 +732,10 @@ const ArtisanManagement = () => {
                     Contact
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    View Details
                   </th>
                 </tr>
               </thead>
@@ -580,12 +746,27 @@ const ArtisanManagement = () => {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {`${partner.firstName} ${partner.lastName}`}
-                      </div>
-
-                      <div className="text-xs text-gray-500">
-                        Joined: {partner.joinedDate}
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={
+                              partner.avatar ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                `${partner.firstName} ${partner.lastName}`
+                              )}&background=random`
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {`${partner.firstName} ${partner.lastName}`}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Joined: {partner.joinedDate}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -599,37 +780,38 @@ const ArtisanManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {partner.location}
-                      </div>
+                      <Switch
+                        checked={partner.status === "ACTIVE"}
+                        onChange={() => handleToggleStatus(partner)}
+                        className={`${partner.status === "ACTIVE"
+                          ? "bg-orange-600"
+                          : "bg-gray-300"
+                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                      >
+                        <span className="sr-only">Toggle Status</span>
+                        <span
+                          className={`${partner.status === "ACTIVE"
+                            ? "translate-x-6"
+                            : "translate-x-1"
+                            } inline-block h-[18px] w-[18px] transform rounded-full bg-white transition`}
+                        />
+                      </Switch>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap relative">
                       <button
-                        onClick={() => toggleDropdown(partner.id)}
+                        onClick={() => handleViewDetails(partner)}
                         className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        title="View Details"
                       >
-                        <MoreVertical className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </button>
-
-                      {/* Dropdown Menu */}
-                      {dropdownOpen === partner.id && (
-                        <div className="absolute right-0 top-12 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[150px]">
-                          <button
-                            onClick={() => handleViewDetails(partner)}
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </button>
-                        </div>
-                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {/* Pagination Controls */}
-            {filteredPartners.length > 0 && (
+            {totalDocs > 0 && (
               <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-xl shadow-sm mt-2">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-700">Rows per page:</span>
@@ -649,18 +831,17 @@ const ArtisanManagement = () => {
                 </div>
 
                 <div className="text-sm text-gray-600">
-                  {indexOfFirstItem + 1}–
-                  {Math.min(indexOfLastItem, filteredPartners.length)} of{" "}
-                  {filteredPartners.length}
+                  {(currentPage - 1) * rowsPerPage + 1}–
+                  {Math.min(currentPage * rowsPerPage, totalDocs)} of{" "}
+                  {totalDocs}
                 </div>
 
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-2 py-1 rounded ${
-                      currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
-                    }`}
+                    className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                      }`}
                   >
                     ‹
                   </button>
@@ -668,11 +849,10 @@ const ArtisanManagement = () => {
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`px-2 py-1 rounded ${
-                      currentPage === totalPages
-                        ? "text-gray-400"
-                        : "hover:bg-gray-100"
-                    }`}
+                    className={`px-2 py-1 rounded ${currentPage === totalPages
+                      ? "text-gray-400"
+                      : "hover:bg-gray-100"
+                      }`}
                   >
                     ›
                   </button>
@@ -685,10 +865,23 @@ const ArtisanManagement = () => {
         {filteredPartners.length === 0 && (
           <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
             <p className="text-gray-500">
-              No artisans found matching your search criteria.
+              No employees found matching your search criteria.
             </p>
           </div>
         )}
+        {showStatusModal && (
+          <DisableModal
+            onClose={() => setShowStatusModal(false)}
+            onConfirm={confirmStatusChange}
+            title={selectedEmployee?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
+            message={
+              selectedEmployee?.status === "ACTIVE"
+                ? "Are you sure you want to disable this user's profile?"
+                : "Are you sure you want to activate this user's profile?"
+            }
+          />
+        )}
+        <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </div>
   );

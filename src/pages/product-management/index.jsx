@@ -130,18 +130,9 @@ export default function ProductManagement() {
 
                   </div>
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-2">
+                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={product.product_name}>
                       {product.product_name}
                     </h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xl font-bold text-orange-600">
-                          ₹
-                          {parseInt(product.productPricePerPiece) *
-                            product.quantity}
-                        </span>
-                      </div>
-                    </div>
 
                     <button
                       onClick={() => handleViewDetails(product.productId)}
