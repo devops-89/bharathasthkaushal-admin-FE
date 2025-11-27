@@ -20,6 +20,7 @@ import {
   Layers,
   Droplets,
   Pencil,
+  Tag,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -794,6 +795,40 @@ const ProductDetails = () => {
                           </p>
                           <p className="text-gray-900 font-semibold">
                             {product.artisan?.name || product.artisan}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Category */}
+                    {product?.category && (
+                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Layers className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Category
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.category.category_name}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Subcategory */}
+                    {product?.subCategory && (
+                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-indigo-100 rounded-lg">
+                          <Tag className="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Subcategory
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.subCategory.category_name}
                           </p>
                         </div>
                       </div>

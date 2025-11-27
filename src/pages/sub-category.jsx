@@ -10,6 +10,11 @@ const SubcategoryManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [subcategories, setSubcategories] = useState([]);
   const [categoryName, setCategoryName] = useState("Loading...");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [formData, setFormData] = useState({
     category_name: "",
     category_logo: null,
@@ -18,15 +23,20 @@ const SubcategoryManagement = () => {
     type: "Sub-Category",
   });
 
+  // Server-side pagination: subcategories contains only current page items
+  const currentSubcategories = subcategories;
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
 
   const getSubcategories = () => {
     categoryControllers
-      .getSubCategory(id)
+      .getSubCategory(id, currentPage, rowsPerPage)
       .then((res) => {
-        console.log("Subcategories API response:", res.data.data.docs);
-        if (Array.isArray(res?.data?.data?.docs)) {
+        console.log("Subcategories API response:", res.data.data);
+        const data = res.data.data;
+        if (data && Array.isArray(data.docs)) {
           setSubcategories(
-            res.data.data.docs.map((sub) => ({
+            data.docs.map((sub) => ({
               id: sub.category_id || sub.id,
               name: sub.category_name || sub.name,
               image: sub.category_logo || sub.image,
@@ -34,6 +44,8 @@ const SubcategoryManagement = () => {
               products: sub.productCount || sub.products || 0,
             }))
           );
+          setTotalDocs(data.totalDocs || 0);
+          setTotalPages(data.totalPages || 1);
         } else {
           setSubcategories([]);
           console.log("No subcategories data found in response");
@@ -63,10 +75,14 @@ const SubcategoryManagement = () => {
   useEffect(() => {
     getSubcategories();
     getCategoryName();
-  }, [id]);
-  const filteredSubcategories = subcategories.filter((sub) =>
+  }, [id, currentPage, rowsPerPage]);
+
+  // Note: Client-side search will only search within the current page. 
+  // For full search, backend search API is needed.
+  const filteredSubcategories = currentSubcategories.filter((sub) =>
     sub.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -74,12 +90,7 @@ const SubcategoryManagement = () => {
       [name]: value,
     }));
   };
-  const [currentPage, setCurrentPage] = useState(1);
-const [rowsPerPage, setRowsPerPage] = useState(10);
-const indexOfLastItem = currentPage * rowsPerPage;
-const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-const currentSubcategories = filteredSubcategories.slice(indexOfFirstItem, indexOfLastItem);
-const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setFormData((prev) => ({
@@ -95,7 +106,7 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
     formDataToSend.append("parent_id", formData.parent_id);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("type", formData.type);
-    console.log("FormData being sent:", Object.fromEntries(formDataToSend)); 
+    console.log("FormData being sent:", Object.fromEntries(formDataToSend));
     try {
       const response = await categoryControllers.addCategory(formDataToSend);
       console.log("API Response:", response.data);
@@ -108,7 +119,7 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
         type: "Sub-Category",
       });
       setShowAddForm(false);
-      getSubcategories(); 
+      getSubcategories();
     } catch (err) {
       console.error("API Error:", err.response ? err.response.data : err.message);
       alert("Failed to add subcategory");
@@ -147,21 +158,19 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
             <div className="flex border border-gray-200 rounded-lg">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 ${
-                  viewMode === "grid"
+                className={`p-2 ${viewMode === "grid"
                     ? "bg-orange-500 text-white"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 <Grid size={20} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 ${
-                  viewMode === "list"
+                className={`p-2 ${viewMode === "list"
                     ? "bg-orange-500 text-white"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                  }`}
               >
                 <List size={20} />
               </button>
@@ -331,31 +340,27 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
       )}
 
       {/* Subcategories */}
-      {filteredSubcategories.length === 0 ? (
+      {filteredSubcategories.length === 0 && !searchTerm ? (
         <div className="text-center py-12">
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchTerm ? "No subcategories found" : "No subcategories available"}
+            No subcategories available
           </h3>
           <p className="text-gray-500 mb-4">
-            {searchTerm
-              ? `No subcategories match "${searchTerm}"`
-              : `Add subcategories to organize your ${categoryName.toLowerCase()} products`}
+            Add subcategories to organize your {categoryName.toLowerCase()} products
           </p>
-          {!searchTerm && (
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-            >
-              <Plus size={16} />
-              Add First Subcategory
-            </button>
-          )}
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            <Plus size={16} />
+            Add First Subcategory
+          </button>
         </div>
       ) : (
         <>
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentSubcategories.map((sub) => (
+              {filteredSubcategories.map((sub) => (
                 <div
                   key={sub.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
@@ -372,11 +377,10 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-gray-900">{sub.name}</h3>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          sub.status === "Active"
+                        className={`text-xs px-2 py-1 rounded-full ${sub.status === "Active"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {sub.status}
                       </span>
@@ -394,8 +398,8 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
                 <div>Status</div>
                 <div>Products</div>
               </div>
-              {currentSubcategories.map((sub) => (
- 
+              {filteredSubcategories.map((sub) => (
+
                 <div
                   key={sub.id}
                   className="grid grid-cols-4 gap-4 p-4 border-b hover:bg-gray-50 transition cursor-pointer"
@@ -410,11 +414,10 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
                     }}
                   />
                   <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      sub.status === "Active"
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${sub.status === "Active"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
-                    }`}
+                      }`}
                   >
                     {sub.status}
                   </span>
@@ -425,51 +428,50 @@ const totalPages = Math.ceil(filteredSubcategories.length / rowsPerPage);
           )}
         </>
       )}
-      {filteredSubcategories.length > 0 && (
-  <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-lg shadow-sm">
+      {totalDocs > 0 && (
+        <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-lg shadow-sm">
 
-    <div className="flex items-center gap-2 text-sm">
-      <span className="text-gray-700">Rows per page:</span>
-      <select
-        value={rowsPerPage}
-        onChange={(e) => {
-          setRowsPerPage(Number(e.target.value));
-          setCurrentPage(1);
-        }}
-        className="border rounded px-2 py-1"
-      >
-        <option value={10}>10</option>
-        <option value={25}>25</option>
-        <option value={50}>50</option>
-        <option value={100}>100</option>
-      </select>
-    </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-700">Rows per page:</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
 
-    <div className="text-sm text-gray-600">
-      {indexOfFirstItem + 1}–
-      {Math.min(indexOfLastItem, filteredSubcategories.length)} of {filteredSubcategories.length}
-    </div>
+          <div className="text-sm text-gray-600">
+            {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
+          </div>
 
-    <div className="flex items-center gap-1">
-      <button
-        onClick={() => setCurrentPage((prev) => prev - 1)}
-        disabled={currentPage === 1}
-        className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ‹
-      </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+            >
+              ‹
+            </button>
 
-      <button
-        onClick={() => setCurrentPage((prev) => prev + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
-      >
-        ›
-      </button>
-    </div>
+            <button
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+            >
+              ›
+            </button>
+          </div>
 
-  </div>
-)}
+        </div>
+      )}
 
     </div>
 

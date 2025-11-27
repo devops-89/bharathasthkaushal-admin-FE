@@ -1024,7 +1024,12 @@ const ArtisanManagement = () => {
           <DisableModal
             onClose={() => setShowStatusModal(false)}
             onConfirm={confirmStatusChange}
-            message="Are you sure you want to permanently block this artisan?"
+            title={selectedArtisan?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
+            message={
+              selectedArtisan?.status === "ACTIVE"
+                ? "Are you sure you want to disable this user's profile?"
+                : "Are you sure you want to activate this user's profile?"
+            }
           />
         )}
         {showVideoModal && (

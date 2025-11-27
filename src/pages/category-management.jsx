@@ -8,43 +8,47 @@ import { useParams } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const CategoryManagement = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [categories, setCategories] = useState([]);
-  const { page: paramPage, pageSize: paramPageSize } = useParams();
-  const page = paramPage ? parseInt(paramPage, 10) : 1;
-  const pageSize = paramPageSize ? parseInt(paramPageSize, 10) : 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [formData, setFormData] = useState({
     category_name: "",
     category_logo: null,
     description: "",
   });
 
-  const filteredCategories = categories.filter((cat) =>
-    (cat.category_name || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Since we are doing server-side pagination, 'categories' will only contain the current page's data.
+  // We can still filter locally if needed, but usually search should also be server-side.
+  // For now, we will assume the API returns the correct page data.
+  const currentCategories = categories;
 
-  const indexOfLastItem = currentPage * rowsPerPage;
-  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentCategories = filteredCategories.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  
-  const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
+
   const getCategoriesList = () => {
     categoryControllers
-      .getCategory(page, pageSize)
+      .getCategory(currentPage, rowsPerPage)
       .then((res) => {
         console.log("API response:", res);
 
-        if (Array.isArray(res?.data?.data?.docs)) {
-          setCategories(res.data.data.docs);
+        if (res?.data?.data) {
+          const data = res.data.data;
+          if (Array.isArray(data.docs)) {
+            setCategories(data.docs);
+            setTotalDocs(data.totalDocs || 0);
+            setTotalPages(data.totalPages || 1);
+          } else {
+            setCategories([]);
+          }
         } else {
           setCategories([]);
         }
@@ -104,7 +108,7 @@ const CategoryManagement = () => {
 
   useEffect(() => {
     getCategoriesList();
-  }, [page, pageSize]);
+  }, [currentPage, rowsPerPage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -146,21 +150,19 @@ const CategoryManagement = () => {
               <div className="flex border border-gray-200 rounded-lg">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 ${
-                    viewMode === "grid"
-                      ? "bg-orange-500 text-white"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`p-2 ${viewMode === "grid"
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   <Grid size={20} />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 ${
-                    viewMode === "list"
-                      ? "bg-orange-500 text-white"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
+                  className={`p-2 ${viewMode === "list"
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-500 hover:text-gray-700"
+                    }`}
                 >
                   <List size={20} />
                 </button>
@@ -341,7 +343,7 @@ const CategoryManagement = () => {
         )}
       </div>
       {/* Pagination Controls */}
-      {filteredCategories.length > 0 && (
+      {totalDocs > 0 && (
         <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-b-xl shadow-sm">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-700">Rows per page:</span>
@@ -361,18 +363,15 @@ const CategoryManagement = () => {
           </div>
 
           <div className="text-sm text-gray-600">
-            {indexOfFirstItem + 1}–
-            {Math.min(indexOfLastItem, filteredCategories.length)} of{" "}
-            {filteredCategories.length}
+            {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
           </div>
 
           <div className="flex items-center gap-1">
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-2 py-1 rounded ${
-                currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
-              }`}
+              className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                }`}
             >
               ‹
             </button>
@@ -382,11 +381,10 @@ const CategoryManagement = () => {
                 currentPage < totalPages && setCurrentPage(currentPage + 1)
               }
               disabled={currentPage === totalPages}
-              className={`px-2 py-1 rounded ${
-                currentPage === totalPages
-                  ? "text-gray-400"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-2 py-1 rounded ${currentPage === totalPages
+                ? "text-gray-400"
+                : "hover:bg-gray-100"
+                }`}
             >
               ›
             </button>

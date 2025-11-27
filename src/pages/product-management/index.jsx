@@ -20,30 +20,33 @@ export default function ProductManagement() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const filteredProducts = products?.docs || [];
-  const indexOfLastItem = currentPage * rowsPerPage;
-  const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
-  const fetchProducts = async () => {
+
+  // When using server-side pagination, 'docs' contains only the current page's items
+  const currentProducts = products?.docs || [];
+  const totalDocs = products?.totalDocs || 0;
+  const totalPages = products?.totalPages || 1;
+
+  // Calculate the range for "X-Y of Z"
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
+
+  const fetchProducts = async (page, limit) => {
     productControllers
-      .getAllProducts()
+      .getAllProducts(page, limit)
       .then((res) => {
         const response = res.data.data;
         setProducts(response);
       })
       .catch((err) => {
-        console.log("sdsds", err);
+        console.log("Error fetching products:", err);
         toast.error("Failed to fetch products");
       });
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage, rowsPerPage);
+  }, [currentPage, rowsPerPage]);
+
   const handleViewDetails = (id) => {
     navigate(`/product-management/product-details/${id}`);
   };
@@ -102,7 +105,7 @@ export default function ProductManagement() {
         </div>
         {/* Products List  */}
         <div className="bg-white rounded-2xl p-6 shadow-lg">
-          {!products?.docs.length ? (
+          {!currentProducts.length ? (
             <div className="text-center py-16">
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">No products found</p>
@@ -124,18 +127,12 @@ export default function ProductManagement() {
                       />
                     ) : null}
 
-                    <div className="absolute top-0 right-0">
-                      {product.quantity}
-                    </div>
+
                   </div>
                   <div className="space-y-2">
                     <h3 className="font-semibold text-lg text-gray-800 line-clamp-2">
-                      {product.product_name} {`(${product.quantity})pcs`}
+                      {product.product_name}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Tag className="w-4 h-4" />
-                      <span>{product.category.category_name}</span>
-                    </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <span className="text-xl font-bold text-orange-600">
@@ -159,7 +156,7 @@ export default function ProductManagement() {
             </div>
           )}
           {/* Pagination Controls */}
-          {filteredProducts.length > 0 && (
+          {totalDocs > 0 && (
             <div className="flex items-center justify-between p-4 border-t mt-4 bg-white rounded-b-xl">
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-700">Rows per page:</span>
@@ -179,9 +176,7 @@ export default function ProductManagement() {
               </div>
 
               <div className="text-sm text-gray-600">
-                {indexOfFirstItem + 1}–
-                {Math.min(indexOfLastItem, filteredProducts.length)} of{" "}
-                {filteredProducts.length}
+                {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
               </div>
 
               <div className="flex items-center gap-1">
@@ -202,8 +197,8 @@ export default function ProductManagement() {
                   }
                   disabled={currentPage === totalPages}
                   className={`px-2 py-1 rounded ${currentPage === totalPages
-                      ? "text-gray-400"
-                      : "hover:bg-gray-100"
+                    ? "text-gray-400"
+                    : "hover:bg-gray-100"
                     }`}
                 >
                   ›
