@@ -246,7 +246,7 @@ const emailTrimmed = state.email.trim();
               marginRight: "auto",
             }}
           />
-          <h1 style={titleStyle}>Handloom & Handicraft</h1>
+          <h1 style={titleStyle}>Bharathastkaushal</h1>
           <p style={subtitleStyle}>Welcome back</p>
         </div>
         {/* Login Form */}

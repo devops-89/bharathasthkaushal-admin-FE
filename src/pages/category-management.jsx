@@ -128,7 +128,7 @@ const CategoryManagement = () => {
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             {/* Header */}
-            <div className="mb-6">
+            <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -178,16 +178,9 @@ const CategoryManagement = () => {
                   <List size={20} />
                 </button>
               </div>
-              <button
-                onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-              >
-                <Plus size={20} />
-                Add Category
-              </button>
             </div>
           </div>
-          {/* Search */}
+          {/* Search and Action */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -196,9 +189,15 @@ const CategoryManagement = () => {
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              <Plus className="w-5 h-5 mr-2" /> Add Category
+            </button>
           </div>
         </div>
 

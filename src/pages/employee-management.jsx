@@ -92,7 +92,7 @@ const ArtisanManagement = () => {
         joinedDate: user.createdAt
           ? new Date(user.createdAt).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        name: user.name || user.fullName || "Unknown",
+        name: user.name || user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Unknown",
         email: user.email || "No email",
         phoneNo: user.phoneNo || "",
         countryCode: user.countryCode || "+91",
@@ -554,7 +554,7 @@ const ArtisanManagement = () => {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Secondary Phone Number 
+                        Secondary Phone Number
                       </label>
                       <input
                         type="tel"
@@ -843,8 +843,8 @@ const ArtisanManagement = () => {
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
                     className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                       }`}
                   >
                     <ChevronLeft className="w-5 h-5" />
@@ -854,8 +854,8 @@ const ArtisanManagement = () => {
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                       }`}
                   >
                     <ChevronRight className="w-5 h-5" />
