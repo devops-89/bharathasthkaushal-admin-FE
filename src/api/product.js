@@ -17,11 +17,12 @@ export const productControllers = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  getAllProducts: (page = 1, pageSize = 10) => {
+  getAllProducts: (page = 1, pageSize = 10, search = "") => {
     return productSecuredApi.get("/product/admin/all-products", {
       params: {
         page,
         pageSize,
+        search,
       },
       headers: {
         "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",

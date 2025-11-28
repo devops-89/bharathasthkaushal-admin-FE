@@ -110,7 +110,7 @@ const ProductDetails = () => {
   const fetchProducts = async (page = 1) => {
     try {
       setProductLoading(true);
-      const res = await productControllers.getAllProducts({ page, limit: 100 });
+      const res = await productControllers.getAllProducts(page, 100);
 
       const newProducts = res.data?.data?.docs || [];
 

@@ -18,7 +18,9 @@ import { productControllers } from "../../api/product";
 import { toast } from "react-toastify";
 export default function ProductManagement() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [products, setProducts] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,22 +35,55 @@ export default function ProductManagement() {
   const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
 
-  const fetchProducts = async (page, limit) => {
-    productControllers
-      .getAllProducts(page, limit)
-      .then((res) => {
-        const response = res.data.data;
-        setProducts(response);
-      })
-      .catch((err) => {
-        console.log("Error fetching products:", err);
-        toast.error("Failed to fetch products");
-      });
+  const fetchProducts = async (page, limit, search = "") => {
+    setLoading(true);
+    try {
+      // If searching, fetch more items to ensure we can filter client-side if backend search fails
+      const fetchLimit = search ? 1000 : limit;
+      const fetchPage = search ? 1 : page;
+
+      const res = await productControllers.getAllProducts(fetchPage, fetchLimit, search);
+      let response = res.data.data;
+
+      if (search) {
+        // Client-side filtering fallback
+        const filteredDocs = response.docs.filter((p) =>
+          p.product_name?.toLowerCase().includes(search.toLowerCase())
+        );
+
+        response = {
+          ...response,
+          docs: filteredDocs,
+          totalDocs: filteredDocs.length,
+          totalPages: Math.ceil(filteredDocs.length / limit),
+          page: 1,
+        };
+      }
+
+      setProducts(response);
+    } catch (err) {
+      console.log("Error fetching products:", err);
+      toast.error("Failed to fetch products");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Debounce search term
   useEffect(() => {
-    fetchProducts(currentPage, rowsPerPage);
-  }, [currentPage, rowsPerPage]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    fetchProducts(currentPage, rowsPerPage, debouncedSearch);
+  }, [currentPage, rowsPerPage, debouncedSearch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   const handleViewDetails = (id) => {
     navigate(`/product-management/product-details/${id}`);
@@ -109,7 +144,11 @@ export default function ProductManagement() {
         </div>
         {/* Products List  */}
         <div className="bg-white rounded-2xl p-6 shadow-lg">
-          {!currentProducts.length ? (
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            </div>
+          ) : !currentProducts.length ? (
             <div className="text-center py-16">
               <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">No products found</p>
