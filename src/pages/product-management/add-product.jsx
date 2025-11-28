@@ -14,10 +14,7 @@ const AddProduct = () => {
     subCategoryId: "",
     productPricePerPiece: "",
     quantity: "",
-    // discount: "",
     material: "",
-    color: "",
-    sizeInput: "",
     weightValue: "",
     weightUnit: "gm",
     length: "",
@@ -27,7 +24,10 @@ const AddProduct = () => {
     description: "",
     timeToMake: "",
     texture: "",
+    finish: "",
+    washCare: "",
     artUsed: "",
+    pattern: "",
   });
 
   const [categories, setCategories] = useState([]);
@@ -67,6 +67,22 @@ const AddProduct = () => {
 
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.product_name.trim()) newErrors.product_name = "Product Name is required";
+    if (!formData.categoryId) newErrors.categoryId = "Category is required";
+    if (!formData.subCategoryId) newErrors.subCategoryId = "SubCategory is required";
+    if (!formData.productPricePerPiece) newErrors.productPricePerPiece = "Price is required";
+    if (!formData.quantity) newErrors.quantity = "Quantity is required";
+    if (!formData.material.trim()) newErrors.material = "Material is required";
+    if (!formData.description.trim()) newErrors.description = "Description is required";
+    if (images.length === 0) newErrors.images = "At least one product image is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,10 +93,33 @@ const AddProduct = () => {
   };
 
   const handleFileChange = (e) => {
-    setImages(Array.from(e.target.files));
+    const files = Array.from(e.target.files);
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const invalidFiles = files.filter((file) => !validTypes.includes(file.type));
+
+    if (invalidFiles.length > 0) {
+      const errorMessage = "only jpeg ,jpg and png format are allowed";
+      toast.error(errorMessage);
+      setErrors((prev) => ({ ...prev, images: errorMessage }));
+      e.target.value = null; // Reset input
+      setImages([]);
+      return;
+    }
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors.images;
+      return newErrors;
+    });
+    setImages(files);
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields correctly.");
+      return;
+    }
+
     setLoading(true);
     try {
       const data = new FormData();
@@ -95,18 +134,16 @@ const AddProduct = () => {
       data.append("subCategoryId", formData.subCategoryId);
       data.append("productPricePerPiece", formData.productPricePerPiece);
       data.append("quantity", formData.quantity);
-      // data.append("discount", formData.discount);
       data.append("material", formData.material);
-      data.append("color", formData.color);
       data.append("description", formData.description);
       data.append("timeToMake", formData.timeToMake);
       data.append("texture", formData.texture);
+      data.append("finish", formData.finish);
+      data.append("washCare", formData.washCare);
       data.append("artUsed", formData.artUsed);
+      data.append("pattern", formData.pattern);
       data.append("dimension", dimension);
       data.append("netWeight", netWeight);
-
-      // Send size as array (even if single value)
-      data.append("size", formData.sizeInput);
 
       if (images.length > 0) {
         images.forEach((file) => {
@@ -173,10 +210,13 @@ const AddProduct = () => {
                 name="product_name"
                 value={formData.product_name}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.product_name ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter product name"
-                required
               />
+              {errors.product_name && (
+                <p className="text-red-500 text-sm mt-1">{errors.product_name}</p>
+              )}
             </div>
 
             {/* Category */}
@@ -188,8 +228,8 @@ const AddProduct = () => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleCategoryChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                required
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.categoryId ? "border-red-500" : "border-gray-300"
+                  }`}
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
@@ -198,6 +238,9 @@ const AddProduct = () => {
                   </option>
                 ))}
               </select>
+              {errors.categoryId && (
+                <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
+              )}
             </div>
 
             {/* SubCategory */}
@@ -209,7 +252,8 @@ const AddProduct = () => {
                 name="subCategoryId"
                 value={formData.subCategoryId}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
+                  }`}
                 disabled={!subCategories.length}
               >
                 <option value="">Select SubCategory</option>
@@ -219,6 +263,9 @@ const AddProduct = () => {
                   </option>
                 ))}
               </select>
+              {errors.subCategoryId && (
+                <p className="text-red-500 text-sm mt-1">{errors.subCategoryId}</p>
+              )}
             </div>
 
             {/* Product Price Per Piece */}
@@ -231,10 +278,15 @@ const AddProduct = () => {
                 name="productPricePerPiece"
                 value={formData.productPricePerPiece}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.productPricePerPiece ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="0.00"
-                required
               />
+              {errors.productPricePerPiece && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.productPricePerPiece}
+                </p>
+              )}
             </div>
 
             {/* Quantity */}
@@ -247,10 +299,13 @@ const AddProduct = () => {
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.quantity ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="0"
-                required
               />
+              {errors.quantity && (
+                <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>
+              )}
             </div>
 
             {/* Total Price Display */}
@@ -266,20 +321,7 @@ const AddProduct = () => {
               />
             </div>
 
-            {/* Discount */}
-            {/* <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Discount (%)
-              </label>
-              <input
-                type="number"
-                name="discount"
-                value={formData.discount}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="0"
-              />
-            </div> */}
+
 
             {/* Time to Make */}
             <div>
@@ -299,16 +341,20 @@ const AddProduct = () => {
             {/* Material */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Material
+                Material *
               </label>
               <input
                 type="text"
                 name="material"
                 value={formData.material}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.material ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Cotton, Silk, etc."
               />
+              {errors.material && (
+                <p className="text-red-500 text-sm mt-1">{errors.material}</p>
+              )}
             </div>
 
             {/* Finish/Texture */}
@@ -316,14 +362,38 @@ const AddProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Finish / Texture
               </label>
-              <input
-                type="text"
-                name="texture"
-                value={formData.texture}
+              <select
+                name="finish"
+                value={formData.finish}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Smooth, Rough, Matte, etc."
-              />
+              >
+                <option value="">Select Finish</option>
+                <option value="Matte">Matte</option>
+                <option value="Glossy">Glossy</option>
+                <option value="Handwoven">Handwoven</option>
+                <option value="Rough">Rough</option>
+                <option value="Smooth">Smooth</option>
+              </select>
+            </div>
+
+            {/* Wash Care */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Wash Care
+              </label>
+              <select
+                name="washCare"
+                value={formData.washCare}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Select Wash Care</option>
+                <option value="Dry Clean Only">Dry Clean Only</option>
+                <option value="Hand Wash">Hand Wash</option>
+                <option value="Machine Wash">Machine Wash</option>
+                <option value="Do Not Wash">Do Not Wash</option>
+              </select>
             </div>
 
             {/* Art Used */}
@@ -341,35 +411,22 @@ const AddProduct = () => {
               />
             </div>
 
-            {/* Color */}
-            {/* <div>
+            {/* Pattern Used */}
+            <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Color
+                Pattern Used
               </label>
               <input
                 type="text"
-                name="color"
-                value={formData.color}
+                name="pattern"
+                value={formData.pattern}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Red, Blue, etc."
+                placeholder="Floral, Geometric, Striped, etc."
               />
-            </div> */}
+            </div>
 
-            {/* Size */}
-            {/* <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Size
-              </label>
-              <input
-                type="text"
-                name="sizeInput"
-                value={formData.sizeInput}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Enter size (e.g. XL, 42, etc.)"
-              />
-            </div> */}
+
 
             {/* Net Weight */}
             <div>
@@ -442,16 +499,20 @@ const AddProduct = () => {
             {/* Description */}
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
-                Description
+                Description *
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.description ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Describe your product..."
               />
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+              )}
             </div>
 
             {/* Image Upload */}
@@ -464,9 +525,13 @@ const AddProduct = () => {
                 multiple
                 accept="image/*"
                 onChange={handleFileChange}
-                className="w-full"
-                required
+                className={`w-full ${errors.images ? "text-red-500" : ""}`}
               />
+              {errors.images ? (
+                <p className="text-red-500 text-sm mt-1">{errors.images}</p>
+              ) : (
+                <p className="text-gray-500 text-sm mt-1">Only JPEG, JPG, and PNG formats are allowed.</p>
+              )}
             </div>
           </div>
 
