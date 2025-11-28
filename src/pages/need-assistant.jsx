@@ -247,35 +247,38 @@ const NeedAssistanceDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
+        {/* Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
-          <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-            Need Assistance
-          </h1>
-          <nav className="mt-2 text-sm text-orange-600">
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                isActive ? "text-orange-600 font-semibold" : ""
-              }
-            >
-              Dashboard
-            </NavLink>
-            <span className="mx-1">•</span>
-            <NavLink
-              to="/need-assistant"
-              className={({ isActive }) =>
-                isActive ? "text-orange-600 font-semibold" : ""
-              }
-            >
-              Need Assistance
-            </NavLink>
-          </nav>
-        </div>
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+                Need Assistance
+              </h1>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
+                >
+                  Dashboard
+                </NavLink>
+                <span>•</span>
+                <NavLink
+                  to="/need-assistant"
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
+                >
+                  Need Assistance
+                </NavLink>
+              </nav>
+            </div>
+          </div>
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={20}
@@ -288,13 +291,9 @@ const NeedAssistanceDashboard = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="relative">
-              <Filter
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
+            <div className="relative min-w-[150px]">
               <select
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -306,13 +305,9 @@ const NeedAssistanceDashboard = () => {
                 ))}
               </select>
             </div>
-            <div className="relative">
-              <Filter
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
-              />
+            <div className="relative min-w-[150px]">
               <select
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
                 value={issueTypeFilter}
                 onChange={(e) => setIssueTypeFilter(e.target.value)}
               >

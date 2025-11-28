@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import DisableModal from "../components/DisableModal";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { userControllers } from "../api/user";
 
 function UserManagement() {
@@ -95,37 +95,44 @@ function UserManagement() {
 
       <div className="max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
-          <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
-            User Management
-          </h1>
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+                User Management
+              </h1>
 
-          <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-            <NavLink to="/dashboard">dashboard</NavLink>
-            <span>•</span>
-            <NavLink to="/user-management" className="font-semibold">
-              User Management
-            </NavLink>
-          </nav>
-        </div>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                <NavLink to="/dashboard">dashboard</NavLink>
+                <span>•</span>
+                <NavLink to="/user-management" className="font-semibold">
+                  User Management
+                </NavLink>
+              </nav>
+            </div>
+          </div>
 
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white min-w-[150px]"
-          >
-            <option value="ALL">All Status</option>
-            <option value="ACTIVE">Active</option>
-            <option value="BLOCKED">Blocked</option>
-          </select>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white min-w-[150px]"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="BLOCKED">Blocked</option>
+            </select>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow border overflow-hidden">

@@ -71,6 +71,18 @@ const ArtisanManagement = () => {
     };
   }, []);
 
+  // Prevent background scrolling when modals are open
+  useEffect(() => {
+    if (showAddForm || showDetailsModal || showStatusModal || showVideoModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showAddForm, showDetailsModal, showStatusModal, showVideoModal]);
+
   const filteredCountries = countryCodes.filter(
     (country) =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
@@ -716,16 +728,18 @@ const ArtisanManagement = () => {
                         />
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                        {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
-                        {selectedPartner.verify_status === "VERIFIED" && (
-                          <span className="text-green-600 text-xs font-semibold px-2 py-0.5 border border-green-500 rounded-full">
+                    <div className="flex-1 min-w-0">
+                      {selectedPartner.verify_status === "VERIFIED" && (
+                        <div className="mb-1">
+                          <span className="text-green-600 text-xs font-semibold px-2 py-0.5 border border-green-500 rounded-full inline-block">
                             Verified
                           </span>
-                        )}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-bold text-gray-900 break-words">
+                        {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
                       </h3>
-                      <p className="text-gray-500">{selectedPartner.email || "N/A"}</p>
+                      <p className="text-gray-500 break-words">{selectedPartner.email || "N/A"}</p>
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
                           ? "bg-green-100 text-green-800"
@@ -742,14 +756,14 @@ const ArtisanManagement = () => {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium">{`${selectedPartner.countryCode || ""
+                        <p className="font-medium break-words">{`${selectedPartner.countryCode || ""
                           } ${selectedPartner.phoneNo || "N/A"}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Expertise Field</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.expertizeField || "Not Specified"}
                         </p>
                       </div>
@@ -758,7 +772,7 @@ const ArtisanManagement = () => {
                       <Calendar className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Joined Date</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.joinedDate || "N/A"}
                         </p>
                       </div>
@@ -766,7 +780,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Aadhaar Number</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.aadhaarNumber || "N/A"}
                         </p>
                       </div>
@@ -774,7 +788,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Caste Category</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.user_caste_category || "N/A"}
                         </p>
                       </div>
@@ -782,7 +796,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Sub Caste</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.subCaste || "N/A"}
                         </p>
                       </div>
@@ -790,7 +804,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">GST Number</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.gstNumber || "N/A"}
                         </p>
                       </div>
@@ -798,7 +812,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Location</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.location || "N/A"}
                         </p>
                       </div>
@@ -806,7 +820,7 @@ const ArtisanManagement = () => {
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Status</p>
-                        <p className="font-medium">
+                        <p className="font-medium break-words">
                           {selectedPartner.status || "Approved Artisan"}
                         </p>
                       </div>
@@ -955,66 +969,66 @@ const ArtisanManagement = () => {
               </tbody>
             </table>
           </div>
-        </div>
-        {filteredPartners.length === 0 && (
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
-            <p className="text-gray-500">
-              No artisans found matching your search criteria.
-            </p>
+          {filteredPartners.length === 0 && (
+            <div className="p-8 text-center border-t border-gray-200">
+              <p className="text-gray-500">
+                No artisans found matching your search criteria.
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 items-center p-6 border-t bg-white">
+            <div className="flex items-center gap-4 text-base font-medium justify-self-start">
+              <span className="text-gray-700">Rows per page:</span>
+
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  const newLimit = Number(e.target.value);
+                  setRowsPerPage(newLimit);
+                  setCurrentPage(1);
+
+                  fetchArtisans(1, newLimit);
+                }}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            <div className="text-base text-gray-600 font-medium justify-self-center">
+              {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
+            </div>
+
+            <div className="flex items-center gap-4 justify-self-end">
+              <button
+                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
-        <div className="flex items-center gap-4 text-base font-medium justify-self-start">
-          <span className="text-gray-700">Rows per page:</span>
-
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              const newLimit = Number(e.target.value);
-              setRowsPerPage(newLimit);
-              setCurrentPage(1);
-
-              fetchArtisans(1, newLimit);
-            }}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
-
-        <div className="text-base text-gray-600 font-medium justify-self-center">
-          {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
-        </div>
-
-        <div className="flex items-center gap-4 justify-self-end">
-          <button
-            onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-
-          <button
-            onClick={() =>
-              currentPage < totalPages && setCurrentPage(currentPage + 1)
-            }
-            disabled={currentPage === totalPages}
-            className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
       </div>
       {

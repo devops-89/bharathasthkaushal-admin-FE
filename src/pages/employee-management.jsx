@@ -120,6 +120,18 @@ const ArtisanManagement = () => {
     setCurrentPage(1);
   }, [searchTerm, locationFilter]);
 
+  // Prevent background scrolling when modals are open
+  useEffect(() => {
+    if (showAddForm || showDetailsModal || showStatusModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showAddForm, showDetailsModal, showStatusModal]);
+
   const handleToggleStatus = (employee) => {
     setSelectedEmployee(employee);
     setShowStatusModal(true);
@@ -275,41 +287,37 @@ const ArtisanManagement = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-5xl mx-auto">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Header */}
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+          <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Employee Management
               </h1>
-              <nav className="flex items-center space-x-2 text-sm text-gray-500 mt-2">
-                <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-                  <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) =>
-                      isActive ? "text-orange-600 font-semibold" : ""
-                    }
-                  >
-                    Dashboard
-                  </NavLink>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
+                >
+                  Dashboard
+                </NavLink>
 
-                  <span>•</span>
-                  <NavLink
-                    to="/employee-management"
-                    className={({ isActive }) =>
-                      isActive ? "text-orange-600 font-semibold" : ""
-                    }
-                  >
-                    Employee Management
-                  </NavLink>
-                </nav>
+                <span>•</span>
+                <NavLink
+                  to="/employee-management"
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
+                >
+                  Employee Management
+                </NavLink>
               </nav>
             </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          {/* Search and Filter */}
+          {/* Search and Action */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -326,9 +334,10 @@ const ArtisanManagement = () => {
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
             >
-              <Plus className="w-4 h-4 mr-2" /> Register Employee
+              <Plus className="w-5 h-5 mr-2" /> Register Employee
             </button>
           </div>
+
           {/* Filter Panel */}
           {showFilter && (
             <div className="mt-4 p-4 border-t border-gray-200">
@@ -888,6 +897,7 @@ const ArtisanManagement = () => {
         <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </div>
+
   );
 };
 

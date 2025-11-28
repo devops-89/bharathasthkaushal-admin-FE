@@ -29,7 +29,19 @@ const CategoryManagement = () => {
   // Since we are doing server-side pagination, 'categories' will only contain the current page's data.
   // We can still filter locally if needed, but usually search should also be server-side.
   // For now, we will assume the API returns the correct page data.
-  const currentCategories = categories;
+  const [showFilter, setShowFilter] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  // Filter categories locally
+  const currentCategories = categories.filter((cat) => {
+    const matchesSearch = cat.category_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      !statusFilter ||
+      (statusFilter === "active" ? cat.isActive : !cat.isActive);
+    return matchesSearch && matchesStatus;
+  });
 
   const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
@@ -193,218 +205,318 @@ const CategoryManagement = () => {
               />
             </div>
             <button
+              onClick={() => setShowFilter(!showFilter)}
+              className={`flex items-center px-4 py-2 border rounded-lg transition-colors ${showFilter
+                ? "bg-orange-50 border-orange-200 text-orange-600"
+                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+            >
+              <Filter className="w-5 h-5 mr-2" />
+              Filter
+            </button>
+            <button
               onClick={() => setShowForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" /> Add Category
             </button>
           </div>
+
+          {/* Filter Panel */}
+          {showFilter && (
+            <div className="mt-4 p-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => {
+                    setStatusFilter("");
+                    setSearchTerm("");
+                  }}
+                  className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Add Category Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Add Category
-                </h2>
-                <button
-                  onClick={resetForm}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-                {/* Category Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="category_name"
-                    value={formData.category_name}
-                    onChange={handleFormChange}
-                    placeholder="Enter category name"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Category Logo */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Logo *
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
-                    <input
-                      type="file"
-                      id="category_logo"
-                      name="category_logo"
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      required
-                      className="hidden"
-                    />
-                    <label htmlFor="category_logo" className="cursor-pointer">
-                      <Upload
-                        className="mx-auto mb-2 text-gray-400"
-                        size={32}
-                      />
-                      <p className="text-sm text-gray-600">
-                        {formData.category_logo
-                          ? formData.category_logo.name
-                          : "Upload JPG, JPEG, and PNG format"}
-                      </p>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleFormChange}
-                    placeholder="Enter description"
-                    required
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
-                  />
-                </div>
-                {/* Form Actions */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-                  >
+        {
+          showForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-6 border-b">
+                  <h2 className="text-xl font-bold text-gray-900">
                     Add Category
+                  </h2>
+                  <button
+                    onClick={resetForm}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X size={24} />
                   </button>
                 </div>
-              </form>
+                <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+                  {/* Category Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="category_name"
+                      value={formData.category_name}
+                      onChange={handleFormChange}
+                      placeholder="Enter category name"
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Category Logo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category Logo *
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
+                      <input
+                        type="file"
+                        id="category_logo"
+                        name="category_logo"
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        required
+                        className="hidden"
+                      />
+                      <label htmlFor="category_logo" className="cursor-pointer">
+                        <Upload
+                          className="mx-auto mb-2 text-gray-400"
+                          size={32}
+                        />
+                        <p className="text-sm text-gray-600">
+                          {formData.category_logo
+                            ? formData.category_logo.name
+                            : "Upload JPG, JPEG, and PNG format"}
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description *
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleFormChange}
+                      placeholder="Enter description"
+                      required
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+                  {/* Form Actions */}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      Add Category
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        }
 
         {/* Categories */}
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentCategories.map((cat) => (
-              <div
-                key={cat.category_id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
-                onClick={() => handleCategoryClick(cat.category_id)}
-              >
-                <img
-                  src={cat.category_logo}
-                  alt={cat.category_name}
-                  className="w-full h-40 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900">
-                    {cat.category_name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{cat.description}</p>
-                  <p className="text-xs text-gray-400">
-                    Status: {cat.isActive ? "Active" : "Inactive"}
-                  </p>
+        {
+          viewMode === "grid" ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentCategories.map((cat) => (
+                  <div
+                    key={cat.category_id}
+                    className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
+                    onClick={() => handleCategoryClick(cat.category_id)}
+                  >
+                    <img
+                      src={cat.category_logo}
+                      alt={cat.category_name}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900">
+                        {cat.category_name}
+                      </h3>
+                      <p className="text-sm text-gray-600">{cat.description}</p>
+                      <p className="text-xs text-gray-400">
+                        Status: {cat.isActive ? "Active" : "Inactive"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {totalDocs > 0 && (
+                <div className="grid grid-cols-3 items-center p-6 bg-white mt-6 rounded-xl shadow-sm border border-gray-200">
+                  <div className="flex items-center gap-4 text-base font-medium justify-self-start">
+                    <span className="text-gray-700">Rows per page:</span>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
+                  <div className="text-base text-gray-600 font-medium justify-self-center">
+                    {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
+                  </div>
+
+                  <div className="flex items-center gap-4 justify-self-end">
+                    <button
+                      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        currentPage < totalPages && setCurrentPage(currentPage + 1)
+                      }
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 font-medium text-gray-700 text-sm border-b">
+                <div>Category</div>
+                <div>Image</div>
+                <div>Status</div>
+                <div>Description</div>{" "}
+                {/* Changed from Products since data doesn't have it */}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white  rounded-lg shadow-sm overflow-hidden">
-            <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 font-medium text-gray-700 text-sm border-b">
-              <div>Category</div>
-              <div>Image</div>
-              <div>Status</div>
-              <div>Description</div>{" "}
-              {/* Changed from Products since data doesn't have it */}
+              {currentCategories.map((cat) => (
+                <div
+                  key={cat.category_id}
+                  className="grid grid-cols-4 gap-4 p-4 border-b cursor-pointer hover:bg-gray-50 transition"
+                  onClick={() => handleCategoryClick(cat.category_id)}
+                >
+                  <div>{cat.category_name}</div>
+                  <img
+                    src={cat.category_logo}
+                    alt={cat.category_name}
+                    className="w-16 h-12 rounded-lg object-cover"
+                  />
+                  <span>{cat.isActive ? "Active" : "Inactive"}</span>
+                  <span>{cat.description}</span> {/* Changed from products */}
+                </div>
+              ))}
+              {totalDocs > 0 && (
+                <div className="grid grid-cols-3 items-center p-6 border-t bg-white">
+                  <div className="flex items-center gap-4 text-base font-medium justify-self-start">
+                    <span className="text-gray-700">Rows per page:</span>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
+                  <div className="text-base text-gray-600 font-medium justify-self-center">
+                    {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
+                  </div>
+
+                  <div className="flex items-center gap-4 justify-self-end">
+                    <button
+                      onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        currentPage < totalPages && setCurrentPage(currentPage + 1)
+                      }
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-            {currentCategories.map((cat) => (
-              <div
-                key={cat.category_id}
-                className="grid grid-cols-4 gap-4 p-4 border-b cursor-pointer hover:bg-gray-50 transition"
-                onClick={() => handleCategoryClick(cat.category_id)}
-              >
-                <div>{cat.category_name}</div>
-                <img
-                  src={cat.category_logo}
-                  alt={cat.category_name}
-                  className="w-16 h-12 rounded-lg object-cover"
-                />
-                <span>{cat.isActive ? "Active" : "Inactive"}</span>
-                <span>{cat.description}</span> {/* Changed from products */}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+          )
+        }
+      </div >
       {/* Pagination Controls */}
-      {totalDocs > 0 && (
-        <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
-          <div className="flex items-center gap-4 text-base font-medium justify-self-start">
-            <span className="text-gray-700">Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
 
-          <div className="text-base text-gray-600 font-medium justify-self-center">
-            {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
-          </div>
-
-          <div className="flex items-center gap-4 justify-self-end">
-            <button
-              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() =>
-                currentPage < totalPages && setCurrentPage(currentPage + 1)
-              }
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      )}
-      <ToastContainer />
-    </div>
+      < ToastContainer />
+    </div >
   );
 };
 
