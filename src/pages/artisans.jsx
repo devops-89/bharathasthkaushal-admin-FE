@@ -38,7 +38,6 @@ const ArtisanManagement = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const [loading, setLoading] = useState(true);
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -85,10 +84,10 @@ const ArtisanManagement = () => {
 
   const [subCategories, setSubCategories] = useState([]);
   const casteCategories = {
-    GENERAL: ["Brahmin", "Kshatriya", "Vaishya", "Shudra"],
-    OBC: ["Yadav", "Kurmi", "Jat", "Gujjar"],
-    SC: ["Chamar", "Pasi", "Dhobi", "Kori"],
-    ST: ["Gond", "Bhil", "Santhal", "Munda"],
+    GENERAL: ["Brahmin", "Kshatriya", "Vaishya", "Shudra", "Other"],
+    OBC: ["Yadav", "Kurmi", "Jat", "Gujjar", "Other"],
+    SC: ["Chamar", "Pasi", "Dhobi", "Kori", "Other"],
+    ST: ["Gond", "Bhil", "Santhal", "Munda", "Other"],
   };
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -378,7 +377,7 @@ const ArtisanManagement = () => {
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
             >
-              <Plus className="w-4 h-4 mr-2" /> Register Artisan
+              <Plus className="w-5 h-5 mr-2" /> Register Artisan
             </button>
           </div>
           {showFilter && (
@@ -459,7 +458,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
+                      Email Address *
                     </label>
 
                     <input
@@ -467,11 +466,6 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      onBlur={() => {
-                        if (!emailRegex.test(formData.email)) {
-                          toast.error("Please enter a valid email address");
-                        }
-                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                       placeholder="Enter email address"
                     />
@@ -492,7 +486,7 @@ const ArtisanManagement = () => {
                   <div className="flex gap-2">
                     <div className="w-40 relative" ref={dropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Code
+                        Country Code
                       </label>
                       <div
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
@@ -567,7 +561,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expertise Field
+                      Expertise Field *
                     </label>
                     <select
                       name="expertizeField"
@@ -575,7 +569,7 @@ const ArtisanManagement = () => {
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="">Select Expertise</option>
+                      <option value="" hidden>Select Expertise</option>
                       {subCategories.map((subCategory, index) => (
                         <option key={index} value={subCategory.category_name}>
                           {subCategory.category_name}
@@ -604,7 +598,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      User Caste Category
+                      User Caste Category *
                     </label>
                     <select
                       name="user_caste_category"
@@ -612,7 +606,7 @@ const ArtisanManagement = () => {
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="">Select Caste Category</option>
+                      <option value="" hidden>Select Caste Category</option>
                       {Object.keys(casteCategories).map((category) => (
                         <option key={category} value={category}>
                           {category}
@@ -622,7 +616,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub Caste
+                      Sub Caste *
                     </label>
                     <select
                       name="subCaste"
@@ -630,7 +624,7 @@ const ArtisanManagement = () => {
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="">Select Sub Caste</option>
+                      <option value="" hidden>Select Sub Caste</option>
                       {formData.user_caste_category && casteCategories[formData.user_caste_category]?.map(
                         (subCaste) => (
                           <option key={subCaste} value={subCaste}>
@@ -653,14 +647,6 @@ const ArtisanManagement = () => {
                           ...formData,
                           gstNumber: e.target.value.toUpperCase(),
                         });
-                      }}
-                      onBlur={() => {
-                        if (
-                          formData.gstNumber &&
-                          !gstRegex.test(formData.gstNumber)
-                        ) {
-                          toast.error("Invalid GST Number Format");
-                        }
                       }}
                       maxLength={15}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"

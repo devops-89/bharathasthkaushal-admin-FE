@@ -11,6 +11,8 @@ import {
   XCircle,
   AlertCircle,
   X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { needAssistanceControllers } from "../api/needAssistance";
 const NEED_ASSISTANCE_STATUS = {
@@ -394,16 +396,17 @@ const NeedAssistanceDashboard = () => {
                 </table>
                 {/* Pagination Controls */}
                 {totalDocs > 0 && (
-                  <div className="flex items-center justify-between p-4 border-t bg-white rounded-b-lg">
-                    <div className="flex items-center gap-2 text-sm">
+                  <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-b-lg">
+                    <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                       <span className="text-gray-700">Rows per page:</span>
                       <select
                         value={rowsPerPage}
                         onChange={(e) => {
-                          setRowsPerPage(Number(e.target.value));
+                          const newLimit = Number(e.target.value);
+                          setRowsPerPage(newLimit);
                           setCurrentPage(1);
                         }}
-                        className="border rounded px-2 py-1"
+                        className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
                       >
                         <option value={10}>10</option>
                         <option value={25}>25</option>
@@ -412,44 +415,42 @@ const NeedAssistanceDashboard = () => {
                       </select>
                     </div>
 
-                    <div className="text-sm text-gray-600">
+                    <div className="text-base text-gray-600 font-medium justify-self-center">
                       {(currentPage - 1) * rowsPerPage + 1}–
-                      {Math.min(currentPage * rowsPerPage, totalDocs)} of{" "}
-                      {totalDocs}
+                      {Math.min(currentPage * rowsPerPage, totalDocs)} of {totalDocs}
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-4 justify-self-end">
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-2 py-1 rounded ${currentPage === 1
-                            ? "text-gray-400"
-                            : "hover:bg-gray-100"
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                           }`}
                       >
-                        ‹
+                        <ChevronLeft className="w-5 h-5" />
                       </button>
 
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-2 py-1 rounded ${currentPage === totalPages
-                            ? "text-gray-400"
-                            : "hover:bg-gray-100"
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                           }`}
                       >
-                        ›
+                        <ChevronRight className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
                 )}
               </div>
-              {
-                filteredData.length === 0 && (
-                  <div className="text-center py-12 text-gray-500">
-                    <p>No assistance requests found</p>
-                  </div>
-                )
+              {filteredData.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <p>No assistance requests found</p>
+                </div>
+              )
               }
             </>
           )}

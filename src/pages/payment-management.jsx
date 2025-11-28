@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 const PaymentManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,8 +123,6 @@ const PaymentManagement = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Payment Management</h1>
-
-            {/* <p className="text-gray-600">Dashboard • Auctions</p> */}
             <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
               <NavLink
                 to="/dashboard"
@@ -132,7 +130,6 @@ const PaymentManagement = () => {
               >
                 Dashboard
               </NavLink>
-
               <span>•</span>
               <NavLink
                 to="/payment-management"
@@ -141,10 +138,9 @@ const PaymentManagement = () => {
                 Payment Management
               </NavLink>
             </nav>
-
           </div>
-          <button className="bg-orange-500 to oranage-700 text-white px-4 py-2 rounded-lg hover: transition-colors flex items-center gap-2 ">
-            <CreditCard size={20} />
+          <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2">
+            <Plus size={20} />
             Create Payment
           </button>
         </div>
@@ -400,9 +396,6 @@ const PaymentManagement = () => {
             </div>
           </div>
         </div>
-
-        {/* Quick Actions */}
-
       </div>
     </div>
   );

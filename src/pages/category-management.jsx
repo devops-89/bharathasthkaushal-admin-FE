@@ -72,10 +72,21 @@ const CategoryManagement = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      category_logo: file,
-    }));
+    if (file) {
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const validExtensions = ["jpg", "jpeg", "png"];
+      const fileExtension = file.name.split(".").pop().toLowerCase();
+
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        toast.error("Invalid file format. Please upload a JPEG, JPG, or PNG image.");
+        e.target.value = null;
+        return;
+      }
+      setFormData((prev) => ({
+        ...prev,
+        category_logo: file,
+      }));
+    }
   };
 
   const handleFormSubmit = async (e) => {
@@ -169,7 +180,7 @@ const CategoryManagement = () => {
               </div>
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <Plus size={20} />
                 Add Category
@@ -217,7 +228,7 @@ const CategoryManagement = () => {
                     name="category_name"
                     value={formData.category_name}
                     onChange={handleFormChange}
-                    placeholder="e.g., Fly Shuttle Loom"
+                    placeholder="Enter category name"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
@@ -246,7 +257,7 @@ const CategoryManagement = () => {
                       <p className="text-sm text-gray-600">
                         {formData.category_logo
                           ? formData.category_logo.name
-                          : "Click to upload image"}
+                          : "Upload JPG, JPEG, and PNG format"}
                       </p>
                     </label>
                   </div>
@@ -261,7 +272,7 @@ const CategoryManagement = () => {
                     name="description"
                     value={formData.description}
                     onChange={handleFormChange}
-                    placeholder="e.g., Handicrafts in ancient India embodied creativity, tradition, and utility. Crafted by skilled artisans, they included pottery, jewelry, woodwork, metalwork, and textiles."
+                    placeholder="Enter description"
                     required
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
@@ -371,8 +382,8 @@ const CategoryManagement = () => {
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
               className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -384,8 +395,8 @@ const CategoryManagement = () => {
               }
               disabled={currentPage === totalPages}
               className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
               <ChevronRight className="w-5 h-5" />
@@ -393,6 +404,7 @@ const CategoryManagement = () => {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 };

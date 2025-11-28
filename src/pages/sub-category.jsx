@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Plus, Search, Filter, Grid, List, X, Upload } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { categoryControllers } from "../api/category";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const SubcategoryManagement = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -93,10 +95,21 @@ const SubcategoryManagement = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      category_logo: file,
-    }));
+    if (file) {
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const validExtensions = ["jpg", "jpeg", "png"];
+      const fileExtension = file.name.split(".").pop().toLowerCase();
+
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        toast.error("Invalid file format. Please upload a JPEG, JPG, or PNG image.");
+        e.target.value = null;
+        return;
+      }
+      setFormData((prev) => ({
+        ...prev,
+        category_logo: file,
+      }));
+    }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,7 +123,7 @@ const SubcategoryManagement = () => {
     try {
       const response = await categoryControllers.addCategory(formDataToSend);
       console.log("API Response:", response.data);
-      alert("Subcategory added successfully!");
+      toast.success("Subcategory added successfully!");
       setFormData({
         category_name: "",
         category_logo: null,
@@ -122,7 +135,7 @@ const SubcategoryManagement = () => {
       getSubcategories();
     } catch (err) {
       console.error("API Error:", err.response ? err.response.data : err.message);
-      alert("Failed to add subcategory");
+      toast.error("Failed to add subcategory");
     }
   };
 
@@ -159,8 +172,8 @@ const SubcategoryManagement = () => {
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 ${viewMode === "grid"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "bg-orange-500 text-white"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
               >
                 <Grid size={20} />
@@ -168,8 +181,8 @@ const SubcategoryManagement = () => {
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-2 ${viewMode === "list"
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "bg-orange-500 text-white"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
               >
                 <List size={20} />
@@ -233,7 +246,7 @@ const SubcategoryManagement = () => {
                     value={formData.category_name}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="Enter subcategory name"
+                    placeholder="Enter category name"
                     required
                   />
                 </div>
@@ -257,12 +270,8 @@ const SubcategoryManagement = () => {
                       <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
                       <div className="text-sm text-gray-600">
                         <span className="font-medium text-orange-600 hover:text-orange-500">
-                          Click to upload
-                        </span>{" "}
-                        or drag and drop
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, GIF up to 10MB
+                          Upload JPG, JPEG, and PNG format
+                        </span>
                       </div>
                     </label>
                     {formData.category_logo && (
@@ -272,16 +281,14 @@ const SubcategoryManagement = () => {
                     )}
                   </div>
                 </div>
-                {/* Parent ID */}
+                {/* Parent Category Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Parent Category <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    name="parent_id"
-                    value={formData.parent_id}
-                    onChange={handleInputChange}
+                    value={categoryName}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-100"
                     readOnly
                   />
@@ -298,24 +305,12 @@ const SubcategoryManagement = () => {
                     onChange={handleInputChange}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="Enter detailed description of the subcategory"
+                    placeholder="Enter description"
                     required
                   />
                 </div>
 
-                {/* Type (Read-only) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type
-                  </label>
-                  <input
-                    type="text"
-                    name="type"
-                    value={formData.type}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                    readOnly
-                  />
-                </div>
+
               </div>
 
               {/* Form Actions */}
@@ -378,8 +373,8 @@ const SubcategoryManagement = () => {
                       <h3 className="font-semibold text-gray-900">{sub.name}</h3>
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${sub.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                           }`}
                       >
                         {sub.status}
@@ -415,8 +410,8 @@ const SubcategoryManagement = () => {
                   />
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${sub.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
                       }`}
                   >
                     {sub.status}
@@ -472,7 +467,7 @@ const SubcategoryManagement = () => {
 
         </div>
       )}
-
+      <ToastContainer />
     </div>
 
   );

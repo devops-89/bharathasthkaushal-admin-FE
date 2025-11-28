@@ -5,8 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import DisableModal from "../components/DisableModal";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { userControllers } from "../api/user";
+
 function UserManagement() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -16,6 +17,7 @@ function UserManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -31,14 +33,17 @@ function UserManagement() {
       toast.error("Failed to fetch users");
     }
   };
+
   const handleToggle = (user) => {
     setSelectedUser(user);
     setOpenModal(true);
   };
+
   const dash = (v) =>
     v === null || v === undefined || (typeof v === "string" && v.trim() === "")
       ? "—"
       : v;
+
   const fullName = (u) => {
     const f = dash(u?.firstName);
     const l = dash(u?.lastName);
@@ -58,8 +63,7 @@ function UserManagement() {
         )
       );
       toast.success(
-        `Profile ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
-        } Successfully!`
+        `User ${newStatus === "BLOCKED" ? "Blocked" : "Activated"} Successfully!`
       );
     } catch (err) {
       toast.error("Something went wrong!");
@@ -126,51 +130,84 @@ function UserManagement() {
 
         <div className="bg-white rounded-lg shadow border overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-100 text-left">
+            <thead className="bg-gray-50 text-left">
               <tr>
-                <th className="p-3">User Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Action</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">User Name</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">Mobile Number</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">Status</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">View Details</th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.map((user) => (
-                <tr key={user.id || user._id} className="border-b">
-                  <td className="p-3">{fullName(user)}</td>
-                  <td className="p-3">{dash(user?.email)}</td>
+                <tr key={user.id || user._id} className="border-b hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img
+                          className="h-10 w-10 rounded-full object-cover"
+                          src={
+                            user.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              fullName(user)
+                            )}&background=random`
+                          }
+                          alt=""
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {fullName(user)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.countryCode ? `${user.countryCode} ` : ""}
+                    {dash(user?.phoneNo)}
+                  </td>
 
-                  <td className="p-3">
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     <Switch
                       checked={user?.status === "ACTIVE"}
                       onChange={() => handleToggle(user)}
                       className={`${user?.status === "ACTIVE"
                         ? "bg-orange-600"
                         : "bg-gray-300"
-                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
                     >
                       <span className="sr-only">Toggle Status</span>
-                      <span className="translate-x-1 inline-block h-[18px] w-[18px] bg-white rounded-full transition" />
+                      <span
+                        className={`${user?.status === "ACTIVE"
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                          } inline-block h-[18px] w-[18px] transform rounded-full bg-white transition`}
+                      />
                     </Switch>
                   </td>
 
-                  <td className="p-3">
-                    <button
-                      onClick={() =>
-                        navigate(`/user-profile/${user.id || user._id}`)
-                      }
-                      className="text-orange-700 hover:text-orange-500 transition"
-                      aria-label="View profile"
-                    >
-                      <Eye size={20} />
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() =>
+                          navigate(`/user-profile/${user.id || user._id}`)
+                        }
+                        className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        aria-label="View profile"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="flex items-center justify-between p-4 border-t bg-white">
-            <div className="flex items-center gap-2 text-sm">
+          <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-b-xl">
+            <div className="flex items-center gap-4 text-base font-medium justify-self-start">
               <span className="text-gray-700">Rows per page:</span>
               <select
                 value={rowsPerPage}
@@ -178,7 +215,7 @@ function UserManagement() {
                   setRowsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="border rounded px-2 py-1"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -187,34 +224,31 @@ function UserManagement() {
               </select>
             </div>
 
-            <div className="text-sm text-gray-600">
-              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredUsers.length)}{" "}
-              of {filteredUsers.length}
+            <div className="text-base text-gray-600 font-medium justify-self-center">
+              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-4 justify-self-end">
               <button
-                onClick={() =>
-                  currentPage > 1 && setCurrentPage(currentPage - 1)
-                }
+                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
-                ‹
+                <ChevronLeft className="w-5 h-5" />
               </button>
 
               <button
-                onClick={() =>
-                  currentPage < totalPages && setCurrentPage(currentPage + 1)
-                }
+                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-2 py-1 rounded ${currentPage === totalPages
-                  ? "text-gray-400"
-                  : "hover:bg-gray-100"
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
-                ›
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -224,10 +258,17 @@ function UserManagement() {
           <DisableModal
             onClose={() => setOpenModal(false)}
             onConfirm={confirmDisable}
+            title={selectedUser?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
+            message={
+              selectedUser?.status === "ACTIVE"
+                ? "Are you sure you want to disable this user's profile?"
+                : "Are you sure you want to activate this user's profile?"
+            }
           />
         )}
       </div>
     </div>
   );
 }
+
 export default UserManagement;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Eye, X, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, X, Play, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { productControllers } from "../api/product.js";
 import { NavLink } from "react-router-dom";
 const AuctionManagement = () => {
@@ -342,7 +342,7 @@ const AuctionManagement = () => {
           onClick={() => setShowAddForm(true)}
           className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2"
         >
-          <span>+</span>
+          <Plus className="w-5 h-5" />
           Add Auction
         </button>
       </div>
@@ -1006,8 +1006,8 @@ const AuctionManagement = () => {
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => prev - 1)}
             className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              ? "text-gray-300 cursor-not-allowed"
+              : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
               }`}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -1017,8 +1017,8 @@ const AuctionManagement = () => {
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((prev) => prev + 1)}
             className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              ? "text-gray-300 cursor-not-allowed"
+              : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
               }`}
           >
             <ChevronRight className="w-5 h-5" />

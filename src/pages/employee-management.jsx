@@ -420,7 +420,7 @@ const ArtisanManagement = () => {
                   <div className="flex gap-2">
                     <div className="w-40 relative" ref={dropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Code
+                        Country Code
                       </label>
                       <div
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
@@ -499,7 +499,7 @@ const ArtisanManagement = () => {
                   <div className="flex gap-2">
                     <div className="w-40 relative" ref={secondaryDropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Code
+                        Country Code
                       </label>
                       <div
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
@@ -554,7 +554,7 @@ const ArtisanManagement = () => {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Secondary Phone Number (Optional)
+                        Secondary Phone Number 
                       </label>
                       <input
                         type="tel"

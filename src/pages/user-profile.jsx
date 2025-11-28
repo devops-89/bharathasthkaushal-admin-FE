@@ -3,6 +3,7 @@ import { useParams, NavLink } from "react-router-dom";
 import { userControllers } from "../api/user";
 import { productControllers } from "../api/product";
 import { ToastContainer, toast } from "react-toastify";
+import { Phone, Calendar, Mail, User, ShieldCheck } from "lucide-react";
 
 function UserProfile() {
   const { id } = useParams();
@@ -55,9 +56,9 @@ function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       {/* Header / Back Button */}
-      <div className="max-w-3xl mx-auto mb-6 px-4 md:px-0">
+      <div className="max-w-4xl mx-auto mb-6 px-4 md:px-0">
         <NavLink
           to="/user-management"
           className="inline-flex items-center text-gray-600 hover:text-orange-600 transition-colors font-medium"
@@ -67,44 +68,98 @@ function UserProfile() {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-white shadow p-6 rounded-xl border max-w-3xl mx-auto">
-
-        {/* Avatar + Name */}
-        <div className="flex items-center gap-5 mb-6">
-          <img
-            src={
-              user.avatar ||
-              "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-            }
-            className="w-24 h-24 rounded-full object-cover border"
-            alt="User Avatar"
-          />
+      <div className="bg-white shadow-lg p-8 rounded-2xl border border-gray-100 max-w-4xl mx-auto mb-8">
+        <div className="flex items-center space-x-6 mb-8">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-orange-100 shadow-sm">
+              <img
+                src={
+                  user.avatar ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.name || `${user.firstName} ${user.lastName}`
+                  )}&background=random`
+                }
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
           <div>
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
               {user.name || `${user.firstName} ${user.lastName}`}
             </h2>
-            <p className="text-gray-600">{user.roleName}</p>
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center text-gray-500 text-sm">
+                <Mail className="w-4 h-4 mr-1.5" />
+                {user.email || "—"}
+              </div>
+              <span className="text-gray-300">|</span>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.status === "ACTIVE"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+                  }`}
+              >
+                {user.status || "Active"}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <p>
-            <b>Email:</b> {user.email || "—"}
-          </p>
-          <p>
-            <b>Phone:</b> {user.countryCode} {user.phoneNo || "—"}
-          </p>
-          <p>
-            <b>Status:</b> {user.status}
-          </p>
-          <p>
-            <b>Aadhaar Number:</b> {user.aadhaarNumber || "—"}
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-100 pt-8">
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-orange-50 rounded-lg">
+              <Phone className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Contact Number</p>
+              <p className="font-semibold text-gray-900">
+                {user.countryCode ? `${user.countryCode} ` : ""}
+                {user.phoneNo || "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-orange-50 rounded-lg">
+              <Calendar className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Joined Date</p>
+              <p className="font-semibold text-gray-900">
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-orange-50 rounded-lg">
+              <User className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Role</p>
+              <p className="font-semibold text-gray-900">
+                {user.roleName || "User"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="p-2 bg-orange-50 rounded-lg">
+              <ShieldCheck className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-medium">Aadhaar Number</p>
+              <p className="font-semibold text-gray-900">
+                {user.aadhaarNumber || "—"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Auction Stats Section */}
-      <div className="bg-white shadow p-6 rounded-xl border max-w-3xl mx-auto mt-8">
+      <div className="bg-white shadow-lg p-8 rounded-2xl border border-gray-100 max-w-4xl mx-auto">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Auction Activity</h3>
 
         {statsLoading ? (
@@ -114,7 +169,7 @@ function UserProfile() {
         ) : auctionStats ? (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white p-6 rounded-xl border border-blue-100 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-blue-800 font-semibold">Participated</h3>

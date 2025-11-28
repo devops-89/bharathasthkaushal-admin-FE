@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Users,
@@ -12,17 +11,14 @@ import {
   Check,
   X,
   Eye,
-  Settings,
-  UserPlus,
   Crown,
-  Star,
   MapPin,
   Globe,
   Building,
   Target,
   TrendingUp,
-
 } from 'lucide-react';
+
 const PermissionManagement = () => {
   const [users, setUsers] = useState([
     {
@@ -140,10 +136,10 @@ const PermissionManagement = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
-  const [selectedUser, setSelectedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('edit');
   const [editingUser, setEditingUser] = useState(null);
+
   const permissionsList = [
     { id: 'view_all_data', name: 'View All Data', description: 'Access to all national data', level: 1 },
     { id: 'manage_all_users', name: 'Manage All Users', description: 'Manage all user accounts nationwide', level: 1 },
@@ -177,14 +173,6 @@ const PermissionManagement = () => {
     { id: 'create_area_reports', name: 'Create Area Reports', description: 'Generate area-level reports', level: 4 },
     { id: 'create_territory_reports', name: 'Create Territory Reports', description: 'Generate territory reports', level: 5 },
     { id: 'sales_reporting', name: 'Sales Reporting', description: 'Generate sales reports', level: 6 }
-  ];
-  const departments = [
-    'Country Head',
-    'Zonal Manager',
-    'State Manager',
-    'Area Manager',
-    'Territory Manager',
-    'Sales Manager'
   ];
 
   const filteredUsers = users.filter(user => {
@@ -373,9 +361,9 @@ const PermissionManagement = () => {
             </div>
             <button
               onClick={() => openModal('add')}
-              className="bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-500 hover:to-orange-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              <UserPlus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               Add User
             </button>
           </div>
@@ -423,8 +411,8 @@ const PermissionManagement = () => {
                       <button
                         onClick={() => toggleUserStatus(user.id)}
                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${user.status === 'active'
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
+                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                          : 'bg-red-100 text-red-800 hover:bg-red-200'
                           }`}
                       >
                         {user.status}

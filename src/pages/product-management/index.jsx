@@ -10,6 +10,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -100,7 +101,7 @@ export default function ProductManagement() {
             </div>
             <Link to={"/product-management/add-product"}>
               <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
-                <span className="text-xl"> + </span> Add New Product
+                <Plus className="w-5 h-5 mr-2" /> Add New Product
               </button>
             </Link>
           </div>
@@ -179,8 +180,8 @@ export default function ProductManagement() {
                   }
                   disabled={currentPage === 1}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -192,8 +193,8 @@ export default function ProductManagement() {
                   }
                   disabled={currentPage === totalPages}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronRight className="w-5 h-5" />
