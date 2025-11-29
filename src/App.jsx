@@ -7,7 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import ApprovalManagement from "./pages/approvalmanagement";
 import Artisans from "./pages/artisans";
 import AuctionManagement from "./pages/auction-management";
-import CategoryManagement from "./pages/category-management";      
+import CategoryManagement from "./pages/category-management";
 import EmployeeManagement from "./pages/employee-management";
 import PaymentManagement from "./pages/payment-management";
 import PermissionManagement from "./pages/permission-management";
@@ -21,6 +21,7 @@ import Subcategory from "./pages/sub-category";
 import NeedAssistant from "./pages/need-assistant";
 import UserManagement from "./pages/user-management";
 import UserProfile from "./pages/user-profile";
+import Profile from "./pages/Profile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function App() {
@@ -29,7 +30,7 @@ function App() {
   const location = useLocation();
   const [show, setShow] = useState(false);
   useEffect(() => {
-    
+
     if (location.pathname === "/") {
       setShow(false);
     } else {
@@ -53,9 +54,9 @@ function App() {
         />
         <Route path="/edit-product/:id" element={<EditProduct />} />
 
-        <Route 
-        path="/product-management/product-details/:id"
-        element={<ProductDetails/>} 
+        <Route
+          path="/product-management/product-details/:id"
+          element={<ProductDetails />}
         />
         <Route path="/category-management" element={<CategoryManagement />} />
         <Route path="/auction-management" element={<AuctionManagement />} />
@@ -66,26 +67,27 @@ function App() {
         /> */}
         <Route path="/employee-management" element={<EmployeeManagement />} />
         <Route path="/payment-management" element={<PaymentManagement />} />
-        <Route 
+        <Route
           path="/permission-management"
           element={<PermissionManagement />}
         />
         <Route
           path="/category-management/sub-category/:id"
-          element={<Subcategory/>}
+          element={<Subcategory />}
         />
-        <Route path="/categories/:page/:pageSize/:id" element={<CategoryManagement/>} />
-        <Route 
-        path="/user-management"
-        element={<UserManagement/>}
+        <Route path="/categories/:page/:pageSize/:id" element={<CategoryManagement />} />
+        <Route
+          path="/user-management"
+          element={<UserManagement />}
         />
-      <Route path="/user-profile/:id" element={<UserProfile />} />
-<Route path="/edit-build-step/:id" element={<Buildstate />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/user-profile/:id" element={<UserProfile />} />
+        <Route path="/edit-build-step/:id" element={<Buildstate />} />
 
 
-        <Route 
+        <Route
           path="/need-assistant"
-          element={<NeedAssistant/>}
+          element={<NeedAssistant />}
         />
       </Routes>
     </div>

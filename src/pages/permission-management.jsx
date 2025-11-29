@@ -255,11 +255,8 @@ const PermissionManagement = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-700 rounded-xl shadow-lg">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+          <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Permission Management
@@ -275,72 +272,21 @@ const PermissionManagement = () => {
                   to="/permission-management"
                   className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
                 >
-                  Permission  Management
+                  Permission Management
                 </NavLink>
               </nav>
-
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Users</p>
-                  <p className="text-2xl font-bold text-gray-900">{users.length}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Check className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Active Users</p>
-                  <p className="text-2xl font-bold text-gray-900">{users.filter(u => u.status === 'active').length}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <Shield className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Hierarchy Levels</p>
-                  <p className="text-2xl font-bold text-gray-900">{roles.length}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-100 rounded-lg">
-                  <Crown className="w-6 h-6 text-orange-700" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Country Heads</p>
-                  <p className="text-2xl font-bold text-gray-900">{users.filter(u => u.role === 'Country Head').length}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Actions */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 mb-6 p-6">
+          {/* Filters and Actions */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-col md:flex-row gap-4 flex-1">
-              <div className="relative">
+            <div className="flex flex-col md:flex-row gap-4 flex-1 w-full">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search users..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -348,7 +294,7 @@ const PermissionManagement = () => {
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <select
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-700 bg-white"
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
                 >
@@ -361,7 +307,7 @@ const PermissionManagement = () => {
             </div>
             <button
               onClick={() => openModal('add')}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
               Add User

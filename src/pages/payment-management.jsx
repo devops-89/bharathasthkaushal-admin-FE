@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+
 const PaymentManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,7 +25,6 @@ const PaymentManagement = () => {
       customerName: 'Rajesh Kumar',
       email: 'rajesh.k@email.com',
       product: 'Wooden Handicraft Set',
-
       category: 'Handicraft',
       amount: 2300.00,
       date: '14 Aug 2025',
@@ -120,103 +120,45 @@ const PaymentManagement = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">Payment Management</h1>
-            <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
-              <NavLink
-                to="/dashboard"
-                className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
-              >
-                Dashboard
-              </NavLink>
-              <span>•</span>
-              <NavLink
-                to="/payment-management"
-                className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
-              >
+        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Payment Management
-              </NavLink>
-            </nav>
-          </div>
-          <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2">
-            <Plus size={20} />
-            Create Payment
-          </button>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-600 text-sm font-medium">Total Payments</p>
-                <p className="text-2xl font-bold text-blue-900">₹{totalPayments.toLocaleString()}</p>
-                <p className="text-blue-700 text-sm mt-1">+30.20% from last month</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <CreditCard className="text-blue-600" size={24} />
-              </div>
+              </h1>
+              <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                >
+                  Dashboard
+                </NavLink>
+                <span>•</span>
+                <NavLink
+                  to="/payment-management"
+                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                >
+                  Payment Management
+                </NavLink>
+              </nav>
             </div>
           </div>
 
-          <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-600 text-sm font-medium">Successful Payments</p>
-                <p className="text-2xl font-bold text-green-900">{successfulPayments}</p>
-                <p className="text-green-700 text-sm mt-1">+21 from yesterday</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <Package className="text-green-600" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-600 text-sm font-medium">Failed Payments</p>
-                <p className="text-2xl font-bold text-red-900">{failedPayments}</p>
-                <p className="text-red-700 text-sm mt-1">-2 from yesterday</p>
-              </div>
-              <div className="bg-red-100 p-3 rounded-lg">
-                <User className="text-red-600" size={24} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-600 text-sm font-medium">Processing</p>
-                <p className="text-2xl font-bold text-yellow-900">{processingPayments}</p>
-                <p className="text-yellow-700 text-sm mt-1">Pending approval</p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <Calendar className="text-yellow-600" size={24} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
+          {/* Search and Actions */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex gap-4 items-center">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search by customer, product, email..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
+            <div className="flex-1 relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search by customer, product, email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
               <select
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
               >
@@ -226,16 +168,17 @@ const PaymentManagement = () => {
                 <option value="Processing">Processing</option>
                 <option value="Refunded">Refunded</option>
               </select>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 whitespace-nowrap">
                 <Filter size={16} />
                 Filter
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 whitespace-nowrap">
                 <Download size={16} />
                 Export
+              </button>
+              <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 whitespace-nowrap">
+                <Plus size={20} />
+                Create Payment
               </button>
             </div>
           </div>
@@ -247,7 +190,7 @@ const PaymentManagement = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Recent Payments</h2>
               <select
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
+                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -276,7 +219,7 @@ const PaymentManagement = () => {
                   <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white font-semibold">
                           {payment.customerName.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div className="ml-3">
@@ -315,7 +258,7 @@ const PaymentManagement = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <button className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
                           <Eye size={16} />
                         </button>
                         <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
@@ -353,7 +296,7 @@ const PaymentManagement = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-20 bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-blue-500 h-2 rounded-full"
+                          className="bg-orange-500 h-2 rounded-full"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>

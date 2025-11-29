@@ -72,7 +72,7 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">Edit Build Step</h2>
+          <h2 className="text-xl font-bold text-gray-900">Update Build Step</h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"

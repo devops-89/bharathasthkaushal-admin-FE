@@ -181,7 +181,7 @@ const ArtisanManagement = () => {
         gstNumber: user.gstNumber || "—",
         user_caste_category: user.user_caste_category || "—",
         joinedDate: user.createdAt
-          ? new Date(user.createdAt).toISOString().split("T")[0]
+          ? new Date(user.createdAt).toLocaleDateString("en-GB").replace(/\//g, "-")
           : "—",
         aadhaarNumber: user.aadhaarNumber || "N/A",
         subCaste: user.subCaste || "_",
@@ -610,7 +610,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      User Caste Category *
+                      Caste Category *
                     </label>
                     <select
                       name="user_caste_category"

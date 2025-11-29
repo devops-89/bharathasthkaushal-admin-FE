@@ -189,10 +189,6 @@ const AddProduct = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Add New Product
               </h1>
-
-              <p className="text-gray-600">
-                Enter product details for your handloom/handcraft item
-              </p>
             </div>
           </div>
         </div>
@@ -200,7 +196,7 @@ const AddProduct = () => {
         {/* Form */}
         <div className="bg-white rounded-2xl p-8 shadow-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Product Name */}
+            {/* Product Name */}  
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Product Name *

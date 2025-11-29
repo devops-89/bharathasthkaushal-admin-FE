@@ -333,7 +333,7 @@ const NeedAssistanceDashboard = () => {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-orange-600 text-white">
+                  <thead className="bg-gray-50 text-gray-600">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-semibold uppercase">
                         Name

@@ -9,23 +9,38 @@ const Header = () => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [user, setUser] = useState({ name: 'ADMIN', role: 'Administrator' });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser({
+          name: parsedUser.name || 'ADMIN',
+          role: parsedUser.role || 'Administrator'
+        });
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
       await authControllers.logout();
     } catch (error) {
       console.error("Logout failed:", error);
-      // Optional: toast.error("Logout failed"); 
     } finally {
-      // Always clear local storage and redirect, regardless of API success/failure
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
       navigate("/");
       setIsDropdownOpen(false);
     }
   };
 
   const handleProfile = () => {
-    console.log('Navigate to profile');
+    navigate('/profile');
     setIsDropdownOpen(false);
   };
 
@@ -48,17 +63,18 @@ const Header = () => {
         <div className="flex items-center space-x-2">
           <img src={logo} alt="Logo"
             className="w-8 h-8 object-cover rounded-full" />
-          <h1 className="text-2xl font-bold text-gray-800">
-            <span className="text-primary-600">Hand</span>
-            <span className="text-earth-600">loom</span>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
+              Bharathastkaushal
+            </span>
           </h1>
         </div>
 
         <div className="relative" ref={dropdownRef}>
           <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">ADMIN</p>
-              <p className="text-xs text-gray-500">Administrator</p>
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-medium text-gray-900">{user.name}</p>
+              <p className="text-xs text-gray-500">{user.role}</p>
             </div>
             <div
               className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-primary-600 transition-colors"
@@ -73,17 +89,17 @@ const Header = () => {
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
               <button
                 onClick={handleProfile}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
               >
-                <User className="w-4 h-4 mr-3" />
+                <User className="w-4 h-4 mr-3 text-orange-600" />
                 Profile
               </button>
               <hr className="my-1 border-gray-100" />
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
               >
-                <LogOut className="w-4 h-4 mr-3" />
+                <LogOut className="w-4 h-4 mr-3 text-orange-600" />
                 Logout
               </button>
             </div>

@@ -19,7 +19,7 @@ export default function LoginPage({ onLogin }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-const emailTrimmed = state.email.trim();
+  const emailTrimmed = state.email.trim();
 
   // const inputHandler = (e) => {
   //   const { id, value } = e.target;
@@ -31,20 +31,20 @@ const emailTrimmed = state.email.trim();
   //   });
   // };
   const inputHandler = (e) => {
-  const { id, value } = e.target;
+    const { id, value } = e.target;
 
-  // email ke liye starting & extra spaces remove
-  const cleanedValue =
-    id === "email" ? value.replace(/\s+/g, "").trimStart() : value;
+    // email ke liye starting & extra spaces remove
+    const cleanedValue =
+      id === "email" ? value.replace(/\s+/g, "").trimStart() : value;
 
-  setState({ ...state, [id]: cleanedValue });
+    setState({ ...state, [id]: cleanedValue });
 
-  setErrors({
-    email: "",
-    password: "",
-    general: "",
-  });
-};
+    setErrors({
+      email: "",
+      password: "",
+      general: "",
+    });
+  };
 
 
   const handleSubmit = () => {
@@ -267,19 +267,19 @@ const emailTrimmed = state.email.trim();
                 placeholder="Enter your email"
               /> */}
               <input
-  id="email"
-  type="email"
-  value={state.email}
-  required
-  autoComplete="off"
-  spellCheck="false"
-  onChange={inputHandler}
-  onBlur={(e) =>
-    setState(prev => ({ ...prev, email: e.target.value.trim() }))
-  }
-  style={inputStyle}
-  placeholder="Enter your email"
-/>
+                id="email"
+                type="email"
+                value={state.email}
+                required
+                autoComplete="off"
+                spellCheck="false"
+                onChange={inputHandler}
+                onBlur={(e) =>
+                  setState(prev => ({ ...prev, email: e.target.value.trim() }))
+                }
+                style={inputStyle}
+                placeholder="Enter your email"
+              />
 
               {errors.email && (
                 <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>

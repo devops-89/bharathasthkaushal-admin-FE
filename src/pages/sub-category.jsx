@@ -238,7 +238,7 @@ const SubcategoryManagement = () => {
                 {/* Category Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name <span className="text-red-500">*</span>
+                    Subcategory Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -246,7 +246,7 @@ const SubcategoryManagement = () => {
                     value={formData.category_name}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="Enter category name"
+                    placeholder="Enter subcategory name"
                     required
                   />
                 </div>
@@ -254,7 +254,7 @@ const SubcategoryManagement = () => {
                 {/* Category Logo */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Logo <span className="text-red-500">*</span>
+                    Subcategory Image <span className="text-red-500">*</span>
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors">
                     <input
@@ -284,7 +284,7 @@ const SubcategoryManagement = () => {
                 {/* Parent Category Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Parent Category <span className="text-red-500">*</span>
+                    Category Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
