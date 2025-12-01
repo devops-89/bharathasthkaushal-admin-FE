@@ -6,7 +6,7 @@ export const userControllers = {
         params: {
           user_group: group,
           page: page,
-          limit: pageSize, 
+          limit: pageSize,
         },
         headers: { "Cache-Control": "no-cache" }
       });
@@ -16,21 +16,22 @@ export const userControllers = {
     }
   },
   getUserProfile: async (id) => {
-  try {
-    let result = await getuserSecuredApi.get(`/users/${id}/profile`);
-    return result;
-  } catch (error) {
-    throw error;
-  }
-},
+    try {
+      let result = await getuserSecuredApi.get(`/users/${id}/profile`);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-updateUserStatus: async (id, status) => {
-  try {
-    return await getuserSecuredApi.patch(`/users/${id}/status`, { status });
-  } catch (error) {
-    throw error;
-  }
-},
+  updateUserStatus: async (id, status) => {
+    try {
+      return await getuserSecuredApi.patch(`/users/${id}/status`, { status });
+    } catch (error) {
+      throw error;
+    }
+  },
+
   verifyArtisan: async (id) => {
     try {
       const body = { verifyStatus: "VERIFIED" };
@@ -40,6 +41,38 @@ updateUserStatus: async (id, status) => {
       );
       console.log("hey guyssss", response);
       return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getUserDetails: async () => {
+    try {
+      const result = await getuserSecuredApi.get("/users/userdetails", {
+        headers: {
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      });
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getDashboardUserCount: async () => {
+    try {
+      const result = await getuserSecuredApi.get("/dashboard/users/count");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  updateUserProfile: async (data) => {
+    try {
+      const result = await getuserSecuredApi.post("/users/updateprofile", data);
+      return result;
     } catch (error) {
       throw error;
     }

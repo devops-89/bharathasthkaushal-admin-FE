@@ -29,6 +29,7 @@ import {
   DollarSign
 } from "lucide-react";
 import { productControllers } from "../api/product";
+import { userControllers } from "../api/user";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NavLink } from "react-router-dom";
@@ -37,6 +38,18 @@ const Dashboard = () => {
   const [serviceData, setServiceData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userCount, setUserCount] = useState(0);
+
+  const fetchUserCount = async () => {
+    try {
+      const res = await userControllers.getDashboardUserCount();
+      // Assuming the API returns the count in res.data.data
+      // Adjust if the structure is different (e.g. res.data.count)
+      setUserCount(res.data.data || 0);
+    } catch (err) {
+      console.error("Failed to fetch user count", err);
+    }
+  };
 
   // Mock data for stats - in a real app, fetch this from API
   const stats = [
@@ -49,8 +62,8 @@ const Dashboard = () => {
       color: "bg-green-100 text-green-600",
     },
     {
-      title: "Active Artisans",
-      value: "1,240",
+      title: "Total Users", // Updated title to reflect the API
+      value: userCount.toLocaleString(),
       change: "+8.2%",
       trend: "up",
       icon: Users,
@@ -172,7 +185,7 @@ const Dashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchMonthlyReport(), fetchStatusSummary()]);
+      await Promise.all([fetchMonthlyReport(), fetchStatusSummary(), fetchUserCount()]);
       setLoading(false);
     };
     loadData();

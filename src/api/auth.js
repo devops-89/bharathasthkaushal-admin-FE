@@ -9,21 +9,21 @@ export const authControllers = {
     }
   },
   logout: async () => {
-  try {
-    let result = await logoutSecuredApi.get("/logout/currentsession", {
-      headers: {
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-      },
-    });
-    localStorage.removeItem("accessToken");
-    return result;
-  } catch (error) {
-    throw error;
-  }
-},
+    try {
+      let result = await logoutSecuredApi.get("/logout/currentsession", {
+        headers: {
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
+        },
+      });
+      localStorage.removeItem("accessToken");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-addEmployee: async (data) => {
+  addEmployee: async (data) => {
     try {
       let result = await securedApi.post("/add_employee", data);
       return result;
@@ -36,9 +36,17 @@ addEmployee: async (data) => {
     console.log(data)
     try {
       let result = await securedApi.post("/admin_register_artisan", data);
-      console.log("gsgggdegdugd",result);
+      //console.log("gsgggdegdugd", result);
       return result;
-    } catch (error) {               
+    } catch (error) {
+      throw error;
+    }
+  },
+  changePassword: async (data) => {
+    try {
+      let result = await securedApi.post("/changePassword", data);
+      return result;
+    } catch (error) {
       throw error;
     }
   },

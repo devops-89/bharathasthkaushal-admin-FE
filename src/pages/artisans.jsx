@@ -484,7 +484,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location
+                      Address
                     </label>
                     <input
                       type="text"
@@ -492,7 +492,7 @@ const ArtisanManagement = () => {
                       value={formData.location}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder=" Enter your location"
+                      placeholder=" Enter your Address"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -811,7 +811,7 @@ const ArtisanManagement = () => {
                     </div>
                     <div className="flex items-center space-x-3">
                       <div>
-                        <p className="text-sm text-gray-500">Location</p>
+                        <p className="text-sm text-gray-500">Address</p>
                         <p className="font-medium break-words">
                           {selectedPartner.location || "N/A"}
                         </p>

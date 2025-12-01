@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { User, Mail, Shield, Lock, Camera, Edit2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { userControllers } from '../api/user';
+import { authControllers } from '../api/auth';
 
 const Profile = () => {
     const [user, setUser] = useState({
@@ -10,30 +12,130 @@ const Profile = () => {
         role: '',
         avatar: ''
     });
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        email: ''
+    });
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
+        const fetchUserDetails = async () => {
             try {
-                const parsedUser = JSON.parse(storedUser);
+                const response = await userControllers.getUserDetails();
+                const userData = response.data.data;
                 setUser({
-                    name: parsedUser.name || 'ADMIN',
-                    email: parsedUser.email || parsedUser.identity || 'admin@handloom.com',
-                    role: parsedUser.role || 'Administrator',
-                    avatar: parsedUser.avatar || ''
+                    name: userData.name || 'User',
+                    email: userData.email || 'N/A',
+                    role: userData.roleName || 'N/A',
+                    avatar: userData.avatar || ''
                 });
-            } catch (e) {
-                console.error("Error parsing user data", e);
+                setFormData({
+                    name: userData.name || '',
+                    email: userData.email || ''
+                });
+            } catch (error) {
+                console.error("Error fetching user details", error);
+                toast.error("Failed to fetch user details");
             }
-        }
+        };
+
+        fetchUserDetails();
     }, []);
 
-    const handleChangePassword = () => {
-        toast.info("Change Password functionality will be implemented here");
+    const handleChangePasswordClick = () => {
+        setIsChangePasswordOpen(true);
+    };
+
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswordData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmitPassword = async (e) => {
+        e.preventDefault();
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error("New passwords do not match");
+            return;
+        }
+        if (passwordData.newPassword.length < 6) {
+            toast.error("Password must be at least 6 characters long");
+            return;
+        }
+
+        try {
+            await authControllers.changePassword({
+                oldPassword: passwordData.oldPassword,
+                newPassword: passwordData.newPassword
+            });
+            toast.success("Password changed successfully");
+            setIsChangePasswordOpen(false);
+            setPasswordData({
+                oldPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+        } catch (error) {
+            console.error("Error changing password", error);
+            toast.error(error.response?.data?.message || "Failed to change password");
+        }
+    };
+
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setFormData({
+            name: user.name,
+            email: user.email
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSave = async () => {
+        try {
+            await userControllers.updateUserProfile(formData);
+            setUser(prev => ({
+                ...prev,
+                name: formData.name,
+                email: formData.email
+            }));
+
+            // Update localStorage to persist changes across the app if used elsewhere
+            const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                const updatedUser = { ...parsedUser, name: formData.name, email: formData.email };
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+
+            setIsEditing(false);
+            toast.success("Profile updated successfully");
+        } catch (error) {
+            console.error("Error updating profile", error);
+            toast.error("Failed to update profile");
+        }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1 relative">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
@@ -78,9 +180,29 @@ const Profile = () => {
                         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xl font-bold text-gray-900">Personal Information</h3>
-                                <button className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center gap-1">
-                                    <Edit2 className="w-4 h-4" /> Edit
-                                </button>
+                                {!isEditing ? (
+                                    <button
+                                        onClick={handleEdit}
+                                        className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center gap-1"
+                                    >
+                                        <Edit2 className="w-4 h-4" /> Edit
+                                    </button>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handleSave}
+                                            className="px-3 py-1 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700"
+                                        >
+                                            Save
+                                        </button>
+                                        <button
+                                            onClick={handleCancel}
+                                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-6">
@@ -88,9 +210,19 @@ const Profile = () => {
                                     <div className="p-3 bg-orange-50 rounded-lg">
                                         <User className="w-5 h-5 text-orange-600" />
                                     </div>
-                                    <div>
+                                    <div className="flex-1">
                                         <p className="text-sm font-medium text-gray-500">Full Name</p>
-                                        <p className="text-base font-semibold text-gray-900">{user.name}</p>
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleInputChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm border p-2"
+                                            />
+                                        ) : (
+                                            <p className="text-base font-semibold text-gray-900">{user.name}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -98,9 +230,19 @@ const Profile = () => {
                                     <div className="p-3 bg-blue-50 rounded-lg">
                                         <Mail className="w-5 h-5 text-blue-600" />
                                     </div>
-                                    <div>
+                                    <div className="flex-1">
                                         <p className="text-sm font-medium text-gray-500">Email Address</p>
-                                        <p className="text-base font-semibold text-gray-900">{user.email}</p>
+                                        {isEditing ? (
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm border p-2"
+                                            />
+                                        ) : (
+                                            <p className="text-base font-semibold text-gray-900">{user.email}</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -127,11 +269,11 @@ const Profile = () => {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900">Password</p>
-                                        <p className="text-sm text-gray-500">Last changed 3 months ago</p>
+                                        <p className="text-sm text-gray-500">Change Your Password</p>
                                     </div>
                                 </div>
                                 <button
-                                    onClick={handleChangePassword}
+                                    onClick={handleChangePasswordClick}
                                     className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
                                 >
                                     Change Password
@@ -141,6 +283,65 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Change Password Modal */}
+            {isChangePasswordOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+                        <h2 className="text-2xl font-bold mb-6 text-gray-900">Change Password</h2>
+                        <form onSubmit={handleSubmitPassword} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                <input
+                                    type="password"
+                                    name="oldPassword"
+                                    value={passwordData.oldPassword}
+                                    onChange={handlePasswordChange}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    value={passwordData.newPassword}
+                                    onChange={handlePasswordChange}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={passwordData.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-4 mt-8">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsChangePasswordOpen(false)}
+                                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium transition-colors"
+                                >
+                                    Update Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

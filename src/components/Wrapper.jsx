@@ -6,7 +6,6 @@ import {
   Package,
   Grid,
   Gavel,
-  //ThumbsUp,
   User2Icon,
   CreditCard,
   Lock,
