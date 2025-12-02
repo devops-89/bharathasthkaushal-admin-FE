@@ -61,11 +61,14 @@ export const userControllers = {
     }
   },
 
-  getDashboardUserCount: async (userGroup) => {
+  getDashboardUserCount: async (userGroup, verifyStatus) => {
     try {
-      const config = {};
+      const config = { params: {} };
       if (userGroup) {
-        config.params = { userGroup };
+        config.params.userGroup = userGroup;
+      }
+      if (verifyStatus) {
+        config.params.verifyStatus = verifyStatus;
       }
       const result = await dashboardSecuredApi.get("/dashboard/users/count", config);
       return result;

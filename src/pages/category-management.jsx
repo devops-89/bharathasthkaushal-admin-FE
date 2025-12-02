@@ -122,7 +122,8 @@ export default function CategoryManagement() {
       resetForm();
       fetchCategories(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
-      toast.error("Failed to add category!");
+      const errorMessage = err.response?.data?.message || "Failed to add category!";
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -256,8 +257,8 @@ export default function CategoryManagement() {
                   onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -267,8 +268,8 @@ export default function CategoryManagement() {
                   onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronRight className="w-5 h-5" />

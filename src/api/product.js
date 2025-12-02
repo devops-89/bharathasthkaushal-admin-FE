@@ -40,6 +40,19 @@ export const productControllers = {
     }
   },
 
+  getDashboardBuildStepCount: async (buildStatus) => {
+    try {
+      const config = {};
+      if (buildStatus) {
+        config.params = { buildStatus };
+      }
+      const result = await dashboardSecuredApi.get("/dashboard/build-steps/count", config);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getAllProducts: (page = 1, pageSize = 10, search = "") => {
     return productSecuredApi.get("/product/admin/all-products", {
       params: {

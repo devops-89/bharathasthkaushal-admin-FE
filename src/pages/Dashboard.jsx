@@ -52,6 +52,9 @@ const Dashboard = () => {
   const [scheduledAuctionCount, setScheduledAuctionCount] = useState(0);
   const [totalPaymentCount, setTotalPaymentCount] = useState(0);
   const [pendingPaymentCount, setPendingPaymentCount] = useState(0);
+  const [totalBuildSteps, setTotalBuildSteps] = useState(0);
+  const [assignedBuildSteps, setAssignedBuildSteps] = useState(0);
+  const [endedBuildSteps, setEndedBuildSteps] = useState(0);
 
   const fetchProductCount = async () => {
     try {
@@ -95,21 +98,49 @@ const Dashboard = () => {
     }
   };
 
+  const [verifiedArtisanCount, setVerifiedArtisanCount] = useState(0);
+  const [unverifiedArtisanCount, setUnverifiedArtisanCount] = useState(0);
+
+  // ... existing fetch functions ...
+
+
+
+  const fetchBuildStepCounts = async () => {
+    try {
+      const [totalRes, assignedRes, endedRes] = await Promise.all([
+        productControllers.getDashboardBuildStepCount(),
+        productControllers.getDashboardBuildStepCount("ASSIGNED"),
+        productControllers.getDashboardBuildStepCount("ENDED"),
+      ]);
+      setTotalBuildSteps(totalRes.data.data || 0);
+      setAssignedBuildSteps(assignedRes.data.data || 0);
+      setEndedBuildSteps(endedRes.data.data || 0);
+    } catch (err) {
+      console.error("Failed to fetch build step counts", err);
+    }
+  };
+
   const fetchUserCounts = async () => {
     try {
-      const [artisanRes, employeeRes, userRes] = await Promise.all([
+      const [artisanRes, employeeRes, userRes, verifiedRes, unverifiedRes] = await Promise.all([
         userControllers.getDashboardUserCount("ARTISAN"),
         userControllers.getDashboardUserCount("EMPLOYEE"),
         userControllers.getDashboardUserCount("USER"),
+        userControllers.getDashboardUserCount("ARTISAN", "VERIFIED"),
+        userControllers.getDashboardUserCount("ARTISAN", "UNVERIFIED"),
       ]);
 
       const aCount = artisanRes.data.data || 0;
       const eCount = employeeRes.data.data || 0;
       const uCount = userRes.data.data || 0;
+      const vCount = verifiedRes.data.data || 0;
+      const uvCount = unverifiedRes.data.data || 0;
 
       setArtisanCount(aCount);
       setEmployeeCount(eCount);
       setGeneralUserCount(uCount);
+      setVerifiedArtisanCount(vCount);
+      setUnverifiedArtisanCount(uvCount);
       setTotalUserCount(aCount + eCount + uCount);
     } catch (err) {
       console.error("Failed to fetch user counts", err);
@@ -174,44 +205,29 @@ const Dashboard = () => {
       icon: Activity,
       color: "bg-orange-100 text-orange-600",
     },
-  ];
-
-  const recentActivity = [
     {
-      id: 1,
-      user: "Rajesh Kumar",
-      action: "added a new product",
-      target: "Banarasi Silk Saree",
-      time: "2 hours ago",
-      avatar: "R",
-      color: "bg-blue-500"
+      title: "Artisans",
+      value: artisanCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: Palette,
+      color: "bg-purple-100 text-purple-600",
     },
     {
-      id: 2,
-      user: "Priya Sharma",
-      action: "registered as",
-      target: "New Artisan",
-      time: "4 hours ago",
-      avatar: "P",
-      color: "bg-green-500"
+      title: "Employees",
+      value: employeeCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: Briefcase,
+      color: "bg-blue-100 text-blue-600",
     },
     {
-      id: 3,
-      user: "System",
-      action: "generated report",
-      target: "Monthly Sales",
-      time: "5 hours ago",
-      avatar: "S",
-      color: "bg-purple-500"
-    },
-    {
-      id: 4,
-      user: "Amit Singh",
-      action: "updated status for",
-      target: "Order #12345",
-      time: "1 day ago",
-      avatar: "A",
-      color: "bg-orange-500"
+      title: "General Users",
+      value: generalUserCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: User,
+      color: "bg-orange-100 text-orange-600",
     },
   ];
 
@@ -280,7 +296,8 @@ const Dashboard = () => {
         fetchUserCounts(),
         fetchProductCount(),
         fetchAuctionCount(),
-        fetchPaymentCount()
+        fetchPaymentCount(),
+        fetchBuildStepCounts()
       ]);
       setLoading(false);
     };
@@ -311,7 +328,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           {stats.map((stat, index) => (
             <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-2">
@@ -332,40 +349,9 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* User Groups Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-2">
-              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
-                <Palette className="w-5 h-5" />
-              </div>
-            </div>
-            <h3 className="text-gray-500 text-sm font-medium">Artisans</h3>
-            <p className="text-xl font-bold text-gray-900 mt-1">{artisanCount.toLocaleString()}</p>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-2">
-              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
-                <Briefcase className="w-5 h-5" />
-              </div>
-            </div>
-            <h3 className="text-gray-500 text-sm font-medium">Employees</h3>
-            <p className="text-xl font-bold text-gray-900 mt-1">{employeeCount.toLocaleString()}</p>
-          </div>
 
 
 
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-2">
-              <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
-                <User className="w-5 h-5" />
-              </div>
-            </div>
-            <h3 className="text-gray-500 text-sm font-medium">General Users</h3>
-            <p className="text-xl font-bold text-gray-900 mt-1">{generalUserCount.toLocaleString()}</p>
-          </div>
-        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -418,28 +404,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
-                <button className="text-orange-600 text-sm font-medium hover:text-orange-700">View All</button>
-              </div>
-              <div className="space-y-6">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-full ${activity.color} flex items-center justify-center text-white font-bold shrink-0`}>
-                      {activity.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900">
-                        <span className="font-semibold">{activity.user}</span> {activity.action} <span className="font-medium text-gray-900">{activity.target}</span>
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           {/* Right Column */}
@@ -516,50 +481,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Top Performing Categories */}
-            <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl p-6 text-white shadow-lg">
-              <h3 className="text-lg font-bold mb-4">Top Categories</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                      <span className="font-bold">1</span>
-                    </div>
-                    <span>Handloom Sarees</span>
-                  </div>
-                  <span className="font-bold">45%</span>
-                </div>
-                <div className="w-full bg-black/20 rounded-full h-1.5">
-                  <div className="bg-white h-1.5 rounded-full" style={{ width: '45%' }}></div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                      <span className="font-bold">2</span>
-                    </div>
-                    <span>Wooden Crafts</span>
-                  </div>
-                  <span className="font-bold">30%</span>
-                </div>
-                <div className="w-full bg-black/20 rounded-full h-1.5">
-                  <div className="bg-white h-1.5 rounded-full" style={{ width: '30%' }}></div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                      <span className="font-bold">3</span>
-                    </div>
-                    <span>Pottery</span>
-                  </div>
-                  <span className="font-bold">25%</span>
-                </div>
-                <div className="w-full bg-black/20 rounded-full h-1.5">
-                  <div className="bg-white h-1.5 rounded-full" style={{ width: '25%' }}></div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
