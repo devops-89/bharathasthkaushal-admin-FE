@@ -12,7 +12,14 @@ const formatDateForDisplay = (dateString) => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
 };
 
 const AuctionManagement = () => {
@@ -250,17 +257,6 @@ const AuctionManagement = () => {
       );
       console.log("Auction Details Response:", res.data);
       const details = res.data.data.auction;
-      const formatDateTime = (date) => {
-        if (!date) return "Not available";
-        const d = new Date(date);
-        return d.toLocaleString("en-IN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      };
 
       const mappedDetails = {
         ...details,
@@ -273,8 +269,8 @@ const AuctionManagement = () => {
         minBidAmount: parseFloat(details.min_bid_amount || 0),
         reservePrice: parseFloat(details.reserve_price || 0),
 
-        startDate: formatDateTime(details.start_date),
-        endDate: formatDateTime(details.hard_close_at || details.end_date || details.hardCloseAt || details.endDate),
+        startDate: formatDateForDisplay(details.start_date),
+        endDate: formatDateForDisplay(details.hard_close_at || details.end_date || details.hardCloseAt || details.endDate),
 
         quantity: details.quantity || details.product?.quantity || 0,
 
@@ -455,7 +451,7 @@ const AuctionManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>
                       <div>Start: {auction.startDate}</div>
-                      <div>End: {auction.endDate}</div>
+                      <div>Hard Close: {auction.endDate}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -709,7 +705,7 @@ const AuctionManagement = () => {
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">End Date</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Hard Close</p>
                             <p className="text-sm font-semibold text-gray-900">{selectedAuction.endDate}</p>
                           </div>
                         </div>
@@ -1036,7 +1032,7 @@ const AuctionManagement = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        End Date & Time *
+                        Hard Close Date & Time *
                       </label>
                       <div className="flex gap-2">
                         <div className="relative w-full">
