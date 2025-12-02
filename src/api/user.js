@@ -1,4 +1,4 @@
-import { getuserSecuredApi } from "./config";
+import { getuserSecuredApi, dashboardSecuredApi } from "./config";
 export const userControllers = {
   getUserListGroup: async (group, page = 1, pageSize = 50) => {
     try {
@@ -61,9 +61,13 @@ export const userControllers = {
     }
   },
 
-  getDashboardUserCount: async () => {
+  getDashboardUserCount: async (userGroup) => {
     try {
-      const result = await getuserSecuredApi.get("/dashboard/users/count");
+      const config = {};
+      if (userGroup) {
+        config.params = { userGroup };
+      }
+      const result = await dashboardSecuredApi.get("/dashboard/users/count", config);
       return result;
     } catch (error) {
       throw error;

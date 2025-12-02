@@ -1,22 +1,45 @@
-import { productSecuredApi } from "./config";
+import { productSecuredApi, dashboardSecuredApi } from "./config";
+
 export const productControllers = {
-  addProduct: (formData) => {
-    return productSecuredApi.post("/product/addproduct", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  getDashboardAuctionCount: async (status) => {
+    try {
+      const config = {};
+      if (status) {
+        config.params = { status };
+      }
+      const result = await dashboardSecuredApi.get("/dashboard/auctions/count", config);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   },
-  updateProduct: (id, formData) => {
-    return productSecuredApi.patch(`/product/update/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+
+  getDashboardProductCount: async (status) => {
+    try {
+      const config = {};
+      if (status) {
+        config.params = { status };
+      }
+      const result = await dashboardSecuredApi.get("/dashboard/products/count", config);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   },
-  updateBuildStep: (id, formData) => {
-    return productSecuredApi.put(`/build-step/update/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+
+  getDashboardPaymentCount: async (status) => {
+    try {
+      const config = {};
+      if (status) {
+        config.params = { status };
+      }
+      const result = await dashboardSecuredApi.get("/dashboard/payments/count", config);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   },
+
   getAllProducts: (page = 1, pageSize = 10, search = "") => {
     return productSecuredApi.get("/product/admin/all-products", {
       params: {
@@ -35,9 +58,23 @@ export const productControllers = {
       "/product/admin/all-products?buildStatus=READY_FOR_AUCTION"
     );
   },
+
   getProductById: (id) => {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
+
+  updateProduct: (id, formData) => {
+    return productSecuredApi.patch(`/product/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  updateBuildStep: (id, formData) => {
+    return productSecuredApi.put(`/build-step/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
   updateBuildStepStatus: (stepId, status, adminRemarks = "") => {
     const payload = {
       status: status,
@@ -52,7 +89,6 @@ export const productControllers = {
       payload
     );
   },
-
 
   updateProductStatus: (id, status, adminRemarks = "") => {
     const payload = {
@@ -71,6 +107,7 @@ export const productControllers = {
       },
     });
   },
+
   getBuildSteps: (productId) => {
     return productSecuredApi.get(`/build-step/product/${productId}`);
   },
@@ -78,9 +115,6 @@ export const productControllers = {
   getBuildStepDetails: (stepId) => {
     return productSecuredApi.get(`/build-step/details/${stepId}`);
   },
-
-
-
 
   assignStepToArtisan: (data) => {
     return productSecuredApi.patch("/build-step/assign-artisan", data);
@@ -111,6 +145,7 @@ export const productControllers = {
       `/auction/winners?page=${page}&limit=${limit}`
     );
   },
+
   getMonthlyAuctionReport: () => {
     return productSecuredApi.get("/auction/ended/monthly");
   },
@@ -118,6 +153,7 @@ export const productControllers = {
   getAuctionStatusSummary: () => {
     return productSecuredApi.get("/auction/status/summary");
   },
+
   getUserAuctionStats: (userId) => {
     return productSecuredApi.get(`/auction/stats/${userId}`);
   },

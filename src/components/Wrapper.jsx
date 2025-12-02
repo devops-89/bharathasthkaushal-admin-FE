@@ -11,7 +11,9 @@ import {
   Lock,
   HelpCircle,
   UserCheck,
+  Warehouse,
 } from 'lucide-react'
+
 const Wrapper = () => {
   const location = useLocation()
   const menuItems = [
@@ -20,6 +22,7 @@ const Wrapper = () => {
     { path: '/product-management', name: 'Product Management', icon: Package },
     { path: '/category-management', name: 'Category Management', icon: Grid },
     { path: '/auction-management', name: 'Auction Management', icon: Gavel },
+    { path: '/warehouse-management', name: 'Warehouse Management', icon: Warehouse },
     // {path:'/approval-management', name:'Approval Management', icon:ThumbsUp},
     { path: '/employee-management', name: 'Employee Management', icon: User2Icon },
     { path: '/payment-management', name: 'Payment Management', icon: CreditCard },

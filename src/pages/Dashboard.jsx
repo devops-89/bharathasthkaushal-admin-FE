@@ -26,7 +26,11 @@ import {
   ArrowDownRight,
   Package,
   Calendar,
-  DollarSign
+  DollarSign,
+  Briefcase,
+  Palette,
+  User,
+  Gavel
 } from "lucide-react";
 import { productControllers } from "../api/product";
 import { userControllers } from "../api/user";
@@ -38,49 +42,134 @@ const Dashboard = () => {
   const [serviceData, setServiceData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userCount, setUserCount] = useState(0);
+  const [totalUserCount, setTotalUserCount] = useState(0);
+  const [artisanCount, setArtisanCount] = useState(0);
+  const [employeeCount, setEmployeeCount] = useState(0);
+  const [generalUserCount, setGeneralUserCount] = useState(0);
+  const [productCount, setProductCount] = useState(0);
+  const [auctionCount, setAuctionCount] = useState(0);
+  const [liveAuctionCount, setLiveAuctionCount] = useState(0);
+  const [scheduledAuctionCount, setScheduledAuctionCount] = useState(0);
+  const [totalPaymentCount, setTotalPaymentCount] = useState(0);
+  const [pendingPaymentCount, setPendingPaymentCount] = useState(0);
 
-  const fetchUserCount = async () => {
+  const fetchProductCount = async () => {
     try {
-      const res = await userControllers.getDashboardUserCount();
-      // Assuming the API returns the count in res.data.data
-      // Adjust if the structure is different (e.g. res.data.count)
-      setUserCount(res.data.data || 0);
+      const res = await productControllers.getDashboardProductCount();
+      setProductCount(res.data.data || 0);
     } catch (err) {
-      console.error("Failed to fetch user count", err);
+      console.error("Failed to fetch product count", err);
+    }
+  };
+
+  const fetchPaymentCount = async () => {
+    try {
+      const [totalRes, pendingRes] = await Promise.all([
+        productControllers.getDashboardPaymentCount(),
+        productControllers.getDashboardPaymentCount("PENDING"),
+      ]);
+      setTotalPaymentCount(totalRes.data.data || 0);
+      setPendingPaymentCount(pendingRes.data.data || 0);
+    } catch (err) {
+      console.error("Failed to fetch payment count", err);
+    }
+  };
+
+  const fetchAuctionCount = async () => {
+    try {
+      const [endedRes, liveRes, scheduledRes] = await Promise.all([
+        productControllers.getDashboardAuctionCount("ENDED"),
+        productControllers.getDashboardAuctionCount("LIVE"),
+        productControllers.getDashboardAuctionCount("SCHEDULED"),
+      ]);
+
+      const ended = endedRes.data.data || 0;
+      const live = liveRes.data.data || 0;
+      const scheduled = scheduledRes.data.data || 0;
+
+      setLiveAuctionCount(live);
+      setScheduledAuctionCount(scheduled);
+      setAuctionCount(ended + live + scheduled);
+    } catch (err) {
+      console.error("Failed to fetch auction count", err);
+    }
+  };
+
+  const fetchUserCounts = async () => {
+    try {
+      const [artisanRes, employeeRes, userRes] = await Promise.all([
+        userControllers.getDashboardUserCount("ARTISAN"),
+        userControllers.getDashboardUserCount("EMPLOYEE"),
+        userControllers.getDashboardUserCount("USER"),
+      ]);
+
+      const aCount = artisanRes.data.data || 0;
+      const eCount = employeeRes.data.data || 0;
+      const uCount = userRes.data.data || 0;
+
+      setArtisanCount(aCount);
+      setEmployeeCount(eCount);
+      setGeneralUserCount(uCount);
+      setTotalUserCount(aCount + eCount + uCount);
+    } catch (err) {
+      console.error("Failed to fetch user counts", err);
     }
   };
 
   // Mock data for stats - in a real app, fetch this from API
   const stats = [
     {
-      title: "Total Revenue",
-      value: "₹12,45,000",
-      change: "+12.5%",
-      trend: "up",
-      icon: DollarSign,
+      title: "Product Count",
+      value: productCount,
+      change: "",
+      trend: "neutral",
+      icon: Package,
       color: "bg-green-100 text-green-600",
     },
     {
-      title: "Total Users", // Updated title to reflect the API
-      value: userCount.toLocaleString(),
-      change: "+8.2%",
-      trend: "up",
+      title: "Total Users",
+      value: totalUserCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
       icon: Users,
       color: "bg-blue-100 text-blue-600",
     },
     {
-      title: "Total Orders",
-      value: "3,850",
-      change: "-2.4%",
-      trend: "down",
-      icon: ShoppingBag,
+      title: "Total Auctions",
+      value: auctionCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: Gavel,
       color: "bg-purple-100 text-purple-600",
     },
     {
-      title: "Pending Approvals",
-      value: "45",
-      change: "+5",
+      title: "Live Auctions",
+      value: liveAuctionCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: Activity,
+      color: "bg-red-100 text-red-600",
+    },
+    {
+      title: "Scheduled Auctions",
+      value: scheduledAuctionCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: Calendar,
+      color: "bg-yellow-100 text-yellow-600",
+    },
+    {
+      title: "Total Payments",
+      value: totalPaymentCount.toLocaleString(),
+      change: "",
+      trend: "neutral",
+      icon: CreditCard,
+      color: "bg-indigo-100 text-indigo-600",
+    },
+    {
+      title: "Pending Payments",
+      value: pendingPaymentCount.toLocaleString(),
+      change: "",
       trend: "neutral",
       icon: Activity,
       color: "bg-orange-100 text-orange-600",
@@ -185,7 +274,14 @@ const Dashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchMonthlyReport(), fetchStatusSummary(), fetchUserCount()]);
+      await Promise.all([
+        fetchMonthlyReport(),
+        fetchStatusSummary(),
+        fetchUserCounts(),
+        fetchProductCount(),
+        fetchAuctionCount(),
+        fetchPaymentCount()
+      ]);
       setLoading(false);
     };
     loadData();
@@ -215,12 +311,12 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-lg ${stat.color}`}>
-                  <stat.icon className="w-6 h-6" />
+            <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-2">
+                <div className={`p-2 rounded-lg ${stat.color}`}>
+                  <stat.icon className="w-5 h-5" />
                 </div>
                 <div className={`flex items-center text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' :
                   stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'
@@ -231,9 +327,44 @@ const Dashboard = () => {
                 </div>
               </div>
               <h3 className="text-gray-500 text-sm font-medium">{stat.title}</h3>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+              <p className="text-xl font-bold text-gray-900 mt-1">{stat.value}</p>
             </div>
           ))}
+        </div>
+
+        {/* User Groups Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-2">
+              <div className="p-2 rounded-lg bg-purple-100 text-purple-600">
+                <Palette className="w-5 h-5" />
+              </div>
+            </div>
+            <h3 className="text-gray-500 text-sm font-medium">Artisans</h3>
+            <p className="text-xl font-bold text-gray-900 mt-1">{artisanCount.toLocaleString()}</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-2">
+              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                <Briefcase className="w-5 h-5" />
+              </div>
+            </div>
+            <h3 className="text-gray-500 text-sm font-medium">Employees</h3>
+            <p className="text-xl font-bold text-gray-900 mt-1">{employeeCount.toLocaleString()}</p>
+          </div>
+
+
+
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-2">
+              <div className="p-2 rounded-lg bg-orange-100 text-orange-600">
+                <User className="w-5 h-5" />
+              </div>
+            </div>
+            <h3 className="text-gray-500 text-sm font-medium">General Users</h3>
+            <p className="text-xl font-bold text-gray-900 mt-1">{generalUserCount.toLocaleString()}</p>
+          </div>
         </div>
 
         {/* Main Content Grid */}
@@ -244,10 +375,6 @@ const Dashboard = () => {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
-                <select className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2">
-                  <option>This Year</option>
-                  <option>Last Year</option>
-                </select>
               </div>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">

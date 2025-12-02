@@ -22,6 +22,7 @@ import NeedAssistant from "./pages/need-assistant";
 import UserManagement from "./pages/user-management";
 import UserProfile from "./pages/user-profile";
 import Profile from "./pages/Profile";
+import WarehouseManagement from "./pages/warehouse-management";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function App() {
@@ -83,12 +84,11 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/user-profile/:id" element={<UserProfile />} />
         <Route path="/edit-build-step/:id" element={<Buildstate />} />
-
-
         <Route
           path="/need-assistant"
           element={<NeedAssistant />}
         />
+        <Route path="/warehouse-management" element={<WarehouseManagement />} />
       </Routes>
     </div>
   );

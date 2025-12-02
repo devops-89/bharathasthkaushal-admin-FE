@@ -19,18 +19,22 @@ const userSecuredApi = Axios.create({
 const userPublicApi = Axios.create({
   baseURL: serverConstants.userUrl,
 });
-const getuserSecuredApi=Axios.create({
+const getuserSecuredApi = Axios.create({
   baseURL: serverConstants.getuserUrl,
 });
-const getuserPublicApi=Axios.create({
-  baseURL:serverConstants.getuserUrl,
+const getuserPublicApi = Axios.create({
+  baseURL: serverConstants.getuserUrl,
 });
 const logoutPublicApi = Axios.create({
   baseURL: serverConstants.logoutUrl,
 });
-const logoutSecuredApi= Axios.create({
+const logoutSecuredApi = Axios.create({
   baseURL: serverConstants.logoutUrl,
 })
+const dashboardSecuredApi = Axios.create({
+  baseURL: serverConstants.dashboardUrl,
+});
+
 securedApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
@@ -56,6 +60,12 @@ getuserSecuredApi.interceptors.request.use((config) => {
   return config;
 });
 
+dashboardSecuredApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  config.headers.accessToken = token;
+  return config;
+});
+
 logoutSecuredApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
@@ -73,4 +83,5 @@ export {
   logoutSecuredApi,
   getuserPublicApi,
   getuserSecuredApi,
+  dashboardSecuredApi,
 };

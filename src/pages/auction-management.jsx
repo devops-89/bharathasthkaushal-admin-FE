@@ -776,7 +776,8 @@ const AuctionManagement = () => {
                           )}
                         </button>
                       </div>
-                    </div>
+                    </div> 
+                  
                   </div>
                 </div>
               </div>
