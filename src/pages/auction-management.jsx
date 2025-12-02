@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Eye, X, Play, ChevronLeft, ChevronRight, Plus, Search, Calendar } from "lucide-react";
+import {
+  Eye,
+  X,
+  Play,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+  Calendar,
+} from "lucide-react";
 import { productControllers } from "../api/product.js";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -261,9 +270,8 @@ const AuctionManagement = () => {
       const mappedDetails = {
         ...details,
         title: details.product?.product_name || "Unknown",
-        category:
-          details.product?.material === "Cotton" ? "Handloom" : "Handicraft",
-        subcategory: "",
+        category: details.category?.category_name || details.product?.category?.category_name || (details.product?.material === "Cotton" ? "Handloom" : "Handicraft"),
+        subcategory: details.subCategory?.category_name || details.product?.subCategory?.category_name || "N/A",
         startingBid: parseFloat(details.start_price || 0),
         currentBid: parseFloat(details.leading_amount || 0),
         minBidAmount: parseFloat(details.min_bid_amount || 0),
@@ -590,7 +598,7 @@ const AuctionManagement = () => {
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
                       <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                        <span className="text-orange-500">📋</span> Specifications
+                        <span className="text-orange-500"></span> Specifications
                       </h4>
                     </div>
                     <div className="p-5 grid grid-cols-2 gap-y-4 gap-x-2">
@@ -688,7 +696,7 @@ const AuctionManagement = () => {
                     {/* Timeline */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                       <h4 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        📅 Auction Timeline
+                        Auction Timeline
                       </h4>
                       <div className="relative pl-6 border-l-2 border-gray-100 space-y-8">
                         <div className="relative">
@@ -762,7 +770,7 @@ const AuctionManagement = () => {
                             }`}
                         >
                           {selectedAuction.winner ? (
-                            <><span>🏆</span> View Winner Details</>
+                            <> View Winner Details</>
                           ) : (
                             "Winner Not Declared"
                           )}
@@ -821,7 +829,7 @@ const AuctionManagement = () => {
 
                     <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
                       <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0">
-                        📧
+
                       </div>
                       <div className="min-w-0">
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Email</p>
@@ -831,7 +839,7 @@ const AuctionManagement = () => {
 
                     <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
                       <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0">
-                        📱
+
                       </div>
                       <div>
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Phone</p>

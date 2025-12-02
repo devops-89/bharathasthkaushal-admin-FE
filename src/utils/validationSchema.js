@@ -1,11 +1,8 @@
 
 export const loginValidation = ({ state, errors, setErrors }) => {
   const { email, password } = state;
-  // Initialize errors object - both fields checked independently
   let newErrors = { email: "", password: "", general: "" };
   let hasErrors = false;
-
-  // Email validation
   if (!email) {
     newErrors.email = "Invalid email";
     hasErrors = true;
