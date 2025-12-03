@@ -23,6 +23,7 @@ import UserManagement from "./pages/user-management";
 import UserProfile from "./pages/user-profile";
 import Profile from "./pages/Profile";
 import WarehouseManagement from "./pages/warehouse-management";
+import WarehouseDetails from "./pages/warehouse-details";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function App() {
@@ -89,6 +90,7 @@ function App() {
           element={<NeedAssistant />}
         />
         <Route path="/warehouse-management" element={<WarehouseManagement />} />
+        <Route path="/warehouse-management/details/:id" element={<WarehouseDetails />} />
       </Routes>
     </div>
   );

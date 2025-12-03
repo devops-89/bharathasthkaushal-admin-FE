@@ -11,7 +11,7 @@ import {
   Cell,
   AreaChart,
   Area,
-  Tooltip
+  Tooltip,
 } from "recharts";
 import {
   Plus,
@@ -30,7 +30,7 @@ import {
   Briefcase,
   Palette,
   User,
-  Gavel
+  Gavel,
 } from "lucide-react";
 import { productControllers } from "../api/product";
 import { userControllers } from "../api/user";
@@ -103,8 +103,6 @@ const Dashboard = () => {
 
   // ... existing fetch functions ...
 
-
-
   const fetchBuildStepCounts = async () => {
     try {
       const [totalRes, assignedRes, endedRes] = await Promise.all([
@@ -122,13 +120,14 @@ const Dashboard = () => {
 
   const fetchUserCounts = async () => {
     try {
-      const [artisanRes, employeeRes, userRes, verifiedRes, unverifiedRes] = await Promise.all([
-        userControllers.getDashboardUserCount("ARTISAN"),
-        userControllers.getDashboardUserCount("EMPLOYEE"),
-        userControllers.getDashboardUserCount("USER"),
-        userControllers.getDashboardUserCount("ARTISAN", "VERIFIED"),
-        userControllers.getDashboardUserCount("ARTISAN", "UNVERIFIED"),
-      ]);
+      const [artisanRes, employeeRes, userRes, verifiedRes, unverifiedRes] =
+        await Promise.all([
+          userControllers.getDashboardUserCount("ARTISAN"),
+          userControllers.getDashboardUserCount("EMPLOYEE"),
+          userControllers.getDashboardUserCount("USER"),
+          userControllers.getDashboardUserCount("ARTISAN", "VERIFIED"),
+          userControllers.getDashboardUserCount("ARTISAN", "UNVERIFIED"),
+        ]);
 
       const aCount = artisanRes.data.data || 0;
       const eCount = employeeRes.data.data || 0;
@@ -235,8 +234,18 @@ const Dashboard = () => {
     try {
       const res = await productControllers.getMonthlyAuctionReport();
       const monthOrder = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
       let apiData = res.data.data.map((item) => ({
         month: item.month,
@@ -249,7 +258,7 @@ const Dashboard = () => {
       setServiceData(completeData);
     } catch (err) {
       console.error("Failed to load monthly report", err);
-      // Fallback data if API fails
+  
       setServiceData([
         { month: "Jan", services: 40 },
         { month: "Feb", services: 30 },
@@ -272,13 +281,12 @@ const Dashboard = () => {
           item.status === "LIVE"
             ? "#0ea5e9"
             : item.status === "ENDED"
-              ? "#f97316"
-              : "#6b7280",
+            ? "#f97316"
+            : "#6b7280",
       }));
       setPieData(formatted);
     } catch (err) {
       console.error("Failed to load status summary", err);
-      // Fallback data
       setPieData([
         { name: "LIVE", value: 45, color: "#0ea5e9" },
         { name: "ENDED", value: 30, color: "#f97316" },
@@ -297,7 +305,7 @@ const Dashboard = () => {
         fetchProductCount(),
         fetchAuctionCount(),
         fetchPaymentCount(),
-        fetchBuildStepCounts()
+        fetchBuildStepCounts(),
       ]);
       setLoading(false);
     };
@@ -317,41 +325,54 @@ const Dashboard = () => {
               <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
                 <NavLink
                   to="/dashboard"
-                  className={({ isActive }) => isActive ? "text-orange-600 font-semibold" : ""}
+                  className={({ isActive }) =>
+                    isActive ? "text-orange-600 font-semibold" : ""
+                  }
                 >
                   Dashboard
                 </NavLink>
               </nav>
             </div>
-
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div
+              key={index}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+            >
               <div className="flex justify-between items-start mb-2">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                   <stat.icon className="w-5 h-5" />
                 </div>
-                <div className={`flex items-center text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' :
-                  stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'
-                  }`}>
-                  {stat.trend === 'up' ? <ArrowUpRight className="w-4 h-4 mr-1" /> :
-                    stat.trend === 'down' ? <ArrowDownRight className="w-4 h-4 mr-1" /> : null}
+                <div
+                  className={`flex items-center text-sm font-medium ${
+                    stat.trend === "up"
+                      ? "text-green-600"
+                      : stat.trend === "down"
+                      ? "text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {stat.trend === "up" ? (
+                    <ArrowUpRight className="w-4 h-4 mr-1" />
+                  ) : stat.trend === "down" ? (
+                    <ArrowDownRight className="w-4 h-4 mr-1" />
+                  ) : null}
                   {stat.change}
                 </div>
               </div>
-              <h3 className="text-gray-500 text-sm font-medium">{stat.title}</h3>
-              <p className="text-xl font-bold text-gray-900 mt-1">{stat.value}</p>
+              <h3 className="text-gray-500 text-sm font-medium">
+                {stat.title}
+              </h3>
+              <p className="text-xl font-bold text-gray-900 mt-1">
+                {stat.value}
+              </p>
             </div>
           ))}
         </div>
-
-
-
-
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -360,36 +381,65 @@ const Dashboard = () => {
             {/* Chart Section */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Revenue Analytics
+                </h3>
               </div>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={serviceData}>
                     <defs>
-                      <linearGradient id="colorServices" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      <linearGradient
+                        id="colorServices"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#f97316"
+                          stopOpacity={0.1}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#f97316"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#f3f4f6"
+                      vertical={false}
+                    />
                     <XAxis
                       dataKey="month"
                       stroke="#9ca3af"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#6b7280', fontSize: 12 }}
+                      tick={{ fill: "#6b7280", fontSize: 12 }}
                       dy={10}
                     />
                     <YAxis
                       stroke="#9ca3af"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#6b7280', fontSize: 12 }}
+                      tick={{ fill: "#6b7280", fontSize: 12 }}
                       dx={-10}
                     />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                      cursor={{ stroke: '#f97316', strokeWidth: 1, strokeDasharray: '4 4' }}
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        borderRadius: "8px",
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                      cursor={{
+                        stroke: "#f97316",
+                        strokeWidth: 1,
+                        strokeDasharray: "4 4",
+                      }}
                     />
                     <Area
                       type="monotone"
@@ -403,14 +453,12 @@ const Dashboard = () => {
                 </ResponsiveContainer>
               </div>
             </div>
-
-
           </div>
 
           {/* Right Column */}
           <div className="space-y-8">
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            {/* <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-4">
                 <button className="p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors text-center group">
@@ -438,11 +486,13 @@ const Dashboard = () => {
                   <span className="text-sm font-medium text-gray-700">View Orders</span>
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Auction Status Pie Chart */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Auction Status</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Auction Status
+              </h3>
               <div className="h-64 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -456,7 +506,11 @@ const Dashboard = () => {
                       dataKey="value"
                     >
                       {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          strokeWidth={0}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -470,18 +524,24 @@ const Dashboard = () => {
               </div>
               <div className="space-y-3 mt-4">
                 {pieData.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center">
-                      <div className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: item.color }}></div>
+                      <div
+                        className="w-3 h-3 rounded-full mr-3"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
                       <span className="text-sm text-gray-600">{item.name}</span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{item.value}%</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {item.value}%
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
-
-
           </div>
         </div>
       </div>

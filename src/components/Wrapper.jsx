@@ -30,13 +30,12 @@ const Wrapper = () => {
     { path: '/user-management', name: 'User Management', icon: UserCheck },
     { path: '/need-assistant', name: 'Need Assistant', icon: HelpCircle },
   ]
-
   const isActive = (path) => {
     return location.pathname === path || (path === '/dashboard' && location.pathname === '/')
   }
   return (
-    <aside className="fixed left-0 top-16 w-64 bg-gray-800 h-screen z-40 overflow-y-auto">
-      <nav className="mt-6">
+    <aside className="fixed left-0 top-16 w-64 bg-gray-800 h-[calc(100vh-4rem)] z-40 overflow-y-auto">
+      <nav className="mt-6 pb-10">
         <div className="px-4 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon
@@ -44,7 +43,7 @@ const Wrapper = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center px-3 py-3 text-sm font-medium leading-relaxed rounded-lg transition-colors duration-200 ${isActive(item.path)
+                className={`flex items-center px-3 py-3 text-sm font-medium leading-relaxed rounded-lg transition-colors duration-200 whitespace-nowrap ${isActive(item.path)
                   ? 'bg-primary-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                   }`}

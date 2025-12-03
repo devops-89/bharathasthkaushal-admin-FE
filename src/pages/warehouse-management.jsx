@@ -8,8 +8,9 @@ import {
     X,
     MapPin,
     Globe,
+    Eye,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { warehouseControllers } from "../api/warehouse";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,6 +24,12 @@ export default function WarehouseManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [showForm, setShowForm] = useState(false);
+    const navigate = useNavigate();
+
+    const handleViewDetails = (id) => {
+        navigate(`/warehouse-management/details/${id}`);
+    };
+
     const [formData, setFormData] = useState({
         warehouse_name: "",
         origin_country: "",
@@ -68,6 +75,32 @@ export default function WarehouseManagement() {
         fetchWarehouses(currentPage, rowsPerPage, debouncedSearch);
     }, [currentPage, rowsPerPage, debouncedSearch]);
 
+    const dropdownRef = React.useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsCountryDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (showForm) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [showForm]);
+
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -78,13 +111,44 @@ export default function WarehouseManagement() {
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
+
+        if (!formData.warehouse_name.trim()) {
+            toast.error("Warehouse Name is required");
+            return;
+        }
+        if (!formData.origin_country.trim()) {
+            toast.error("Origin Country is required");
+            return;
+        }
+
+        const isValidCountry = countries.some(
+            (country) => country.toLowerCase() === formData.origin_country.trim().toLowerCase()
+        );
+
+        if (!isValidCountry) {
+            toast.error("This is not a valid country");
+            return;
+        }
+
+        if (!formData.address.trim()) {
+            toast.error("Address is required");
+            return;
+        }
+
         try {
-            await warehouseControllers.addWarehouse(formData);
+            const payload = {
+                name: formData.warehouse_name,
+                country: formData.origin_country,
+                location: formData.address,
+                latitude: formData.latitude,
+                longitude: formData.longitude
+            };
+            await warehouseControllers.addWarehouse(payload);
             toast.success("Warehouse added successfully!");
             resetForm();
             fetchWarehouses(currentPage, rowsPerPage, debouncedSearch);
         } catch (err) {
-            toast.error("Failed to add warehouse!");
+            toast.error(err.response?.data?.message || "Failed to add warehouse!");
             console.error(err);
         }
     };
@@ -179,6 +243,9 @@ export default function WarehouseManagement() {
                                         <th className="py-4 px-4 font-semibold text-gray-700">
                                             Coordinates
                                         </th>
+                                        <th className="py-4 px-4 font-semibold text-gray-700 text-right">
+                                            View Details
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -187,19 +254,23 @@ export default function WarehouseManagement() {
                                             key={warehouse._id}
                                             className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                                         >
-                                            <td className="py-4 px-4 font-medium text-gray-800">
-                                                {warehouse.warehouse_name}
+                                            <td className="py-4 px-4 font-medium text-gray-800" title={warehouse.name || warehouse.warehouse_name || 'N/A'}>
+                                                {(warehouse.name || warehouse.warehouse_name || 'N/A').length > 25
+                                                    ? `${(warehouse.name || warehouse.warehouse_name || 'N/A').substring(0, 25)}...`
+                                                    : (warehouse.name || warehouse.warehouse_name || 'N/A')}
                                             </td>
                                             <td className="py-4 px-4 text-gray-600">
                                                 <div className="flex items-center gap-2">
                                                     <Globe className="w-4 h-4 text-gray-400" />
-                                                    {warehouse.origin_country}
+                                                    {warehouse.country || warehouse.origin_country || 'N/A'}
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4 text-gray-600">
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="w-4 h-4 text-gray-400" />
-                                                    {warehouse.address}
+                                                <div className="flex items-center gap-2" title={warehouse.location || warehouse.address || 'N/A'}>
+                                                    <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                                    {(warehouse.location || warehouse.address || 'N/A').length > 30
+                                                        ? `${(warehouse.location || warehouse.address || 'N/A').substring(0, 30)}...`
+                                                        : (warehouse.location || warehouse.address || 'N/A')}
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4 text-gray-600 text-sm">
@@ -210,6 +281,14 @@ export default function WarehouseManagement() {
                                                 ) : (
                                                     <span className="text-gray-400">N/A</span>
                                                 )}
+                                            </td>
+                                            <td className="py-4 px-4 text-right">
+                                                <button
+                                                    onClick={() => handleViewDetails(warehouse.id)}
+                                                    className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                                                >
+                                                    <Eye size={20} />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -306,7 +385,7 @@ export default function WarehouseManagement() {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Origin Country *
                                     </label>
-                                    <div className="relative">
+                                    <div className="relative" ref={dropdownRef}>
                                         <input
                                             type="text"
                                             placeholder="Select origin country"
@@ -318,7 +397,10 @@ export default function WarehouseManagement() {
                                                     handleFormChange({ target: { name: 'origin_country', value: '' } });
                                                 }
                                             }}
-                                            onFocus={() => setIsCountryDropdownOpen(true)}
+                                            onClick={() => {
+                                                setIsCountryDropdownOpen(true);
+                                                setCountrySearch(""); // Reset search to show all countries
+                                            }}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                         />
                                         {isCountryDropdownOpen && (
@@ -408,6 +490,7 @@ export default function WarehouseManagement() {
                         </div>
                     </div>
                 )}
+
                 <ToastContainer />
             </div>
         </div>

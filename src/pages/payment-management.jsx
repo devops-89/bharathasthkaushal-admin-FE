@@ -1,120 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { paymentControllers } from '../api/payment';
+import { toast } from 'react-toastify';
 
 const PaymentManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
-  const paymentData = [
-    {
-      id: 'PAY001',
-      customerName: 'Priya Sharma',
-      email: 'priya.sharma@email.com',
-      product: 'Banarasi Silk Saree',
-      category: 'Handloom',
-      amount: 4500.00,
-      date: '15 Aug 2025',
-      status: 'Completed',
-      paymentMethod: 'UPI',
-      orderId: 'ORD001',
-      phone: '+91 98765 43210'
-    },
-    {
-      id: 'PAY002',
-      customerName: 'Rajesh Kumar',
-      email: 'rajesh.k@email.com',
-      product: 'Wooden Handicraft Set',
-      category: 'Handicraft',
-      amount: 2300.00,
-      date: '14 Aug 2025',
-      status: 'Failed',
-      paymentMethod: 'Credit Card',
-      orderId: 'ORD002',
-      phone: '+91 87654 32109'
-    },
-    {
-      id: 'PAY003',
-      customerName: 'Meera Patel',
-      email: 'meera.patel@email.com',
-      product: 'Khadi Cotton Kurta',
-      category: 'Handloom',
-      amount: 1800.00,
-      date: '13 Aug 2025',
-      status: 'Processing',
-      paymentMethod: 'Net Banking',
-      orderId: 'ORD003',
-      phone: '+91 76543 21098'
-    },
-    {
-      id: 'PAY004',
-      customerName: 'Arjun Singh',
-      email: 'arjun.singh@email.com',
-      product: 'Brass Decorative Items',
-      category: 'Handicraft',
-      amount: 3200.00,
-      date: '12 Aug 2025',
-      status: 'Completed',
-      paymentMethod: 'UPI',
-      orderId: 'ORD004',
-      phone: '+91 65432 10987'
-    },
-    {
-      id: 'PAY005',
-      customerName: 'Lakshmi Nair',
-      email: 'lakshmi.nair@email.com',
-      product: 'Kerala Kasavu Saree',
-      category: 'Handloom',
-      amount: 5500.00,
-      date: '11 Aug 2025',
-      status: 'Completed',
-      paymentMethod: 'Debit Card',
-      orderId: 'ORD005',
-      phone: '+91 54321 09876'
-    },
-    {
-      id: 'PAY006',
-      customerName: 'Vikram Gupta',
-      email: 'vikram.gupta@email.com',
-      product: 'Terracotta Pottery Set',
-      category: 'Handicraft',
-      amount: 1500.00,
-      date: '10 Aug 2025',
-      status: 'Refunded',
-      paymentMethod: 'UPI',
-      orderId: 'ORD006',
-      phone: '+91 43210 98765'
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      setLoading(true);
+      try {
+        const res = await paymentControllers.getPayments(currentPage, limit, sortBy);
+        if (res.data?.data) {
+          setPayments(res.data.data.docs || []);
+          setTotalPages(res.data.data.totalPages || 1);
+          setTotalDocs(res.data.data.totalDocs || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching payments:", err);
+        // toast.error("Failed to fetch payments");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPayments();
+  }, [currentPage, limit, sortBy]);
+
+  // Disable background scrolling when modal is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
-  ];
-
-  // Calculate statistics
-  const totalPayments = paymentData.reduce((sum, payment) => sum + payment.amount, 0);
-  const successfulPayments = paymentData.filter(p => p.status === 'Completed').length;
-  const failedPayments = paymentData.filter(p => p.status === 'Failed').length;
-  const processingPayments = paymentData.filter(p => p.status === 'Processing').length;
-
-  const filteredPayments = paymentData.filter(payment => {
-    const matchesSearch = payment.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    if (selectedFilter === 'All') return matchesSearch;
-    return matchesSearch && payment.status === selectedFilter;
-  });
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showModal]);
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Completed': return 'bg-green-100 text-green-800';
-      case 'Failed': return 'bg-red-100 text-red-800';
-      case 'Processing': return 'bg-yellow-100 text-yellow-800';
-      case 'Refunded': return 'bg-blue-100 text-blue-800';
+      case 'SUCCESS': return 'bg-green-100 text-green-800';
+      case 'FAILED': return 'bg-red-100 text-red-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'REFUNDED': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getCategoryColor = (category) => {
-    return category === 'Handloom' ? 'bg-purple-100 text-purple-800' : 'bg-orange-100 text-orange-800';
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
+
+  const handleViewDetails = async (id) => {
+    setModalLoading(true);
+    setShowModal(true);
+    try {
+      const res = await paymentControllers.getPaymentDetails(id);
+      if (res.data?.data) {
+        setSelectedPayment(res.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching payment details:", err);
+      toast.error("Failed to fetch payment details");
+      setShowModal(false);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  // Variables for pagination display
+  const indexOfFirstItem = (currentPage - 1) * limit + 1;
+  const indexOfLastItem = Math.min(currentPage * limit, totalDocs);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
@@ -206,63 +183,63 @@ const PaymentManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Details</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Info</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
-                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">View Details</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPayments.map((payment) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4 text-center">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white font-semibold">
-                          {payment.customerName.split(' ').map(n => n[0]).join('')}
+                          {payment.user?.name ? payment.user.name.charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div className="ml-3">
-                          <div className="text-sm font-medium text-gray-900">{payment.customerName}</div>
-                          <div className="text-sm text-gray-500">{payment.email}</div>
-                          <div className="text-xs text-gray-400">{payment.phone}</div>
+                          <div className="text-sm font-medium text-gray-900">{payment.user?.name || 'Unknown User'}</div>
+                          <div className="text-sm text-gray-500">{payment.user?.email || 'No Email'}</div>
+                          <div className="text-xs text-gray-400">{payment.user?.phoneNo || 'No Phone'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{payment.product}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(payment.category)}`}>
-                          {payment.category}
-                        </span>
-                        <span className="text-xs text-gray-500">ID: {payment.orderId}</span>
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">ID: {payment.receiptNumber || payment.razorpayPaymentId || 'N/A'}</div>
+                      <div className="text-xs text-gray-500 mt-1">Type: {payment.paymentType}</div>
+                      {payment.auctions && payment.auctions.length > 0 && (
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          Auctions: {payment.auctions.map(a => a.auction_id).join(', ')}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-gray-900">₹{payment.amount.toLocaleString()}</div>
+                      <div className="text-sm font-bold text-gray-900">₹{parseFloat(payment.amount).toLocaleString()}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{payment.date}</div>
+                      <div className="text-sm text-gray-900">{formatDate(payment.paymentDate || payment.createdAt)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                        {payment.status === 'Completed' && '✓ '}
-                        {payment.status === 'Failed' && '✗ '}
-                        {payment.status === 'Processing' && '⏳ '}
-                        {payment.status === 'Refunded' && '↩ '}
                         {payment.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{payment.paymentMethod}</div>
-                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                        <button
+                          onClick={() => handleViewDetails(payment.id)}
+                          className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        >
                           <Eye size={16} />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                          <MoreHorizontal size={16} />
                         </button>
                       </div>
                     </td>
@@ -272,74 +249,141 @@ const PaymentManagement = () => {
             </table>
           </div>
 
-          {filteredPayments.length === 0 && (
+          {!loading && payments.length === 0 && (
             <div className="text-center py-12">
               <CreditCard className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No payments found</h3>
               <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
             </div>
           )}
-        </div>
 
-        {/* Payment Summary Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          {/* Payment Methods Distribution */}
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Methods</h3>
-            <div className="space-y-3">
-              {['UPI', 'Credit Card', 'Debit Card', 'Net Banking'].map((method) => {
-                const count = paymentData.filter(p => p.paymentMethod === method).length;
-                const percentage = (count / paymentData.length) * 100;
-                return (
-                  <div key={method} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">{method}</span>
-                    <div className="flex items-center gap-3">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-orange-500 h-2 rounded-full"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium text-gray-900">{count}</span>
-                    </div>
-                  </div>
-                );
-              })}
+          {/* Pagination */}
+          <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-b-xl">
+            <div className="flex items-center gap-4 text-base font-medium justify-self-start">
+              <span className="text-gray-700">Rows per page:</span>
+              <select
+                value={limit}
+                onChange={(e) => {
+                  setLimit(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
             </div>
-          </div>
 
-          {/* Category Revenue */}
-          <div className="bg-white rounded-xl shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Category</h3>
-            <div className="space-y-4">
-              {['Handloom', 'Handicraft'].map((category) => {
-                const categoryPayments = paymentData.filter(p => p.category === category && p.status === 'Completed');
-                const revenue = categoryPayments.reduce((sum, p) => sum + p.amount, 0);
-                const totalRevenue = paymentData.filter(p => p.status === 'Completed').reduce((sum, p) => sum + p.amount, 0);
-                const percentage = totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0;
+            <div className="text-base text-gray-600 font-medium justify-self-center">
+              {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
+            </div>
 
-                return (
-                  <div key={category} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
-                        {category}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">₹{revenue.toLocaleString()}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${category === 'Handloom' ? 'bg-purple-500' : 'bg-orange-500'}`}
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="text-xs text-gray-500">{percentage.toFixed(1)}% of total revenue</div>
-                  </div>
-                );
-              })}
+            <div className="flex items-center gap-4 justify-self-end">
+              <button
+                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Payment Details Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl transform transition-all">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-900">Payment Details</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {modalLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                </div>
+              ) : selectedPayment ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</label>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPayment.user?.name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</label>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">₹{parseFloat(selectedPayment.amount).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Type</label>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPayment.paymentType || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</label>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${getStatusColor(selectedPayment.status)}`}>
+                        {selectedPayment.status}
+                      </span>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</label>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">{formatDate(selectedPayment.paymentDate)}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name(s)</label>
+                      <div className="mt-1 space-y-1">
+                        {selectedPayment.auctions?.map((auction, index) => (
+                          <p key={index} className="text-sm font-semibold text-gray-900">
+                            {auction.product?.product_name || 'Unknown Product'}
+                          </p>
+                        ))}
+                        {(!selectedPayment.auctions || selectedPayment.auctions.length === 0) && (
+                          <p className="text-sm text-gray-500">No products found</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No details available
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
