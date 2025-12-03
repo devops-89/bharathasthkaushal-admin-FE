@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
 import { categoryControllers } from "../../api/category";
+import { warehouseControllers } from "../../api/warehouse";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { countries } from "../../constants/countries";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -28,10 +30,14 @@ const AddProduct = () => {
     washCare: "",
     artUsed: "",
     pattern: "",
+    country: "",
+    warehouseId: "",
   });
+
 
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
 
   const fetchCategories = async () => {
     try {
@@ -61,6 +67,24 @@ const AddProduct = () => {
     }
   };
 
+  const handleCountryChange = async (e) => {
+    const selectedCountry = e.target.value;
+    setFormData((prev) => ({ ...prev, country: selectedCountry, warehouseId: "" }));
+    setWarehouses([]);
+
+    if (selectedCountry) {
+      try {
+        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        console.log("Warehouse Response:", res.data);
+        // Assuming response structure, adjust if needed based on actual API response
+        setWarehouses(res.data?.data?.docs || res.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching warehouses:", error);
+        toast.error("Failed to fetch warehouses");
+      }
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -68,6 +92,27 @@ const AddProduct = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Searchable Country Dropdown State
+  const [countrySearch, setCountrySearch] = useState("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+
+  const filteredCountries = countries.filter((c) =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  // Close dropdown when clicking outside (optional but good for UX)
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".relative")) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -78,6 +123,8 @@ const AddProduct = () => {
     if (!formData.quantity) newErrors.quantity = "Quantity is required";
     if (!formData.material.trim()) newErrors.material = "Material is required";
     if (!formData.description.trim()) newErrors.description = "Description is required";
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.warehouseId) newErrors.warehouseId = "Warehouse is required";
     if (images.length === 0) newErrors.images = "At least one product image is required";
 
     setErrors(newErrors);
@@ -144,6 +191,8 @@ const AddProduct = () => {
       data.append("pattern", formData.pattern);
       data.append("dimension", dimension);
       data.append("netWeight", netWeight);
+      data.append("country", formData.country);
+      data.append("warehouseId", formData.warehouseId);
 
       if (images.length > 0) {
         images.forEach((file) => {
@@ -196,7 +245,7 @@ const AddProduct = () => {
         {/* Form */}
         <div className="bg-white rounded-2xl p-8 shadow-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Product Name */}  
+            {/* Product Name */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Product Name *
@@ -214,6 +263,89 @@ const AddProduct = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.product_name}</p>
               )}
             </div>
+
+            {/* Country */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Origin Country *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Select Country"
+                  value={countrySearch}
+                  onChange={(e) => {
+                    setCountrySearch(e.target.value);
+                    setIsCountryDropdownOpen(true);
+                    if (e.target.value === "") {
+                      handleCountryChange({ target: { value: "" } });
+                    }
+                  }}
+                  onClick={() => {
+                    setIsCountryDropdownOpen(true);
+                    // If a country is already selected, we might want to clear search or keep it.
+                    // Keeping it allows editing. Clearing it allows seeing all options.
+                    // Let's keep it simple: if clicked, show dropdown.
+                    if (formData.country && countrySearch !== formData.country) {
+                      setCountrySearch(formData.country);
+                    }
+                  }}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.country ? "border-red-500" : "border-gray-300"
+                    }`}
+                />
+                {isCountryDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map((c) => (
+                        <div
+                          key={c}
+                          className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                          onClick={() => {
+                            handleCountryChange({ target: { value: c } });
+                            setCountrySearch(c);
+                            setIsCountryDropdownOpen(false);
+                          }}
+                        >
+                          {c}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {errors.country && (
+                <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+              )}
+            </div>
+
+
+            {/* Warehouse */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Warehouse *
+              </label>
+              <select
+                name="warehouseId"
+                value={formData.warehouseId}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.warehouseId ? "border-red-500" : "border-gray-300"
+                  }`}
+                disabled={!formData.country}
+              >
+                <option value="" disabled>Select Warehouse</option>
+                {warehouses.map((w) => (
+                  <option key={w._id || w.id} value={w._id || w.id}>
+                    {w.warehouse_name || w.name}
+                  </option>
+                ))}
+              </select>
+              {errors.warehouseId && (
+                <p className="text-red-500 text-sm mt-1">{errors.warehouseId}</p>
+              )}
+            </div>
+
 
             {/* Category */}
             <div>

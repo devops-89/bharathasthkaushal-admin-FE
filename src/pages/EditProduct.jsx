@@ -3,13 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { productControllers } from "../api/product";
 import { toast } from "react-toastify";
 import { categoryControllers } from "../api/category";
+import { warehouseControllers } from "../api/warehouse";
 import { X } from "lucide-react";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [productData, setProductData] = useState({
-    
+
     product_name: "",
     description: "",
     categoryId: "",
@@ -22,15 +23,21 @@ const EditProduct = () => {
     quantity: "",
     material: "",
     // discount: "",
+    // discount: "",
     netWeight: "",
     dimension: "",
+    country: "",
+    warehouseId: "",
     // color: "",
     // size: "",
   });
 
+  const COUNTRIES = ["India", "USA", "UK", "Canada", "Australia", "Germany", "France", "UAE"];
+
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -57,7 +64,7 @@ const EditProduct = () => {
 
           if (typeof val === "object") {
             if (val.category_id) return val.category_id;
-         
+
             const match = list.find((c) => c._id === val._id || c.id === val._id);
             return match ? match.category_id : val._id || "";
           }
@@ -65,7 +72,7 @@ const EditProduct = () => {
           const matchByCatId = list.find((c) => c.category_id == val);
           if (matchByCatId) return matchByCatId.category_id;
 
-          
+
           const matchByObjId = list.find(
             (c) => c._id == val || c.id == val
           );
@@ -107,6 +114,16 @@ const EditProduct = () => {
 
         console.log("Fetched Product:", p);
 
+        // Fetch warehouses if country is present
+        if (p.country) {
+          try {
+            const wRes = await warehouseControllers.getWarehousesByCountry(p.country);
+            setWarehouses(wRes.data?.data?.docs || wRes.data?.data || []);
+          } catch (err) {
+            console.error("Error fetching warehouses", err);
+          }
+        }
+
         setProductData({
           product_name: p.product_name || "",
           description: p.description || "",
@@ -121,6 +138,8 @@ const EditProduct = () => {
           material: p.material || "",
           netWeight: p.netWeight || "",
           dimension: p.dimension || "",
+          country: p.country || "",
+          warehouseId: p.warehouseId || (p.warehouse && (p.warehouse._id || p.warehouse.id)) || "",
         });
 
       } catch (err) {
@@ -153,6 +172,26 @@ const EditProduct = () => {
       setSubCategories(onlySubs);
     } catch (err) {
       console.log("SubCategory Fetch Error");
+    }
+  };
+
+  const handleCountryChange = async (e) => {
+    const selectedCountry = e.target.value;
+    setProductData((prev) => ({
+      ...prev,
+      country: selectedCountry,
+      warehouseId: "",
+    }));
+    setWarehouses([]);
+
+    if (selectedCountry) {
+      try {
+        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        setWarehouses(res.data?.data?.docs || res.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching warehouses:", error);
+        toast.error("Failed to fetch warehouses");
+      }
     }
   };
 
@@ -217,6 +256,44 @@ const EditProduct = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             />
+          </div>
+
+          {/* COUNTRY + WAREHOUSE */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="font-medium">Origin Country *</label>
+              <select
+                name="country"
+                value={productData.country || ""}
+                onChange={handleCountryChange}
+                className="w-full p-2 border rounded-lg"
+              >
+                <option value="">Select Country</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="font-medium">Warehouse *</label>
+              <select
+                name="warehouseId"
+                value={productData.warehouseId || ""}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg"
+                disabled={!productData.country}
+              >
+                <option value="">Select Warehouse</option>
+                {warehouses.map((w) => (
+                  <option key={w._id || w.id} value={w._id || w.id}>
+                    {w.warehouse_name || w.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           {/* CATEGORY */}
           <div className="grid grid-cols-2 gap-4">

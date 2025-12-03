@@ -21,6 +21,8 @@ import {
   Droplets,
   Pencil,
   Tag,
+  MapPin,
+  Warehouse,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -806,6 +808,41 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Country */}
+                    {product?.country && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <MapPin className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Origin Country
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.country}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Warehouse */}
+                    {(product?.warehouse || product?.warehouseId) && (
+                      <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl hover:shadow-md transition-shadow">
+                        <div className="p-2 bg-orange-100 rounded-lg">
+                          <Warehouse className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                            Warehouse
+                          </p>
+                          <p className="text-gray-900 font-semibold">
+                            {product.warehouse?.warehouse_name || product.warehouse?.name || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
 
                     {/* Category */}
                     {product?.category && (

@@ -16,4 +16,7 @@ export const warehouseControllers = {
     getWarehouseDetails: (id) => {
         return productSecuredApi.get(`/warehouses/${id}`);
     },
+    getWarehousesByCountry: (country) => {
+        return productSecuredApi.get(`/warehouses?country=${country}`);
+    },
 };

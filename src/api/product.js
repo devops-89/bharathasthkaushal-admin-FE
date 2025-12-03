@@ -76,6 +76,12 @@ export const productControllers = {
     return productSecuredApi.get(`/product/productdetails/${id}`);
   },
 
+  addProduct: (formData) => {
+    return productSecuredApi.post("/product/addproduct", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
   updateProduct: (id, formData) => {
     return productSecuredApi.patch(`/product/update/${id}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
