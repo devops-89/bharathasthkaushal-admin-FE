@@ -77,7 +77,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
           <X className="w-5 h-5 text-gray-600" />
         </button>
 
-        {/* HEADER */}
+        {/* HEADERr */}
         <h2 className="text-2xl font-bold mb-4">Build Step Details</h2>
         {loading ? (
           <p className="text-center py-10">Loading details...</p>
@@ -90,7 +90,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
             {/* Description */}
             <p className="text-gray-700 mb-4">{stepDetails?.description}</p>
-  
+
 
             <h3 className="text-lg font-semibold mt-4">
               Status:{" "}
@@ -99,8 +99,8 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                   stepDetails?.buildStatus === "APPROVED"
                     ? "text-green-600"
                     : stepDetails?.buildStatus === "REJECTED"
-                    ? "text-red-600"
-                    : "text-gray-600"
+                      ? "text-red-600"
+                      : "text-gray-600"
                 }
               >
                 {stepDetails?.buildStatus || "PENDING"}
