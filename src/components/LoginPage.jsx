@@ -326,6 +326,22 @@ export default function LoginPage({ onLogin }) {
               )}
             </div>
 
+            <div style={{ textAlign: "right", marginBottom: "16px" }}>
+              <span
+                onClick={() => navigate("/forgot-password")}
+                style={{
+                  color: "#d97706",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
+                onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+              >
+                Forgot Password?
+              </span>
+            </div>
+
             {/* Login Button */}
             <button
               type="button"

@@ -68,7 +68,7 @@ export const productControllers = {
 
   getAllProductsReady: () => {
     return productSecuredApi.get(
-      "/product/admin/all-products?buildStatus=READY_FOR_AUCTION"
+      "/product/admin/all-products?buildStatus=READY_FOR_AUCTION&page=1&pageSize=1000"
     );
   },
 

@@ -26,6 +26,9 @@ import WarehouseManagement from "./pages/warehouse-management";
 import WarehouseDetails from "./pages/warehouse-details";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +36,7 @@ function App() {
   const [show, setShow] = useState(false);
   useEffect(() => {
 
-    if (location.pathname === "/") {
+    if (location.pathname === "/" || location.pathname === "/login" || location.pathname === "/forgot-password" || location.pathname === "/reset-password") {
       setShow(false);
     } else {
       setShow(true);
@@ -47,6 +50,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/artisans" element={<Artisans />} />
         <Route path="/product-management" element={<ProductManagement />} />

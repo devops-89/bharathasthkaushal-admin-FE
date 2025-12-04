@@ -8,7 +8,7 @@ export const categoryControllers = {
       },
     });
   },
-  getCategory: async (page = 1, pageSize = 10) => {
+  getCategory: async (page = 1, pageSize = 1000) => {
     try {
       let result = await productSecuredApi.get(
         `/category/main-categories?page=${page}&pageSize=${pageSize}`,
@@ -19,7 +19,7 @@ export const categoryControllers = {
       throw error;
     }
   },
-  getSubCategory: async (categoryId, page = 1, pageSize = 10) => {
+  getSubCategory: async (categoryId, page = 1, pageSize = 1000) => {
     try {
       let result = await productSecuredApi.get(
         `/category/getsubcategory/${categoryId}?page=${page}&pageSize=${pageSize}`,
@@ -36,7 +36,7 @@ export const categoryControllers = {
   getallSubcategory: async (categoryId) => {
     try {
       let result = await productSecuredApi.get(
-        `/category/getallsubcategory`,
+        `/category/getallsubcategory?page=1&pageSize=1000`,
         {
           headers: { "cache-control": "no-cache" },
         }
