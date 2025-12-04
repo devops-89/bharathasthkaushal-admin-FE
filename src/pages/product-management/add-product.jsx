@@ -93,7 +93,7 @@ const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Searchable Country Dropdown State
+
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
@@ -101,7 +101,7 @@ const AddProduct = () => {
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
 
-  // Close dropdown when clicking outside (optional but good for UX)
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".relative")) {

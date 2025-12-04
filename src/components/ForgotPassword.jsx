@@ -13,14 +13,22 @@ export default function ForgotPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email) {
+        const trimmedEmail = email.trim();
+
+        if (!trimmedEmail) {
             toast.error("Please enter your email address");
+            return;
+        }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(trimmedEmail)) {
+            toast.error("Please enter a valid email address");
             return;
         }
 
         setIsLoading(true);
         try {
-            await authControllers.forgotPassword({ email });
+            await authControllers.forgotPassword({ email: trimmedEmail });
             toast.success("Password reset link sent to your email!");
             setTimeout(() => {
                 navigate("/login");
@@ -165,7 +173,7 @@ export default function ForgotPassword() {
                                 type="email"
                                 value={email}
                                 required
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => setEmail(e.target.value.replace(/\s+/g, "").trim())}
                                 style={inputStyle}
                                 placeholder="Enter your registered email"
                             />

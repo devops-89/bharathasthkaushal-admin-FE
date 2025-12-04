@@ -41,7 +41,8 @@ export const categoryControllers = {
           headers: { "cache-control": "no-cache" },
         }
       );
-      console.log("wjdsdhjhdec", result)
+
+      //console.log("wjdsdhjhdec", result)
       return result;
 
     } catch (error) {

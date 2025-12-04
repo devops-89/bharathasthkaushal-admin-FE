@@ -116,6 +116,12 @@ export default function CategoryManagement() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.description.trim().split(/\s+/).length > 20) {
+      toast.error("Description cannot exceed 20 words");
+      return;
+    }
+
     try {
       await categoryControllers.addCategory(formData);
       toast.success("Category added successfully!");
@@ -203,7 +209,7 @@ export default function CategoryManagement() {
               {currentCategories.map((cat) => (
                 <div
                   key={cat.category_id}
-                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
                   <div className="relative mb-4">
                     <img
@@ -212,17 +218,26 @@ export default function CategoryManagement() {
                       className="w-full h-48 object-cover rounded-lg"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col flex-grow">
                     <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={cat.category_name}>
                       {cat.category_name}
                     </h3>
-                    <button
-                      onClick={() => handleViewDetails(cat.category_id)}
-                      className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Show Details
-                    </button>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2 h-10">
+                      {cat.description
+                        ? cat.description.split(" ").length > 20
+                          ? cat.description.split(" ").slice(0, 20).join(" ") + "..."
+                          : cat.description
+                        : "No description available"}
+                    </p>
+                    <div className="mt-auto pt-3">
+                      <button
+                        onClick={() => handleViewDetails(cat.category_id)}
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                        Show Subcategory
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -334,7 +349,7 @@ export default function CategoryManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
+                    Description * <span className="text-xs text-gray-500">(Max 20 words)</span>
                   </label>
                   <textarea
                     name="description"
