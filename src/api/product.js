@@ -99,7 +99,7 @@ export const productControllers = {
       status: status,
     };
 
-    if (status === "REJECTED") {
+    if (status === "DISAPPROVED") {
       payload.admin_remarks = adminRemarks;
     }
 
@@ -109,12 +109,13 @@ export const productControllers = {
     );
   },
 
-  updateProductStatus: (id, status, adminRemarks = "") => {
+  updateProductStatus: (id, status, adminRemarks = "", additionalData = {}) => {
     const payload = {
       admin_approval_status: status,
+      ...additionalData,
     };
-    if (status === "REJECTED") {
-      payload.adminRemarks = adminRemarks;
+    if (status === "DISAPPROVED") {
+      payload.admin_remarks = adminRemarks;
     }
     return productSecuredApi.patch(`/product/${id}/status`, payload);
   },

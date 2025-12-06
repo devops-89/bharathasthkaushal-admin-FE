@@ -162,13 +162,20 @@ export default function ProductManagement() {
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
                 >
                   <div className="relative mb-4">
-                    {product.images && product.images.length ? (
+                    {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0].imageUrl}
                         alt={product.name}
                         className="w-full h-48 object-cover rounded-lg"
                       />
-                    ) : null}
+                    ) : (
+                      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
+                        <div className="text-center">
+                          <Package className="w-10 h-10 text-gray-300 mx-auto mb-1" />
+                          <span className="text-xs text-gray-400 font-medium">No Image</span>
+                        </div>
+                      </div>
+                    )}
 
 
                   </div>

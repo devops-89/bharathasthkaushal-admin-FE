@@ -44,7 +44,7 @@ const ArtisanManagement = () => {
     email: "",
     countryCode: "+91",
     phoneNo: "",
-    expertizeField: "",
+    expertizeField: [],
     location: "",
     aadhaarNumber: "",
     user_caste_category: "",
@@ -56,12 +56,18 @@ const ArtisanManagement = () => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExpertiseDropdownOpen, setIsExpertiseDropdownOpen] = useState(false);
+  const [showSubCasteOther, setShowSubCasteOther] = useState(false);
   const dropdownRef = React.useRef(null);
+  const expertiseDropdownRef = React.useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsCountryDropdownOpen(false);
+      }
+      if (expertiseDropdownRef.current && !expertiseDropdownRef.current.contains(event.target)) {
+        setIsExpertiseDropdownOpen(false);
       }
     };
 
@@ -218,6 +224,7 @@ const ArtisanManagement = () => {
       const newFormData = { ...prev, [name]: value };
       if (name === "user_caste_category") {
         newFormData.subCaste = "";
+        setShowSubCasteOther(false);
       }
       return newFormData;
     });
@@ -246,19 +253,44 @@ const ArtisanManagement = () => {
       handleValidationError("Last Name is required");
       return;
     }
+    if (!formData.email || !formData.email.trim()) {
+      console.log("Validation Error: Email is missing");
+      handleValidationError("Email is required");
+      return;
+    }
+    if (!emailRegex.test(formData.email)) {
+      console.log("Validation Error: Invalid Email");
+      handleValidationError("Please enter a valid email address");
+      return;
+    }
     if (!formData.phoneNo || formData.phoneNo.length !== 10) {
       console.log("Validation Error: Invalid Phone Number");
       handleValidationError("Phone Number must be 10 digits");
       return;
     }
-    if (formData.email && !emailRegex.test(formData.email)) {
-      console.log("Validation Error: Invalid Email");
-      handleValidationError("Please enter a valid email address");
+    if (!formData.expertizeField || formData.expertizeField.length === 0) {
+      console.log("Validation Error: Expertise Field is missing");
+      handleValidationError("Please select at least 1 area of expertise");
+      return;
+    }
+    if (!formData.location || !formData.location.trim()) {
+      console.log("Validation Error: Address is missing");
+      handleValidationError("Address is required");
       return;
     }
     if (!formData.aadhaarNumber || !aadhaarRegex.test(formData.aadhaarNumber)) {
       console.log("Validation Error: Invalid Aadhaar Number");
       handleValidationError("Aadhaar Number must be 12 digits");
+      return;
+    }
+    if (!formData.user_caste_category) {
+      console.log("Validation Error: Caste Category is missing");
+      handleValidationError("Caste Category is required");
+      return;
+    }
+    if (!formData.subCaste) {
+      console.log("Validation Error: Sub Caste is missing");
+      handleValidationError("Sub Caste is required");
       return;
     }
     if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
@@ -275,7 +307,7 @@ const ArtisanManagement = () => {
         email: formData.email,
         countryCode: formData.countryCode,
         phoneNo: formData.phoneNo,
-        expertizeField: formData.expertizeField,
+        expertizeField: Array.isArray(formData.expertizeField) ? formData.expertizeField.join(", ") : formData.expertizeField,
         location: formData.location,
         aadhaarNumber: formData.aadhaarNumber,
         user_caste_category: formData.user_caste_category,
@@ -575,19 +607,49 @@ const ArtisanManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Expertise Field *
                     </label>
-                    <select
-                      name="expertizeField"
-                      value={formData.expertizeField}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    >
-                      <option value="" hidden>Select Expertise</option>
-                      {subCategories.map((subCategory, index) => (
-                        <option key={index} value={subCategory.category_name}>
-                          {subCategory.category_name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative" ref={expertiseDropdownRef}>
+                      <div
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
+                        onClick={() => setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)}
+                      >
+                        <span className="truncate">
+                          {formData.expertizeField.length > 0
+                            ? `${formData.expertizeField.length} selected`
+                            : "Select Expertise"}
+                        </span>
+                        <span className="ml-2 text-gray-400">▼</span>
+                      </div>
+
+                      {isExpertiseDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {subCategories.map((subCategory, index) => (
+                            <div
+                              key={index}
+                              className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                              onClick={() => {
+                                const currentSelected = formData.expertizeField;
+                                const isSelected = currentSelected.includes(subCategory.category_name);
+                                let newSelected;
+                                if (isSelected) {
+                                  newSelected = currentSelected.filter(item => item !== subCategory.category_name);
+                                } else {
+                                  newSelected = [...currentSelected, subCategory.category_name];
+                                }
+                                setFormData({ ...formData, expertizeField: newSelected });
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.expertizeField.includes(subCategory.category_name)}
+                                readOnly
+                                className="rounded text-orange-600 focus:ring-orange-500"
+                              />
+                              <span className="text-gray-700">{subCategory.category_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -632,8 +694,16 @@ const ArtisanManagement = () => {
                     </label>
                     <select
                       name="subCaste"
-                      value={formData.subCaste}
-                      onChange={handleFormChange}
+                      value={showSubCasteOther ? "Other" : formData.subCaste}
+                      onChange={(e) => {
+                        if (e.target.value === "Other") {
+                          setShowSubCasteOther(true);
+                          setFormData((prev) => ({ ...prev, subCaste: "" }));
+                        } else {
+                          setShowSubCasteOther(false);
+                          handleFormChange(e);
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
                       <option value="" hidden>Select Sub Caste</option>
@@ -645,6 +715,16 @@ const ArtisanManagement = () => {
                         )
                       )}
                     </select>
+                    {showSubCasteOther && (
+                      <input
+                        type="text"
+                        name="subCaste"
+                        value={formData.subCaste}
+                        onChange={handleFormChange}
+                        placeholder="Enter custom sub caste"
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -948,7 +1028,7 @@ const ArtisanManagement = () => {
                           className={`${partner.status === "ACTIVE"
                             ? "translate-x-6"
                             : "translate-x-1"
-                            } inline-block h-[18px] w-[18px] transform rounded-full bg-white transition`}
+                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                         />
                       </Switch>
                     </td>

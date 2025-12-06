@@ -7,22 +7,28 @@ import "react-toastify/dist/ReactToastify.css";
 import { ArrowLeft } from "lucide-react";
 
 export default function ForgotPassword() {
+    const [error, setError] = useState("");
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
         const trimmedEmail = email.trim();
 
         if (!trimmedEmail) {
-            toast.error("Please enter your email address");
+            const msg = "Please enter your email address";
+            toast.error(msg);
+            setError(msg);
             return;
         }
 
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(trimmedEmail)) {
-            toast.error("Please enter a valid email address");
+            const msg = "Please enter a valid email address";
+            toast.error(msg);
+            setError(msg);
             return;
         }
 
@@ -34,8 +40,13 @@ export default function ForgotPassword() {
                 navigate("/login");
             }, 3000);
         } catch (err) {
-            const errorMessage = err?.response?.data?.message || "Failed to send reset link";
+            let errorMessage = err?.response?.data?.message;
+            if (Array.isArray(errorMessage)) {
+                errorMessage = errorMessage.join(", ");
+            }
+            errorMessage = errorMessage || "Failed to send reset link";
             toast.error(errorMessage);
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -95,7 +106,7 @@ export default function ForgotPassword() {
         width: "100%",
         padding: "10px 12px",
         borderRadius: "12px",
-        border: "2px solid #fde68a",
+        border: error ? "2px solid #ef4444" : "2px solid #fde68a",
         outline: "none",
         transition: "all 0.2s",
         background: "rgba(255, 255, 255, 0.8)",
@@ -173,10 +184,18 @@ export default function ForgotPassword() {
                                 type="email"
                                 value={email}
                                 required
-                                onChange={(e) => setEmail(e.target.value.replace(/\s+/g, "").trim())}
+                                onChange={(e) => {
+                                    setEmail(e.target.value.replace(/\s+/g, "").trim());
+                                    if (error) setError("");
+                                }}
                                 style={inputStyle}
                                 placeholder="Enter your registered email"
                             />
+                            {error && (
+                                <p style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px" }}>
+                                    {error}
+                                </p>
+                            )}
                         </div>
 
                         <button

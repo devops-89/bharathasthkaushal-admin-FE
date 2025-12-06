@@ -15,9 +15,10 @@ export const loginValidation = ({ state, errors, setErrors }) => {
     newErrors.password = "Invalid password";
     hasErrors = true;
   }
+
  
   setErrors(newErrors);
 
-  // Return true only if both fields are valid (no errors)
+  
   return !hasErrors;
 };

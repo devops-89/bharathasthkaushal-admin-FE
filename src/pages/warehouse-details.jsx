@@ -113,7 +113,14 @@ export default function WarehouseDetails() {
                                         <div className="p-2 bg-orange-50 rounded-lg">
                                             <MapPin className="w-5 h-5 text-orange-600" />
                                         </div>
-                                        <p className="text-base font-medium text-gray-900 flex-1 break-all">{warehouse.address || warehouse.location || 'N/A'}</p>
+                                        <p className="text-base font-medium text-gray-900 flex-1 break-all">
+                                            {(() => {
+                                                const addr = warehouse.address || warehouse.location;
+                                                if (!addr) return 'N/A';
+                                                if (typeof addr === 'string') return addr;
+                                                return [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
+                                            })()}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -164,7 +171,7 @@ export default function WarehouseDetails() {
                                 </span>
                             </div>
 
-                            {warehouse.products && warehouse.products.length > 0 ? (
+                            {Array.isArray(warehouse.products) && warehouse.products.length > 0 ? (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-gray-50">
@@ -176,22 +183,24 @@ export default function WarehouseDetails() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {warehouse.products.map((product, index) => (
-                                                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="py-4 px-6 font-medium text-gray-900">
-                                                        {product.product_name}
-                                                    </td>
-                                                    <td className="py-4 px-6 text-gray-700 text-right font-mono">
-                                                        {product.quantity}
-                                                    </td>
-                                                    <td className="py-4 px-6 text-center">
-                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.product_status === 'DRAFT' ? 'bg-gray-100 text-gray-800' :
-                                                            product.product_status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                                                'bg-blue-100 text-blue-800'
-                                                            }`}>
-                                                            {product.product_status}
-                                                        </span>
-                                                    </td>
-                                                </tr>
+                                                product ? (
+                                                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                                        <td className="py-4 px-6 font-medium text-gray-900">
+                                                            {product.product_name || 'N/A'}
+                                                        </td>
+                                                        <td className="py-4 px-6 text-gray-700 text-right font-mono">
+                                                            {product.quantity || 0}
+                                                        </td>
+                                                        <td className="py-4 px-6 text-center">
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.product_status === 'DRAFT' ? 'bg-gray-100 text-gray-800' :
+                                                                product.product_status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                                                                    'bg-blue-100 text-blue-800'
+                                                                }`}>
+                                                                {product.product_status || 'UNKNOWN'}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ) : null
                                             ))}
                                         </tbody>
                                     </table>

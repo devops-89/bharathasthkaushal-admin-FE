@@ -34,7 +34,7 @@ function UserProfile() {
       setAuctionStats(res.data.data);
     } catch (error) {
       console.error("Error fetching auction stats:", error);
-      // Don't show error toast here to avoid clutter if just stats fail
+      
     } finally {
       setStatsLoading(false);
     }
@@ -78,7 +78,7 @@ function UserProfile() {
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(
                     user.name || `${user.firstName} ${user.lastName}`
                   )}&background=random`
-                }
+                }               
                 alt="User Avatar"
                 className="w-full h-full object-cover"
               />
@@ -135,6 +135,7 @@ function UserProfile() {
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-orange-50 rounded-lg">
               <User className="w-5 h-5 text-orange-600" />
+
             </div>
             <div>
               <p className="text-sm text-gray-500 font-medium">Role</p>

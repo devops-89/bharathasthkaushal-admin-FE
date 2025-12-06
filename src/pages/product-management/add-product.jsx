@@ -101,6 +101,15 @@ const AddProduct = () => {
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
 
+  const [showFinishOther, setShowFinishOther] = useState(false);
+  const [showWashCareOther, setShowWashCareOther] = useState(false);
+
+  const preventNegative = (e) => {
+    if (["-", "e", "+"].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -119,13 +128,24 @@ const AddProduct = () => {
     if (!formData.product_name.trim()) newErrors.product_name = "Product Name is required";
     if (!formData.categoryId) newErrors.categoryId = "Category is required";
     if (!formData.subCategoryId) newErrors.subCategoryId = "SubCategory is required";
+
     if (!formData.productPricePerPiece) newErrors.productPricePerPiece = "Price is required";
+    else if (Number(formData.productPricePerPiece) <= 0) newErrors.productPricePerPiece = "Price must be greater than 0";
+
     if (!formData.quantity) newErrors.quantity = "Quantity is required";
+    else if (Number(formData.quantity) <= 0) newErrors.quantity = "Quantity must be greater than 0";
+
     if (!formData.material.trim()) newErrors.material = "Material is required";
     if (!formData.description.trim()) newErrors.description = "Description is required";
     if (!formData.country) newErrors.country = "Country is required";
     if (!formData.warehouseId) newErrors.warehouseId = "Warehouse is required";
     if (images.length === 0) newErrors.images = "At least one product image is required";
+
+    if (formData.weightValue && Number(formData.weightValue) <= 0) newErrors.weightValue = "Weight must be greater than 0";
+    if (formData.length && Number(formData.length) <= 0) newErrors.length = "Length must be greater than 0";
+    if (formData.breadth && Number(formData.breadth) <= 0) newErrors.breadth = "Breadth must be greater than 0";
+    if (formData.height && Number(formData.height) <= 0) newErrors.height = "Height must be greater than 0";
+    if (formData.timeToMake && Number(formData.timeToMake) <= 0) newErrors.timeToMake = "Time to make must be greater than 0";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -163,7 +183,6 @@ const AddProduct = () => {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast.error("Please fill in all required fields correctly.");
       return;
     }
 
@@ -408,6 +427,9 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.productPricePerPiece ? "border-red-500" : "border-gray-300"
                   }`}
+                min="0.01"
+                step="0.01"
+                onKeyDown={preventNegative}
                 placeholder="0.00"
               />
               {errors.productPricePerPiece && (
@@ -429,6 +451,9 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.quantity ? "border-red-500" : "border-gray-300"
                   }`}
+                min="1"
+                step="1"
+                onKeyDown={preventNegative}
                 placeholder="0"
               />
               {errors.quantity && (
@@ -457,13 +482,19 @@ const AddProduct = () => {
                 Time to Make (Days)
               </label>
               <input
-                type="text"
+                type="number"
                 name="timeToMake"
                 value={formData.timeToMake}
                 onChange={handleInputChange}
+                min="1"
+                step="1"
+                onKeyDown={preventNegative}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="e.g. 5 days"
+                placeholder="Days"
               />
+              {errors.timeToMake && (
+                <p className="text-red-500 text-sm mt-1">{errors.timeToMake}</p>
+              )}
             </div>
 
             {/* Material */}
@@ -492,8 +523,16 @@ const AddProduct = () => {
               </label>
               <select
                 name="finish"
-                value={formData.finish}
-                onChange={handleInputChange}
+                value={showFinishOther ? "Other" : formData.finish}
+                onChange={(e) => {
+                  if (e.target.value === "Other") {
+                    setShowFinishOther(true);
+                    setFormData((prev) => ({ ...prev, finish: "" }));
+                  } else {
+                    setShowFinishOther(false);
+                    handleInputChange(e);
+                  }
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="">Select Finish</option>
@@ -502,7 +541,18 @@ const AddProduct = () => {
                 <option value="Handwoven">Handwoven</option>
                 <option value="Rough">Rough</option>
                 <option value="Smooth">Smooth</option>
+                <option value="Other">Other</option>
               </select>
+              {showFinishOther && (
+                <input
+                  type="text"
+                  name="finish"
+                  value={formData.finish}
+                  onChange={handleInputChange}
+                  placeholder="Enter custom finish"
+                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              )}
             </div>
 
             {/* Wash Care */}
@@ -512,8 +562,16 @@ const AddProduct = () => {
               </label>
               <select
                 name="washCare"
-                value={formData.washCare}
-                onChange={handleInputChange}
+                value={showWashCareOther ? "Other" : formData.washCare}
+                onChange={(e) => {
+                  if (e.target.value === "Other") {
+                    setShowWashCareOther(true);
+                    setFormData((prev) => ({ ...prev, washCare: "" }));
+                  } else {
+                    setShowWashCareOther(false);
+                    handleInputChange(e);
+                  }
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
                 <option value="">Select Wash Care</option>
@@ -521,7 +579,18 @@ const AddProduct = () => {
                 <option value="Hand Wash">Hand Wash</option>
                 <option value="Machine Wash">Machine Wash</option>
                 <option value="Do Not Wash">Do Not Wash</option>
+                <option value="Other">Other</option>
               </select>
+              {showWashCareOther && (
+                <input
+                  type="text"
+                  name="washCare"
+                  value={formData.washCare}
+                  onChange={handleInputChange}
+                  placeholder="Enter custom wash care"
+                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              )}
             </div>
 
             {/* Art Used */}
@@ -567,6 +636,9 @@ const AddProduct = () => {
                   name="weightValue"
                   value={formData.weightValue}
                   onChange={handleInputChange}
+                  min="0.01"
+                  step="0.01"
+                  onKeyDown={preventNegative}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Weight"
                 />
@@ -593,6 +665,9 @@ const AddProduct = () => {
                   name="length"
                   value={formData.length}
                   onChange={handleInputChange}
+                  min="0.01"
+                  step="0.01"
+                  onKeyDown={preventNegative}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Length"
                 />
@@ -601,6 +676,9 @@ const AddProduct = () => {
                   name="breadth"
                   value={formData.breadth}
                   onChange={handleInputChange}
+                  min="0.01"
+                  step="0.01"
+                  onKeyDown={preventNegative}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Breadth"
                 />
@@ -609,6 +687,9 @@ const AddProduct = () => {
                   name="height"
                   value={formData.height}
                   onChange={handleInputChange}
+                  min="0.01"
+                  step="0.01"
+                  onKeyDown={preventNegative}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Height"
                 />

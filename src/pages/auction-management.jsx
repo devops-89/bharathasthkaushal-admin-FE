@@ -10,6 +10,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { productControllers } from "../api/product.js";
+import { warehouseControllers } from "../api/warehouse.js";
+import { countries } from "../constants/countries.js";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -48,7 +50,47 @@ const AuctionManagement = () => {
     endDate: "",
     startDate: "",
     quantity: "",
+    country: "",
+    warehouseId: "",
   });
+
+  const [countrySearch, setCountrySearch] = useState("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [warehouses, setWarehouses] = useState([]);
+  const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
+
+  const filteredCountries = countries.filter((c) =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  const handleCountryChange = async (selectedCountry) => {
+    setNewAuction((prev) => ({ ...prev, country: selectedCountry, warehouseId: "" }));
+    setCountrySearch(selectedCountry);
+    setIsCountryDropdownOpen(false);
+    setWarehouses([]);
+
+    if (selectedCountry) {
+      setIsWarehouseLoading(true);
+      try {
+        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        console.log("Warehouses Response:", res.data);
+        const data = res.data.data;
+        if (Array.isArray(data)) {
+          setWarehouses(data);
+        } else if (data && Array.isArray(data.docs)) {
+          setWarehouses(data.docs);
+        } else {
+          setWarehouses([]);
+        }
+      } catch (err) {
+        console.error("Error fetching warehouses:", err);
+        toast.error("Failed to fetch warehouses");
+        setWarehouses([]);
+      } finally {
+        setIsWarehouseLoading(false);
+      }
+    }
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -179,6 +221,8 @@ const AuctionManagement = () => {
       min_bid_amount: parseFloat(newAuction.minBidAmount),
       start_date: new Date(newAuction.startDate).toISOString(),
       quantity: parseInt(newAuction.quantity),
+      country: newAuction.country,
+      warehouseId: newAuction.warehouseId,
     };
 
     console.log("Sending Auction Data:", auctionData);
@@ -238,7 +282,12 @@ const AuctionManagement = () => {
         minBidAmount: "",
         endDate: "",
         startDate: "",
+        quantity: "",
+        country: "",
+        warehouseId: "",
       });
+      setCountrySearch("");
+      setWarehouses([]);
     } catch (err) {
       console.error(
         "Error creating auction:",
@@ -295,6 +344,8 @@ const AuctionManagement = () => {
         bids: res.data.data.bids || res.data.data.auction?.bids || [],
         winner: res.data.data.winner || res.data.data.auction?.winner || null,
         challenge_minutes: details.challenge_minutes || 15,
+        warehouseName: details.warehouse?.name || res.data.data.warehouse?.name || "N/A",
+        warehouseCountry: details.warehouse?.country || res.data.data.warehouse?.country || "N/A",
       };
       setSelectedAuction(mappedDetails);
       setShowDetailsModal(true);
@@ -626,6 +677,14 @@ const AuctionManagement = () => {
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Subcategory</p>
                         <p className="text-sm font-medium text-gray-900">{selectedAuction.subcategory || "N/A"}</p>
                       </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Warehouse</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedAuction.warehouseName}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Country</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedAuction.warehouseCountry}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -776,8 +835,8 @@ const AuctionManagement = () => {
                           )}
                         </button>
                       </div>
-                    </div> 
-                  
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -941,6 +1000,75 @@ const AuctionManagement = () => {
                           <option disabled>No products available</option>
                         )}
                       </select>
+                    </div>
+
+                    {/* Country Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Origin Country *
+                      </label>
+                      <div className="relative relative-country-dropdown">
+                        <input
+                          type="text"
+                          placeholder="Select Country"
+                          value={countrySearch}
+                          onChange={(e) => {
+                            setCountrySearch(e.target.value);
+                            setIsCountryDropdownOpen(true);
+                            if (e.target.value === "") {
+                              handleCountryChange("");
+                            }
+                          }}
+                          onClick={() => {
+                            setIsCountryDropdownOpen(true);
+                            if (newAuction.country && countrySearch !== newAuction.country) {
+                              setCountrySearch(newAuction.country);
+                            }
+                          }}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        />
+                        {isCountryDropdownOpen && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {filteredCountries.length > 0 ? (
+                              filteredCountries.map((c) => (
+                                <div
+                                  key={c}
+                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                                  onClick={() => {
+                                    handleCountryChange(c);
+                                  }}
+                                >
+                                  {c}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Warehouse Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Warehouse *
+                      </label>
+                      <select
+                        required
+                        value={newAuction.warehouseId}
+                        onChange={(e) => setNewAuction({ ...newAuction, warehouseId: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        disabled={!newAuction.country || isWarehouseLoading}
+                      >
+                        <option value="" disabled>Select Warehouse</option>
+                        {Array.isArray(warehouses) && warehouses.map((w) => (
+                          <option key={w._id || w.id} value={w._id || w.id}>
+                            {w.warehouse_name || w.name}
+                          </option>
+                        ))}
+                      </select>
+                      {isWarehouseLoading && <p className="text-xs text-gray-500 mt-1">Loading warehouses...</p>}
                     </div>
 
                     <div>

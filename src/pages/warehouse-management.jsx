@@ -266,11 +266,25 @@ export default function WarehouseManagement() {
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4 text-gray-600">
-                                                <div className="flex items-center gap-2" title={warehouse.location || warehouse.address || 'N/A'}>
+                                                <div className="flex items-center gap-2" title={(() => {
+                                                    const addr = warehouse.location || warehouse.address;
+                                                    if (!addr) return 'N/A';
+                                                    if (typeof addr === 'string') return addr;
+                                                    return [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
+                                                })()}>
                                                     <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                                    {(warehouse.location || warehouse.address || 'N/A').length > 30
-                                                        ? `${(warehouse.location || warehouse.address || 'N/A').substring(0, 30)}...`
-                                                        : (warehouse.location || warehouse.address || 'N/A')}
+                                                    {(() => {
+                                                        const addr = warehouse.location || warehouse.address;
+                                                        let displayAddr = 'N/A';
+                                                        if (addr) {
+                                                            if (typeof addr === 'string') {
+                                                                displayAddr = addr;
+                                                            } else {
+                                                                displayAddr = [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
+                                                            }
+                                                        }
+                                                        return displayAddr.length > 30 ? `${displayAddr.substring(0, 30)}...` : displayAddr;
+                                                    })()}
                                                 </div>
                                             </td>
                                             <td className="py-4 px-4 text-gray-600 text-sm">

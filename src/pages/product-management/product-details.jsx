@@ -28,6 +28,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
+import { warehouseControllers } from "../../api/warehouse";
+import { countries } from "../../constants/countries";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
 import EditBuildStepModal from "../../components/EditBuildStepModal";
 
@@ -80,6 +82,50 @@ const ProductDetails = () => {
   console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+
+  // Approval Modal State
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approveCountry, setApproveCountry] = useState("");
+  const [approveWarehouseId, setApproveWarehouseId] = useState("");
+  const [warehouses, setWarehouses] = useState([]);
+  const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+
+  const filteredCountries = countries.filter((c) =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  const handleCountryChange = async (selectedCountry) => {
+    setApproveCountry(selectedCountry);
+    setApproveWarehouseId("");
+    setWarehouses([]);
+
+    if (selectedCountry) {
+      setIsWarehouseLoading(true);
+      try {
+        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        setWarehouses(res.data?.data?.docs || res.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching warehouses:", error);
+        toast.error("Failed to fetch warehouses");
+      } finally {
+        setIsWarehouseLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".relative-country-dropdown")) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     console.log("Route param id:", id);
     if (id) {
@@ -402,34 +448,36 @@ const ProductDetails = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => {
-                      if (buildSteps.length >= 10) {
-                        toast.error(
-                          "You can create only up to 10 build steps!"
-                        );
-                        return;
-                      }
-                      setCreateStepForm((prev) => ({
-                        ...prev,
-                        productId: product.productId,
-                      }));
-                      setShowCreateStepForm(true);
-                    }}
-                    className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                  >
-                    <FileText className="w-3 h-5" />
-                    Create Build Step
-                  </button>
-                  <button
-                    onClick={() => setShowAssignForm(true)}
-                    className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                  >
-                    <Users className="w-5 h-5" />
-                    Assigned Step To Artisan
-                  </button>
-                </div>
+                {product.admin_approval_status === "APPROVED" && (
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => {
+                        if (buildSteps.length >= 10) {
+                          toast.error(
+                            "You can create only up to 10 build steps!"
+                          );
+                          return;
+                        }
+                        setCreateStepForm((prev) => ({
+                          ...prev,
+                          productId: product.productId,
+                        }));
+                        setShowCreateStepForm(true);
+                      }}
+                      className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                    >
+                      <FileText className="w-3 h-5" />
+                      Create Build Step
+                    </button>
+                    <button
+                      onClick={() => setShowAssignForm(true)}
+                      className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                    >
+                      <Users className="w-5 h-5" />
+                      Assigned Step To Artisan
+                    </button>
+                  </div>
+                )}
                 {/* Build Steps FAQ Section */}
                 <div className="mt-8">
                   <div className="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-6 border border-gray-200">
@@ -701,7 +749,7 @@ const ProductDetails = () => {
                               try {
                                 await productControllers.updateProductStatus(
                                   product.productId,
-                                  "REJECTED",
+                                  "DISAPPROVED",
                                   rejectReason.trim()
                                 );
 
@@ -727,28 +775,145 @@ const ProductDetails = () => {
                     </div>
                   )}
 
+                  {showApproveModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-xl font-bold text-gray-900">
+                            Approve Product
+                          </h2>
+                          <button
+                            onClick={() => setShowApproveModal(false)}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <X className="w-5 h-5 text-gray-500" />
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          {/* Country Selection */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Origin Country *
+                            </label>
+                            <div className="relative relative-country-dropdown">
+                              <input
+                                type="text"
+                                placeholder="Select Country"
+                                value={countrySearch}
+                                onChange={(e) => {
+                                  setCountrySearch(e.target.value);
+                                  setIsCountryDropdownOpen(true);
+                                  if (e.target.value === "") {
+                                    handleCountryChange("");
+                                  }
+                                }}
+                                onClick={() => {
+                                  setIsCountryDropdownOpen(true);
+                                  if (approveCountry && countrySearch !== approveCountry) {
+                                    setCountrySearch(approveCountry);
+                                  }
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              />
+                              {isCountryDropdownOpen && (
+                                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                  {filteredCountries.length > 0 ? (
+                                    filteredCountries.map((c) => (
+                                      <div
+                                        key={c}
+                                        className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                                        onClick={() => {
+                                          handleCountryChange(c);
+                                          setCountrySearch(c);
+                                          setIsCountryDropdownOpen(false);
+                                        }}
+                                      >
+                                        {c}
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Warehouse Selection */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Warehouse *
+                            </label>
+                            <select
+                              value={approveWarehouseId}
+                              onChange={(e) => setApproveWarehouseId(e.target.value)}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              disabled={!approveCountry || isWarehouseLoading}
+                            >
+                              <option value="" disabled>Select Warehouse</option>
+                              {warehouses.map((w) => (
+                                <option key={w._id || w.id} value={w._id || w.id}>
+                                  {w.warehouse_name || w.name}
+                                </option>
+                              ))}
+                            </select>
+                            {isWarehouseLoading && <p className="text-xs text-gray-500 mt-1">Loading warehouses...</p>}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                          <button
+                            onClick={() => setShowApproveModal(false)}
+                            className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+
+                          <button
+                            disabled={!approveCountry || !approveWarehouseId}
+                            onClick={async () => {
+                              try {
+                                await productControllers.updateProductStatus(
+                                  product.productId,
+                                  "APPROVED",
+                                  "",
+                                  {
+                                    country: approveCountry,
+                                    warehouseId: approveWarehouseId
+                                  }
+                                );
+
+                                toast.success("Product Approved Successfully");
+
+                                const updated = await productControllers.getProductById(id);
+                                setProduct(updated.data?.data || updated.data);
+
+                                setShowApproveModal(false);
+                                setApproveCountry("");
+                                setApproveWarehouseId("");
+                                setCountrySearch("");
+                              } catch (err) {
+                                toast.error(err.response?.data?.message || "Failed to Approve Product");
+                                console.log(err);
+                              }
+                            }}
+                            className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-green-200"
+                          >
+                            Confirm Approve
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700 font-medium">Status:</span>
                     <div className="flex items-center gap-3">
                       {product.admin_approval_status === "PENDING" && (
                         <>
                           <button
-                            onClick={async () => {
-                              try {
-                                await productControllers.updateProductStatus(
-                                  product.productId,
-                                  "APPROVED"
-                                );
-                                toast.success("Product Approved Successfully");
-
-                                const updated =
-                                  await productControllers.getProductById(id);
-                                setProduct(updated.data?.data || updated.data);
-                              } catch (err) {
-                                toast.error(err.response?.data?.message || "Failed to Approve Product");
-                                console.log(err);
-                              }
-                            }}
+                            onClick={() => setShowApproveModal(true)}
                             className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-green-200"
                           >
                             Approve
@@ -769,14 +934,14 @@ const ProductDetails = () => {
                         </span>
                       )}
 
-                      {product.admin_approval_status === "REJECTED" && (
+                      {product.admin_approval_status === "DISAPPROVED" && (
                         <div className="text-right">
                           <span className="bg-red-100 text-red-700 px-4 py-2 rounded-xl font-bold inline-flex items-center gap-2">
                             <X className="w-4 h-4" /> Rejected
                           </span>
-                          {product.adminRemarks && (
+                          {(product.adminRemarks || product.admin_remarks) && (
                             <p className="text-xs text-red-600 mt-1 max-w-[200px]">
-                              Reason: {product.adminRemarks}
+                              Reason: {product.adminRemarks || product.admin_remarks}
                             </p>
                           )}
                         </div>

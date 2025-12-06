@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Search, Filter, Grid, List, X, Upload } from "lucide-react";
+import { Plus, Search, Filter, Grid, List, X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { categoryControllers } from "../api/category";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const SubcategoryManagement = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [subcategories, setSubcategories] = useState([]);
@@ -44,6 +44,7 @@ const SubcategoryManagement = () => {
               image: sub.category_logo || sub.image,
               status: sub.isActive ? "Active" : "Inactive",
               products: sub.productCount || sub.products || 0,
+              description: sub.description || "No description available",
             }))
           );
           setTotalDocs(data.totalDocs || 0);
@@ -152,70 +153,49 @@ const SubcategoryManagement = () => {
 
   return (
     <div className="ml-64 pt-20 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* Page Header */}
+      <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="flex justify-between items-start mb-6">
           <div>
-            <button
-              onClick={() => navigate("/category-management")}
-              className="text-orange-500 hover:text-orange-600 font-medium mb-2"
-            >
-              ← Back to Categories
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
               {categoryName} Subcategories
             </h1>
-            <p className="text-gray-600">dashboard • Categories • {categoryName}</p>
-          </div>
-          <div className="flex gap-3">
-            <div className="flex border border-gray-200 rounded-lg">
+            <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
               <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 ${viewMode === "grid"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                onClick={() => navigate("/dashboard")}
+                className="hover:font-semibold transition-colors"
               >
-                <Grid size={20} />
+                Dashboard
               </button>
+              <span>•</span>
               <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 ${viewMode === "list"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-500 hover:text-gray-700"
-                  }`}
+                onClick={() => navigate("/category-management")}
+                className="hover:font-semibold transition-colors"
               >
-                <List size={20} />
+                Categories
               </button>
-            </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-            >
-              <Plus size={20} />
-              Add Subcategory
-            </button>
+              <span>•</span>
+              <span className="font-semibold">{categoryName}</span>
+            </nav>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search subcategories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <Filter size={20} />
-            Filter
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+          >
+            <Plus className="w-5 h-5 mr-2" /> Add Subcategory
           </button>
         </div>
       </div>
@@ -235,7 +215,20 @@ const SubcategoryManagement = () => {
 
             <form onSubmit={handleSubmit} className="p-6">
               <div className="space-y-6">
-                {/* Category Name */}
+                {/* Category Name (Parent) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={categoryName}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-100"
+                    readOnly
+                  />
+                </div>
+
+                {/* Subcategory Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subcategory Name <span className="text-red-500">*</span>
@@ -251,7 +244,7 @@ const SubcategoryManagement = () => {
                   />
                 </div>
 
-                {/* Category Logo */}
+                {/* Subcategory Image */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subcategory Image <span className="text-red-500">*</span>
@@ -281,18 +274,6 @@ const SubcategoryManagement = () => {
                     )}
                   </div>
                 </div>
-                {/* Parent Category Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={categoryName}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-100"
-                    readOnly
-                  />
-                </div>
 
                 {/* Description */}
                 <div>
@@ -309,8 +290,6 @@ const SubcategoryManagement = () => {
                     required
                   />
                 </div>
-
-
               </div>
 
               {/* Form Actions */}
@@ -352,81 +331,35 @@ const SubcategoryManagement = () => {
           </button>
         </div>
       ) : (
-        <>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSubcategories.map((sub) => (
-                <div
-                  key={sub.id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
-                >
-                  <img
-                    src={sub.image}
-                    alt={sub.name}
-                    className="w-full h-40 object-cover"
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/160";
-                    }}
-                  />
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{sub.name}</h3>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${sub.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {sub.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">{sub.products} products</p>
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSubcategories.map((sub) => (
+            <div
+              key={sub.id}
+              className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
+            >
+              <img
+                src={sub.image}
+                alt={sub.name}
+                className="w-full h-40 object-cover"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/160";
+                }}
+              />
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900">{sub.name}</h3>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 font-medium text-gray-700 text-sm border-b">
-                <div>Subcategory</div>
-                <div>Image</div>
-                <div>Status</div>
-                <div>Products</div>
+                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{sub.description}</p>
               </div>
-              {filteredSubcategories.map((sub) => (
-
-                <div
-                  key={sub.id}
-                  className="grid grid-cols-4 gap-4 p-4 border-b hover:bg-gray-50 transition cursor-pointer"
-                >
-                  <div className="font-medium text-gray-900">{sub.name}</div>
-                  <img
-                    src={sub.image}
-                    alt={sub.name}
-                    className="w-16 h-12 rounded-lg object-cover"
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/64";
-                    }}
-                  />
-                  <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${sub.status === "Active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                      }`}
-                  >
-                    {sub.status}
-                  </span>
-                  <span className="text-gray-700">{sub.products}</span>
-                </div>
-              ))}
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
-      {totalDocs > 0 && (
-        <div className="flex items-center justify-between p-4 border-t mt-6 bg-white rounded-lg shadow-sm">
 
-          <div className="flex items-center gap-2 text-sm">
+      {/* Pagination */}
+      {totalDocs > 0 && (
+        <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-lg shadow-sm mt-6">
+          <div className="flex items-center gap-4 text-base font-medium justify-self-start">
             <span className="text-gray-700">Rows per page:</span>
             <select
               value={rowsPerPage}
@@ -434,7 +367,7 @@ const SubcategoryManagement = () => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border rounded px-2 py-1"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -443,28 +376,33 @@ const SubcategoryManagement = () => {
             </select>
           </div>
 
-          <div className="text-sm text-gray-600">
+          <div className="text-base text-gray-600 font-medium justify-self-center">
             {indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-4 justify-self-end">
             <button
-              onClick={() => setCurrentPage((prev) => prev - 1)}
+              onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-2 py-1 rounded ${currentPage === 1 ? "text-gray-400" : "hover:bg-gray-100"}`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
             >
-              ‹
+              <ChevronLeft className="w-5 h-5" />
             </button>
 
             <button
-              onClick={() => setCurrentPage((prev) => prev + 1)}
+              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`px-2 py-1 rounded ${currentPage === totalPages ? "text-gray-400" : "hover:bg-gray-100"}`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
             >
-              ›
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-
         </div>
       )}
       <ToastContainer />
