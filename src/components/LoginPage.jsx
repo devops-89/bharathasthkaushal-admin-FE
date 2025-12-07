@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { Eye, EyeOff } from "lucide-react";
-import { loginValidation } from "../utils/validationSchema";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 export default function LoginPage({ onLogin }) {
@@ -21,40 +21,24 @@ export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
   const emailTrimmed = state.email.trim();
 
-  // const inputHandler = (e) => {
-  //   const { id, value } = e.target;
-  //   setState({ ...state, [id]: value });
-  //   setErrors({
-  //     email: "",
-  //     password: "",
-  //     general: "",
-  //   });
-  // };
   const inputHandler = (e) => {
     const { id, value } = e.target;
-
-    // email ke liye starting & extra spaces remove
-    const cleanedValue =
-      id === "email" ? value.replace(/\s+/g, "").trimStart() : value;
-
-    setState({ ...state, [id]: cleanedValue });
-
-    setErrors({
+    setState((prev) => ({ ...prev, [id]: value }));
+    setErrors((prev) => ({
+      ...prev,
       email: "",
       password: "",
       general: "",
-    });
+    }));
   };
 
 
   const handleSubmit = () => {
     let frontendErrors = { email: "", password: "", general: "" };
-    const emailTrimmed = state.email.trim();
 
-    // Update state with trimmed email if it differs
-    if (state.email !== emailTrimmed) {
-      setState(prev => ({ ...prev, email: emailTrimmed }));
-    }
+    // Trim email immediately and update state unconditionally to ensure visual update
+    const emailTrimmed = state.email.trim();
+    setState(prev => ({ ...prev, email: emailTrimmed }));
 
     if (!emailTrimmed) {
       frontendErrors.email = "Invalid email";
@@ -75,8 +59,6 @@ export default function LoginPage({ onLogin }) {
 
     if (hasEmailError || hasPasswordError) {
       setErrors(frontendErrors);
-      if (hasEmailError) toast.error(frontendErrors.email);
-      if (hasPasswordError) toast.error(frontendErrors.password);
       return;
     }
 
@@ -99,14 +81,10 @@ export default function LoginPage({ onLogin }) {
       .catch((err) => {
         let errMessage = err?.response?.data?.message || "Login failed";
         let errorMsgLower = errMessage.toLowerCase();
-
-        // Handle specific backend errors that should be shown as "Invalid email"
         if (errorMsgLower.includes("phone")) {
           errMessage = "Invalid email";
           errorMsgLower = "invalid email";
         }
-
-        toast.error(errMessage);
 
         let apiErrors = { email: "", password: "", general: "" };
 
@@ -124,6 +102,10 @@ export default function LoginPage({ onLogin }) {
         }
 
         setErrors(apiErrors);
+        if (!apiErrors.email && !apiErrors.password) {
+          toast.error(errMessage);
+        }
+
         setIsLoading(false);
       });
   };
@@ -225,6 +207,7 @@ export default function LoginPage({ onLogin }) {
     transition: "all 0.2s",
   };
   return (
+
     <div style={containerStyle}>
       <ToastContainer />
       <div style={cardStyle}>
@@ -257,15 +240,7 @@ export default function LoginPage({ onLogin }) {
               <label htmlFor="email" style={labelStyle}>
                 Email Address
               </label>
-              {/* <input
-                id="email"
-                type="email"
-                value={state.email}
-                required
-                onChange={inputHandler}
-                style={inputStyle}
-                placeholder="Enter your email"
-              /> */}
+
               <input
                 id="email"
                 type="email"

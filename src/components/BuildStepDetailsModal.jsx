@@ -92,20 +92,35 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
             <p className="text-gray-700 mb-4">{stepDetails?.description}</p>
 
 
-            <h3 className="text-lg font-semibold mt-4">
-              Status:{" "}
+            <div className="flex items-center gap-2 mt-4 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Status:</h3>
               <span
-                className={
-                  stepDetails?.buildStatus === "APPROVED"
-                    ? "text-green-600"
-                    : stepDetails?.buildStatus === "REJECTED"
-                      ? "text-red-600"
-                      : "text-gray-600"
-                }
+                className={`px-3 py-1 rounded-full text-sm font-bold border ${["APPROVED", "ADMIN_APPROVED"].includes(
+                  stepDetails?.buildStatus
+                )
+                    ? "bg-green-100 text-green-700 border-green-200"
+                    : ["REJECTED", "ADMIN_REJECTED"].includes(
+                      stepDetails?.buildStatus
+                    )
+                      ? "bg-red-100 text-red-700 border-red-200"
+                      : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                  }`}
               >
-                {stepDetails?.buildStatus || "PENDING"}
+                {stepDetails?.buildStatus?.replace(/_/g, " ") || "PENDING"}
               </span>
-            </h3>
+            </div>
+
+            {/* Admin Remarks */}
+            {stepDetails?.adminRemarks && (
+              <div className="mb-6 bg-orange-50 p-4 rounded-xl border border-orange-100">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  Admin Remarks
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {stepDetails.adminRemarks}
+                </p>
+              </div>
+            )}
             {/*artisianRemarks  */}
 
             {stepDetails?.artisianRemarks && (

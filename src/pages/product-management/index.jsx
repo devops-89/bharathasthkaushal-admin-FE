@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Phone,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -154,12 +155,12 @@ export default function ProductManagement() {
               <p className="text-gray-500 text-lg">No products found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
 
-                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow"
+                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
                   <div className="relative mb-4">
                     {product.images && product.images.length > 0 ? (
@@ -179,14 +180,56 @@ export default function ProductManagement() {
 
 
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col flex-1">
                     <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={product.product_name}>
                       {product.product_name}
                     </h3>
+                    {product.artisan ? (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0">
+                            {product.artisan.avatar ? (
+                              <img
+                                src={product.artisan.avatar}
+                                alt="Artisan"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm text-gray-900 truncate" title={`${product.artisan.firstName || product.artisan.name} ${product.artisan.lastName}`}>
+                              {product.artisan.firstName || product.artisan.name} {product.artisan.lastName}
+                            </p>
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3" />
+                              {product.artisan.phoneNo || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center overflow-hidden border border-orange-200 flex-shrink-0">
+                            <User className="w-4 h-4 text-orange-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm text-gray-900 truncate">
+                              Admin
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              Platform Managed
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     <button
                       onClick={() => handleViewDetails(product.productId)}
-                      className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                      className="w-full mt-auto bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       Show Details

@@ -23,6 +23,8 @@ import {
   Tag,
   MapPin,
   Warehouse,
+  User,
+  Phone,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -252,6 +254,12 @@ const ProductDetails = () => {
 
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
+
+    // Prevent negative input for numeric fields
+    if ((name === "sequence" || name === "proposedPrice") && value !== "" && Number(value) < 0) {
+      return;
+    }
+
     setCreateStepForm((prev) => ({
       ...prev,
       [name]: value,
@@ -260,18 +268,44 @@ const ProductDetails = () => {
 
   const handleCreateStepFormSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
+    if (Number(createStepForm.sequence) <= 0) {
+      toast.error("Sequence must be a positive number greater than 0.");
+      return;
+    }
+    if (Number(createStepForm.proposedPrice) <= 0) {
+      toast.error("Proposed Price must be a positive number greater than 0.");
+      return;
+    }
+    if (!createStepForm.stepName.trim()) {
+      toast.error("Step Name cannot be empty or just spaces.");
+      return;
+    }
+    if (!createStepForm.description.trim()) {
+      toast.error("Description cannot be empty or just spaces.");
+      return;
+    }
+    const selectedDate = new Date(createStepForm.dueDate);
+    const now = new Date();
+    // Allow current minute by ignoring seconds/milliseconds of current time
+    if (selectedDate < now.setSeconds(0, 0, 0)) {
+      toast.error("Due Date cannot be in the past. Please select a future date and time.");
+      return;
+    }
+
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append("productId", createStepForm.productId);
       formData.append("sequence", createStepForm.sequence);
-      formData.append("stepName", createStepForm.stepName);
-      formData.append("description", createStepForm.description);
+      formData.append("stepName", createStepForm.stepName.trim());
+      formData.append("description", createStepForm.description.trim());
       formData.append("proposedPrice", createStepForm.proposedPrice);
-      formData.append("admin_remarks", createStepForm.admin_remarks || "");
+      formData.append("admin_remarks", (createStepForm.admin_remarks || "").trim());
       formData.append("dueDate", createStepForm.dueDate);
-      formData.append("materials", createStepForm.materials || "");
-      formData.append("instructions", createStepForm.instructions || "");
+      formData.append("materials", (createStepForm.materials || "").trim());
+      formData.append("instructions", (createStepForm.instructions || "").trim());
       referenceImages.forEach((file) => {
         formData.append("reference_images", file);
       });
@@ -458,9 +492,15 @@ const ProductDetails = () => {
                           );
                           return;
                         }
+                        const maxSequence = buildSteps.length > 0
+                          ? Math.max(...buildSteps.map(step => Number(step.stepNumber || step.sequence) || 0))
+                          : 0;
+                        const nextSequence = maxSequence + 1;
+
                         setCreateStepForm((prev) => ({
                           ...prev,
                           productId: product.productId,
+                          sequence: nextSequence,
                         }));
                         setShowCreateStepForm(true);
                       }}
@@ -505,7 +545,7 @@ const ProductDetails = () => {
                             >
                               <div className="flex items-center gap-3">
                                 <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
-                                  Step {step.sequence}
+                                  Step {step.stepNumber || step.sequence}
                                 </span>
                                 <span className="font-medium text-gray-900">
                                   {step.stepName}
@@ -959,16 +999,28 @@ const ProductDetails = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {product?.artisan && (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Award className="w-5 h-5 text-blue-600" />
+                      <div className="col-span-1 md:col-span-2 flex items-center gap-4 p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow border border-orange-100">
+                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden border border-orange-200 flex-shrink-0">
+                          {product.artisan.avatar ? (
+                            <img
+                              src={product.artisan.avatar}
+                              alt="Artisan"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-orange-400" />
+                          )}
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Artisan
+                            Created By Artisan
                           </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.artisan?.name || product.artisan}
+                          <h4 className="text-gray-900 font-bold capitalize text-base">
+                            {product.artisan.firstName || product.artisan.name} {product.artisan.lastName}
+                          </h4>
+                          <p className="text-gray-600 text-xs flex items-center gap-2 mt-0.5">
+                            <Phone className="w-3 h-3" />
+                            {product.artisan.countryCode} {product.artisan.phoneNo}
                           </p>
                         </div>
                       </div>
@@ -1227,37 +1279,7 @@ const ProductDetails = () => {
                 </button>
               </div>
               <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
-                <div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Select Product
-                    </label>
 
-                    <div
-                      onScroll={(e) => {
-                        const bottom =
-                          e.target.scrollHeight - e.target.scrollTop ===
-                          e.target.clientHeight;
-                        if (bottom && hasMoreProducts && !productLoading) {
-                          setProductPage((prev) => prev + 1);
-                        }
-                      }}
-                      className="w-full max-h-48 overflow-auto border border-gray-300 rounded-lg"
-                    >
-                      <select
-                        name="productId"
-                        value={createStepForm.productId}
-                        onChange={handleCreateStepFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        required
-                      >
-                        <option value={product.productId}>
-                          {product.product_name}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1270,8 +1292,9 @@ const ProductDetails = () => {
                       onChange={handleCreateStepFormChange}
                       required
                       min="1"
+                      disabled
                       placeholder="e.g., 4"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-500"
                     />
                   </div>
                   <div>
@@ -1329,6 +1352,7 @@ const ProductDetails = () => {
                     value={createStepForm.dueDate}
                     onChange={handleCreateStepFormChange}
                     required
+                    min={moment().format("YYYY-MM-DDTHH:mm")}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
                 </div>
@@ -1518,7 +1542,8 @@ const ProductDetails = () => {
           />
         )
       }
-    </div >
+      <ToastContainer position="top-right" autoClose={3000} />
+    </div>
   );
 };
 export default ProductDetails;

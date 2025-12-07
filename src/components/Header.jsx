@@ -1,11 +1,11 @@
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Menu } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import logo from '../assets/image.png';
 import { useNavigate } from "react-router-dom";
 import { authControllers } from "../api/auth";
 import { toast } from "react-toastify";
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -58,12 +58,18 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
-      <div className="flex items-center justify-between px-6 py-4">
+    <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center space-x-2">
+          <button
+            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg mr-2"
+            onClick={toggleSidebar}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
           <img src={logo} alt="Logo"
             className="w-8 h-8 object-cover rounded-full" />
-          <h1 className="text-2xl font-extrabold tracking-tight">
+          <h1 className="text-lg md:text-2xl font-extrabold tracking-tight truncate max-w-[200px] md:max-w-none">
             <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
               Bharathastkaushal
             </span>

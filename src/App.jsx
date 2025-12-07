@@ -34,19 +34,21 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [show, setShow] = useState(false);
-  useEffect(() => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
     if (location.pathname === "/" || location.pathname === "/login" || location.pathname === "/forgot-password" || location.pathname === "/reset-password") {
       setShow(false);
     } else {
       setShow(true);
     }
   }, [location.pathname]);
+
   return (
     <div className="">
       <ToastContainer position="top-right" autoClose={2500} />
-      {show && <Wrapper />}
-      {show && <Header />}
+      {show && <Wrapper isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
+      {show && <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
