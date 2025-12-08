@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { User, Mail, Shield, Lock, Camera, Edit2 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -23,6 +23,7 @@ const Profile = () => {
         newPassword: '',
         confirmPassword: ''
     });
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -134,6 +135,40 @@ const Profile = () => {
         }
     };
 
+    const handleImageClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            toast.error("Only JPG, JPEG, and PNG formats are allowed");
+            // clear input
+            e.target.value = null;
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            await userControllers.updateUserProfile(formData);
+
+            const response = await userControllers.getUserDetails();
+            const userData = response.data.data;
+            setUser(prev => ({ ...prev, avatar: userData.avatar }));
+
+            toast.success("Profile picture updated successfully");
+        } catch (error) {
+            console.error("Error updating profile picture", error);
+            const errMsg = error.response?.data?.message || "Failed to update profile picture";
+            toast.error(errMsg);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1 relative">
             <div className="max-w-4xl mx-auto">
@@ -162,9 +197,19 @@ const Profile = () => {
                                         ) : (
                                             <User className="w-16 h-16 text-gray-400" />
                                         )}
-                                        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                        <div
+                                            className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                            onClick={handleImageClick}
+                                        >
                                             <Camera className="w-8 h-8 text-white" />
                                         </div>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                            accept=".jpg,.jpeg,.png"
+                                        />
                                     </div>
                                 </div>
                                 <div className="text-center">
@@ -285,64 +330,66 @@ const Profile = () => {
             </div>
 
             {/* Change Password Modal */}
-            {isChangePasswordOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-900">Change Password</h2>
-                        <form onSubmit={handleSubmitPassword} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                                <input
-                                    type="password"
-                                    name="oldPassword"
-                                    value={passwordData.oldPassword}
-                                    onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                                <input
-                                    type="password"
-                                    name="newPassword"
-                                    value={passwordData.newPassword}
-                                    onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    value={passwordData.confirmPassword}
-                                    onChange={handlePasswordChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                                    required
-                                />
-                            </div>
-                            <div className="flex gap-4 mt-8">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsChangePasswordOpen(false)}
-                                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium transition-colors"
-                                >
-                                    Update Password
-                                </button>
-                            </div>
-                        </form>
+            {
+                isChangePasswordOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-2xl">
+                            <h2 className="text-2xl font-bold mb-6 text-gray-900">Change Password</h2>
+                            <form onSubmit={handleSubmitPassword} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input
+                                        type="password"
+                                        name="oldPassword"
+                                        value={passwordData.oldPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input
+                                        type="password"
+                                        name="newPassword"
+                                        value={passwordData.newPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        value={passwordData.confirmPassword}
+                                        onChange={handlePasswordChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex gap-4 mt-8">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsChangePasswordOpen(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium transition-colors"
+                                    >
+                                        Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

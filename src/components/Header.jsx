@@ -58,7 +58,7 @@ const Header = ({ toggleSidebar }) => {
   }, []);
 
   return (
-    <header className="bg-white/0 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <header className="bg-white/0 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center gap-4">
@@ -95,9 +95,7 @@ const Header = ({ toggleSidebar }) => {
                 <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
                   {user.name}
                 </p>
-                <p className="text-xs text-gray-500 font-medium">
-                  {user.role}
-                </p>
+
               </div>
 
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 transition-all duration-300 ring-2 ring-white">
@@ -110,7 +108,7 @@ const Header = ({ toggleSidebar }) => {
               <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 z-50 transform origin-top-right transition-all">
                 <div className="px-4 py-3 border-b border-gray-100 mb-2 md:hidden">
                   <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.role}</p>
+
                 </div>
 
                 <button

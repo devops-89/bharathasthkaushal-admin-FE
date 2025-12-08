@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { categoryControllers } from "../api/category";
 import { warehouseControllers } from "../api/warehouse";
 import { X } from "lucide-react";
+import { countries } from "../constants/countries";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,12 +33,31 @@ const EditProduct = () => {
     // size: "",
   });
 
-  const COUNTRIES = ["India", "USA", "UK", "Canada", "Australia", "Germany", "France", "UAE"];
+
 
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
+
+  const [countrySearch, setCountrySearch] = useState("");
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+
+  const filteredCountries = countries.filter((c) =>
+    c.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".relative-dropdown-container")) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -114,14 +134,24 @@ const EditProduct = () => {
 
         console.log("Fetched Product:", p);
 
-        // Fetch warehouses if country is present
+        let fetchedWarehouses = [];
         if (p.country) {
           try {
             const wRes = await warehouseControllers.getWarehousesByCountry(p.country);
-            setWarehouses(wRes.data?.data?.docs || wRes.data?.data || []);
+            fetchedWarehouses = wRes.data?.data?.docs || wRes.data?.data || [];
+            setWarehouses(fetchedWarehouses);
           } catch (err) {
             console.error("Error fetching warehouses", err);
           }
+        }
+
+        const rawWarehouseId = p.warehouseId || (p.warehouse && (p.warehouse._id || p.warehouse.id));
+        let finalWarehouseId = "";
+
+        if (rawWarehouseId) {
+          // Try to find matching warehouse in the fetched list to ensure ID format matches dropdown options
+          const foundW = fetchedWarehouses.find(w => (w._id === rawWarehouseId || w.id === rawWarehouseId));
+          finalWarehouseId = foundW ? (foundW._id || foundW.id) : rawWarehouseId;
         }
 
         setProductData({
@@ -139,8 +169,9 @@ const EditProduct = () => {
           netWeight: p.netWeight || "",
           dimension: p.dimension || "",
           country: p.country || "",
-          warehouseId: p.warehouseId || (p.warehouse && (p.warehouse._id || p.warehouse.id)) || "",
+          warehouseId: finalWarehouseId || "",
         });
+        setCountrySearch(p.country || "");
 
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -260,21 +291,45 @@ const EditProduct = () => {
 
           {/* COUNTRY + WAREHOUSE */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="relative-dropdown-container relative">
               <label className="font-medium">Origin Country *</label>
-              <select
-                name="country"
-                value={productData.country || ""}
-                onChange={handleCountryChange}
-                className="w-full p-2 border rounded-lg"
-              >
-                <option value="">Select Country</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <input
+                type="text"
+                placeholder="Select Country"
+                value={countrySearch}
+                onChange={(e) => {
+                  setCountrySearch(e.target.value);
+                  setIsCountryDropdownOpen(true);
+                  if (e.target.value === "") {
+                    handleCountryChange({ target: { value: "" } });
+                  }
+                }}
+                onClick={() => {
+                  setIsCountryDropdownOpen(true);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+              {isCountryDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredCountries.length > 0 ? (
+                    filteredCountries.map((c) => (
+                      <div
+                        key={c}
+                        className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                        onClick={() => {
+                          handleCountryChange({ target: { value: c } });
+                          setCountrySearch(c);
+                          setIsCountryDropdownOpen(false);
+                        }}
+                      >
+                        {c}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

@@ -124,7 +124,6 @@ export default function ProductManagement() {
             </div>
           </div>
           {/* SearchBar*/}
-
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -139,7 +138,9 @@ export default function ProductManagement() {
             <Link to={"/product-management/add-product"}>
               <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
                 <Plus className="w-5 h-5 mr-2" /> Add New Product
+
               </button>
+
             </Link>
           </div>
         </div>
