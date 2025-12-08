@@ -34,7 +34,7 @@ function UserProfile() {
       setAuctionStats(res.data.data);
     } catch (error) {
       console.error("Error fetching auction stats:", error);
-      
+
     } finally {
       setStatsLoading(false);
     }
@@ -56,7 +56,7 @@ function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       {/* Header / Back Button */}
       <div className="max-w-4xl mx-auto mb-6 px-4 md:px-0">
         <NavLink
@@ -78,7 +78,7 @@ function UserProfile() {
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(
                     user.name || `${user.firstName} ${user.lastName}`
                   )}&background=random`
-                }               
+                }
                 alt="User Avatar"
                 className="w-full h-full object-cover"
               />

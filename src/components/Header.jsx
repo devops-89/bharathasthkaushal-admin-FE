@@ -58,58 +58,81 @@ const Header = ({ toggleSidebar }) => {
   }, []);
 
   return (
-    <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
-      <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg mr-2"
-            onClick={toggleSidebar}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-          <img src={logo} alt="Logo"
-            className="w-8 h-8 object-cover rounded-full" />
-          <h1 className="text-lg md:text-2xl font-extrabold tracking-tight truncate max-w-[200px] md:max-w-none">
-            <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
-              Bharathastkaushal
-            </span>
-          </h1>
-        </div>
-
-        <div className="relative" ref={dropdownRef}>
-          <div className="flex items-center space-x-3">
-            <div className="text-right hidden md:block">
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.role}</p>
-            </div>
-            <div
-              className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-primary-600 transition-colors"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+    <header className="bg-white/0 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex items-center gap-4">
+            <button
+              className="md:hidden p-2 text-gray-500 hover:bg-gray-50 rounded-xl transition-colors"
+              onClick={toggleSidebar}
             >
-              <User className="w-5 h-5 text-white" />
+              <Menu className="w-6 h-6" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-600 to-amber-600 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-1000 group-hover:duration-200"></div>
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="relative w-10 h-10 object-cover rounded-full border-2 border-white"
+                />
+              </div>
+              <h1 className="text-sm md:text-2xl font-bold tracking-tight hidden sm:block">
+                <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                  Bharathastkaushal
+                </span>
+              </h1>
             </div>
           </div>
 
-          {/* Dropdown Menu */}
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-              <button
-                onClick={handleProfile}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-              >
-                <User className="w-4 h-4 mr-3 text-orange-600" />
-                Profile
-              </button>
-              <hr className="my-1 border-gray-100" />
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-              >
-                <LogOut className="w-4 h-4 mr-3 text-orange-600" />
-                Logout
-              </button>
+          <div className="relative" ref={dropdownRef}>
+            <div
+              className="flex items-center gap-4 pl-6 border-l border-gray-100 cursor-pointer group"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <div className="text-right hidden md:block">
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-500 font-medium">
+                  {user.role}
+                </p>
+              </div>
+
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 transition-all duration-300 ring-2 ring-white">
+                <User className="w-5 h-5 text-white" />
+              </div>
             </div>
-          )}
+
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 py-2 z-50 transform origin-top-right transition-all">
+                <div className="px-4 py-3 border-b border-gray-100 mb-2 md:hidden">
+                  <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.role}</p>
+                </div>
+
+                <button
+                  onClick={handleProfile}
+                  className="w-full flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-700 transition-colors font-medium"
+                >
+                  <User className="w-4 h-4 mr-3" />
+                  Profile
+                </button>
+                <div className="my-1 px-4">
+                  <div className="h-px bg-gray-100"></div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4 mr-3" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

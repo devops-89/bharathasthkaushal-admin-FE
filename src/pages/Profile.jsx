@@ -135,7 +135,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1 relative">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1 relative">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">

@@ -232,7 +232,7 @@ const EditProduct = () => {
   if (loading) return <p className="p-6 text-center">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 ml-64 pt-20">
+    <div className="min-h-screen bg-gray-50 p-6 ml-64 pt-24">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-xl">
         <div className="flex justify-between mb-4">
           <h2 className="text-3xl font-bold text-gray-800">Edit Product</h2>

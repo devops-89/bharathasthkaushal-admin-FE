@@ -41,7 +41,7 @@ export default function WarehouseDetails() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex justify-center items-center">
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
             </div>
         );
@@ -49,7 +49,7 @@ export default function WarehouseDetails() {
 
     if (!warehouse) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex flex-col justify-center items-center">
+            <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex flex-col justify-center items-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Warehouse Not Found</h2>
                 <button
                     onClick={() => navigate("/warehouse-management")}
@@ -62,7 +62,7 @@ export default function WarehouseDetails() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">

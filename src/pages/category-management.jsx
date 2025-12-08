@@ -144,7 +144,7 @@ export default function CategoryManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-20 flex-1">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">

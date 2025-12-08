@@ -152,7 +152,7 @@ const SubcategoryManagement = () => {
   };
 
   return (
-    <div className="ml-64 pt-20 p-6">
+    <div className="ml-64 pt-24 p-6">
       {/* Page Header */}
       <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
         <div className="flex justify-between items-start mb-6">
