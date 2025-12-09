@@ -15,13 +15,11 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
     materials: "",
   });
   const [images, setImages] = useState([]);
-
   useEffect(() => {
     const loadDetails = async () => {
       try {
         const res = await productControllers.getBuildStepDetails(stepId);
         const d = res.data?.data;
-
         setStepData({
           stepName: d.stepName || "",
           description: d.description || "",

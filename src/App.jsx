@@ -46,7 +46,7 @@ function App() {
 
   return (
     <div className="">
-      <ToastContainer position="top-right" autoClose={2500} />
+      <ToastContainer position="top-right" autoClose={2500} style={{ zIndex: 99999 }} />
       {show && <Wrapper isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
       {show && <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
       <Routes>

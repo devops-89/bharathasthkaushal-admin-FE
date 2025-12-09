@@ -17,5 +17,4 @@ const DisableModal = ({ onClose, onConfirm, title = "Disable Profile", message =
     </div>
   );
 };
-
 export default DisableModal;

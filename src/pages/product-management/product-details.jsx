@@ -24,6 +24,7 @@ import {
   Warehouse,
   User,
   Phone,
+  CheckCircle,
 } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -62,7 +63,10 @@ const ProductDetails = () => {
     description: "",
     proposedPrice: "",
     admin_remarks: "",
-    dueDate: "",
+    stepName: "",
+    description: "",
+    proposedPrice: "",
+    admin_remarks: "",
     materials: "",
     instructions: "",
   });
@@ -261,6 +265,18 @@ const ProductDetails = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (!assignForm.dueDate) {
+        toast.error("Due Date is required");
+        setLoading(false);
+        return;
+      }
+      const selectedDate = new Date(assignForm.dueDate);
+      const now = new Date();
+      if (selectedDate < now.setSeconds(0, 0, 0)) {
+        toast.error("Due Date cannot be in the past.");
+        setLoading(false);
+        return;
+      }
       const payload = {
         productId: product.productId,
         buildStepId: Number(assignForm.buildStepId),
@@ -269,7 +285,10 @@ const ProductDetails = () => {
       };
       console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
-      toast.success("Step Assigned Successfully!");
+      toast.success("Step Assigned Successfully!", {
+        icon: <CheckCircle className="text-orange-600" />,
+        progressStyle: { background: "#ea580c" }
+      });
       setShowAssignForm(false);
       fetchBuildSteps();
     } catch (err) {
@@ -315,12 +334,7 @@ const ProductDetails = () => {
       toast.error("Description cannot be empty or just spaces.");
       return;
     }
-    const selectedDate = new Date(createStepForm.dueDate);
-    const now = new Date();
-    if (selectedDate < now.setSeconds(0, 0, 0)) {
-      toast.error("Due Date cannot be in the past. Please select a future date and time.");
-      return;
-    }
+
 
     setLoading(true);
     try {
@@ -331,7 +345,7 @@ const ProductDetails = () => {
       formData.append("description", createStepForm.description.trim());
       formData.append("proposedPrice", createStepForm.proposedPrice);
       formData.append("admin_remarks", (createStepForm.admin_remarks || "").trim());
-      formData.append("dueDate", createStepForm.dueDate);
+      // formData.append("dueDate", createStepForm.dueDate); // Removed due date
       formData.append("materials", (createStepForm.materials || "").trim());
       formData.append("instructions", (createStepForm.instructions || "").trim());
       referenceImages.forEach((file) => {
@@ -341,7 +355,10 @@ const ProductDetails = () => {
       const res = await productControllers.createBuildStep(formData);
       console.log("Create build step API response:", res.data);
       const newStep = res.data?.data || res.data;
-      toast.success("Build step created successfully!");
+      toast.success("Build step created successfully!", {
+        icon: <CheckCircle className="text-orange-600" />,
+        progressStyle: { background: "#ea580c" }
+      });
       setCreateStepForm({
         productId: "",
         sequence: "",
@@ -349,7 +366,6 @@ const ProductDetails = () => {
         description: "",
         proposedPrice: "",
         admin_remarks: "",
-        dueDate: "",
         materials: "",
         instructions: "",
       });
@@ -808,7 +824,10 @@ const ProductDetails = () => {
                                   rejectReason.trim()
                                 );
 
-                                toast.success("Product Rejected Successfully");
+                                toast.success("Product Rejected Successfully", {
+                                  icon: <CheckCircle className="text-orange-600" />,
+                                  progressStyle: { background: "#ea580c" }
+                                });
 
                                 const updated =
                                   await productControllers.getProductById(id);
@@ -939,7 +958,10 @@ const ProductDetails = () => {
                                   }
                                 );
 
-                                toast.success("Product Approved Successfully");
+                                toast.success("Product Approved Successfully", {
+                                  icon: <CheckCircle className="text-orange-600" />,
+                                  progressStyle: { background: "#ea580c" }
+                                });
 
                                 const updated = await productControllers.getProductById(id);
                                 setProduct(updated.data?.data || updated.data);
@@ -1357,20 +1379,7 @@ const ProductDetails = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Due Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="dueDate"
-                    value={createStepForm.dueDate}
-                    onChange={handleCreateStepFormChange}
-                    required
-                    min={moment().format("YYYY-MM-DDTHH:mm")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Materials

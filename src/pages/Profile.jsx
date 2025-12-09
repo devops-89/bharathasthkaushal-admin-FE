@@ -74,7 +74,7 @@ const Profile = () => {
             return;
         }
         if (passwordData.newPassword === passwordData.oldPassword) {
-            toast.error("New password cannot be the same as the old password");
+            toast.error("Old password is same as new password. Please choose a different one.");
             return;
         }
 
@@ -396,7 +396,7 @@ const Profile = () => {
                 )
             }
             {/* Toast Container */}
-            <ToastContainer position="top-right" autoClose={3000} />
+            <ToastContainer position="top-right" autoClose={3000} style={{ zIndex: 999999 }} />
         </div>
     );
 };

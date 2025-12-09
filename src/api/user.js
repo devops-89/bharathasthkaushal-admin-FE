@@ -48,6 +48,7 @@ export const userControllers = {
       const body = { verifyStatus: "VERIFIED" };
       const response = await getuserSecuredApi.patch(
         `/users/${id}/verify-status`,
+        
         body
       );
       console.log("hey guyssss", response);

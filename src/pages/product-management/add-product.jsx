@@ -1,10 +1,10 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
 import { categoryControllers } from "../../api/category";
 import { warehouseControllers } from "../../api/warehouse";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { countries } from "../../constants/countries";
 
@@ -182,6 +182,7 @@ const AddProduct = () => {
   };
 
   const handleSubmit = async () => {
+    toast.dismiss(); // Clear any existing toasts
     if (!validateForm()) {
       return;
     }
@@ -224,9 +225,19 @@ const AddProduct = () => {
         console.log(`${key}:`, value);
       }
       const res = await productControllers.addProduct(data);
-      toast.success("Product added successfully!");
-      console.log("Product Response:", res.data);
-      navigate("/product-management", { state: { refresh: true } });
+
+      if (res && res.data) {
+        toast.success("Product added successfully!", {
+          icon: <CheckCircle className="text-orange-600" />,
+          progressStyle: { background: "#ea580c" }
+        });
+        console.log("Product Response:", res.data);
+        setTimeout(() => {
+          navigate("/product-management", { state: { refresh: true } });
+        }, 1500);
+      } else {
+        throw new Error("No response received");
+      }
     } catch (err) {
       console.error("Error adding product:", err.response?.data || err);
       toast.error(err.response?.data?.message || "Something went wrong!");
@@ -765,6 +776,7 @@ const AddProduct = () => {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} style={{ zIndex: 99999 }} />
     </div>
   );
 };
