@@ -23,7 +23,16 @@ export default function LoginPage({ onLogin }) {
 
   const inputHandler = (e) => {
     const { id, value } = e.target;
-    setState((prev) => ({ ...prev, [id]: value }));
+
+    let newValue = value;
+    if (id === "email") {
+      // Actively remove leading spaces
+      newValue = newValue.replace(/^\s+/, "");
+      // Actively remove multiple consecutive spaces
+      newValue = newValue.replace(/\s{2,}/g, " ");
+    }
+
+    setState((prev) => ({ ...prev, [id]: newValue }));
     setErrors((prev) => ({
       ...prev,
       email: "",

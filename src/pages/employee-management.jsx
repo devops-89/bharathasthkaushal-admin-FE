@@ -167,35 +167,44 @@ const ArtisanManagement = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    let newValue = value;
+
+    // Validation for Name, Email and Location fields
+    if (name === "firstName" || name === "lastName" || name === "email" || name === "location") {
+      // Actively remove leading spaces
+      newValue = newValue.replace(/^\s+/, "");
+      // Actively remove multiple consecutive spaces
+      newValue = newValue.replace(/\s{2,}/g, " ");
+    }
 
     let newErrors = { ...errors };
 
     if (name === "email") {
       newErrors.email =
-        !value.includes("@") || !value.includes(".com")
+        !newValue.includes("@") || !newValue.includes(".com")
           ? "Enter a valid email"
           : "";
     }
 
     if (name === "phoneNo") {
       newErrors.phoneNo =
-        value.length !== 10 ? "Phone number must be 10 digits" : "";
+        newValue.length !== 10 ? "Phone number must be 10 digits" : "";
     }
 
     if (name === "firstName") {
-      newErrors.firstName = value.trim() === "" ? "First name is required" : "";
+      newErrors.firstName = newValue.trim() === "" ? "First name is required" : "";
     }
 
     if (name === "lastName") {
-      newErrors.lastName = value.trim() === "" ? "Last name is required" : "";
+      newErrors.lastName = newValue.trim() === "" ? "Last name is required" : "";
     }
 
     if (name === "location") {
-      newErrors.location = value.trim() === "" ? "Location is required" : "";
+      newErrors.location = newValue.trim() === "" ? "Location is required" : "";
     }
 
     setErrors(newErrors);
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
   const handleAddEmployee = async () => {
     // Validation

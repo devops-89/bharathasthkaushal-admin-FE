@@ -1,16 +1,27 @@
 import { getuserSecuredApi, dashboardSecuredApi } from "./config";
 export const userControllers = {
-  getUserListGroup: async (group, page = 1, pageSize = 50) => {
+  getUserListGroup: async (group, page = 1, pageSize = 50, hasAddress = null) => {
     try {
       let result = await getuserSecuredApi.get(`/users/getUserList`, {
         params: {
           user_group: group,
           page: page,
           limit: pageSize,
+          ...(hasAddress !== null && { hasAddress }),
         },
         headers: { "Cache-Control": "no-cache" }
       });
       return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+  getAllUsers: async (params = {}) => {
+    try {
+      return await getuserSecuredApi.get(`/users/getUserList`, {
+        params,
+        headers: { "Cache-Control": "no-cache" }
+      });
     } catch (error) {
       throw error;
     }
@@ -60,7 +71,6 @@ export const userControllers = {
       throw error;
     }
   },
-
   getDashboardUserCount: async (userGroup, verifyStatus) => {
     try {
       const config = { params: {} };

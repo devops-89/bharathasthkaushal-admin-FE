@@ -4,6 +4,8 @@ import { User, Mail, Shield, Lock, Camera, Edit2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { userControllers } from '../api/user';
 import { authControllers } from '../api/auth';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Profile = () => {
     const [user, setUser] = useState({
@@ -69,6 +71,10 @@ const Profile = () => {
         }
         if (passwordData.newPassword.length < 6) {
             toast.error("Password must be at least 6 characters long");
+            return;
+        }
+        if (passwordData.newPassword === passwordData.oldPassword) {
+            toast.error("New password cannot be the same as the old password");
             return;
         }
 
@@ -389,7 +395,9 @@ const Profile = () => {
                     </div>
                 )
             }
-        </div >
+            {/* Toast Container */}
+            <ToastContainer position="top-right" autoClose={3000} />
+        </div>
     );
 };
 

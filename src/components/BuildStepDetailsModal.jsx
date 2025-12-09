@@ -26,26 +26,35 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
   }, [stepId]);
 
   if (!stepId) return null;
+  const [processing, setProcessing] = useState(false);
+
   const handleApprove = async () => {
+    if (processing) return;
+    setProcessing(true);
     try {
       const res = await productControllers.updateBuildStepStatus(
         stepId,
         "APPROVED"
       );
-      console.log("Reject API Response:", res.data);
+      console.log("Approve API Response:", res.data);
       setStepDetails((prev) => ({
         ...prev,
         status: "APPROVED",
+        buildStatus: "APPROVED"
       }));
-      toast.info("Approved Successfully!");
+      toast.success("Approved Successfully!");
     } catch (err) {
       console.log(err);
-      toast.info("Approval failed");
+      toast.error("Approval failed");
+    } finally {
+      setProcessing(false);
     }
   };
   const currentStatus = stepDetails?.buildStatus || stepDetails?.status;
 
   const handleRejectSubmit = async () => {
+    if (processing) return;
+    setProcessing(true);
     try {
       const res = await productControllers.updateBuildStepStatus(
         stepId,
@@ -57,13 +66,18 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
       setStepDetails((prev) => ({
         ...prev,
         status: "REJECTED",
+        buildStatus: "REJECTED",
+        adminRemarks: remarks,
+        admin_remarks: remarks
       }));
 
-      toast.info("Rejected Successfully!");
+      toast.success("Rejected Successfully!");
       setShowRejectPopup(false);
     } catch (err) {
       console.log(err);
-      toast.info("Rejection failed");
+      toast.error("Rejection failed");
+    } finally {
+      setProcessing(false);
     }
   };
   return (
@@ -83,13 +97,55 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
           <p className="text-center py-10">Loading details...</p>
         ) : (
           <>
+            {/* Assigned Artisan */}
+            {stepDetails?.artisan && (
+              <div className="mb-4 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
+                  Assigned Artisan
+                </p>
+                <p className="text-orange-700 font-bold">
+                  {stepDetails.artisan.firstName || stepDetails.artisan.lastName
+                    ? `${stepDetails.artisan.firstName ?? ""} ${stepDetails.artisan.lastName ?? ""}`
+                    : "Unknown Artisan"}
+                </p>
+              </div>
+            )}
+
             {/* Step Name */}
-            <p className="text-lg font-semibold mb-2">
-              {stepDetails?.stepName}
-            </p>
+            <div className="mb-2">
+              <p className="text-xs text-gray-500 uppercase font-semibold">Step Name</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {stepDetails?.stepName}
+              </p>
+            </div>
+
+            {/* Price and Due Date Row */}
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Proposed Price</p>
+                <p className="text-xl font-bold text-orange-600">
+                  ₹{stepDetails?.proposedPrice?.toLocaleString() || "0"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500 mb-1">Due Date</p>
+                <p className="text-gray-900 font-medium">
+                  {stepDetails?.dueDate
+                    ? new Date(stepDetails.dueDate).toLocaleString()
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
 
             {/* Description */}
-            <p className="text-gray-700 mb-4">{stepDetails?.description}</p>
+            <div className="mb-6">
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Description
+              </h3>
+              <p className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                {stepDetails?.description}
+              </p>
+            </div>
 
 
             <div className="flex items-center gap-2 mt-4 mb-4">
@@ -98,12 +154,12 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 className={`px-3 py-1 rounded-full text-sm font-bold border ${["APPROVED", "ADMIN_APPROVED"].includes(
                   stepDetails?.buildStatus
                 )
-                    ? "bg-green-100 text-green-700 border-green-200"
-                    : ["REJECTED", "ADMIN_REJECTED"].includes(
-                      stepDetails?.buildStatus
-                    )
-                      ? "bg-red-100 text-red-700 border-red-200"
-                      : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                  ? "bg-green-100 text-green-700 border-green-200"
+                  : ["REJECTED", "ADMIN_REJECTED"].includes(
+                    stepDetails?.buildStatus
+                  )
+                    ? "bg-red-100 text-red-700 border-red-200"
+                    : "bg-yellow-100 text-yellow-700 border-yellow-200"
                   }`}
               >
                 {stepDetails?.buildStatus?.replace(/_/g, " ") || "PENDING"}
@@ -111,13 +167,13 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
             </div>
 
             {/* Admin Remarks */}
-            {stepDetails?.adminRemarks && (
+            {(stepDetails?.adminRemarks || stepDetails?.admin_remarks) && (
               <div className="mb-6 bg-orange-50 p-4 rounded-xl border border-orange-100">
                 <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                   Admin Remarks
                 </h3>
                 <p className="text-gray-700 leading-relaxed">
-                  {stepDetails.adminRemarks}
+                  {stepDetails.adminRemarks || stepDetails.admin_remarks}
                 </p>
               </div>
             )}
@@ -205,14 +261,16 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 <div className="flex gap-20 mt-6">
                   <button
                     onClick={handleApprove}
-                    className="ml-40 bg-green-600 hover:bg-green-700 px-4 py-2 text-white rounded-lg"
+                    disabled={processing}
+                    className={`ml-40 bg-green-600 hover:bg-green-700 px-4 py-2 text-white rounded-lg ${processing ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
-                    Approve
+                    {processing ? "Approving..." : "Approve"}
                   </button>
 
                   <button
                     onClick={() => setShowRejectPopup(true)}
-                    className="mr-40 bg-red-600 hover:bg-red-700 px-4 py-2 text-white rounded-lg"
+                    disabled={processing}
+                    className={`mr-40 bg-red-600 hover:bg-red-700 px-4 py-2 text-white rounded-lg ${processing ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     Reject
                   </button>

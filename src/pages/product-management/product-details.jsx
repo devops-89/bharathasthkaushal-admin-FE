@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import moment from "moment";
-
 import {
   Package,
   Palette,
@@ -54,6 +53,7 @@ const ProductDetails = () => {
     productId: "",
     buildStepId: "",
     artisanId: "",
+    dueDate: "",
   });
   const [createStepForm, setCreateStepForm] = useState({
     productId: "",
@@ -66,20 +66,47 @@ const ProductDetails = () => {
     materials: "",
     instructions: "",
   });
-  const [artisans, setArtisans] = useState([]);
   const [showStepDetails, setShowStepDetails] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState(null);
   const [editStepId, setEditStepId] = useState(null);
+  const [artisans, setArtisans] = useState([]);
+  const [artisanPage, setArtisanPage] = useState(1);
+  const [hasMoreArtisans, setHasMoreArtisans] = useState(true);
+  const [isArtisanLoading, setIsArtisanLoading] = useState(false);
+  const [isArtisanDropdownOpen, setIsArtisanDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    userControllers.getUserListGroup("ARTISAN").then((res) => {
-      let data = res.data.data.docs.map((a) => ({
+  const fetchArtisans = async (page) => {
+    try {
+      setIsArtisanLoading(true);
+      const res = await userControllers.getAllUsers({
+        user_group: "ARTISAN",
+        hasAddress: true,
+        page: page,
+        limit: 1000
+      });
+      const docs = res.data?.data?.docs || [];
+      const newArtisans = docs.map((a) => ({
         id: a.id,
         name: `${a.firstName} ${a.lastName}`,
       }));
-      setArtisans(data);
-    });
-  }, []);
+
+      setArtisans((prev) => {
+        if (page === 1) return newArtisans;
+        const existingIds = new Set(prev.map((p) => p.id));
+        const filtered = newArtisans.filter((a) => !existingIds.has(a.id));
+        return [...prev, ...filtered];
+      });
+      setHasMoreArtisans(docs.length === 1000);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsArtisanLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArtisans(artisanPage);
+  }, [artisanPage]);
   console.log("buildstep", buildSteps);
   console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -97,7 +124,6 @@ const ProductDetails = () => {
   const filteredCountries = countries.filter((c) =>
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
-
   const handleCountryChange = async (selectedCountry) => {
     setApproveCountry(selectedCountry);
     setApproveWarehouseId("");
@@ -239,14 +265,17 @@ const ProductDetails = () => {
         productId: product.productId,
         buildStepId: Number(assignForm.buildStepId),
         artisanId: artisanID,
+        dueDate: assignForm.dueDate,
       };
       console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
-      toast.info(" Step Assigned Successfully!");
+      toast.success("Step Assigned Successfully!");
       setShowAssignForm(false);
       fetchBuildSteps();
     } catch (err) {
-      toast.info(" Failed to assign step");
+      console.error("Error assigning step:", err);
+      const errorMessage = err.response?.data?.message || "Failed to assign step";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -255,7 +284,7 @@ const ProductDetails = () => {
   const handleCreateStepFormChange = (e) => {
     const { name, value } = e.target;
 
-    // Prevent negative input for numeric fields
+
     if ((name === "sequence" || name === "proposedPrice") && value !== "" && Number(value) < 0) {
       return;
     }
@@ -288,7 +317,6 @@ const ProductDetails = () => {
     }
     const selectedDate = new Date(createStepForm.dueDate);
     const now = new Date();
-    // Allow current minute by ignoring seconds/milliseconds of current time
     if (selectedDate < now.setSeconds(0, 0, 0)) {
       toast.error("Due Date cannot be in the past. Please select a future date and time.");
       return;
@@ -313,7 +341,7 @@ const ProductDetails = () => {
       const res = await productControllers.createBuildStep(formData);
       console.log("Create build step API response:", res.data);
       const newStep = res.data?.data || res.data;
-      toast.info("Build step created successfully!");
+      toast.success("Build step created successfully!");
       setCreateStepForm({
         productId: "",
         sequence: "",
@@ -459,6 +487,7 @@ const ProductDetails = () => {
                     </div>
                   )}
                 </div>
+
                 {/* Thumbnaill    & Images */}
                 {product?.images?.length > 1 && (
                   <div className="flex gap-3 overflow-x-auto pb-2 mb-4">
@@ -550,12 +579,27 @@ const ProductDetails = () => {
                                 <span className="font-medium text-gray-900">
                                   {step.stepName}
                                 </span>
-                                <button
-                                  onClick={() => setEditStepId(step.id)}
-                                  className="p-2 rounded-full hover:bg-gray-100"
-                                >
-                                  <Pencil className="w-5 h-5 text-blue-600" />
-                                </button>
+                                {step.artisanAgreedStatus !== "ACCEPTED" && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const isEditable = step.status !== "APPROVED" &&
+                                        step.status !== "ADMIN_APPROVED";
+                                      if (isEditable) {
+                                        setEditStepId(step.id);
+                                      }
+                                    }}
+                                    disabled={step.status === "APPROVED" || step.status === "ADMIN_APPROVED"}
+                                    className={`p-2 rounded-full transition-colors ${step.status === "APPROVED" || step.status === "ADMIN_APPROVED"
+                                      ? "bg-gray-100 cursor-not-allowed opacity-50"
+                                      : "hover:bg-gray-100 cursor-pointer"
+                                      }`}
+                                    title={(step.status === "APPROVED" || step.status === "ADMIN_APPROVED") ? "Cannot edit lock step" : "Edit Step"}
+                                  >
+                                    <Pencil className={`w-5 h-5 ${(step.status === "APPROVED" || step.status === "ADMIN_APPROVED") ? "text-gray-400" : "text-blue-600"
+                                      }`} />
+                                  </button>
+                                )}
 
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
@@ -576,7 +620,7 @@ const ProductDetails = () => {
                               <div className="px-4 pb-4 bg-gray-50">
                                 {/* Assigned Artisan Name */}
                                 {step.artisan && (
-                                  <div className="md:col-span-2">
+                                  <div className="md:col-span-2 mb-4">
                                     <h4 className="font-semibold text-gray-700 mb-2">
                                       Assigned Artisan
                                     </h4>
@@ -590,59 +634,30 @@ const ProductDetails = () => {
                                   </div>
                                 )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                                  <div className="  md:col-span-2 ">
-                                    <h4 className="font-semibold text-gray-700 mb-2">
-                                      Build Steps Details
-                                    </h4>
-                                    <Eye
-                                      className="w-5 h-5 text-gray-600 cursor-pointer hover:text-orange-600"
+                                <div>
+                                  <h4 className="font-semibold text-gray-700 mb-2">
+                                    Build Steps Details
+                                  </h4>
+                                  <div className="flex items-center gap-4">
+                                    <button
                                       onClick={() => {
                                         setSelectedStepId(step.id);
                                         setShowStepDetails(true);
                                       }}
-                                    />
-                                  </div>
-                                  <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2">
-                                      Description
-                                    </h4>
-                                    <p className="text-gray-600 text-sm">
-                                      {step.description}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2">
-                                      Proposed Price
-                                    </h4>
-                                    <p className="text-orange-600 font-bold text-lg">
-                                      ₹
-                                      {step.proposed_price ||
-                                        step.proposedPrice}
-                                    </p>
-                                  </div>
+                                      className="p-2 hover:bg-gray-200 rounded-full transition-colors flex items-center gap-2"
+                                      title="View Full Details"
+                                    >
+                                      <Eye className="w-6 h-6 text-gray-600 hover:text-orange-600" />
+                                      <span className="text-sm font-medium text-gray-600">View Details</span>
+                                    </button>
 
-                                  {step.admin_remarks && (
-                                    <div className="md:col-span-2">
-                                      <h4 className="font-semibold text-gray-700 mb-2">
-                                        Admin Remarks
-                                      </h4>
-                                      <p className="text-gray-600 text-sm bg-white p-3 rounded-lg">
-                                        {step.admin_remarks}
-                                      </p>
-                                    </div>
-                                  )}
-                                  <div className="md:col-span-2">
-                                    <h4 className="font-semibold text-gray-700 mb-2">
-                                      Due Date
-                                    </h4>
-                                    <p className="text-gray-600 text-sm">
-                                      {/* {moment(step.dueDate).format("DD/MM/YYYY hh:mm A")} */}
-                                      {moment(
-                                        step.dueDate,
-                                        "YYYY-MM-DDTHH:mm"
-                                      ).format("DD/MM/YYYY hh:mm A")}
-                                    </p>
+                                    <span
+                                      className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(
+                                        step.status
+                                      )}`}
+                                    >
+                                      {step.status?.replace("_", " ").toUpperCase()}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -1448,22 +1463,20 @@ const ProductDetails = () => {
               </div>
 
               <form onSubmit={handleAssignFormSubmit}>
-                {/* Product Dropdown */}
+                {/* Due Date */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select Product
+                    Due Date <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="productId"
-                    value={assignForm.productId}
+                  <input
+                    type="datetime-local"
+                    name="dueDate"
+                    value={assignForm.dueDate}
                     onChange={handleAssignFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     required
-                  >
-                    <option value={product.productId}>
-                      {product.product_name}
-                    </option>
-                  </select>
+                    min={moment().format("YYYY-MM-DDTHH:mm")}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
                 </div>
                 {/* Build Step Dropdown */}
                 <div>
@@ -1491,19 +1504,65 @@ const ProductDetails = () => {
                     Select Artisan
                   </label>
 
-                  <select
-                    name="artisanId"
-                    value={assignForm.artisanId}
-                    onChange={handleAssignFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="">Choose artisan...</option>
-                    {artisans.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <div
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer flex justify-between items-center bg-white"
+                      onClick={() => setIsArtisanDropdownOpen(!isArtisanDropdownOpen)}
+                    >
+                      <span className={assignForm.artisanId ? "text-gray-900" : "text-gray-500"}>
+                        {assignForm.artisanId
+                          ? artisans.find((a) => a.id === assignForm.artisanId)?.name ||
+                          "Selected Artisan"
+                          : "Choose artisan..."}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    </div>
+
+                    {isArtisanDropdownOpen && (
+                      <div
+                        className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+                        onScroll={(e) => {
+                          const { scrollTop, clientHeight, scrollHeight } = e.target;
+                          if (scrollHeight - scrollTop <= clientHeight + 20 && !isArtisanLoading && hasMoreArtisans) {
+                            setArtisanPage((prev) => prev + 1);
+                          }
+                        }}
+                      >
+                        {artisans.map((a) => (
+                          <div
+                            key={a.id}
+                            className={`px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 transition-colors ${assignForm.artisanId === a.id
+                              ? "bg-orange-50 text-orange-700 font-medium"
+                              : "text-gray-700"
+                              }`}
+                            onClick={() => {
+                              handleAssignFormChange({
+                                target: { name: "artisanId", value: a.id },
+                              });
+                              setIsArtisanDropdownOpen(false);
+                            }}
+                          >
+                            {a.name}
+                          </div>
+                        ))}
+                        {isArtisanLoading && (
+                          <div className="px-4 py-3 text-center text-gray-500 text-xs font-medium">
+                            <span className="inline-block animate-pulse">Loading more artisans...</span>
+                          </div>
+                        )}
+                        {!hasMoreArtisans && artisans.length > 0 && (
+                          <div className="px-4 py-2 text-center text-gray-400 text-xs">
+                            End of list
+                          </div>
+                        )}
+                        {!isArtisanLoading && artisans.length === 0 && (
+                          <div className="px-4 py-2 text-center text-gray-400 text-xs">
+                            No artisans found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {/* Submit */}
                 <div className="flex gap-3 pt-4">
@@ -1543,7 +1602,7 @@ const ProductDetails = () => {
         )
       }
       <ToastContainer position="top-right" autoClose={3000} />
-    </div>
+    </div >
   );
 };
 export default ProductDetails;

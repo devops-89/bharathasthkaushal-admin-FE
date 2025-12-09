@@ -154,7 +154,7 @@ const ArtisanManagement = () => {
     try {
       const partner = partnersData.find((p) => p.id === id);
       if (partner.verify_status === "VERIFIED") {
-        toast.info("This artisan is already verified ");
+        toast.warning("This artisan is already verified");
         return;
       }
       const response = await userControllers.verifyArtisan(id);
@@ -220,8 +220,18 @@ const ArtisanManagement = () => {
   };
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    let newValue = value;
+
+    // Validation for Name, Email and Location fields
+    if (name === "firstName" || name === "lastName" || name === "email" || name === "location") {
+      // Actively remove leading spaces
+      newValue = newValue.replace(/^\s+/, "");
+      // Actively remove multiple consecutive spaces
+      newValue = newValue.replace(/\s{2,}/g, " ");
+    }
+
     setFormData((prev) => {
-      const newFormData = { ...prev, [name]: value };
+      const newFormData = { ...prev, [name]: newValue };
       if (name === "user_caste_category") {
         newFormData.subCaste = "";
         setShowSubCasteOther(false);

@@ -137,10 +137,8 @@ export default function ProductManagement() {
             </div>
             <Link to={"/product-management/add-product"}>
               <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
-                <Plus className="w-5 h-5 mr-2" /> Add New Product
-
+                <Plus className="w-5 h-5 mr-2" /> Add New Product 
               </button>
-
             </Link>
           </div>
         </div>
@@ -160,7 +158,6 @@ export default function ProductManagement() {
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
-
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
                   <div className="relative mb-4">
@@ -178,8 +175,6 @@ export default function ProductManagement() {
                         </div>
                       </div>
                     )}
-
-
                   </div>
                   <div className="space-y-2 flex flex-col flex-1">
                     <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={product.product_name}>

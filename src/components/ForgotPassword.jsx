@@ -34,17 +34,27 @@ export default function ForgotPassword() {
 
         setIsLoading(true);
         try {
-            await authControllers.forgotPassword({ email: trimmedEmail });
-            toast.success("Password reset link sent to your email!");
+            const res = await authControllers.forgotPassword({ email: trimmedEmail });
+            console.log("Forgot Password response:", res);
+            const responseData = res.data;
+
+            toast.success("OTP sent to your email!");
             setTimeout(() => {
-                navigate("/login");
-            }, 3000);
+                navigate("/reset-password", {
+                    state: {
+                        email: trimmedEmail,
+                        // Try to find referenceId in common locations or pass the whole data object
+                        referenceId: responseData?.data?.referenceId || responseData?.referenceId || responseData?.data?.id || responseData?.id,
+                        fullResponse: responseData
+                    }
+                });
+            }, 1000);
         } catch (err) {
             let errorMessage = err?.response?.data?.message;
             if (Array.isArray(errorMessage)) {
                 errorMessage = errorMessage.join(", ");
             }
-            errorMessage = errorMessage || "Failed to send reset link";
+            errorMessage = errorMessage || "Failed to send OTP";
             toast.error(errorMessage);
             setError(errorMessage);
         } finally {

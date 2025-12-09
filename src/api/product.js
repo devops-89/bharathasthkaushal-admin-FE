@@ -99,7 +99,7 @@ export const productControllers = {
       status: status,
     };
 
-    if (status === "DISAPPROVED") {
+    if (status === "DISAPPROVED" || status === "REJECTED") {
       payload.admin_remarks = adminRemarks;
     }
 

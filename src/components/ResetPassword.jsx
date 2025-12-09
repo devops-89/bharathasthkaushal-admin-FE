@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { ToastContainer, toast } from "react-toastify";
@@ -7,20 +7,36 @@ import "react-toastify/dist/ReactToastify.css";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPassword() {
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get("token"); // Assuming token is passed as a query param
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Get state passed from ForgotPassword
+    const { email, referenceId } = location.state || {};
+
+    const [otp, setOtp] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!email && !referenceId) {
+            toast.warning("Please initiate password reset from the Forgot Password page.");
+            // navigate("/forgot-password"); // Optional: redirect back
+        }
+    }, [email, referenceId, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!token) {
-            toast.error("Invalid or missing reset token.");
+        if (!referenceId) {
+            toast.error("Missing reference ID. Please try 'Forgot Password' again.");
+            return;
+        }
+
+        if (!otp) {
+            toast.error("Please enter the OTP sent to your email.");
             return;
         }
 
@@ -36,15 +52,22 @@ export default function ResetPassword() {
 
         setIsLoading(true);
         try {
-            // Adjust payload based on actual API requirements. 
-            // Often it's { token, password } or { token, newPassword }
-            await authControllers.resetPassword({ token, password });
+            const payload = {
+                referenceId: referenceId, // Using the ID from the previous step
+                otp: otp,
+                password: password
+            };
+            console.log("Resetting password with:", payload);
+
+            await authControllers.resetPassword(payload);
+
             toast.success("Password reset successful! Redirecting to login...");
             setTimeout(() => {
                 navigate("/login");
-            }, 3000);
+            }, 2000);
         } catch (err) {
-            const errorMessage = err?.response?.data?.message || "Failed to reset password";
+            console.error("Reset Password Error:", err);
+            const errorMessage = err?.response?.data?.message || "Failed to reset password. Please check your OTP.";
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
@@ -153,11 +176,28 @@ export default function ResetPassword() {
                         }}
                     />
                     <h1 style={titleStyle}>Reset Password</h1>
-                    <p style={subtitleStyle}>Enter your new password</p>
+                    <p style={subtitleStyle}>Enter OTP and your new password</p>
                 </div>
 
                 <div style={formContainerStyle}>
                     <form onSubmit={handleSubmit}>
+                        {/* OTP Field */}
+                        <div style={fieldContainerStyle}>
+                            <label htmlFor="otp" style={labelStyle}>
+                                OTP
+                            </label>
+                            <input
+                                id="otp"
+                                type="text"
+                                value={otp}
+                                required
+                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                                style={inputStyle}
+                                placeholder="Enter OTP code"
+                                maxLength={6}
+                            />
+                        </div>
+
                         <div style={fieldContainerStyle}>
                             <label htmlFor="password" style={labelStyle}>
                                 New Password
