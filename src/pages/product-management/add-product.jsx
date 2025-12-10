@@ -680,9 +680,6 @@
 //                 <p className="text-red-500 text-sm mt-1">{errors.pattern}</p>
 //               )}
 //             </div>
-
-
-
 //             {/* Net Weight */}
 //             <div>
 //               <label className="block text-gray-700 font-medium mb-2">
@@ -852,7 +849,6 @@ import { warehouseControllers } from "../../api/warehouse";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { countries } from "../../constants/countries";
-
 const AddProduct = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -878,8 +874,6 @@ const AddProduct = () => {
     country: "",
     warehouseId: "",
   });
-
-
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -921,7 +915,7 @@ const AddProduct = () => {
       try {
         const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
         console.log("Warehouse Response:", res.data);
-        // Assuming response structure, adjust if needed based on actual API response
+
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
         console.error("Error fetching warehouses:", error);
@@ -929,7 +923,6 @@ const AddProduct = () => {
       }
     }
   };
-
   useEffect(() => {
     fetchCategories();
   }, []);

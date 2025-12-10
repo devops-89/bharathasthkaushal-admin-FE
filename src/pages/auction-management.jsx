@@ -68,6 +68,7 @@ const AuctionManagement = () => {
     setCountrySearch(selectedCountry);
     setIsCountryDropdownOpen(false);
     setWarehouses([]);
+    setProducts([]);
 
     if (selectedCountry) {
       setIsWarehouseLoading(true);
@@ -191,9 +192,49 @@ const AuctionManagement = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
+    // fetchProducts(); // Removed as we fetch on warehouse selection
     fetchAuctions();
   }, []);
+
+  const [isProductLoading, setIsProductLoading] = useState(false);
+
+  const fetchProductsByWarehouse = async (country, warehouseId) => {
+    console.log("Fetching products for:", { country, warehouseId });
+    setIsProductLoading(true);
+    try {
+      const res = await productControllers.getProductsByWarehouse(country, warehouseId);
+      console.log("Products By Warehouse Response:", res.data);
+      const data = res.data.data;
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else if (data && Array.isArray(data.docs)) {
+        setProducts(data.docs);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error("Error fetching products by warehouse:", err);
+      toast.error("Failed to fetch products for selected warehouse");
+      setProducts([]);
+    } finally {
+      setIsProductLoading(false);
+    }
+  };
+
+  const handleWarehouseChange = (e) => {
+    const warehouseId = e.target.value;
+    const currentCountry = newAuction.country || countrySearch;
+    console.log("Warehouse changed:", warehouseId, "Country:", currentCountry);
+
+    setNewAuction(prev => ({ ...prev, warehouseId: warehouseId, productId: "" }));
+
+    if (currentCountry && warehouseId) {
+      fetchProductsByWarehouse(currentCountry, warehouseId);
+    } else {
+      console.warn("Cannot fetch products: Missing country or warehouseId");
+    }
+  };
+
   const getStatusBadge = (status) => {
     const statusMap = {
       DRAFT: "bg-gray-200 text-gray-700",
@@ -212,9 +253,19 @@ const AuctionManagement = () => {
 
   const handleAddAuction = async (e) => {
     e.preventDefault();
+
+    // Check quantity validation
+    const selectedProduct = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
+    if (selectedProduct) {
+      if (parseInt(newAuction.quantity) > parseInt(selectedProduct.quantity)) {
+        toast.error(`Auction quantity cannot exceed available product quantity (${selectedProduct.quantity})`);
+        return;
+      }
+    }
+
     // Manual validation is no longer needed as HTML5 form validation handles required fields
     const auctionData = {
-      productId: parseInt(newAuction.productId),
+      productId: newAuction.productId,
       start_price: parseFloat(newAuction.startingBid),
       reserve_price: parseFloat(newAuction.reservePrice),
       hard_close_at: new Date(newAuction.endDate).toISOString(),
@@ -236,11 +287,9 @@ const AuctionManagement = () => {
 
       const newAuctionData = {
         ...res.data.data,
-        title:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.product_name || "Unknown",
+        title: res.data.data.title || selectedProduct?.product_name || "Unknown",
         category:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
+          products.find((p) => (p.productId || p._id || p.id) == newAuction.productId)
             ?.material === "Cotton"
             ? "Handloom"
             : "Handicraft",
@@ -256,21 +305,11 @@ const AuctionManagement = () => {
             ? "Active"
             : res.data.data.status.charAt(0).toUpperCase() +
             res.data.data.status.slice(1).toLowerCase(),
-        description:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.description || "No description",
-        dimensions:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.dimension || "Not specified",
-        weight:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.netWeight || "Not specified",
-        materials:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.material || "Not specified",
-        image:
-          products.find((p) => p.productId === parseInt(newAuction.productId))
-            ?.images?.[0] || null,
+        description: selectedProduct?.description || "No description",
+        dimensions: selectedProduct?.dimension || "Not specified",
+        weight: selectedProduct?.netWeight || "Not specified",
+        materials: selectedProduct?.material || "Not specified",
+        image: selectedProduct?.images?.[0] || null,
       };
 
       setAuctions((prevAuctions) => [newAuctionData, ...prevAuctions]);
@@ -288,6 +327,7 @@ const AuctionManagement = () => {
       });
       setCountrySearch("");
       setWarehouses([]);
+      setProducts([]); // Clear products
     } catch (err) {
       console.error(
         "Error creating auction:",
@@ -971,37 +1011,6 @@ const AuctionManagement = () => {
 
                 <form onSubmit={handleAddAuction} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Select Product *
-                      </label>
-                      <select
-                        required
-                        value={newAuction.productId}
-                        onChange={(e) =>
-                          setNewAuction({
-                            ...newAuction,
-                            productId: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      >
-                        <option value="" disabled>Select Product</option>
-                        {Array.isArray(products) && products.length > 0 ? (
-                          products.map((product) => (
-                            <option
-                              key={product.productId}
-                              value={product.productId}
-                            >
-                              {product.product_name || "Unnamed Product"}
-                            </option>
-                          ))
-                        ) : (
-                          <option disabled>No products available</option>
-                        )}
-                      </select>
-                    </div>
-
                     {/* Country Selection */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1057,7 +1066,7 @@ const AuctionManagement = () => {
                       <select
                         required
                         value={newAuction.warehouseId}
-                        onChange={(e) => setNewAuction({ ...newAuction, warehouseId: e.target.value })}
+                        onChange={handleWarehouseChange}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         disabled={!newAuction.country || isWarehouseLoading}
                       >
@@ -1069,6 +1078,41 @@ const AuctionManagement = () => {
                         ))}
                       </select>
                       {isWarehouseLoading && <p className="text-xs text-gray-500 mt-1">Loading warehouses...</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select Product *
+                      </label>
+                      <select
+                        required
+                        value={newAuction.productId}
+                        onChange={(e) =>
+                          setNewAuction({
+                            ...newAuction,
+                            productId: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      >
+                        <option value="" disabled>Select Product</option>
+                        {Array.isArray(products) && products.length > 0 ? (
+                          products.map((product) => (
+                            <option
+                              key={product.productId || product._id || product.id}
+                              value={product.productId || product._id || product.id}
+                            >
+                              {product.product_name || product.name || "Unnamed Product"}
+                            </option>
+                          ))
+                        ) : (
+                          <option disabled>
+                            {!newAuction.warehouseId
+                              ? "Please Select Warehouse First"
+                              : "No products found in this warehouse"}
+                          </option>
+                        )}
+                      </select>
                     </div>
 
                     <div>

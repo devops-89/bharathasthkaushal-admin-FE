@@ -177,4 +177,10 @@ export const productControllers = {
   getUserAuctionStats: (userId) => {
     return productSecuredApi.get(`/auction/stats/${userId}`);
   },
+
+  getProductsByWarehouse: (country, warehouseId) => {
+    return productSecuredApi.get(
+      `warehouses/products?country=${country}&warehouseId=${warehouseId}`
+    );
+  },
 };

@@ -289,6 +289,13 @@ const ProductDetails = () => {
         icon: <CheckCircle className="text-orange-600" />,
         progressStyle: { background: "#ea580c" }
       });
+      setAssignForm({
+        productId: "",
+        buildStepId: "",
+        artisanId: "",
+        dueDate: "",
+      });
+      setArtisanID("");
       setShowAssignForm(false);
       fetchBuildSteps();
     } catch (err) {
