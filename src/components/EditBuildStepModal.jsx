@@ -34,7 +34,7 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
       } finally {
         setLoading(false);
       }
-    };
+    };  
 
     loadDetails();
   }, [stepId]);

@@ -28,14 +28,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [show, setShow] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   useEffect(() => {
     if (location.pathname === "/" || location.pathname === "/login" || location.pathname === "/forgot-password" || location.pathname === "/reset-password") {
       setShow(false);
@@ -43,10 +41,9 @@ function App() {
       setShow(true);
     }
   }, [location.pathname]);
-
   return (
     <div className="">
-      <ToastContainer position="top-right" autoClose={2500} style={{ zIndex: 99999 }} />
+      <ToastContainer position="top-right" autoClose={2500} style={{ zIndex: 9999999 }} />
       {show && <Wrapper isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
       {show && <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />}
       <Routes>
