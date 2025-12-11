@@ -23,11 +23,13 @@ const NEED_ASSISTANCE_STATUS = {
   CLOSED: "CLOSED",
 };
 const NEED_ASSISTANCE_ISSUE_TYPE = {
-  LOGIN_ISSUE: "LOGIN_ISSUE",
+  ACCOUNT_VERIFICATION_ISSUE: "ACCOUNT_VERIFICATION_ISSUE",
   PAYMENT_QUERY: "PAYMENT_QUERY",
-  TECHNICAL_ERROR: "TECHNICAL_ERROR",
-  ACCOUNT_UPDATE: "ACCOUNT_UPDATE",
-  OTHER: "OTHER",
+  ACCOUNT_UPDATION_ISSUE: "ACCOUNT_UPDATION_ISSUE",
+  TECHNICAL_PROBLEM: "TECHNICAL_PROBLEM",
+  CONNECTIVITY_ISSUE: "CONNECTIVITY_ISSUE",
+  USER_INTERFACE_PROBLEM: "USER_INTERFACE_PROBLEM",
+  OTHERS: "OTHERS",
 };
 
 const NeedAssistanceDashboard = () => {
@@ -77,13 +79,13 @@ const NeedAssistanceDashboard = () => {
           (createdByUser?.email
             ? createdByUser.email.split("@")[0]
             : "Unknown User");
-        const userEmail = createdByUser?.email
-          ? createdByUser.email.split("@")[0]
-          : "Unknown User";
+        const userEmail = createdByUser?.email || "Unknown User";
         const userId = createdByUser?.id || createdByUser?._id || "N/A";
+        const phoneNo = createdByUser?.phoneNo || "N/A";
         return {
           id: ticket._id || ticket.id || `temp-id-${index + 1}`,
           userId: userId,
+          phoneNo: phoneNo,
           userName: userName,
           email: userEmail,
           issueType: ticket.issueType || "OTHER",
@@ -129,23 +131,25 @@ const NeedAssistanceDashboard = () => {
 
       const userEmail = createdByUser?.email || "N/A";
       const userId = createdByUser?.id || createdByUser?._id || "N/A";
+      const phoneNo = createdByUser?.phoneNo || "N/A";
 
       const detailedTicket = {
         ...fullTicket,
         userName: userName,
         email: userEmail,
         userId: userId,
+        phoneNo: phoneNo,
       };
 
       setSelectedTicket(detailedTicket);
       setNewStatus(detailedTicket.status || "PENDING");
-      setAdminRemarks(detailedTicket.adminRemarks || "");
+      setAdminRemarks("");
       setShowModal(true);
     } catch (error) {
       toast.error("Error fetching ticket details:", error);
       setSelectedTicket(ticket);
       setNewStatus(ticket.status);
-      setAdminRemarks(ticket.adminRemarks || "");
+      setAdminRemarks("");
       setShowModal(true);
     }
   };
@@ -221,13 +225,11 @@ const NeedAssistanceDashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const filteredData = data.filter((item) => {
@@ -362,9 +364,6 @@ const NeedAssistanceDashboard = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {item.userName}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {item.email}
-                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
@@ -485,9 +484,9 @@ const NeedAssistanceDashboard = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-600">User ID</p>
+                      <p className="text-gray-600">Phone Number</p>
                       <p className="font-medium text-gray-900">
-                        {selectedTicket.userId}
+                        {selectedTicket.phoneNo}
                       </p>
                     </div>
                     <div>
@@ -579,7 +578,7 @@ const NeedAssistanceDashboard = () => {
                   <button
                     onClick={handleUpdateStatus}
                     disabled={updating}
-                    className="flex-1 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {updating ? (
                       <>
@@ -593,7 +592,7 @@ const NeedAssistanceDashboard = () => {
                   <button
                     onClick={() => setShowModal(false)}
                     disabled={updating}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>

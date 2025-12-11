@@ -34,7 +34,6 @@ import { warehouseControllers } from "../../api/warehouse";
 import { countries } from "../../constants/countries";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
 import EditBuildStepModal from "../../components/EditBuildStepModal";
-
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -45,10 +44,7 @@ const ProductDetails = () => {
   const [showCreateStepForm, setShowCreateStepForm] = useState(false);
   const [buildSteps, setBuildSteps] = useState([]);
   const [expandedStep, setExpandedStep] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [productPage, setProductPage] = useState(1);
-  const [hasMoreProducts, setHasMoreProducts] = useState(true);
-  const [productLoading, setProductLoading] = useState(false);
+
   const [referenceImages, setReferenceImages] = useState([]);
   const [assignForm, setAssignForm] = useState({
     productId: "",
@@ -107,7 +103,6 @@ const ProductDetails = () => {
       setIsArtisanLoading(false);
     }
   };
-
   useEffect(() => {
     fetchArtisans(artisanPage);
   }, [artisanPage]);
@@ -115,7 +110,6 @@ const ProductDetails = () => {
   console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
-
   // Approval Modal State
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [approveCountry, setApproveCountry] = useState("");
@@ -124,7 +118,6 @@ const ProductDetails = () => {
   const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-
   const filteredCountries = countries.filter((c) =>
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
@@ -179,7 +172,6 @@ const ProductDetails = () => {
             setProduct(null);
             return null;
           }),
-        fetchProducts(),
         fetchBuildSteps(),
       ]).finally(() => setLoading(false));
     } else {
@@ -187,27 +179,7 @@ const ProductDetails = () => {
     }
   }, [id]);
 
-  const fetchProducts = async (page = 1) => {
-    try {
-      setProductLoading(true);
-      const res = await productControllers.getAllProducts(page, 100);
 
-      const newProducts = res.data?.data?.docs || [];
-
-      setProducts((prev) => [...prev, ...newProducts]);
-      setHasMoreProducts(newProducts.length > 0);
-    } catch (err) {
-      toast.error(
-        "Error fetching products:",
-        err.response?.data || err.message
-      );
-    } finally {
-      setProductLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchProducts(productPage);
-  }, [productPage]);
   const fetchBuildSteps = async () => {
     try {
       const res = await productControllers.getBuildSteps(id);

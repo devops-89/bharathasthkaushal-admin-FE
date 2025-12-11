@@ -26,10 +26,8 @@ export default function LoginPage({ onLogin }) {
 
     let newValue = value;
     if (id === "email") {
-      // Actively remove leading spaces
-      newValue = newValue.replace(/^\s+/, "");
-      // Actively remove multiple consecutive spaces
-      newValue = newValue.replace(/\s{2,}/g, " ");
+      // Actively remove all spaces to prevent leading, trailing, or middle spaces
+      newValue = newValue.replace(/\s/g, "");
     }
 
     setState((prev) => ({ ...prev, [id]: newValue }));
@@ -46,7 +44,7 @@ export default function LoginPage({ onLogin }) {
     let frontendErrors = { email: "", password: "", general: "" };
 
     // Trim email immediately and update state unconditionally to ensure visual update
-    const emailTrimmed = state.email.trim();
+    const emailTrimmed = state.email.trim().replace(/\s+/g, "");
     setState(prev => ({ ...prev, email: emailTrimmed }));
 
     if (!emailTrimmed) {

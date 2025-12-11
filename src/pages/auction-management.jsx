@@ -8,6 +8,7 @@ import {
   Plus,
   Search,
   Calendar,
+  Upload,
 } from "lucide-react";
 import { productControllers } from "../api/product.js";
 import { warehouseControllers } from "../api/warehouse.js";
@@ -52,24 +53,21 @@ const AuctionManagement = () => {
     quantity: "",
     country: "",
     warehouseId: "",
-  });
 
+  });
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [warehouses, setWarehouses] = useState([]);
   const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
-
   const filteredCountries = countries.filter((c) =>
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
-
   const handleCountryChange = async (selectedCountry) => {
     setNewAuction((prev) => ({ ...prev, country: selectedCountry, warehouseId: "" }));
     setCountrySearch(selectedCountry);
     setIsCountryDropdownOpen(false);
     setWarehouses([]);
     setProducts([]);
-
     if (selectedCountry) {
       setIsWarehouseLoading(true);
       try {
@@ -92,7 +90,6 @@ const AuctionManagement = () => {
       }
     }
   };
-
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const indexOfLastItem = currentPage * rowsPerPage;
@@ -121,11 +118,9 @@ const AuctionManagement = () => {
       setLoading(false);
     }
   };
-
   const [winners, setWinners] = useState([]);
   const [showWinnersModal, setShowWinnersModal] = useState(false);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
-
   const fetchWinners = async () => {
     setLoading(true);
     try {
@@ -259,6 +254,12 @@ const AuctionManagement = () => {
         toast.error(`Auction quantity cannot exceed available product quantity (${selectedProduct.quantity})`);
         return;
       }
+    }
+
+    // Validate start time is not in the past
+    if (new Date(newAuction.startDate) < new Date()) {
+      toast.error("Auction start time cannot be in the past");
+      return;
     }
 
     // Manual validation is no longer needed as HTML5 form validation handles required fields
@@ -423,6 +424,27 @@ const AuctionManagement = () => {
     }
   };
 
+  const handleImageUpload = async (e, auctionId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("auctionId", auctionId);
+
+    setLoading(true);
+    try {
+      await productControllers.addImageToAuction(formData);
+      toast.success("Image uploaded successfully!");
+      fetchAuctions();
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      toast.error("Failed to upload image");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
@@ -497,6 +519,9 @@ const AuctionManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Product Name
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Add to Popular
+                </th>
 
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Bidding Info
@@ -519,6 +544,17 @@ const AuctionManagement = () => {
                     <div className="text-sm font-medium text-gray-900" title={auction.title}>
                       {auction.title.length > 20 ? `${auction.title.substring(0, 20)}...` : auction.title}
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <label className="cursor-pointer flex items-center justify-center p-2 rounded-lg hover:bg-orange-50 transition-colors text-orange-600 hover:text-orange-700 w-fit">
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, auction.auction_id)}
+                      />
+                      <Upload size={18} />
+                    </label>
                   </td>
 
                   <td className="px-6 py-4 whitespace-nowrap">

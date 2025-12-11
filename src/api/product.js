@@ -183,4 +183,10 @@ export const productControllers = {
       `warehouses/products?country=${country}&warehouseId=${warehouseId}`
     );
   },
+
+  addImageToAuction: (formData) => {
+    return productSecuredApi.patch("/auction/image", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
 };
