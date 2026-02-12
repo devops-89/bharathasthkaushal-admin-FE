@@ -17,6 +17,9 @@ import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
 import { toast } from "react-toastify";
+import axios from "axios";
+import SecureImage from "../../components/SecureImage";
+
 export default function ProductManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -43,13 +46,17 @@ export default function ProductManagement() {
       const fetchLimit = search ? 1000 : limit;
       const fetchPage = search ? 1 : page;
 
-      const res = await productControllers.getAllProducts(fetchPage, fetchLimit, search);
+      const res = await productControllers.getAllProducts(
+        fetchPage,
+        fetchLimit,
+        search,
+      );
       let response = res.data.data;
 
       if (search) {
         // Client-side filtering fallback
         const filteredDocs = response.docs.filter((p) =>
-          p.product_name?.toLowerCase().includes(search.toLowerCase())
+          p.product_name?.toLowerCase().includes(search.toLowerCase()),
         );
 
         response = {
@@ -137,7 +144,7 @@ export default function ProductManagement() {
             </div>
             <Link to={"/product-management/add-product"}>
               <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
-                <Plus className="w-5 h-5 mr-2" /> Add New Product 
+                <Plus className="w-5 h-5 mr-2" /> Add New Product
               </button>
             </Link>
           </div>
@@ -162,7 +169,7 @@ export default function ProductManagement() {
                 >
                   <div className="relative mb-4">
                     {product.images && product.images.length > 0 ? (
-                      <img
+                      <SecureImage
                         src={product.images[0].imageUrl}
                         alt={product.name}
                         className="w-full h-48 object-cover rounded-lg"
@@ -171,13 +178,18 @@ export default function ProductManagement() {
                       <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
                         <div className="text-center">
                           <Package className="w-10 h-10 text-gray-300 mx-auto mb-1" />
-                          <span className="text-xs text-gray-400 font-medium">No Image</span>
+                          <span className="text-xs text-gray-400 font-medium">
+                            No Image
+                          </span>
                         </div>
                       </div>
                     )}
                   </div>
                   <div className="space-y-2 flex flex-col flex-1">
-                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={product.product_name}>
+                    <h3
+                      className="font-semibold text-lg text-gray-800 line-clamp-1"
+                      title={product.product_name}
+                    >
                       {product.product_name}
                     </h3>
                     {product.artisan ? (
@@ -185,7 +197,7 @@ export default function ProductManagement() {
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200 flex-shrink-0">
                             {product.artisan.avatar ? (
-                              <img
+                              <SecureImage
                                 src={product.artisan.avatar}
                                 alt="Artisan"
                                 className="w-full h-full object-cover"
@@ -195,8 +207,13 @@ export default function ProductManagement() {
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-sm text-gray-900 truncate" title={`${product.artisan.firstName || product.artisan.name} ${product.artisan.lastName}`}>
-                              {product.artisan.firstName || product.artisan.name} {product.artisan.lastName}
+                            <p
+                              className="font-medium text-sm text-gray-900 truncate"
+                              title={`${product.artisan.firstName || product.artisan.name} ${product.artisan.lastName}`}
+                            >
+                              {product.artisan.firstName ||
+                                product.artisan.name}{" "}
+                              {product.artisan.lastName}
                             </p>
                             <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                               <Phone className="w-3 h-3" />
@@ -265,10 +282,11 @@ export default function ProductManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -278,10 +296,11 @@ export default function ProductManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

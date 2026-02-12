@@ -7,12 +7,14 @@ import {
   ChevronLeft,
   ChevronRight,
   Upload,
-  X
+  X,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { categoryControllers } from "../api/category";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import SecureImage from "../components/SecureImage";
 
 export default function CategoryManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +49,7 @@ export default function CategoryManagement() {
 
       if (search) {
         const filteredDocs = response.docs.filter((c) =>
-          c.category_name?.toLowerCase().includes(search.toLowerCase())
+          c.category_name?.toLowerCase().includes(search.toLowerCase()),
         );
 
         response = {
@@ -102,8 +104,13 @@ export default function CategoryManagement() {
       const validExtensions = ["jpg", "jpeg", "png"];
       const fileExtension = file.name.split(".").pop().toLowerCase();
 
-      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-        toast.error("Invalid file format. Please upload a JPEG, JPG, or PNG image.");
+      if (
+        !validTypes.includes(file.type) ||
+        !validExtensions.includes(fileExtension)
+      ) {
+        toast.error(
+          "Invalid file format. Please upload a JPEG, JPG, or PNG image.",
+        );
         e.target.value = null;
         return;
       }
@@ -128,7 +135,8 @@ export default function CategoryManagement() {
       resetForm();
       fetchCategories(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to add category!";
+      const errorMessage =
+        err.response?.data?.message || "Failed to add category!";
       toast.error(errorMessage);
       console.error(err);
     }
@@ -212,20 +220,24 @@ export default function CategoryManagement() {
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
                   <div className="relative mb-4">
-                    <img
+                    <SecureImage
                       src={cat.category_logo}
                       alt={cat.category_name}
                       className="w-full h-48 object-cover rounded-lg"
                     />
                   </div>
                   <div className="space-y-2 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-1" title={cat.category_name}>
+                    <h3
+                      className="font-semibold text-lg text-gray-800 line-clamp-1"
+                      title={cat.category_name}
+                    >
                       {cat.category_name}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2 h-10">
                       {cat.description
                         ? cat.description.split(" ").length > 20
-                          ? cat.description.split(" ").slice(0, 20).join(" ") + "..."
+                          ? cat.description.split(" ").slice(0, 20).join(" ") +
+                            "..."
                           : cat.description
                         : "No description available"}
                     </p>
@@ -269,23 +281,29 @@ export default function CategoryManagement() {
 
               <div className="flex items-center gap-4 justify-self-end">
                 <button
-                  onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                  onClick={() =>
+                    currentPage > 1 && setCurrentPage(currentPage - 1)
+                  }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
                 <button
-                  onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                  onClick={() =>
+                    currentPage < totalPages && setCurrentPage(currentPage + 1)
+                  }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -298,7 +316,9 @@ export default function CategoryManagement() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-bold text-gray-900">Add Category</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Add Category
+                </h2>
                 <button
                   onClick={resetForm}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -337,7 +357,10 @@ export default function CategoryManagement() {
                       className="hidden"
                     />
                     <label htmlFor="category_logo" className="cursor-pointer">
-                      <Upload className="mx-auto mb-2 text-gray-400" size={32} />
+                      <Upload
+                        className="mx-auto mb-2 text-gray-400"
+                        size={32}
+                      />
                       <p className="text-sm text-gray-600">
                         {formData.category_logo
                           ? formData.category_logo.name
@@ -349,7 +372,10 @@ export default function CategoryManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description * <span className="text-xs text-gray-500">(Max 20 words)</span>
+                    Description *{" "}
+                    <span className="text-xs text-gray-500">
+                      (Max 20 words)
+                    </span>
                   </label>
                   <textarea
                     name="description"

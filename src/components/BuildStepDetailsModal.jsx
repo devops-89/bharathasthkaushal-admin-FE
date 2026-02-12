@@ -4,6 +4,7 @@ import axios from "axios";
 import { productControllers } from "../api/product";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SecureImage from "./SecureImage";
 
 const BuildStepDetailsModal = ({ stepId, onClose }) => {
   const [loading, setLoading] = useState(true);
@@ -34,13 +35,13 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
     try {
       const res = await productControllers.updateBuildStepStatus(
         stepId,
-        "APPROVED"
+        "APPROVED",
       );
       console.log("Approve API Response:", res.data);
       setStepDetails((prev) => ({
         ...prev,
         status: "APPROVED",
-        buildStatus: "APPROVED"
+        buildStatus: "APPROVED",
       }));
       toast.success("Approved Successfully!");
     } catch (err) {
@@ -59,7 +60,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
       const res = await productControllers.updateBuildStepStatus(
         stepId,
         "REJECTED",
-        remarks
+        remarks,
       );
       console.log("Reject API Response:", res.data);
 
@@ -68,7 +69,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
         status: "REJECTED",
         buildStatus: "REJECTED",
         adminRemarks: remarks,
-        admin_remarks: remarks
+        admin_remarks: remarks,
       }));
 
       toast.success("Rejected Successfully!");
@@ -113,7 +114,9 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
             {/* Step Name */}
             <div className="mb-2">
-              <p className="text-xs text-gray-500 uppercase font-semibold">Step Name</p>
+              <p className="text-xs text-gray-500 uppercase font-semibold">
+                Step Name
+              </p>
               <p className="text-lg font-semibold text-gray-900">
                 {stepDetails?.stepName}
               </p>
@@ -147,20 +150,20 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
               </p>
             </div>
 
-
             <div className="flex items-center gap-2 mt-4 mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Status:</h3>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-bold border ${["APPROVED", "ADMIN_APPROVED"].includes(
-                  stepDetails?.buildStatus
-                )
-                  ? "bg-green-100 text-green-700 border-green-200"
-                  : ["REJECTED", "ADMIN_REJECTED"].includes(
-                    stepDetails?.buildStatus
+                className={`px-3 py-1 rounded-full text-sm font-bold border ${
+                  ["APPROVED", "ADMIN_APPROVED"].includes(
+                    stepDetails?.buildStatus,
                   )
-                    ? "bg-red-100 text-red-700 border-red-200"
-                    : "bg-yellow-100 text-yellow-700 border-yellow-200"
-                  }`}
+                    ? "bg-green-100 text-green-700 border-green-200"
+                    : ["REJECTED", "ADMIN_REJECTED"].includes(
+                          stepDetails?.buildStatus,
+                        )
+                      ? "bg-red-100 text-red-700 border-red-200"
+                      : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                }`}
               >
                 {stepDetails?.buildStatus?.replace(/_/g, " ") || "PENDING"}
               </span>
@@ -220,7 +223,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   {stepDetails.referenceImagesAddedByAdmin.map((url, i) => (
-                    <img
+                    <SecureImage
                       key={i}
                       src={url}
                       className="w-full h-32 object-cover rounded-lg"
@@ -238,7 +241,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
 
                 <div className="grid grid-cols-2 gap-2">
                   {stepDetails.imagesAddedByArtisan.map((url, i) => (
-                    <img
+                    <SecureImage
                       key={i}
                       src={url}
                       className="w-full h-32 object-cover rounded-lg"

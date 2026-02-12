@@ -7,7 +7,10 @@ export const productControllers = {
       if (status) {
         config.params = { status };
       }
-      const result = await dashboardSecuredApi.get("/dashboard/auctions/count", config);
+      const result = await dashboardSecuredApi.get(
+        "/dashboard/auctions/count",
+        config,
+      );
       return result;
     } catch (error) {
       throw error;
@@ -20,7 +23,10 @@ export const productControllers = {
       if (status) {
         config.params = { status };
       }
-      const result = await dashboardSecuredApi.get("/dashboard/products/count", config);
+      const result = await dashboardSecuredApi.get(
+        "/dashboard/products/count",
+        config,
+      );
       return result;
     } catch (error) {
       throw error;
@@ -33,7 +39,10 @@ export const productControllers = {
       if (status) {
         config.params = { status };
       }
-      const result = await dashboardSecuredApi.get("/dashboard/payments/count", config);
+      const result = await dashboardSecuredApi.get(
+        "/dashboard/payments/count",
+        config,
+      );
       return result;
     } catch (error) {
       throw error;
@@ -46,7 +55,10 @@ export const productControllers = {
       if (buildStatus) {
         config.params = { buildStatus };
       }
-      const result = await dashboardSecuredApi.get("/dashboard/build-steps/count", config);
+      const result = await dashboardSecuredApi.get(
+        "/dashboard/build-steps/count",
+        config,
+      );
       return result;
     } catch (error) {
       throw error;
@@ -61,14 +73,14 @@ export const productControllers = {
         search,
       },
       headers: {
-        "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
+        companyId: "2917DA28-C412-5525-E814-A3E1E80638CB",
       },
     });
   },
 
   getAllProductsReady: () => {
     return productSecuredApi.get(
-      "/product/admin/all-products?buildStatus=READY_FOR_AUCTION&page=1&pageSize=1000"
+      "/product/admin/all-products?buildStatus=READY_FOR_AUCTION&page=1&pageSize=1000",
     );
   },
 
@@ -105,7 +117,7 @@ export const productControllers = {
 
     return productSecuredApi.post(
       `/build-step/admin/approve/${stepId}`,
-      payload
+      payload,
     );
   },
 
@@ -162,7 +174,7 @@ export const productControllers = {
 
   getAuctionWinners: (page = 1, limit = 10) => {
     return productSecuredApi.get(
-      `/auction/winners?page=${page}&limit=${limit}`
+      `/auction/winners?page=${page}&limit=${limit}`,
     );
   },
 
@@ -180,7 +192,7 @@ export const productControllers = {
 
   getProductsByWarehouse: (country, warehouseId) => {
     return productSecuredApi.get(
-      `warehouses/products?country=${country}&warehouseId=${warehouseId}`
+      `warehouses/products?country=${country}&warehouseId=${warehouseId}`,
     );
   },
 

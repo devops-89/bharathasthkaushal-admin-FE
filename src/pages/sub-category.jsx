@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Search, Filter, Grid, List, X, Upload, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Filter,
+  Grid,
+  List,
+  X,
+  Upload,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { categoryControllers } from "../api/category";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SecureImage from "../components/SecureImage";
 
 const SubcategoryManagement = () => {
   const navigate = useNavigate();
@@ -45,7 +56,7 @@ const SubcategoryManagement = () => {
               status: sub.isActive ? "Active" : "Inactive",
               products: sub.productCount || sub.products || 0,
               description: sub.description || "No description available",
-            }))
+            })),
           );
           setTotalDocs(data.totalDocs || 0);
           setTotalPages(data.totalPages || 1);
@@ -65,7 +76,7 @@ const SubcategoryManagement = () => {
       .then((res) => {
         if (Array.isArray(res?.data?.data?.docs)) {
           const foundCategory = res.data.data.docs.find(
-            (cat) => cat.category_id === parseInt(id)
+            (cat) => cat.category_id === parseInt(id),
           );
           setCategoryName(foundCategory?.category_name || "Unknown Category");
         }
@@ -80,10 +91,10 @@ const SubcategoryManagement = () => {
     getCategoryName();
   }, [id, currentPage, rowsPerPage]);
 
-  // Note: Client-side search will only search within the current page. 
+  // Note: Client-side search will only search within the current page.
   // For full search, backend search API is needed.
   const filteredSubcategories = currentSubcategories.filter((sub) =>
-    sub.name.toLowerCase().includes(searchTerm.toLowerCase())
+    sub.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleInputChange = (e) => {
@@ -101,8 +112,13 @@ const SubcategoryManagement = () => {
       const validExtensions = ["jpg", "jpeg", "png"];
       const fileExtension = file.name.split(".").pop().toLowerCase();
 
-      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-        toast.error("Invalid file format. Please upload a JPEG, JPG, or PNG image.");
+      if (
+        !validTypes.includes(file.type) ||
+        !validExtensions.includes(fileExtension)
+      ) {
+        toast.error(
+          "Invalid file format. Please upload a JPEG, JPG, or PNG image.",
+        );
         e.target.value = null;
         return;
       }
@@ -135,7 +151,10 @@ const SubcategoryManagement = () => {
       setShowAddForm(false);
       getSubcategories();
     } catch (err) {
-      console.error("API Error:", err.response ? err.response.data : err.message);
+      console.error(
+        "API Error:",
+        err.response ? err.response.data : err.message,
+      );
       toast.error("Failed to add subcategory");
     }
   };
@@ -208,7 +227,10 @@ const SubcategoryManagement = () => {
               <h2 className="text-xl font-semibold text-gray-900">
                 Add New Subcategory
               </h2>
-              <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={resetForm}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -320,7 +342,8 @@ const SubcategoryManagement = () => {
             No subcategories available
           </h3>
           <p className="text-gray-500 mb-4">
-            Add subcategories to organize your {categoryName.toLowerCase()} products
+            Add subcategories to organize your {categoryName.toLowerCase()}{" "}
+            products
           </p>
           <button
             onClick={() => setShowAddForm(true)}
@@ -337,19 +360,18 @@ const SubcategoryManagement = () => {
               key={sub.id}
               className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
             >
-              <img
+              <SecureImage
                 src={sub.image}
                 alt={sub.name}
                 className="w-full h-40 object-cover"
-                onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/160";
-                }}
               />
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">{sub.name}</h3>
                 </div>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{sub.description}</p>
+                <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                  {sub.description}
+                </p>
               </div>
             </div>
           ))}
@@ -384,21 +406,25 @@ const SubcategoryManagement = () => {
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
 
             <button
-              onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+              onClick={() =>
+                currentPage < totalPages && setCurrentPage(currentPage + 1)
+              }
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -407,7 +433,6 @@ const SubcategoryManagement = () => {
       )}
       <ToastContainer />
     </div>
-
   );
 };
 
