@@ -12,7 +12,7 @@ export const categoryControllers = {
     try {
       let result = await productSecuredApi.get(
         `/category/main-categories?page=${page}&pageSize=${pageSize}`,
-        { headers: { "Cache-Control": "no-cache" } }
+        { headers: { "Cache-Control": "no-cache", "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB" } }
       );
       return result;
     } catch (error) {

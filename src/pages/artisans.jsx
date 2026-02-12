@@ -166,6 +166,7 @@ const ArtisanManagement = () => {
   };
   const fetchArtisans = async (page = 1, limit = 10) => {
     try {
+      setLoading(true);
       const response = await userControllers.getUserListGroup(
         "ARTISAN",
         page,
@@ -205,6 +206,8 @@ const ArtisanManagement = () => {
       setTotalPages(responseData.totalPages || 1);
     } catch (error) {
       console.error("Failed to load artisans", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -374,7 +377,7 @@ const ArtisanManagement = () => {
     return matchesSearch && matchesLocation && matchesTab;
   });
 
-  console.log("Filtered Partners:", filteredPartners);
+  // console.log("Filtered Partners:", filteredPartners);
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.expertizeField)),
   ].filter((field) => field && field !== "Not Specified");
@@ -974,88 +977,117 @@ const ArtisanManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPartners.map((partner) => (
-                  <tr
-                    key={partner.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={
-                              partner.avatar ||
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                `${partner.firstName} ${partner.lastName}`
-                              )}&background=random`
-                            }
-                            alt=""
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {[partner.firstName, partner.lastName]
-                              .join(" ")
-                              .slice(0, 20) +
-                              ([partner.firstName, partner.lastName].join(" ")
-                                .length > 20
-                                ? "..."
-                                : "")}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Joined: {partner.joinedDate || "N/A"}
-                          </div>
-                        </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <svg
+                          className="animate-spin h-10 w-10 text-orange-600 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-gray-500 font-medium">Loading artisans...</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{`${partner.countryCode || ""
-                        } ${partner.phoneNo || "N/A"}`}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {(partner.expertizeField || "Not Specified").slice(
-                          0,
-                          20
-                        ) +
-                          ((partner.expertizeField || "").length > 20
-                            ? "..."
-                            : "")}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Switch
-                        checked={partner.status === "ACTIVE"}
-                        onChange={() => handleToggleStatus(partner)}
-                        className={`${partner.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
-                      >
-                        <span className="sr-only">Toggle Status</span>
-                        <span
-                          className={`${partner.status === "ACTIVE"
-                            ? "translate-x-6"
-                            : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                        />
-                      </Switch>
-                    </td>
-
-
-
-                    <td className="px-6 py-4 whitespace-nowrap relative">
-                      <button
-                        onClick={() => handleViewDetails(partner)}
-                        className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        title="View Details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredPartners.map((partner) => (
+                    <tr
+                      key={partner.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={
+                                partner.avatar ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  `${partner.firstName} ${partner.lastName}`
+                                )}&background=random`
+                              }
+                              alt=""
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {[partner.firstName, partner.lastName]
+                                .join(" ")
+                                .slice(0, 20) +
+                                ([partner.firstName, partner.lastName].join(" ")
+                                  .length > 20
+                                  ? "..."
+                                  : "")}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Joined: {partner.joinedDate || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{`${partner.countryCode || ""
+                          } ${partner.phoneNo || "N/A"}`}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {(partner.expertizeField || "Not Specified").slice(
+                            0,
+                            20
+                          ) +
+                            ((partner.expertizeField || "").length > 20
+                              ? "..."
+                              : "")}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Switch
+                          checked={partner.status === "ACTIVE"}
+                          onChange={() => handleToggleStatus(partner)}
+                          className={`${partner.status === "ACTIVE"
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
+                            } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        >
+                          <span className="sr-only">Toggle Status</span>
+                          <span
+                            className={`${partner.status === "ACTIVE"
+                              ? "translate-x-6"
+                              : "translate-x-1"
+                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          />
+                        </Switch>
+                      </td>
+
+
+
+                      <td className="px-6 py-4 whitespace-nowrap relative">
+                        <button
+                          onClick={() => handleViewDetails(partner)}
+                          className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  )))}
               </tbody>
             </table>
           </div>

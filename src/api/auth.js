@@ -16,6 +16,7 @@ export const authControllers = {
           "Pragma": "no-cache",
         },
       });
+
       localStorage.removeItem("accessToken");
       return result;
     } catch (error) {
@@ -36,7 +37,6 @@ export const authControllers = {
     console.log(data)
     try {
       let result = await securedApi.post("/admin_register_artisan", data);
-      //console.log("gsgggdegdugd", result);
       return result;
     } catch (error) {
       throw error;
