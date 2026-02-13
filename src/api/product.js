@@ -66,12 +66,21 @@ export const productControllers = {
   },
 
   getAllProducts: (page = 1, pageSize = 10, search = "") => {
+    const params = {
+      page,
+      pageSize,
+      search,
+    };
+
+    // Filter out empty, null, or undefined params
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([_, value]) => value !== "" && value !== null && value !== undefined,
+      ),
+    );
+
     return productSecuredApi.get("/product/admin/all-products", {
-      params: {
-        page,
-        pageSize,
-        search,
-      },
+      params: filteredParams,
       headers: {
         companyId: "2917DA28-C412-5525-E814-A3E1E80638CB",
       },
@@ -157,7 +166,12 @@ export const productControllers = {
   },
 
   getAllAuctions: (params = {}) => {
-    return productSecuredApi.get("/auction", { params });
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([_, value]) => value !== "" && value !== null && value !== undefined,
+      ),
+    );
+    return productSecuredApi.get("/auction", { params: filteredParams });
   },
 
   createAuction: (auctionData) => {
@@ -173,9 +187,15 @@ export const productControllers = {
   },
 
   getAuctionWinners: (page = 1, limit = 10) => {
-    return productSecuredApi.get(
-      `/auction/winners?page=${page}&limit=${limit}`,
+    const params = { page, limit };
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([_, value]) => value !== "" && value !== null && value !== undefined,
+      ),
     );
+    return productSecuredApi.get("/auction/winners", {
+      params: filteredParams,
+    });
   },
 
   getMonthlyAuctionReport: () => {
@@ -191,9 +211,15 @@ export const productControllers = {
   },
 
   getProductsByWarehouse: (country, warehouseId) => {
-    return productSecuredApi.get(
-      `warehouses/products?country=${country}&warehouseId=${warehouseId}`,
+    const params = { country, warehouseId };
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([_, value]) => value !== "" && value !== null && value !== undefined,
+      ),
     );
+    return productSecuredApi.get("warehouses/products", {
+      params: filteredParams,
+    });
   },
 
   addImageToAuction: (formData) => {

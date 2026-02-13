@@ -10,10 +10,19 @@ export const categoryControllers = {
   },
   getCategory: async (page = 1, pageSize = 1000) => {
     try {
-      let result = await productSecuredApi.get(
-        `/category/main-categories?page=${page}&pageSize=${pageSize}`,
-        { headers: { "Cache-Control": "no-cache", "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB" } }
+      const params = { page, pageSize };
+      const filteredParams = Object.fromEntries(
+        Object.entries(params).filter(
+          ([_, value]) => value !== "" && value !== null && value !== undefined,
+        ),
       );
+      let result = await productSecuredApi.get("/category/main-categories", {
+        params: filteredParams,
+        headers: {
+          "Cache-Control": "no-cache",
+          "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
+        },
+      });
       return result;
     } catch (error) {
       throw error;
@@ -21,9 +30,16 @@ export const categoryControllers = {
   },
   getSubCategory: async (categoryId, page = 1, pageSize = 1000) => {
     try {
+      const params = { page, pageSize };
+      const filteredParams = Object.fromEntries(
+        Object.entries(params).filter(
+          ([_, value]) => value !== "" && value !== null && value !== undefined,
+        ),
+      );
       let result = await productSecuredApi.get(
-        `/category/getsubcategory/${categoryId}?page=${page}&pageSize=${pageSize}`,
+        `/category/getsubcategory/${categoryId}`,
         {
+          params: filteredParams,
           headers: { "Cache-Control": "no-cache" },
         }
       );

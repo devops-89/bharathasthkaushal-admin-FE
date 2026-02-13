@@ -5,12 +5,20 @@ export const warehouseControllers = {
         return productSecuredApi.post("/warehouses", data);
     },
     getWarehouses: (page = 1, limit = 10, search = "") => {
+        const params = {
+            page,
+            limit,
+            search,
+        };
+
+        const filteredParams = Object.fromEntries(
+            Object.entries(params).filter(
+                ([_, value]) => value !== "" && value !== null && value !== undefined,
+            ),
+        );
+
         return productSecuredApi.get("/warehouses", {
-            params: {
-                page,
-                limit,
-                search,
-            },
+            params: filteredParams,
         });
     },
     getWarehouseDetails: (id) => {

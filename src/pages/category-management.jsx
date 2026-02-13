@@ -64,7 +64,9 @@ export default function CategoryManagement() {
       setCategories(response);
     } catch (err) {
       console.log("Error fetching categories:", err);
-      toast.error("Failed to fetch categories");
+      const errorMessage =
+        err.response?.data?.message || "Failed to fetch categories";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -237,7 +239,7 @@ export default function CategoryManagement() {
                       {cat.description
                         ? cat.description.split(" ").length > 20
                           ? cat.description.split(" ").slice(0, 20).join(" ") +
-                            "..."
+                          "..."
                           : cat.description
                         : "No description available"}
                     </p>
@@ -285,11 +287,10 @@ export default function CategoryManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === 1
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -299,11 +300,10 @@ export default function CategoryManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === totalPages
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

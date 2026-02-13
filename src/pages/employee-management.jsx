@@ -22,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import countryCodes from "../utils/countryCodes.json";
 import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
+import SecureImage from "../components/SecureImage";
 
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -565,7 +566,7 @@ const ArtisanManagement = () => {
                   <div className="flex items-center space-x-4 mb-6">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
-                        <img
+                        <SecureImage
                           src={
                             selectedPartner.avatar ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -680,7 +681,7 @@ const ArtisanManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
-                          <img
+                          <SecureImage
                             className="h-10 w-10 rounded-full object-cover"
                             src={
                               partner.avatar ||

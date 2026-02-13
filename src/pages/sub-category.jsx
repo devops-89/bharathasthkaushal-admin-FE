@@ -67,6 +67,9 @@ const SubcategoryManagement = () => {
       })
       .catch((err) => {
         console.log("Error fetching subcategories:", err);
+        const errorMessage =
+          err.response?.data?.message || "Failed to fetch subcategories";
+        toast.error(errorMessage);
         setSubcategories([]);
       });
   };
@@ -151,11 +154,10 @@ const SubcategoryManagement = () => {
       setShowAddForm(false);
       getSubcategories();
     } catch (err) {
-      console.error(
-        "API Error:",
-        err.response ? err.response.data : err.message,
-      );
-      toast.error("Failed to add subcategory");
+      const errorMessage =
+        err.response?.data?.message || "Failed to add subcategory";
+      toast.error(errorMessage);
+      console.error("API Error:", err.response ? err.response.data : err.message);
     }
   };
 
@@ -406,11 +408,10 @@ const SubcategoryManagement = () => {
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -420,11 +421,10 @@ const SubcategoryManagement = () => {
                 currentPage < totalPages && setCurrentPage(currentPage + 1)
               }
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>

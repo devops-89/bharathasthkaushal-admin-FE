@@ -4,6 +4,7 @@ import { userControllers } from "../api/user";
 import { productControllers } from "../api/product";
 import { ToastContainer, toast } from "react-toastify";
 import { Phone, Calendar, Mail, User, ShieldCheck } from "lucide-react";
+import SecureImage from "../components/SecureImage";
 
 function UserProfile() {
   const { id } = useParams();
@@ -72,7 +73,7 @@ function UserProfile() {
         <div className="flex items-center space-x-6 mb-8">
           <div className="relative">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-orange-100 shadow-sm">
-              <img
+              <SecureImage
                 src={
                   user.avatar ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -205,7 +206,7 @@ function UserProfile() {
                       <div key={index} className="flex gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="w-16 h-16 bg-gray-100 rounded-lg shrink-0 overflow-hidden">
                           {auction.product?.images?.[0]?.imageUrl ? (
-                            <img
+                            <SecureImage
                               src={auction.product.images[0].imageUrl}
                               alt={auction.product.product_name}
                               className="w-full h-full object-cover"

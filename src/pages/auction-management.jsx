@@ -16,6 +16,7 @@ import { countries } from "../constants/countries.js";
 import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import SecureImage from "../components/SecureImage";
 
 const formatDateForDisplay = (dateString) => {
   if (!dateString) return "";
@@ -689,13 +690,10 @@ const AuctionManagement = () => {
                   <div className="bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm group">
                     <div className="aspect-[4/3] w-full bg-gray-200 relative overflow-hidden">
                       {selectedAuction.image ? (
-                        <img
+                        <SecureImage
                           src={selectedAuction.image}
                           alt={selectedAuction.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          onError={(e) => {
-                            e.target.src = "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop";
-                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">

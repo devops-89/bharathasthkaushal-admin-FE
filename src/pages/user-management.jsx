@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { Eye, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { userControllers } from "../api/user";
+import SecureImage from "../components/SecureImage";
 
 function UserManagement() {
   const navigate = useNavigate();
@@ -151,7 +152,7 @@ function UserManagement() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <img
+                        <SecureImage
                           className="h-10 w-10 rounded-full object-cover"
                           src={
                             user.avatar ||
