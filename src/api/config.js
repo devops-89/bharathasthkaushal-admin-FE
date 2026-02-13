@@ -1,6 +1,5 @@
 import Axios from "axios";
 import { serverConstants } from "./server-constant";
-
 const securedApi = Axios.create({
   baseURL: serverConstants.authenticationUrls,
 });
@@ -34,26 +33,23 @@ const logoutSecuredApi = Axios.create({
 const dashboardSecuredApi = Axios.create({
   baseURL: serverConstants.dashboardUrl,
 });
-
 securedApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
   return config;
 });
-
 logoutSecuredApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
   return config;
 });
-
 productSecuredApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
+  // config.headers.coma = "2917DA28-C412-5525-E814-A3E1E80638CB";
+  config.headers["x-company-id"] = "2917DA28-C412-5525-E814-A3E1E80638CB";
   return config;
 });
-
-
 getuserSecuredApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;

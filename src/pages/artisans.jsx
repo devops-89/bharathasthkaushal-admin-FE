@@ -22,6 +22,7 @@ import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import countryCodes from "../utils/countryCodes.json";
+import SecureImage from "../components/SecureImage";
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -66,7 +67,10 @@ const ArtisanManagement = () => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsCountryDropdownOpen(false);
       }
-      if (expertiseDropdownRef.current && !expertiseDropdownRef.current.contains(event.target)) {
+      if (
+        expertiseDropdownRef.current &&
+        !expertiseDropdownRef.current.contains(event.target)
+      ) {
         setIsExpertiseDropdownOpen(false);
       }
     };
@@ -92,7 +96,7 @@ const ArtisanManagement = () => {
   const filteredCountries = countryCodes.filter(
     (country) =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
-      country.dial_code.includes(countrySearchTerm)
+      country.dial_code.includes(countrySearchTerm),
   );
 
   const [partnersData, setPartnersData] = useState(() => {
@@ -123,13 +127,14 @@ const ArtisanManagement = () => {
       await userControllers.updateUserStatus(selectedArtisan.id, newStatus);
       setPartnersData((prev) =>
         prev.map((a) =>
-          a.id === selectedArtisan.id ? { ...a, status: newStatus } : a
-        )
+          a.id === selectedArtisan.id ? { ...a, status: newStatus } : a,
+        ),
       );
 
       toast.success(
-        `Artisan ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
-        } Successfully!`
+        `Artisan ${
+          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        } Successfully!`,
       );
     } catch (error) {
       toast.error("Something went wrong!");
@@ -140,9 +145,8 @@ const ArtisanManagement = () => {
 
   const getallSubcategory = async (categoryId) => {
     try {
-      const resultData = await categoryControllers.getallSubcategory(
-        categoryId
-      );
+      const resultData =
+        await categoryControllers.getallSubcategory(categoryId);
 
       setSubCategories(resultData.data.data.docs);
     } catch (error) {
@@ -166,10 +170,11 @@ const ArtisanManagement = () => {
   };
   const fetchArtisans = async (page = 1, limit = 10) => {
     try {
+      setLoading(true);
       const response = await userControllers.getUserListGroup(
         "ARTISAN",
         page,
-        limit
+        limit,
       );
       const responseData = response.data?.data || response.data || {};
       let artisans = responseData.docs || responseData || [];
@@ -187,7 +192,9 @@ const ArtisanManagement = () => {
         gstNumber: user.gstNumber || "—",
         user_caste_category: user.user_caste_category || "—",
         joinedDate: user.createdAt
-          ? new Date(user.createdAt).toLocaleDateString("en-GB").replace(/\//g, "-")
+          ? new Date(user.createdAt)
+              .toLocaleDateString("en-GB")
+              .replace(/\//g, "-")
           : "—",
         aadhaarNumber: user.aadhaarNumber || "N/A",
         subCaste: user.subCaste || "_",
@@ -205,6 +212,8 @@ const ArtisanManagement = () => {
       setTotalPages(responseData.totalPages || 1);
     } catch (error) {
       console.error("Failed to load artisans", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -223,7 +232,12 @@ const ArtisanManagement = () => {
     let newValue = value;
 
     // Validation for Name, Email and Location fields
-    if (name === "firstName" || name === "lastName" || name === "email" || name === "location") {
+    if (
+      name === "firstName" ||
+      name === "lastName" ||
+      name === "email" ||
+      name === "location"
+    ) {
       // Actively remove leading spaces
       newValue = newValue.replace(/^\s+/, "");
       // Actively remove multiple consecutive spaces
@@ -317,7 +331,9 @@ const ArtisanManagement = () => {
         email: formData.email,
         countryCode: formData.countryCode,
         phoneNo: formData.phoneNo,
-        expertizeField: Array.isArray(formData.expertizeField) ? formData.expertizeField.join(", ") : formData.expertizeField,
+        expertizeField: Array.isArray(formData.expertizeField)
+          ? formData.expertizeField.join(", ")
+          : formData.expertizeField,
         location: formData.location,
         aadhaarNumber: formData.aadhaarNumber,
         user_caste_category: formData.user_caste_category,
@@ -330,7 +346,7 @@ const ArtisanManagement = () => {
       console.log("API Response received:", response);
       if (response.status === 200 || response.status === 201) {
         toast.success(
-          "Artisan registered successfully! Login credentials sent to email."
+          "Artisan registered successfully! Login credentials sent to email.",
         );
         setShowAddForm(false);
         setFormData({
@@ -354,7 +370,9 @@ const ArtisanManagement = () => {
     } catch (error) {
       console.error("API Request Failed (Catch Block):", error);
       toast.error(
-        error.response?.data?.message || error.message || "Error registering artisan"
+        error.response?.data?.message ||
+          error.message ||
+          "Error registering artisan",
       );
       console.error("Error registering artisan:", error);
     } finally {
@@ -374,7 +392,7 @@ const ArtisanManagement = () => {
     return matchesSearch && matchesLocation && matchesTab;
   });
 
-  console.log("Filtered Partners:", filteredPartners);
+  // console.log("Filtered Partners:", filteredPartners);
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.expertizeField)),
   ].filter((field) => field && field !== "Not Specified");
@@ -544,11 +562,11 @@ const ArtisanManagement = () => {
                       </label>
                       <div
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
-                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                        onClick={() =>
+                          setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                        }
                       >
-                        <span className="truncate">
-                          {formData.countryCode}
-                        </span>
+                        <span className="truncate">{formData.countryCode}</span>
                         <span className="ml-2 text-gray-400">▼</span>
                       </div>
 
@@ -561,7 +579,9 @@ const ArtisanManagement = () => {
                                 type="text"
                                 placeholder="Search country..."
                                 value={countrySearchTerm}
-                                onChange={(e) => setCountrySearchTerm(e.target.value)}
+                                onChange={(e) =>
+                                  setCountrySearchTerm(e.target.value)
+                                }
                                 className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
@@ -575,13 +595,20 @@ const ArtisanManagement = () => {
                                   key={country.code}
                                   className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
                                   onClick={() => {
-                                    setFormData({ ...formData, countryCode: country.dial_code });
+                                    setFormData({
+                                      ...formData,
+                                      countryCode: country.dial_code,
+                                    });
                                     setIsCountryDropdownOpen(false);
                                     setCountrySearchTerm("");
                                   }}
                                 >
-                                  <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
-                                  <span className="text-gray-600 truncate">{country.name}</span>
+                                  <span className="font-medium text-gray-900 w-12">
+                                    {country.dial_code}
+                                  </span>
+                                  <span className="text-gray-600 truncate">
+                                    {country.name}
+                                  </span>
                                 </div>
                               ))
                             ) : (
@@ -620,7 +647,9 @@ const ArtisanManagement = () => {
                     <div className="relative" ref={expertiseDropdownRef}>
                       <div
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
-                        onClick={() => setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)}
+                        onClick={() =>
+                          setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)
+                        }
                       >
                         <span className="truncate">
                           {formData.expertizeField.length > 0
@@ -638,23 +667,38 @@ const ArtisanManagement = () => {
                               className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
                               onClick={() => {
                                 const currentSelected = formData.expertizeField;
-                                const isSelected = currentSelected.includes(subCategory.category_name);
+                                const isSelected = currentSelected.includes(
+                                  subCategory.category_name,
+                                );
                                 let newSelected;
                                 if (isSelected) {
-                                  newSelected = currentSelected.filter(item => item !== subCategory.category_name);
+                                  newSelected = currentSelected.filter(
+                                    (item) =>
+                                      item !== subCategory.category_name,
+                                  );
                                 } else {
-                                  newSelected = [...currentSelected, subCategory.category_name];
+                                  newSelected = [
+                                    ...currentSelected,
+                                    subCategory.category_name,
+                                  ];
                                 }
-                                setFormData({ ...formData, expertizeField: newSelected });
+                                setFormData({
+                                  ...formData,
+                                  expertizeField: newSelected,
+                                });
                               }}
                             >
                               <input
                                 type="checkbox"
-                                checked={formData.expertizeField.includes(subCategory.category_name)}
+                                checked={formData.expertizeField.includes(
+                                  subCategory.category_name,
+                                )}
                                 readOnly
                                 className="rounded text-orange-600 focus:ring-orange-500"
                               />
-                              <span className="text-gray-700">{subCategory.category_name}</span>
+                              <span className="text-gray-700">
+                                {subCategory.category_name}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -690,7 +734,9 @@ const ArtisanManagement = () => {
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="" hidden>Select Caste Category</option>
+                      <option value="" hidden>
+                        Select Caste Category
+                      </option>
                       {Object.keys(casteCategories).map((category) => (
                         <option key={category} value={category}>
                           {category}
@@ -716,14 +762,17 @@ const ArtisanManagement = () => {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="" hidden>Select Sub Caste</option>
-                      {formData.user_caste_category && casteCategories[formData.user_caste_category]?.map(
-                        (subCaste) => (
-                          <option key={subCaste} value={subCaste}>
-                            {subCaste}
-                          </option>
-                        )
-                      )}
+                      <option value="" hidden>
+                        Select Sub Caste
+                      </option>
+                      {formData.user_caste_category &&
+                        casteCategories[formData.user_caste_category]?.map(
+                          (subCaste) => (
+                            <option key={subCaste} value={subCaste}>
+                              {subCaste}
+                            </option>
+                          ),
+                        )}
                     </select>
                     {showSubCasteOther && (
                       <input
@@ -765,13 +814,29 @@ const ArtisanManagement = () => {
                     <button
                       onClick={handleAddEmployee}
                       disabled={isSubmitting}
-                      className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                       {isSubmitting ? (
                         <span className="flex items-center justify-center">
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Processing...
                         </span>
@@ -806,11 +871,11 @@ const ArtisanManagement = () => {
                   <div className="flex items-center space-x-4 mb-6">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
-                        <img
+                        <SecureImage
                           src={
                             selectedPartner.avatar ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              `${selectedPartner.firstName} ${selectedPartner.lastName}`
+                              `${selectedPartner.firstName} ${selectedPartner.lastName}`,
                             )}&background=random`
                           }
                           alt={`${selectedPartner.firstName} ${selectedPartner.lastName}`}
@@ -829,12 +894,15 @@ const ArtisanManagement = () => {
                       <h3 className="text-xl font-bold text-gray-900 break-words">
                         {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
                       </h3>
-                      <p className="text-gray-500 break-words">{selectedPartner.email || "N/A"}</p>
+                      <p className="text-gray-500 break-words">
+                        {selectedPartner.email || "N/A"}
+                      </p>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                          selectedPartner.status === "ACTIVE"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
                       >
                         {selectedPartner.status || "Approved Artisan"}
                       </span>
@@ -846,8 +914,9 @@ const ArtisanManagement = () => {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium break-words">{`${selectedPartner.countryCode || ""
-                          } ${selectedPartner.phoneNo || "N/A"}`}</p>
+                        <p className="font-medium break-words">{`${
+                          selectedPartner.countryCode || ""
+                        } ${selectedPartner.phoneNo || "N/A"}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -974,88 +1043,121 @@ const ArtisanManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPartners.map((partner) => (
-                  <tr
-                    key={partner.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={
-                              partner.avatar ||
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                `${partner.firstName} ${partner.lastName}`
-                              )}&background=random`
-                            }
-                            alt=""
-                          />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {[partner.firstName, partner.lastName]
-                              .join(" ")
-                              .slice(0, 20) +
-                              ([partner.firstName, partner.lastName].join(" ")
-                                .length > 20
-                                ? "..."
-                                : "")}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Joined: {partner.joinedDate || "N/A"}
-                          </div>
-                        </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <svg
+                          className="animate-spin h-10 w-10 text-orange-600 mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        <p className="text-gray-500 font-medium">
+                          Loading artisans...
+                        </p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{`${partner.countryCode || ""
-                        } ${partner.phoneNo || "N/A"}`}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {(partner.expertizeField || "Not Specified").slice(
-                          0,
-                          20
-                        ) +
-                          ((partner.expertizeField || "").length > 20
-                            ? "..."
-                            : "")}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Switch
-                        checked={partner.status === "ACTIVE"}
-                        onChange={() => handleToggleStatus(partner)}
-                        className={`${partner.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
-                      >
-                        <span className="sr-only">Toggle Status</span>
-                        <span
-                          className={`${partner.status === "ACTIVE"
-                            ? "translate-x-6"
-                            : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                        />
-                      </Switch>
-                    </td>
-
-
-
-                    <td className="px-6 py-4 whitespace-nowrap relative">
-                      <button
-                        onClick={() => handleViewDetails(partner)}
-                        className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        title="View Details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredPartners.map((partner) => (
+                    <tr
+                      key={partner.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <SecureImage
+                              className="h-10 w-10 rounded-full object-cover"
+                              src={
+                                partner.avatar ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  `${partner.firstName} ${partner.lastName}`,
+                                )}&background=random`
+                              }
+                              alt=""
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {[partner.firstName, partner.lastName]
+                                .join(" ")
+                                .slice(0, 20) +
+                                ([partner.firstName, partner.lastName].join(" ")
+                                  .length > 20
+                                  ? "..."
+                                  : "")}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Joined: {partner.joinedDate || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{`${
+                          partner.countryCode || ""
+                        } ${partner.phoneNo || "N/A"}`}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {(partner.expertizeField || "Not Specified").slice(
+                            0,
+                            20,
+                          ) +
+                            ((partner.expertizeField || "").length > 20
+                              ? "..."
+                              : "")}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Switch
+                          checked={partner.status === "ACTIVE"}
+                          onChange={() => handleToggleStatus(partner)}
+                          className={`${
+                            partner.status === "ACTIVE"
+                              ? "bg-orange-600"
+                              : "bg-gray-300"
+                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        >
+                          <span className="sr-only">Toggle Status</span>
+                          <span
+                            className={`${
+                              partner.status === "ACTIVE"
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          />
+                        </Switch>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap relative">
+                        <button
+                          onClick={() => handleViewDetails(partner)}
+                          className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -1095,12 +1197,15 @@ const ArtisanManagement = () => {
 
             <div className="flex items-center gap-4 justify-self-end">
               <button
-                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                  currentPage === 1
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -1110,10 +1215,11 @@ const ArtisanManagement = () => {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                  currentPage === totalPages
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -1121,44 +1227,42 @@ const ArtisanManagement = () => {
           </div>
         </div>
       </div>
-      {
-        showStatusModal && (
-          <DisableModal
-            onClose={() => setShowStatusModal(false)}
-            onConfirm={confirmStatusChange}
-            title={selectedArtisan?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
-            message={
-              selectedArtisan?.status === "ACTIVE"
-                ? "Are you sure you want to disable this user's profile?"
-                : "Are you sure you want to activate this user's profile?"
-            }
-          />
-        )
-      }
-      {
-        showVideoModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full p-4 relative shadow-xl">
-              <button
-                onClick={() => setShowVideoModal(false)}
-                className="absolute top-2 right-2 text-gray-600 hover:text-black"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {showStatusModal && (
+        <DisableModal
+          onClose={() => setShowStatusModal(false)}
+          onConfirm={confirmStatusChange}
+          title={
+            selectedArtisan?.status === "ACTIVE"
+              ? "Disable Profile"
+              : "Activate Profile"
+          }
+          message={
+            selectedArtisan?.status === "ACTIVE"
+              ? "Are you sure you want to disable this user's profile?"
+              : "Are you sure you want to activate this user's profile?"
+          }
+        />
+      )}
+      {showVideoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-4 relative shadow-xl">
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-black"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-              <h2 className="text-lg font-bold mb-3 text-center">
-                Intro Video
-              </h2>
+            <h2 className="text-lg font-bold mb-3 text-center">Intro Video</h2>
 
-              <video
-                src={selectedPartner.introVideo}
-                controls
-                className="w-full h-[250px] rounded-lg object-cover"
-              ></video>
-            </div>
+            <video
+              src={selectedPartner.introVideo}
+              controls
+              className="w-full h-[250px] rounded-lg object-cover"
+            ></video>
           </div>
-        )
-      }
+        </div>
+      )}
       <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );

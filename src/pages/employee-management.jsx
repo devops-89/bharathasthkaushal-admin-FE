@@ -233,17 +233,9 @@ const ArtisanManagement = () => {
       };
       const response = await authControllers.addEmployee(payload);
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         toast.success("Employee registered successfully!");
-        setPartnersData((prev) => [
-          ...prev,
-          {
-            ...payload,
-            name: `${payload.firstName} ${payload.lastName}`.trim(),
-            id: prev.length + 1,
-            joinedDate: new Date().toISOString().split("T")[0],
-          },
-        ]);
+        fetchArtisans(currentPage, rowsPerPage);
         setShowAddForm(false);
         setFormData({
           firstName: "",
@@ -299,7 +291,6 @@ const ArtisanManagement = () => {
                 >
                   Dashboard
                 </NavLink>
-
                 <span>•</span>
                 <NavLink
                   to="/employee-management"

@@ -140,9 +140,9 @@ export default function WarehouseManagement() {
                 name: formData.warehouse_name,
                 country: formData.origin_country,
                 location: formData.address,
-                latitude: formData.latitude,
-                longitude: formData.longitude
             };
+            if (formData.latitude) payload.latitude = formData.latitude;
+            if (formData.longitude) payload.longitude = formData.longitude;
             await warehouseControllers.addWarehouse(payload);
             toast.success("Warehouse added successfully!");
             resetForm();
