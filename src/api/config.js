@@ -33,6 +33,13 @@ const logoutSecuredApi = Axios.create({
 const dashboardSecuredApi = Axios.create({
   baseURL: serverConstants.dashboardUrl,
 });
+const paymentSecuredApi = Axios.create({
+  baseURL: serverConstants.paymentUrl,
+});
+const paymentPublicApi = Axios.create({
+  baseURL: serverConstants.paymentUrl,
+});
+
 securedApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
@@ -62,6 +69,13 @@ dashboardSecuredApi.interceptors.request.use((config) => {
   return config;
 });
 
+paymentSecuredApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  config.headers.accessToken = token;
+  return config;
+});
+
+
 logoutSecuredApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers.accessToken = token;
@@ -80,4 +94,7 @@ export {
   getuserPublicApi,
   getuserSecuredApi,
   dashboardSecuredApi,
+  paymentSecuredApi,
+  paymentPublicApi,
 };
+

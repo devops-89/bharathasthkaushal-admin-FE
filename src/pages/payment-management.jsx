@@ -1,11 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Filter, Download, Eye, MoreHorizontal, Calendar, CreditCard, User, Package, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { paymentControllers } from '../api/payment';
 import { toast } from 'react-toastify';
+import SecureImage from '../components/SecureImage';
+import {
+  Search,
+
+  Eye,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+
+  X,
+  Mail,
+  Phone,
+  Phone as PhoneIcon,
+  User,
+  User as UserIcon,
+  Calendar,
+  Calendar as CalendarIcon,
+  CreditCard,
+  CreditCard as CreditCardIcon,
+  Package,
+  Package as PackageIcon,
+  Hash,
+  Info
+
+} from 'lucide-react';
+
+
 
 const PaymentManagement = () => {
-  const [selectedFilter, setSelectedFilter] = useState('All');
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [payments, setPayments] = useState([]);
@@ -134,29 +160,8 @@ const PaymentManagement = () => {
               />
             </div>
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
-              <select
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                value={selectedFilter}
-                onChange={(e) => setSelectedFilter(e.target.value)}
-              >
-                <option value="All">All Status</option>
-                <option value="Completed">Completed</option>
-                <option value="Failed">Failed</option>
-                <option value="Processing">Processing</option>
-                <option value="Refunded">Refunded</option>
-              </select>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 whitespace-nowrap">
-                <Filter size={16} />
-                Filter
-              </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 whitespace-nowrap">
-                <Download size={16} />
-                Export
-              </button>
-              <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 whitespace-nowrap">
-                <Plus size={20} />
-                Create Payment
-              </button>
+
+
             </div>
           </div>
         </div>
@@ -166,15 +171,7 @@ const PaymentManagement = () => {
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900">Recent Payments</h2>
-              <select
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="date">Sort by Date</option>
-                <option value="amount">Sort by Amount</option>
-                <option value="customer">Sort by Customer</option>
-              </select>
+
             </div>
           </div>
 
@@ -308,84 +305,186 @@ const PaymentManagement = () => {
       </div>
 
       {/* Payment Details Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl transform transition-all">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">Payment Details</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              {modalLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      {
+        showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Payment Transaction</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Reference: {selectedPayment?.receiptNumber || selectedPayment?.id}
+                  </p>
                 </div>
-              ) : selectedPayment ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</label>
-                      <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPayment.user?.name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</label>
-                      <p className="text-sm font-semibold text-gray-900 mt-1">₹{parseFloat(selectedPayment.amount).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Type</label>
-                      <p className="text-sm font-semibold text-gray-900 mt-1">{selectedPayment.paymentType || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</label>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${getStatusColor(selectedPayment.status)}`}>
-                        {selectedPayment.status}
-                      </span>
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</label>
-                      <p className="text-sm font-semibold text-gray-900 mt-1">{formatDate(selectedPayment.paymentDate)}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name(s)</label>
-                      <div className="mt-1 space-y-1">
-                        {selectedPayment.auctions?.map((auction, index) => (
-                          <p key={index} className="text-sm font-semibold text-gray-900">
-                            {auction.product?.product_name || 'Unknown Product'}
-                          </p>
-                        ))}
-                        {(!selectedPayment.auctions || selectedPayment.auctions.length === 0) && (
-                          <p className="text-sm text-gray-500">No products found</p>
-                        )}
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-8">
+                {modalLoading ? (
+                  <div className="flex flex-col justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                    <p className="mt-4 text-gray-500 font-medium">Fetching details...</p>
+                  </div>
+                ) : selectedPayment ? (
+                  <div className="space-y-8">
+                    {/* Status & Amount Banner */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div className="flex items-center gap-4">
+                        <div className={`p-3 rounded-xl ${getStatusColor(selectedPayment.status)} bg-opacity-10`}>
+                          <CreditCard size={32} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Amount</p>
+                          <h4 className="text-3xl font-extrabold text-gray-900">
+                            {selectedPayment.currency === 'INR' ? '₹' : selectedPayment.currency}
+                            {parseFloat(selectedPayment.amount).toLocaleString()}
+                          </h4>
+                        </div>
+                      </div>
+                      <div>
+                        <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${getStatusColor(selectedPayment.status)}`}>
+                          {selectedPayment.status}
+                        </span>
+                        <p className="text-xs text-gray-400 mt-2 text-right">
+                          Type: {selectedPayment.paymentType?.replace('_', ' ')}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No details available
-                </div>
-              )}
-            </div>
 
-            <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
-              >
-                Close
-              </button>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Transaction Details */}
+                      <div className="space-y-6">
+                        <h5 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                          <Hash className="w-5 h-5 text-orange-500" />
+                          Transaction Information
+                        </h5>
+                        <div className="grid grid-cols-1 gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                          <DetailItem label="Razorpay Payment ID" value={selectedPayment.razorpayPaymentId} />
+                          <DetailItem label="Razorpay Order ID" value={selectedPayment.razorpayOrderId} />
+                          <DetailItem label="Receipt Number" value={selectedPayment.receiptNumber} />
+                          <DetailItem label="Payment Date" value={formatDate(selectedPayment.paymentDate)} />
+                          {selectedPayment.failureReason && (
+                            <DetailItem label="Failure Reason" value={selectedPayment.failureReason} isError />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* User Details */}
+                      <div className="space-y-6">
+                        <h5 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                          <UserIcon className="w-5 h-5 text-orange-500" />
+                          Customer Profile
+                        </h5>
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-orange-100">
+                              <SecureImage
+                                src={selectedPayment.user?.avatar}
+                                alt={selectedPayment.user?.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <h6 className="text-lg font-bold text-gray-900">{selectedPayment.user?.name || 'Unknown User'}</h6>
+                              <p className="text-sm text-gray-500">ID: #{selectedPayment.user?.id}</p>
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <IconDetailItem icon={<Mail size={16} />} label="Email" value={selectedPayment.user?.email} />
+                            <IconDetailItem icon={<PhoneIcon size={16} />} label="Phone" value={`${selectedPayment.user?.countryCode} ${selectedPayment.user?.phoneNo}`} />
+                            <IconDetailItem icon={<CreditCardIcon size={16} />} label="Aadhaar" value={selectedPayment.user?.aadhaarNumber} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Associated Auctions/Products */}
+                    {selectedPayment.auctions && selectedPayment.auctions.length > 0 && (
+                      <div className="space-y-6">
+                        <h5 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                          <PackageIcon className="w-5 h-5 text-orange-500" />
+                          Associated Products
+                        </h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {selectedPayment.auctions.map((auction, idx) => (
+                            <div key={idx} className="flex gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                              <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                                <SecureImage
+                                  src={auction.product?.images?.[0]?.imageUrl}
+                                  alt={auction.product?.product_name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h6 className="text-sm font-bold text-gray-900 truncate">
+                                  {auction.product?.product_name || 'N/A'}
+                                </h6>
+                                <p className="text-xs text-gray-500 mt-1">BHK ID: {auction.product?.bhkProductId}</p>
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-sm font-bold text-orange-600">₹{parseFloat(auction.leading_amount).toLocaleString()}</span>
+                                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 uppercase font-medium">Qty: {auction.product?.quantity}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-20">
+                    <Info className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="mt-4 text-gray-500">No detailed records found for this transaction.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-3xl">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-bold transition-all shadow-sm active:scale-95"
+                >
+                  Close
+                </button>
+
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
+
     </div>
+
   );
 };
 
+// Helper components for Modal
+const DetailItem = ({ label, value, isError = false }) => (
+  <div className="flex flex-col">
+    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</label>
+    <p className={`text-sm font-semibold mt-0.5 break-all ${isError ? 'text-red-600' : 'text-gray-900'}`}>
+      {value || 'Not available'}
+    </p>
+  </div>
+);
+
+const IconDetailItem = ({ icon, label, value }) => (
+  <div className="flex items-start gap-3">
+    <div className="mt-0.5 text-orange-500">{icon}</div>
+    <div className="flex flex-col">
+      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{label}</label>
+      <p className="text-sm font-semibold text-gray-900">{value || 'N/A'}</p>
+    </div>
+  </div>
+);
+
 export default PaymentManagement;
+

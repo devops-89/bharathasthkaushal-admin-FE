@@ -6,4 +6,6 @@ export const serverConstants = {
   userUrl: `${baseUrl}/auth/api`,
   getuserUrl: `${baseUrl}/users/api`,
   dashboardUrl: `${baseUrl}/dashboard/api`,
+  paymentUrl: `${baseUrl}/payments/api/`,
 };
+

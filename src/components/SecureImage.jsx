@@ -1,19 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Package } from "lucide-react";
-
-// Global cache for image blobs to prevent re-fetching
 const imageCache = new Map();
-
 const SecureImage = ({ src, alt, className, fallbackIcon }) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const imgRef = useRef(null);
-
   const BACKEND_URL = "http://4.206.208.169:3000";
-
-  // Check if the URL is for our backend
   const isBackendImage = (url) => {
     return url && (url.includes(BACKEND_URL) || url.startsWith("/"));
   };
@@ -21,21 +15,16 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
   useEffect(() => {
     let observer;
     let isMounted = true;
-
-    // If it's not a backend image, we don't need to do any special fetching
     if (!isBackendImage(src)) {
       setLoading(false);
       return;
     }
-
     const fetchImage = async () => {
       if (!src) {
         setLoading(false);
         setError(true);
         return;
       }
-
-      // Check cache first
       if (imageCache.has(src)) {
         if (isMounted) {
           setImageSrc(imageCache.get(src));
@@ -45,7 +34,6 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
       }
 
       try {
-        // Use proxy path if applicable
         const url = src.replace(BACKEND_URL, "");
 
         const response = await axios.get(url, {
@@ -82,12 +70,12 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
 
     if (src) {
       if (imageCache.has(src)) {
-        // If cached, load immediately without observer
+       
         fetchImage();
       } else {
-        // Lazy load
+       
         observer = new IntersectionObserver(handleIntersection, {
-          rootMargin: "50px", // Start loading when 50px away
+          rootMargin: "50px", 
           threshold: 0.1,
         });
 
@@ -96,14 +84,11 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
         }
       }
     }
-
     return () => {
       isMounted = false;
       if (observer) observer.disconnect();
     };
   }, [src]);
-
-  // Render standard img for external URLs
   if (!isBackendImage(src)) {
     return (
       <img
@@ -112,7 +97,6 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
         className={className}
         onError={(e) => {
           e.target.onerror = null;
-          // Optional: set a fallback here if needed, but for now let's just keep standard behavior
         }}
       />
     );
@@ -132,7 +116,6 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
       </div>
     );
   }
-
   if (loading) {
     return (
       <div ref={imgRef} className={`bg-gray-100 animate-pulse ${className}`} />
