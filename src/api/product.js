@@ -71,8 +71,6 @@ export const productControllers = {
       pageSize,
       search,
     };
-
-    // Filter out empty, null, or undefined params
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(
         ([_, value]) => value !== "" && value !== null && value !== undefined,

@@ -23,6 +23,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import countryCodes from "../utils/countryCodes.json";
 import SecureImage from "../components/SecureImage";
+import SecureVideo from "../components/SecureVideo";
+
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -132,8 +134,7 @@ const ArtisanManagement = () => {
       );
 
       toast.success(
-        `Artisan ${
-          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        `Artisan ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`,
       );
     } catch (error) {
@@ -193,8 +194,8 @@ const ArtisanManagement = () => {
         user_caste_category: user.user_caste_category || "—",
         joinedDate: user.createdAt
           ? new Date(user.createdAt)
-              .toLocaleDateString("en-GB")
-              .replace(/\//g, "-")
+            .toLocaleDateString("en-GB")
+            .replace(/\//g, "-")
           : "—",
         aadhaarNumber: user.aadhaarNumber || "N/A",
         subCaste: user.subCaste || "_",
@@ -371,8 +372,8 @@ const ArtisanManagement = () => {
       console.error("API Request Failed (Catch Block):", error);
       toast.error(
         error.response?.data?.message ||
-          error.message ||
-          "Error registering artisan",
+        error.message ||
+        "Error registering artisan",
       );
       console.error("Error registering artisan:", error);
     } finally {
@@ -898,11 +899,10 @@ const ArtisanManagement = () => {
                         {selectedPartner.email || "N/A"}
                       </p>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                          selectedPartner.status === "ACTIVE"
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {selectedPartner.status || "Approved Artisan"}
                       </span>
@@ -914,9 +914,8 @@ const ArtisanManagement = () => {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium break-words">{`${
-                          selectedPartner.countryCode || ""
-                        } ${selectedPartner.phoneNo || "N/A"}`}</p>
+                        <p className="font-medium break-words">{`${selectedPartner.countryCode || ""
+                          } ${selectedPartner.phoneNo || "N/A"}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -1110,9 +1109,8 @@ const ArtisanManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{`${
-                          partner.countryCode || ""
-                        } ${partner.phoneNo || "N/A"}`}</div>
+                        <div className="text-sm text-gray-900">{`${partner.countryCode || ""
+                          } ${partner.phoneNo || "N/A"}`}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -1129,19 +1127,17 @@ const ArtisanManagement = () => {
                         <Switch
                           checked={partner.status === "ACTIVE"}
                           onChange={() => handleToggleStatus(partner)}
-                          className={`${
-                            partner.status === "ACTIVE"
+                          className={`${partner.status === "ACTIVE"
                               ? "bg-orange-600"
                               : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                            } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                         >
                           <span className="sr-only">Toggle Status</span>
                           <span
-                            className={`${
-                              partner.status === "ACTIVE"
+                            className={`${partner.status === "ACTIVE"
                                 ? "translate-x-6"
                                 : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                           />
                         </Switch>
                       </td>
@@ -1201,11 +1197,10 @@ const ArtisanManagement = () => {
                   currentPage > 1 && setCurrentPage(currentPage - 1)
                 }
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === 1
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -1215,11 +1210,10 @@ const ArtisanManagement = () => {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === totalPages
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                  }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -1255,11 +1249,11 @@ const ArtisanManagement = () => {
 
             <h2 className="text-lg font-bold mb-3 text-center">Intro Video</h2>
 
-            <video
+            <SecureVideo
               src={selectedPartner.introVideo}
-              controls
               className="w-full h-[250px] rounded-lg object-cover"
-            ></video>
+            />
+
           </div>
         </div>
       )}
