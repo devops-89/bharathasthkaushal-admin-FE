@@ -104,7 +104,7 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
                   Assigned Artisan
                 </p>
-                <p className="text-orange-700 font-bold">
+                <p className="text-orange-700 font-bold capitalize">
                   {stepDetails.artisan.firstName || stepDetails.artisan.lastName
                     ? `${stepDetails.artisan.firstName ?? ""} ${stepDetails.artisan.lastName ?? ""}`
                     : "Unknown Artisan"}
@@ -153,17 +153,16 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
             <div className="flex items-center gap-2 mt-4 mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Status:</h3>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-bold border ${
-                  ["APPROVED", "ADMIN_APPROVED"].includes(
-                    stepDetails?.buildStatus,
-                  )
+                className={`px-3 py-1 rounded-full text-sm font-bold border ${["APPROVED", "ADMIN_APPROVED"].includes(
+                  stepDetails?.buildStatus,
+                )
                     ? "bg-green-100 text-green-700 border-green-200"
                     : ["REJECTED", "ADMIN_REJECTED"].includes(
-                          stepDetails?.buildStatus,
-                        )
+                      stepDetails?.buildStatus,
+                    )
                       ? "bg-red-100 text-red-700 border-red-200"
                       : "bg-yellow-100 text-yellow-700 border-yellow-200"
-                }`}
+                  }`}
               >
                 {stepDetails?.buildStatus?.replace(/_/g, " ") || "PENDING"}
               </span>

@@ -187,7 +187,7 @@ export default function ProductManagement() {
                   </div>
                   <div className="space-y-2 flex flex-col flex-1">
                     <h3
-                      className="font-semibold text-lg text-gray-800 line-clamp-1"
+                      className="font-semibold text-lg text-gray-800 line-clamp-1 capitalize"
                       title={product.product_name}
                     >
                       {product.product_name}
@@ -208,7 +208,7 @@ export default function ProductManagement() {
                           </div>
                           <div className="min-w-0">
                             <p
-                              className="font-medium text-sm text-gray-900 truncate"
+                              className="font-medium text-sm text-gray-900 truncate capitalize"
                               title={`${product.artisan.firstName || product.artisan.name} ${product.artisan.lastName}`}
                             >
                               {product.artisan.firstName ||
@@ -244,8 +244,7 @@ export default function ProductManagement() {
                       onClick={() => handleViewDetails(product.productId)}
                       className="w-full mt-auto bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
                     >
-                      <Eye className="w-4 h-4" />
-                      Show Details
+                      View Details
                     </button>
                   </div>
                 </div>
@@ -282,11 +281,10 @@ export default function ProductManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -296,11 +294,10 @@ export default function ProductManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

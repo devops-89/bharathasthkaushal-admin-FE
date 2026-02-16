@@ -164,6 +164,9 @@ const ArtisanManagement = () => {
       }
       const response = await userControllers.verifyArtisan(id);
       toast.success("Artisan Verified Successfully ");
+      setSelectedPartner((prev) =>
+        prev && prev.id === id ? { ...prev, verify_status: "VERIFIED" } : prev
+      );
       fetchArtisans(currentPage, rowsPerPage);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error verifying artisan");
@@ -892,7 +895,7 @@ const ArtisanManagement = () => {
                           </span>
                         </div>
                       )}
-                      <h3 className="text-xl font-bold text-gray-900 break-words">
+                      <h3 className="text-xl font-bold text-gray-900 break-words capitalize">
                         {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
                       </h3>
                       <p className="text-gray-500 break-words">
@@ -900,8 +903,8 @@ const ArtisanManagement = () => {
                       </p>
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                           }`}
                       >
                         {selectedPartner.status || "Approved Artisan"}
@@ -1093,7 +1096,7 @@ const ArtisanManagement = () => {
                             />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 capitalize">
                               {[partner.firstName, partner.lastName]
                                 .join(" ")
                                 .slice(0, 20) +
@@ -1128,15 +1131,15 @@ const ArtisanManagement = () => {
                           checked={partner.status === "ACTIVE"}
                           onChange={() => handleToggleStatus(partner)}
                           className={`${partner.status === "ACTIVE"
-                              ? "bg-orange-600"
-                              : "bg-gray-300"
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
                             } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                         >
                           <span className="sr-only">Toggle Status</span>
                           <span
                             className={`${partner.status === "ACTIVE"
-                                ? "translate-x-6"
-                                : "translate-x-1"
+                              ? "translate-x-6"
+                              : "translate-x-1"
                               } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                           />
                         </Switch>
@@ -1198,8 +1201,8 @@ const ArtisanManagement = () => {
                 }
                 disabled={currentPage === 1}
                 className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -1211,8 +1214,8 @@ const ArtisanManagement = () => {
                 }
                 disabled={currentPage === totalPages}
                 className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
                 <ChevronRight className="w-5 h-5" />

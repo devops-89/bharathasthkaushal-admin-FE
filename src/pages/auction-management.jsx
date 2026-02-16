@@ -542,7 +542,7 @@ const AuctionManagement = () => {
               {currentAuctions.map((auction) => (
                 <tr key={auction.auction_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900" title={auction.title}>
+                    <div className="text-sm font-medium text-gray-900 capitalize" title={auction.title}>
                       {auction.title.length > 20 ? `${auction.title.substring(0, 20)}...` : auction.title}
                     </div>
                   </td>
@@ -708,7 +708,7 @@ const AuctionManagement = () => {
                       </div>
                     </div>
                     <div className="p-5">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight capitalize">
                         {selectedAuction.title}
                       </h3>
                       <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
@@ -743,11 +743,11 @@ const AuctionManagement = () => {
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Category</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.category}</p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">{selectedAuction.category}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Subcategory</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.subcategory || "N/A"}</p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">{selectedAuction.subcategory || "N/A"}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Warehouse</p>

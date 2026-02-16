@@ -178,7 +178,7 @@ const SubcategoryManagement = () => {
       <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent capitalize">
               {categoryName} Subcategories
             </h1>
             <nav className="flex items-center space-x-2 text-sm text-orange-600 mt-2">
@@ -196,7 +196,7 @@ const SubcategoryManagement = () => {
                 Categories
               </button>
               <span>•</span>
-              <span className="font-semibold">{categoryName}</span>
+              <span className="font-semibold capitalize">{categoryName}</span>
             </nav>
           </div>
         </div>
@@ -369,7 +369,7 @@ const SubcategoryManagement = () => {
               />
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900">{sub.name}</h3>
+                  <h3 className="font-semibold text-gray-900 capitalize">{sub.name}</h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                   {sub.description}

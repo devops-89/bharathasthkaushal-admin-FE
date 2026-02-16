@@ -78,7 +78,7 @@ const Header = ({ toggleSidebar }) => {
                   className="relative w-10 h-10 object-cover rounded-full border-2 border-white"
                 />
               </div>
-              <h1 className="text-sm md:text-2xl font-bold tracking-tight hidden sm:block">
+              <h1 className="text-xs md:text-xl font-bold tracking-tight hidden sm:block">
                 <span className="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                   Bharathastkaushal
                 </span>
@@ -91,13 +91,6 @@ const Header = ({ toggleSidebar }) => {
               className="flex items-center gap-4 pl-6 border-l border-gray-100 cursor-pointer group"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
-                  {user.name}
-                </p>
-
-              </div>
-
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/30 transition-all duration-300 ring-2 ring-white">
                 <User className="w-5 h-5 text-white" />
               </div>

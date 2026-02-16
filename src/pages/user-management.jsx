@@ -164,7 +164,7 @@ function UserManagement() {
                         />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 capitalize">
                           {fullName(user)}
                         </div>
                         <div className="text-xs text-gray-500">
@@ -192,7 +192,7 @@ function UserManagement() {
                         className={`${user?.status === "ACTIVE"
                           ? "translate-x-6"
                           : "translate-x-1"
-                          } inline-block h-[18px] w-[18px] transform rounded-full bg-white transition`}
+                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                       />
                     </Switch>
                   </td>

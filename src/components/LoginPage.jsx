@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { Eye, EyeOff } from "lucide-react";
-
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 export default function LoginPage({ onLogin }) {
@@ -26,10 +25,8 @@ export default function LoginPage({ onLogin }) {
 
     let newValue = value;
     if (id === "email") {
-      // Actively remove all spaces to prevent leading, trailing, or middle spaces
       newValue = newValue.replace(/\s/g, "");
     }
-
     setState((prev) => ({ ...prev, [id]: newValue }));
     setErrors((prev) => ({
       ...prev,
@@ -38,19 +35,14 @@ export default function LoginPage({ onLogin }) {
       general: "",
     }));
   };
-
-
   const handleSubmit = () => {
     let frontendErrors = { email: "", password: "", general: "" };
-
-    // Trim email immediately and update state unconditionally to ensure visual update
     const emailTrimmed = state.email.trim().replace(/\s+/g, "");
     setState(prev => ({ ...prev, email: emailTrimmed }));
 
     if (!emailTrimmed) {
       frontendErrors.email = "Invalid email";
     } else {
-      // Stricter regex to catch trailing commas and invalid chars
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(emailTrimmed)) {
         frontendErrors.email = "Invalid email";
@@ -75,7 +67,6 @@ export default function LoginPage({ onLogin }) {
     };
     setIsLoading(true);
     setErrors({ email: "", password: "", general: "" });
-
     authControllers
       .login(body)
       .then((res) => {
@@ -92,9 +83,7 @@ export default function LoginPage({ onLogin }) {
           errMessage = "Invalid email";
           errorMsgLower = "invalid email";
         }
-
         let apiErrors = { email: "", password: "", general: "" };
-
         if (errorMsgLower.includes("password") ||
           errorMsgLower.includes("incorrect") ||
           errorMsgLower.includes("wrong") ||
@@ -107,7 +96,6 @@ export default function LoginPage({ onLogin }) {
           errorMsgLower.includes("exist")) {
           apiErrors.email = "Invalid email";
         }
-
         setErrors(apiErrors);
         if (!apiErrors.email && !apiErrors.password) {
           toast.error(errMessage);
@@ -116,7 +104,6 @@ export default function LoginPage({ onLogin }) {
         setIsLoading(false);
       });
   };
-
   const containerStyle = {
     height: "100vh",
     display: "flex",

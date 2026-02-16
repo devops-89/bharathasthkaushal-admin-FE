@@ -254,7 +254,7 @@ export default function WarehouseManagement() {
                                             key={warehouse._id}
                                             className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                                         >
-                                            <td className="py-4 px-4 font-medium text-gray-800" title={warehouse.name || warehouse.warehouse_name || 'N/A'}>
+                                            <td className="py-4 px-4 font-medium text-gray-800 capitalize" title={warehouse.name || warehouse.warehouse_name || 'N/A'}>
                                                 {(warehouse.name || warehouse.warehouse_name || 'N/A').length > 25
                                                     ? `${(warehouse.name || warehouse.warehouse_name || 'N/A').substring(0, 25)}...`
                                                     : (warehouse.name || warehouse.warehouse_name || 'N/A')}

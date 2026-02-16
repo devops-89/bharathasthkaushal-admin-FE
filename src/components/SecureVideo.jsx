@@ -1,42 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Video } from "lucide-react";
-
-// Global cache for video blobs to prevent re-fetching
 const videoCache = new Map();
-
 const SecureVideo = ({ src, className, controls = true, poster }) => {
     const [videoSrc, setVideoSrc] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const videoRef = useRef(null);
-
     const BACKEND_URL = "http://4.206.208.169:3000";
-
-    // Check if the URL is for our backend
     const isBackendVideo = (url) => {
         return url && (url.includes(BACKEND_URL) || url.startsWith("/"));
     };
-
     useEffect(() => {
         let observer;
         let isMounted = true;
-
-        // If it's not a backend video, we don't need to do any special fetching
         if (!isBackendVideo(src)) {
             setLoading(false);
             setVideoSrc(src);
             return;
         }
-
         const fetchVideo = async () => {
             if (!src) {
                 setLoading(false);
                 setError(true);
                 return;
             }
-
-            // Check cache first
             if (videoCache.has(src)) {
                 if (isMounted) {
                     setVideoSrc(videoCache.get(src));
@@ -44,9 +32,7 @@ const SecureVideo = ({ src, className, controls = true, poster }) => {
                 }
                 return;
             }
-
             try {
-                // Use proxy path if applicable
                 const url = src.replace(BACKEND_URL, "");
 
                 const response = await axios.get(url, {
@@ -55,7 +41,6 @@ const SecureVideo = ({ src, className, controls = true, poster }) => {
                         "x-company-id": "2917DA28-C412-5525-E814-A3E1E80638CB",
                     },
                 });
-
                 const objectUrl = URL.createObjectURL(response.data);
                 videoCache.set(src, objectUrl);
 
@@ -71,7 +56,6 @@ const SecureVideo = ({ src, className, controls = true, poster }) => {
                 }
             }
         };
-
         const handleIntersection = (entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
@@ -80,15 +64,12 @@ const SecureVideo = ({ src, className, controls = true, poster }) => {
                 }
             });
         };
-
         if (src) {
             if (videoCache.has(src)) {
-                // If cached, load immediately without observer
                 fetchVideo();
             } else {
-                // Lazy load
                 observer = new IntersectionObserver(handleIntersection, {
-                    rootMargin: "200px", // Start loading when 200px away (videos are bigger)
+                 rootMargin: "200px",
                     threshold: 0.1,
                 });
 
@@ -97,14 +78,11 @@ const SecureVideo = ({ src, className, controls = true, poster }) => {
                 }
             }
         }
-
         return () => {
             isMounted = false;
             if (observer) observer.disconnect();
         };
     }, [src]);
-
-    // Render standard video for external URLs
     if (!isBackendVideo(src)) {
         return (
             <video

@@ -230,7 +230,7 @@ export default function CategoryManagement() {
                   </div>
                   <div className="space-y-2 flex flex-col flex-grow">
                     <h3
-                      className="font-semibold text-lg text-gray-800 line-clamp-1"
+                      className="font-semibold text-lg text-gray-800 line-clamp-1 capitalize"
                       title={cat.category_name}
                     >
                       {cat.category_name}
@@ -248,8 +248,7 @@ export default function CategoryManagement() {
                         onClick={() => handleViewDetails(cat.category_id)}
                         className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
                       >
-                        <Eye className="w-4 h-4" />
-                        Show Subcategory
+                        View Subcategory
                       </button>
                     </div>
                   </div>
@@ -288,8 +287,8 @@ export default function CategoryManagement() {
                   }
                   disabled={currentPage === 1}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -301,8 +300,8 @@ export default function CategoryManagement() {
                   }
                   disabled={currentPage === totalPages}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronRight className="w-5 h-5" />
