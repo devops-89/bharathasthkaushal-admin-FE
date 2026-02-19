@@ -11,7 +11,6 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [productData, setProductData] = useState({
-
     product_name: "",
     description: "",
     categoryId: "",
@@ -33,8 +32,6 @@ const EditProduct = () => {
     // size: "",
   });
 
-
-
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -44,7 +41,7 @@ const EditProduct = () => {
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
   const filteredCountries = countries.filter((c) =>
-    c.toLowerCase().includes(countrySearch.toLowerCase())
+    c.toLowerCase().includes(countrySearch.toLowerCase()),
   );
 
   useEffect(() => {
@@ -81,21 +78,19 @@ const EditProduct = () => {
         const resolveId = (val, list) => {
           if (!val) return "";
 
-
           if (typeof val === "object") {
             if (val.category_id) return val.category_id;
 
-            const match = list.find((c) => c._id === val._id || c.id === val._id);
+            const match = list.find(
+              (c) => c._id === val._id || c.id === val._id,
+            );
             return match ? match.category_id : val._id || "";
           }
 
           const matchByCatId = list.find((c) => c.category_id == val);
           if (matchByCatId) return matchByCatId.category_id;
 
-
-          const matchByObjId = list.find(
-            (c) => c._id == val || c.id == val
-          );
+          const matchByObjId = list.find((c) => c._id == val || c.id == val);
           if (matchByObjId) return matchByObjId.category_id;
 
           return val;
@@ -114,9 +109,9 @@ const EditProduct = () => {
           try {
             const res2 = await categoryControllers.getSubCategory(catId);
             subCats = (res2.data?.data?.docs || []).filter(
-              (item) => item.type === "Sub-Category"
+              (item) => item.type === "Sub-Category",
             );
-            setSubCategories(subCats)
+            setSubCategories(subCats);
             subCatId = resolveId(rawSubCat, subCats);
             console.log("Resolved SubCat ID:", subCatId);
           } catch (err) {
@@ -137,7 +132,9 @@ const EditProduct = () => {
         let fetchedWarehouses = [];
         if (p.country) {
           try {
-            const wRes = await warehouseControllers.getWarehousesByCountry(p.country);
+            const wRes = await warehouseControllers.getWarehousesByCountry(
+              p.country,
+            );
             fetchedWarehouses = wRes.data?.data?.docs || wRes.data?.data || [];
             setWarehouses(fetchedWarehouses);
           } catch (err) {
@@ -145,13 +142,16 @@ const EditProduct = () => {
           }
         }
 
-        const rawWarehouseId = p.warehouseId || (p.warehouse && (p.warehouse._id || p.warehouse.id));
+        const rawWarehouseId =
+          p.warehouseId || (p.warehouse && (p.warehouse._id || p.warehouse.id));
         let finalWarehouseId = "";
 
         if (rawWarehouseId) {
           // Try to find matching warehouse in the fetched list to ensure ID format matches dropdown options
-          const foundW = fetchedWarehouses.find(w => (w._id === rawWarehouseId || w.id === rawWarehouseId));
-          finalWarehouseId = foundW ? (foundW._id || foundW.id) : rawWarehouseId;
+          const foundW = fetchedWarehouses.find(
+            (w) => w._id === rawWarehouseId || w.id === rawWarehouseId,
+          );
+          finalWarehouseId = foundW ? foundW._id || foundW.id : rawWarehouseId;
         }
 
         setProductData({
@@ -172,7 +172,6 @@ const EditProduct = () => {
           warehouseId: finalWarehouseId || "",
         });
         setCountrySearch(p.country || "");
-
       } catch (err) {
         console.error("Error fetching data:", err);
         toast.error("Failed to load product data");
@@ -197,7 +196,7 @@ const EditProduct = () => {
       const res = await categoryControllers.getSubCategory(selectedId);
 
       const onlySubs = (res.data?.data?.docs || []).filter(
-        (item) => item.type === "Sub-Category"
+        (item) => item.type === "Sub-Category",
       );
 
       setSubCategories(onlySubs);
@@ -217,7 +216,8 @@ const EditProduct = () => {
 
     if (selectedCountry) {
       try {
-        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        const res =
+          await warehouseControllers.getWarehousesByCountry(selectedCountry);
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
         console.error("Error fetching warehouses:", error);
@@ -307,7 +307,7 @@ const EditProduct = () => {
                 onClick={() => {
                   setIsCountryDropdownOpen(true);
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
               {isCountryDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -326,7 +326,9 @@ const EditProduct = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                    <div className="px-4 py-2 text-gray-500 text-sm">
+                      No countries found
+                    </div>
                   )}
                 </div>
               )}
@@ -375,7 +377,6 @@ const EditProduct = () => {
                 name="subCategoryId"
                 value={productData.subCategoryId || ""}
                 onChange={handleChange}
-
                 disabled={!subCategories.length}
                 className="w-full p-2 border rounded-lg"
               >

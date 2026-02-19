@@ -34,7 +34,6 @@
 //     warehouseId: "",
 //   });
 
-
 //   const [categories, setCategories] = useState([]);
 //   const [subCategories, setSubCategories] = useState([]);
 //   const [warehouses, setWarehouses] = useState([]);
@@ -93,7 +92,6 @@
 //   const [loading, setLoading] = useState(false);
 //   const [errors, setErrors] = useState({});
 
-
 //   const [countrySearch, setCountrySearch] = useState("");
 //   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
@@ -109,7 +107,6 @@
 //       e.preventDefault();
 //     }
 //   };
-
 
 //   useEffect(() => {
 //     const handleClickOutside = (event) => {
@@ -373,7 +370,6 @@
 //               )}
 //             </div>
 
-
 //             {/* Warehouse */}
 //             <div>
 //               <label className="block text-gray-700 font-medium mb-2">
@@ -398,7 +394,6 @@
 //                 <p className="text-red-500 text-sm mt-1">{errors.warehouseId}</p>
 //               )}
 //             </div>
-
 
 //             {/* Category */}
 //             <div>
@@ -516,8 +511,6 @@
 //                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
 //               />
 //             </div>
-
-
 
 //             {/* Time to Make */}
 //             <div>
@@ -897,7 +890,7 @@ const AddProduct = () => {
       console.log("SUBCATEGORY RESPONSE:", res.data.data.docs);
 
       const filteredSubs = (res.data?.data?.docs || []).filter(
-        (item) => item.type === "Sub-Category"
+        (item) => item.type === "Sub-Category",
       );
 
       setSubCategories(filteredSubs);
@@ -908,12 +901,17 @@ const AddProduct = () => {
 
   const handleCountryChange = async (e) => {
     const selectedCountry = e.target.value;
-    setFormData((prev) => ({ ...prev, country: selectedCountry, warehouseId: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      country: selectedCountry,
+      warehouseId: "",
+    }));
     setWarehouses([]);
 
     if (selectedCountry) {
       try {
-        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        const res =
+          await warehouseControllers.getWarehousesByCountry(selectedCountry);
         console.log("Warehouse Response:", res.data);
 
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
@@ -931,12 +929,11 @@ const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
   const filteredCountries = countries.filter((c) =>
-    c.toLowerCase().includes(countrySearch.toLowerCase())
+    c.toLowerCase().includes(countrySearch.toLowerCase()),
   );
 
   const [showFinishOther, setShowFinishOther] = useState(false);
@@ -947,7 +944,6 @@ const AddProduct = () => {
       e.preventDefault();
     }
   };
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -963,27 +959,39 @@ const AddProduct = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.product_name.trim()) newErrors.product_name = "Product Name is required";
+    if (!formData.product_name.trim())
+      newErrors.product_name = "Product Name is required";
     if (!formData.categoryId) newErrors.categoryId = "Category is required";
-    if (!formData.subCategoryId) newErrors.subCategoryId = "SubCategory is required";
+    if (!formData.subCategoryId)
+      newErrors.subCategoryId = "SubCategory is required";
 
-    if (!formData.productPricePerPiece) newErrors.productPricePerPiece = "Price is required";
-    else if (Number(formData.productPricePerPiece) <= 0) newErrors.productPricePerPiece = "Price must be greater than 0";
+    if (!formData.productPricePerPiece)
+      newErrors.productPricePerPiece = "Price is required";
+    else if (Number(formData.productPricePerPiece) <= 0)
+      newErrors.productPricePerPiece = "Price must be greater than 0";
 
     if (!formData.quantity) newErrors.quantity = "Quantity is required";
-    else if (Number(formData.quantity) <= 0) newErrors.quantity = "Quantity must be greater than 0";
+    else if (Number(formData.quantity) <= 0)
+      newErrors.quantity = "Quantity must be greater than 0";
 
     if (!formData.material.trim()) newErrors.material = "Material is required";
-    if (!formData.description.trim()) newErrors.description = "Description is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
     if (!formData.country) newErrors.country = "Country is required";
     if (!formData.warehouseId) newErrors.warehouseId = "Warehouse is required";
-    if (images.length === 0) newErrors.images = "At least one product image is required";
+    if (images.length === 0)
+      newErrors.images = "At least one product image is required";
 
-    if (formData.weightValue && Number(formData.weightValue) <= 0) newErrors.weightValue = "Weight must be greater than 0";
-    if (formData.length && Number(formData.length) <= 0) newErrors.length = "Length must be greater than 0";
-    if (formData.breadth && Number(formData.breadth) <= 0) newErrors.breadth = "Breadth must be greater than 0";
-    if (formData.height && Number(formData.height) <= 0) newErrors.height = "Height must be greater than 0";
-    if (formData.timeToMake && Number(formData.timeToMake) <= 0) newErrors.timeToMake = "Time to make must be greater than 0";
+    if (formData.weightValue && Number(formData.weightValue) <= 0)
+      newErrors.weightValue = "Weight must be greater than 0";
+    if (formData.length && Number(formData.length) <= 0)
+      newErrors.length = "Length must be greater than 0";
+    if (formData.breadth && Number(formData.breadth) <= 0)
+      newErrors.breadth = "Breadth must be greater than 0";
+    if (formData.height && Number(formData.height) <= 0)
+      newErrors.height = "Height must be greater than 0";
+    if (formData.timeToMake && Number(formData.timeToMake) <= 0)
+      newErrors.timeToMake = "Time to make must be greater than 0";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1000,7 +1008,9 @@ const AddProduct = () => {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const invalidFiles = files.filter((file) => !validTypes.includes(file.type));
+    const invalidFiles = files.filter(
+      (file) => !validTypes.includes(file.type),
+    );
 
     if (invalidFiles.length > 0) {
       const errorMessage = "only jpeg ,jpg and png format are allowed";
@@ -1067,7 +1077,7 @@ const AddProduct = () => {
       if (res && res.data) {
         toast.success("Product added successfully!", {
           icon: <CheckCircle className="text-orange-600" />,
-          progressStyle: { background: "#ea580c" }
+          progressStyle: { background: "#ea580c" },
         });
         console.log("Product Response:", res.data);
         setTimeout(() => {
@@ -1088,7 +1098,9 @@ const AddProduct = () => {
     navigate(-1);
   };
 
-  const totalPrice = (parseFloat(formData.productPricePerPiece) || 0) * (parseFloat(formData.quantity) || 0);
+  const totalPrice =
+    (parseFloat(formData.productPricePerPiece) || 0) *
+    (parseFloat(formData.quantity) || 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
@@ -1123,12 +1135,15 @@ const AddProduct = () => {
                 name="product_name"
                 value={formData.product_name}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.product_name ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.product_name ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholder="Enter product name"
               />
               {errors.product_name && (
-                <p className="text-red-500 text-sm mt-1">{errors.product_name}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.product_name}
+                </p>
               )}
             </div>
 
@@ -1154,12 +1169,16 @@ const AddProduct = () => {
                     // If a country is already selected, we might want to clear search or keep it.
                     // Keeping it allows editing. Clearing it allows seeing all options.
                     // Let's keep it simple: if clicked, show dropdown.
-                    if (formData.country && countrySearch !== formData.country) {
+                    if (
+                      formData.country &&
+                      countrySearch !== formData.country
+                    ) {
                       setCountrySearch(formData.country);
                     }
                   }}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.country ? "border-red-500" : "border-gray-300"
-                    }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                    errors.country ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
                 {isCountryDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -1178,7 +1197,9 @@ const AddProduct = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+                      <div className="px-4 py-2 text-gray-500 text-sm">
+                        No countries found
+                      </div>
                     )}
                   </div>
                 )}
@@ -1187,7 +1208,6 @@ const AddProduct = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.country}</p>
               )}
             </div>
-
 
             {/* Warehouse */}
             <div>
@@ -1198,11 +1218,14 @@ const AddProduct = () => {
                 name="warehouseId"
                 value={formData.warehouseId}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.warehouseId ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.warehouseId ? "border-red-500" : "border-gray-300"
+                }`}
                 disabled={!formData.country}
               >
-                <option value="" disabled>Select Warehouse</option>
+                <option value="" disabled>
+                  Select Warehouse
+                </option>
                 {warehouses.map((w) => (
                   <option key={w._id || w.id} value={w._id || w.id}>
                     {w.warehouse_name || w.name}
@@ -1210,10 +1233,11 @@ const AddProduct = () => {
                 ))}
               </select>
               {errors.warehouseId && (
-                <p className="text-red-500 text-sm mt-1">{errors.warehouseId}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.warehouseId}
+                </p>
               )}
             </div>
-
 
             {/* Category */}
             <div>
@@ -1224,8 +1248,9 @@ const AddProduct = () => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleCategoryChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.categoryId ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.categoryId ? "border-red-500" : "border-gray-300"
+                }`}
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
@@ -1248,8 +1273,9 @@ const AddProduct = () => {
                 name="subCategoryId"
                 value={formData.subCategoryId}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.subCategoryId ? "border-red-500" : "border-gray-300"
+                }`}
                 disabled={!subCategories.length}
               >
                 <option value="">Select SubCategory</option>
@@ -1260,7 +1286,9 @@ const AddProduct = () => {
                 ))}
               </select>
               {errors.subCategoryId && (
-                <p className="text-red-500 text-sm mt-1">{errors.subCategoryId}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.subCategoryId}
+                </p>
               )}
             </div>
 
@@ -1274,8 +1302,11 @@ const AddProduct = () => {
                 name="productPricePerPiece"
                 value={formData.productPricePerPiece}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.productPricePerPiece ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.productPricePerPiece
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
                 min="0.01"
                 step="0.01"
                 onKeyDown={preventNegative}
@@ -1298,8 +1329,9 @@ const AddProduct = () => {
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.quantity ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.quantity ? "border-red-500" : "border-gray-300"
+                }`}
                 min="1"
                 step="1"
                 onKeyDown={preventNegative}
@@ -1323,8 +1355,6 @@ const AddProduct = () => {
               />
             </div>
 
-
-
             {/* Time to Make */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -1338,7 +1368,7 @@ const AddProduct = () => {
                 min="1"
                 step="1"
                 onKeyDown={preventNegative}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Days"
               />
               {errors.timeToMake && (
@@ -1356,8 +1386,9 @@ const AddProduct = () => {
                 name="material"
                 value={formData.material}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.material ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.material ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholder="Cotton, Silk, etc."
               />
               {errors.material && (
@@ -1382,7 +1413,7 @@ const AddProduct = () => {
                     handleInputChange(e);
                   }
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               >
                 <option value="">Select Finish</option>
                 <option value="Matte">Matte</option>
@@ -1399,7 +1430,7 @@ const AddProduct = () => {
                   value={formData.finish}
                   onChange={handleInputChange}
                   placeholder="Enter custom finish"
-                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               )}
             </div>
@@ -1421,7 +1452,7 @@ const AddProduct = () => {
                     handleInputChange(e);
                   }
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               >
                 <option value="">Select Wash Care</option>
                 <option value="Dry Clean Only">Dry Clean Only</option>
@@ -1437,7 +1468,7 @@ const AddProduct = () => {
                   value={formData.washCare}
                   onChange={handleInputChange}
                   placeholder="Enter custom wash care"
-                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               )}
             </div>
@@ -1452,7 +1483,7 @@ const AddProduct = () => {
                 name="artUsed"
                 value={formData.artUsed}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Madhubani, Warli, etc."
               />
             </div>
@@ -1467,12 +1498,10 @@ const AddProduct = () => {
                 name="pattern"
                 value={formData.pattern}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Floral, Geometric, Striped, etc."
               />
             </div>
-
-
 
             {/* Net Weight */}
             <div>
@@ -1488,14 +1517,14 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Weight"
                 />
                 <select
                   name="weightUnit"
                   value={formData.weightUnit}
                   onChange={handleInputChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 >
                   <option value="gm">gm</option>
                   <option value="kg">kg</option>
@@ -1517,7 +1546,7 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Length"
                 />
                 <input
@@ -1528,7 +1557,7 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Breadth"
                 />
                 <input
@@ -1539,14 +1568,14 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Height"
                 />
                 <select
                   name="dimensionUnit"
                   value={formData.dimensionUnit}
                   onChange={handleInputChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 >
                   <option value="cm">cm</option>
                   <option value="inches">inches</option>
@@ -1564,12 +1593,15 @@ const AddProduct = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows="4"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.description ? "border-red-500" : "border-gray-300"
-                  }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                  errors.description ? "border-red-500" : "border-gray-300"
+                }`}
                 placeholder="Describe your product..."
               />
               {errors.description && (
-                <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </p>
               )}
             </div>
 
@@ -1588,7 +1620,9 @@ const AddProduct = () => {
               {errors.images ? (
                 <p className="text-red-500 text-sm mt-1">{errors.images}</p>
               ) : (
-                <p className="text-gray-500 text-sm mt-1">Only JPEG, JPG, and PNG formats are allowed.</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  Only JPEG, JPG, and PNG formats are allowed.
+                </p>
               )}
             </div>
           </div>
@@ -1614,7 +1648,11 @@ const AddProduct = () => {
           </div>
         </div>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} style={{ zIndex: 99999 }} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        style={{ zIndex: 99999 }}
+      />
     </div>
   );
 };

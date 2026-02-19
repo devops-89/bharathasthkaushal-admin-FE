@@ -157,7 +157,10 @@ const SubcategoryManagement = () => {
       const errorMessage =
         err.response?.data?.message || "Failed to add subcategory";
       toast.error(errorMessage);
-      console.error("API Error:", err.response ? err.response.data : err.message);
+      console.error(
+        "API Error:",
+        err.response ? err.response.data : err.message,
+      );
     }
   };
 
@@ -209,7 +212,7 @@ const SubcategoryManagement = () => {
               placeholder="Search subcategories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
             />
           </div>
           <button
@@ -247,7 +250,7 @@ const SubcategoryManagement = () => {
                   <input
                     type="text"
                     value={categoryName}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-gray-100"
                     readOnly
                   />
                 </div>
@@ -262,7 +265,7 @@ const SubcategoryManagement = () => {
                     name="category_name"
                     value={formData.category_name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                     placeholder="Enter subcategory name"
                     required
                   />
@@ -309,7 +312,7 @@ const SubcategoryManagement = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                     placeholder="Enter description"
                     required
                   />
@@ -369,7 +372,9 @@ const SubcategoryManagement = () => {
               />
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 capitalize">{sub.name}</h3>
+                  <h3 className="font-semibold text-gray-900 capitalize">
+                    {sub.name}
+                  </h3>
                 </div>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                   {sub.description}
@@ -391,7 +396,7 @@ const SubcategoryManagement = () => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -408,10 +413,11 @@ const SubcategoryManagement = () => {
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -421,10 +427,11 @@ const SubcategoryManagement = () => {
                 currentPage < totalPages && setCurrentPage(currentPage + 1)
               }
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>

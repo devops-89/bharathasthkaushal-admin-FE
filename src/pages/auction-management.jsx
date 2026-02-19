@@ -28,7 +28,7 @@ const formatDateForDisplay = (dateString) => {
 
   let hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
   hours = hours ? hours : 12;
 
@@ -54,17 +54,20 @@ const AuctionManagement = () => {
     quantity: "",
     country: "",
     warehouseId: "",
-
   });
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [warehouses, setWarehouses] = useState([]);
   const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
   const filteredCountries = countries.filter((c) =>
-    c.toLowerCase().includes(countrySearch.toLowerCase())
+    c.toLowerCase().includes(countrySearch.toLowerCase()),
   );
   const handleCountryChange = async (selectedCountry) => {
-    setNewAuction((prev) => ({ ...prev, country: selectedCountry, warehouseId: "" }));
+    setNewAuction((prev) => ({
+      ...prev,
+      country: selectedCountry,
+      warehouseId: "",
+    }));
     setCountrySearch(selectedCountry);
     setIsCountryDropdownOpen(false);
     setWarehouses([]);
@@ -72,7 +75,8 @@ const AuctionManagement = () => {
     if (selectedCountry) {
       setIsWarehouseLoading(true);
       try {
-        const res = await warehouseControllers.getWarehousesByCountry(selectedCountry);
+        const res =
+          await warehouseControllers.getWarehousesByCountry(selectedCountry);
         console.log("Warehouses Response:", res.data);
         const data = res.data.data;
         if (Array.isArray(data)) {
@@ -96,9 +100,12 @@ const AuctionManagement = () => {
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const filteredAuctions = auctions.filter((auction) =>
-    auction.title.toLowerCase().includes(searchTerm.toLowerCase())
+    auction.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-  const currentAuctions = filteredAuctions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentAuctions = filteredAuctions.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
   const totalPages = Math.ceil(filteredAuctions.length / rowsPerPage);
 
   const fetchProducts = async () => {
@@ -111,7 +118,7 @@ const AuctionManagement = () => {
     } catch (err) {
       console.error(
         "Error fetching products:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
       setError("Failed to fetch products. Please try again.");
       setProducts([]);
@@ -135,7 +142,12 @@ const AuctionManagement = () => {
     setLoading(false);
   };
   useEffect(() => {
-    if (showDetailsModal || showAddForm || showWinnersModal || showWinnerModal) {
+    if (
+      showDetailsModal ||
+      showAddForm ||
+      showWinnersModal ||
+      showWinnerModal
+    ) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -169,7 +181,13 @@ const AuctionManagement = () => {
         reservePrice: auction.reserve_price || 0,
         quantity: auction.quantity || 1,
         startDate: formatDateForDisplay(auction.start_date) || "Not started",
-        endDate: formatDateForDisplay(auction.hard_close_at || auction.end_date || auction.hardCloseAt || auction.endDate) || "Not set",
+        endDate:
+          formatDateForDisplay(
+            auction.hard_close_at ||
+              auction.end_date ||
+              auction.hardCloseAt ||
+              auction.endDate,
+          ) || "Not set",
 
         status: auction.status || "DRAFT",
 
@@ -196,7 +214,10 @@ const AuctionManagement = () => {
     console.log("Fetching products for:", { country, warehouseId });
     setIsProductLoading(true);
     try {
-      const res = await productControllers.getProductsByWarehouse(country, warehouseId);
+      const res = await productControllers.getProductsByWarehouse(
+        country,
+        warehouseId,
+      );
       console.log("Products By Warehouse Response:", res.data);
       const data = res.data.data;
       if (Array.isArray(data)) {
@@ -220,7 +241,11 @@ const AuctionManagement = () => {
     const currentCountry = newAuction.country || countrySearch;
     console.log("Warehouse changed:", warehouseId, "Country:", currentCountry);
 
-    setNewAuction(prev => ({ ...prev, warehouseId: warehouseId, productId: "" }));
+    setNewAuction((prev) => ({
+      ...prev,
+      warehouseId: warehouseId,
+      productId: "",
+    }));
 
     if (currentCountry && warehouseId) {
       fetchProductsByWarehouse(currentCountry, warehouseId);
@@ -240,19 +265,23 @@ const AuctionManagement = () => {
       WON: "bg-teal-200 text-teal-800",
       ACTIVE: "bg-green-200 text-green-800",
     };
-    return `px-3 py-1 rounded-full text-sm font-medium ${statusMap[status] || "bg-gray-200 text-gray-800"
-      }`;
+    return `px-3 py-1 rounded-full text-sm font-medium ${
+      statusMap[status] || "bg-gray-200 text-gray-800"
+    }`;
   };
-
 
   const handleAddAuction = async (e) => {
     e.preventDefault();
 
     // Check quantity validation
-    const selectedProduct = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
+    const selectedProduct = products.find(
+      (p) => (p.productId || p._id || p.id) == newAuction.productId,
+    );
     if (selectedProduct) {
       if (parseInt(newAuction.quantity) > parseInt(selectedProduct.quantity)) {
-        toast.error(`Auction quantity cannot exceed available product quantity (${selectedProduct.quantity})`);
+        toast.error(
+          `Auction quantity cannot exceed available product quantity (${selectedProduct.quantity})`,
+        );
         return;
       }
     }
@@ -287,10 +316,12 @@ const AuctionManagement = () => {
 
       const newAuctionData = {
         ...res.data.data,
-        title: res.data.data.title || selectedProduct?.product_name || "Unknown",
+        title:
+          res.data.data.title || selectedProduct?.product_name || "Unknown",
         category:
-          products.find((p) => (p.productId || p._id || p.id) == newAuction.productId)
-            ?.material === "Cotton"
+          products.find(
+            (p) => (p.productId || p._id || p.id) == newAuction.productId,
+          )?.material === "Cotton"
             ? "Handloom"
             : "Handicraft",
         subcategory: "",
@@ -304,7 +335,7 @@ const AuctionManagement = () => {
           res.data.data.status === "LIVE"
             ? "Active"
             : res.data.data.status.charAt(0).toUpperCase() +
-            res.data.data.status.slice(1).toLowerCase(),
+              res.data.data.status.slice(1).toLowerCase(),
         description: selectedProduct?.description || "No description",
         dimensions: selectedProduct?.dimension || "Not specified",
         weight: selectedProduct?.netWeight || "Not specified",
@@ -331,15 +362,15 @@ const AuctionManagement = () => {
     } catch (err) {
       console.error(
         "Error creating auction:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
       setError(
         "Error creating auction: " +
-        (err.response?.data?.message || err.message || "Unknown error")
+          (err.response?.data?.message || err.message || "Unknown error"),
       );
       toast.error(
         "Error creating auction: " +
-        (err.response?.data?.message || err.message || "Unknown error")
+          (err.response?.data?.message || err.message || "Unknown error"),
       );
     } finally {
       setLoading(false);
@@ -351,7 +382,7 @@ const AuctionManagement = () => {
     setError(null);
     try {
       const res = await productControllers.getAuctionDetails(
-        auction.auction_id
+        auction.auction_id,
       );
       console.log("Auction Details Response:", res.data);
       const details = res.data.data.auction;
@@ -359,15 +390,26 @@ const AuctionManagement = () => {
       const mappedDetails = {
         ...details,
         title: details.product?.product_name || "Unknown",
-        category: details.category?.category_name || details.product?.category?.category_name || (details.product?.material === "Cotton" ? "Handloom" : "Handicraft"),
-        subcategory: details.subCategory?.category_name || details.product?.subCategory?.category_name || "N/A",
+        category:
+          details.category?.category_name ||
+          details.product?.category?.category_name ||
+          (details.product?.material === "Cotton" ? "Handloom" : "Handicraft"),
+        subcategory:
+          details.subCategory?.category_name ||
+          details.product?.subCategory?.category_name ||
+          "N/A",
         startingBid: parseFloat(details.start_price || 0),
         currentBid: parseFloat(details.leading_amount || 0),
         minBidAmount: parseFloat(details.min_bid_amount || 0),
         reservePrice: parseFloat(details.reserve_price || 0),
 
         startDate: formatDateForDisplay(details.start_date),
-        endDate: formatDateForDisplay(details.hard_close_at || details.end_date || details.hardCloseAt || details.endDate),
+        endDate: formatDateForDisplay(
+          details.hard_close_at ||
+            details.end_date ||
+            details.hardCloseAt ||
+            details.endDate,
+        ),
 
         quantity: details.quantity || details.product?.quantity || 0,
 
@@ -375,7 +417,7 @@ const AuctionManagement = () => {
           details.status === "LIVE"
             ? "Active"
             : details.status.charAt(0).toUpperCase() +
-            details.status.slice(1).toLowerCase(),
+              details.status.slice(1).toLowerCase(),
         description: details.product?.description || "No description",
         dimensions: details.product?.dimension || "Not specified",
         weight: details.product?.netWeight || "Not specified",
@@ -384,15 +426,19 @@ const AuctionManagement = () => {
         bids: res.data.data.bids || res.data.data.auction?.bids || [],
         winner: res.data.data.winner || res.data.data.auction?.winner || null,
         challenge_minutes: details.challenge_minutes || 15,
-        warehouseName: details.warehouse?.name || res.data.data.warehouse?.name || "N/A",
-        warehouseCountry: details.warehouse?.country || res.data.data.warehouse?.country || "N/A",
+        warehouseName:
+          details.warehouse?.name || res.data.data.warehouse?.name || "N/A",
+        warehouseCountry:
+          details.warehouse?.country ||
+          res.data.data.warehouse?.country ||
+          "N/A",
       };
       setSelectedAuction(mappedDetails);
       setShowDetailsModal(true);
     } catch (err) {
       console.error(
         "Error fetching auction details:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
       setError("Failed to fetch auction details. Please try again.");
     } finally {
@@ -410,15 +456,15 @@ const AuctionManagement = () => {
     } catch (err) {
       console.error(
         "Error starting auction:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
       setError(
         "Error starting auction: " +
-        (err.response?.data?.message || err.message)
+          (err.response?.data?.message || err.message),
       );
       toast.error(
         "Error starting auction: " +
-        (err.response?.data?.message || err.message)
+          (err.response?.data?.message || err.message),
       );
     } finally {
       setLoading(false);
@@ -489,7 +535,7 @@ const AuctionManagement = () => {
                 placeholder="Search auctions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
             <button
@@ -542,8 +588,13 @@ const AuctionManagement = () => {
               {currentAuctions.map((auction) => (
                 <tr key={auction.auction_id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900 capitalize" title={auction.title}>
-                      {auction.title.length > 20 ? `${auction.title.substring(0, 20)}...` : auction.title}
+                    <div
+                      className="text-sm font-medium text-gray-900 capitalize"
+                      title={auction.title}
+                    >
+                      {auction.title.length > 20
+                        ? `${auction.title.substring(0, 20)}...`
+                        : auction.title}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -552,7 +603,9 @@ const AuctionManagement = () => {
                         type="file"
                         className="hidden"
                         accept="image/*"
-                        onChange={(e) => handleImageUpload(e, auction.auction_id)}
+                        onChange={(e) =>
+                          handleImageUpload(e, auction.auction_id)
+                        }
                       />
                       <Upload size={18} />
                     </label>
@@ -627,7 +680,7 @@ const AuctionManagement = () => {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -637,17 +690,19 @@ const AuctionManagement = () => {
           </div>
 
           <div className="text-base text-gray-600 font-medium justify-self-center">
-            {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, auctions.length)} of {auctions.length}
+            {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, auctions.length)}{" "}
+            of {auctions.length}
           </div>
 
           <div className="flex items-center gap-4 justify-self-end">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((prev) => prev - 1)}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -655,10 +710,11 @@ const AuctionManagement = () => {
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((prev) => prev + 1)}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                ? "text-gray-300 cursor-not-allowed"
-                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+              }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -672,8 +728,12 @@ const AuctionManagement = () => {
               {/* Modal Header */}
               <div className="sticky top-0 bg-white z-10 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Auction Details</h2>
-                  <p className="text-sm text-gray-500 mt-1">ID: #{selectedAuction.auction_id}</p>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Auction Details
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    ID: #{selectedAuction.auction_id}
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowDetailsModal(false)}
@@ -712,7 +772,8 @@ const AuctionManagement = () => {
                         {selectedAuction.title}
                       </h3>
                       <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-                        {selectedAuction.description || "No description provided for this item."}
+                        {selectedAuction.description ||
+                          "No description provided for this item."}
                       </p>
                     </div>
                   </div>
@@ -726,36 +787,68 @@ const AuctionManagement = () => {
                     </div>
                     <div className="p-5 grid grid-cols-2 gap-y-4 gap-x-2">
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Dimensions</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.dimensions}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Dimensions
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.dimensions}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Weight</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.weight}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Weight
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.weight}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Material</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.materials}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Material
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.materials}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Quantity</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.quantity || "1"}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Quantity
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.quantity || "1"}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Category</p>
-                        <p className="text-sm font-medium text-gray-900 capitalize">{selectedAuction.category}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Category
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">
+                          {selectedAuction.category}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Subcategory</p>
-                        <p className="text-sm font-medium text-gray-900 capitalize">{selectedAuction.subcategory || "N/A"}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Subcategory
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">
+                          {selectedAuction.subcategory || "N/A"}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Warehouse</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.warehouseName}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Warehouse
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.warehouseName}
+                        </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Country</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.warehouseCountry}</p>
+                        <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
+                          Country
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {selectedAuction.warehouseCountry}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -765,61 +858,101 @@ const AuctionManagement = () => {
                 <div className="lg:col-span-7 space-y-6">
                   {/* Status & Timer Banner */}
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <div className={`flex-1 p-5 rounded-2xl border flex items-center justify-between ${selectedAuction.status === 'Active' ? 'bg-green-50 border-green-100' :
-                      selectedAuction.status === 'Ended' ? 'bg-gray-100 border-gray-200' :
-                        'bg-orange-50 border-orange-100'
-                      }`}>
+                    <div
+                      className={`flex-1 p-5 rounded-2xl border flex items-center justify-between ${
+                        selectedAuction.status === "Active"
+                          ? "bg-green-50 border-green-100"
+                          : selectedAuction.status === "Ended"
+                            ? "bg-gray-100 border-gray-200"
+                            : "bg-orange-50 border-orange-100"
+                      }`}
+                    >
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Status</p>
+                        <p className="text-xs font-bold uppercase tracking-wider opacity-70 mb-1">
+                          Status
+                        </p>
                         <div className="flex items-center gap-2">
-                          <span className={`w-2.5 h-2.5 rounded-full ${selectedAuction.status === 'Active' ? 'bg-green-500 animate-pulse' :
-                            selectedAuction.status === 'Ended' ? 'bg-gray-500' :
-                              'bg-orange-500'
-                            }`}></span>
-                          <span className={`text-xl font-bold ${selectedAuction.status === 'Active' ? 'text-green-700' :
-                            selectedAuction.status === 'Ended' ? 'text-gray-700' :
-                              'text-orange-700'
-                            }`}>{selectedAuction.status}</span>
+                          <span
+                            className={`w-2.5 h-2.5 rounded-full ${
+                              selectedAuction.status === "Active"
+                                ? "bg-green-500 animate-pulse"
+                                : selectedAuction.status === "Ended"
+                                  ? "bg-gray-500"
+                                  : "bg-orange-500"
+                            }`}
+                          ></span>
+                          <span
+                            className={`text-xl font-bold ${
+                              selectedAuction.status === "Active"
+                                ? "text-green-700"
+                                : selectedAuction.status === "Ended"
+                                  ? "text-gray-700"
+                                  : "text-orange-700"
+                            }`}
+                          >
+                            {selectedAuction.status}
+                          </span>
                         </div>
                       </div>
-                      {selectedAuction.status === 'Active' && (
+                      {selectedAuction.status === "Active" && (
                         <div className="text-right">
-                          <p className="text-xs font-bold text-green-600 uppercase tracking-wider">Live Now</p>
-                          <p className="text-sm text-green-700 font-medium">Accepting Bids</p>
+                          <p className="text-xs font-bold text-green-600 uppercase tracking-wider">
+                            Live Now
+                          </p>
+                          <p className="text-sm text-green-700 font-medium">
+                            Accepting Bids
+                          </p>
                         </div>
                       )}
                     </div>
-
-
                   </div>
 
                   {/* Pricing Cards */}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="col-span-3 sm:col-span-1 bg-gradient-to-br from-orange-500 to-orange-600 p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">💰</div>
-                      <p className="text-orange-100 text-xs font-bold uppercase tracking-wider mb-1">Highest Bid</p>
+                      <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
+                        💰
+                      </div>
+                      <p className="text-orange-100 text-xs font-bold uppercase tracking-wider mb-1">
+                        Highest Bid
+                      </p>
                       <p className="text-2xl font-bold text-white">
-                        ₹{(selectedAuction.currentBid || selectedAuction.startingBid || 0).toLocaleString()}
+                        ₹
+                        {(
+                          selectedAuction.currentBid ||
+                          selectedAuction.startingBid ||
+                          0
+                        ).toLocaleString()}
                       </p>
                       {selectedAuction.leadBidder && (
                         <div className="mt-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px]">👤</div>
+                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+                            👤
+                          </div>
                           <p className="text-xs text-orange-50 truncate max-w-[100px]">
-                            {selectedAuction.leadBidder.name || selectedAuction.leading_bidder}
+                            {selectedAuction.leadBidder.name ||
+                              selectedAuction.leading_bidder}
                           </p>
                         </div>
                       )}
                     </div>
 
-
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Start Price</p>
-                      <p className="text-xl font-bold text-gray-900">₹{selectedAuction.startingBid.toLocaleString()}</p>
+                      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
+                        Start Price
+                      </p>
+                      <p className="text-xl font-bold text-gray-900">
+                        ₹{selectedAuction.startingBid.toLocaleString()}
+                      </p>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Reserve</p>
-                      <p className="text-xl font-bold text-gray-900">₹{selectedAuction.reservePrice.toLocaleString()}</p>
+                      <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
+                        Reserve
+                      </p>
+                      <p className="text-xl font-bold text-gray-900">
+                        ₹{selectedAuction.reservePrice.toLocaleString()}
+                      </p>
                     </div>
                   </div>
 
@@ -835,8 +968,12 @@ const AuctionManagement = () => {
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Start Date</p>
-                            <p className="text-sm font-semibold text-gray-900">{selectedAuction.startDate}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                              Start Date
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {selectedAuction.startDate}
+                            </p>
                           </div>
                         </div>
                         <div className="relative">
@@ -844,8 +981,12 @@ const AuctionManagement = () => {
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Hard Close</p>
-                            <p className="text-sm font-semibold text-gray-900">{selectedAuction.endDate}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                              Hard Close
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {selectedAuction.endDate}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -863,23 +1004,43 @@ const AuctionManagement = () => {
                       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
                         {selectedAuction.bids.length > 0 ? (
                           selectedAuction.bids.map((bid, idx) => (
-                            <div key={bid.bid_id || idx} className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all">
+                            <div
+                              key={bid.bid_id || idx}
+                              className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all"
+                            >
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
-                                  {(bid.user?.name || bid.user?.FirstName || "U")[0].toUpperCase()}
+                                  {(bid.user?.name ||
+                                    bid.user?.FirstName ||
+                                    "U")[0].toUpperCase()}
                                 </div>
                                 <div>
                                   <p className="text-xs font-bold text-gray-900">
-                                    {bid.user?.name || bid.user?.FirstName || `User #${bid.user_id}`}
+                                    {bid.user?.name ||
+                                      bid.user?.FirstName ||
+                                      `User #${bid.user_id}`}
                                   </p>
                                   <p className="text-[10px] text-gray-400">
-                                    {bid.createdAt || bid.created_at ? new Date(bid.createdAt || bid.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                                    {bid.createdAt || bid.created_at
+                                      ? new Date(
+                                          bid.createdAt || bid.created_at,
+                                        ).toLocaleTimeString([], {
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })
+                                      : "Just now"}
                                   </p>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-sm font-bold text-gray-900">₹{parseFloat(bid.bid_amount).toLocaleString()}</p>
-                                {idx === 0 && <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Leading</span>}
+                                <p className="text-sm font-bold text-gray-900">
+                                  ₹{parseFloat(bid.bid_amount).toLocaleString()}
+                                </p>
+                                {idx === 0 && (
+                                  <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                                    Leading
+                                  </span>
+                                )}
                               </div>
                             </div>
                           ))
@@ -895,10 +1056,11 @@ const AuctionManagement = () => {
                         <button
                           onClick={() => setShowWinnerModal(true)}
                           disabled={!selectedAuction.winner}
-                          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-2 ${selectedAuction.winner
-                            ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 hover:shadow-md"
-                            : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
-                            }`}
+                          className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-2 ${
+                            selectedAuction.winner
+                              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 hover:shadow-md"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                          }`}
                         >
                           {selectedAuction.winner ? (
                             <> View Winner Details</>
@@ -908,422 +1070,493 @@ const AuctionManagement = () => {
                         </button>
                       </div>
                     </div>
-
                   </div>
                 </div>
               </div>
             </div>
-          </div >
+          </div>
         )}
-        {
-          showWinnerModal && selectedAuction?.winner && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-              <div className="bg-white p-5 rounded-xl w-full max-w-sm shadow-2xl transform transition-all border border-gray-100">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Winner Details</h2>
-                  <button
-                    onClick={() => setShowWinnerModal(false)}
-                    className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                  >
-                    <X size={20} />
-                  </button>
+        {showWinnerModal && selectedAuction?.winner && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+            <div className="bg-white p-5 rounded-xl w-full max-w-sm shadow-2xl transform transition-all border border-gray-100">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-gray-900">
+                  Winner Details
+                </h2>
+                <button
+                  onClick={() => setShowWinnerModal(false)}
+                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Compact Winner Profile */}
+                <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-sm border-2 border-orange-100 shrink-0">
+                    🏆
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold text-gray-900 truncate">
+                      {selectedAuction.winner.name ||
+                        `${selectedAuction.winner.firstName} ${selectedAuction.winner.lastName}`}
+                    </h3>
+                    <p className="text-xs text-orange-600 font-bold uppercase tracking-wide">
+                      Auction Winner
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Compact Winner Profile */}
-                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-sm border-2 border-orange-100 shrink-0">
-                      🏆
-                    </div>
+                {/* Compact Details Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">
+                      Winning Bid
+                    </p>
+                    <p className="text-sm font-bold text-gray-900">
+                      ₹
+                      {(
+                        selectedAuction.currentBid ||
+                        selectedAuction.winning_bid ||
+                        0
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">
+                      Date
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedAuction.winner.createdAt
+                        ? new Date(
+                            selectedAuction.winner.createdAt,
+                          ).toLocaleDateString("en-IN")
+                        : "N/A"}
+                    </p>
+                  </div>
+
+                  <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0"></div>
                     <div className="min-w-0">
-                      <h3 className="text-base font-bold text-gray-900 truncate">
-                        {selectedAuction.winner.name || `${selectedAuction.winner.firstName} ${selectedAuction.winner.lastName}`}
-                      </h3>
-                      <p className="text-xs text-orange-600 font-bold uppercase tracking-wide">Auction Winner</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">
+                        Email
+                      </p>
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {selectedAuction.winner.email}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Compact Details Grid */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Winning Bid</p>
-                      <p className="text-sm font-bold text-gray-900">
-                        ₹{(selectedAuction.currentBid || selectedAuction.winning_bid || 0).toLocaleString()}
+                  <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0"></div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">
+                        Phone
                       </p>
-                    </div>
-
-                    <div className="p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Date</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {selectedAuction.winner.createdAt ? new Date(selectedAuction.winner.createdAt).toLocaleDateString("en-IN") : "N/A"}
+                        {selectedAuction.winner.phoneNo || "N/A"}
                       </p>
-                    </div>
-
-                    <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0">
-
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Email</p>
-                        <p className="text-sm font-medium text-gray-900 truncate">{selectedAuction.winner.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="col-span-2 p-2.5 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-3">
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-400 shrink-0">
-
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Phone</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedAuction.winner.phoneNo || "N/A"}</p>
-                      </div>
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => setShowWinnerModal(false)}
-                    className="w-full py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700 transition-colors shadow-sm"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          )
-        }
-        {
-          showWinnersModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-              <div className="bg-white p-6 rounded-lg w-full max-w-3xl max-h-[80vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold">Auction Winners</h2>
-                  <button onClick={() => setShowWinnersModal(false)}>
-                    <X size={24} />
-                  </button>
                 </div>
 
-                {winners.length > 0 ? (
-                  winners.map((w) => (
-                    <div key={w.id} className="border p-3 rounded mb-3">
-                      <p>
-                        <strong>Product:</strong> {w.product?.product_name}
-                      </p>
-                      <p>
-                        <strong>Winner:</strong> {w.user?.name}
-                      </p>
-                      <p>
-                        <strong>Winning Amount:</strong> ₹{w.amount}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p>No winners yet.</p>
-                )}
+                <button
+                  onClick={() => setShowWinnerModal(false)}
+                  className="w-full py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700 transition-colors shadow-sm"
+                >
+                  Close
+                </button>
               </div>
             </div>
-          )
-        }
+          </div>
+        )}
+        {showWinnersModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Auction Winners</h2>
+                <button onClick={() => setShowWinnersModal(false)}>
+                  <X size={24} />
+                </button>
+              </div>
+
+              {winners.length > 0 ? (
+                winners.map((w) => (
+                  <div key={w.id} className="border p-3 rounded mb-3">
+                    <p>
+                      <strong>Product:</strong> {w.product?.product_name}
+                    </p>
+                    <p>
+                      <strong>Winner:</strong> {w.user?.name}
+                    </p>
+                    <p>
+                      <strong>Winning Amount:</strong> ₹{w.amount}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>No winners yet.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Add Auction Modal */}
-        {
-          showAddForm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Add New Auction
-                  </h2>
-                  <button
-                    onClick={() => setShowAddForm(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
+        {showAddForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Add New Auction
+                </h2>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-                <form onSubmit={handleAddAuction} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Country Selection */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Origin Country *
-                      </label>
-                      <div className="relative relative-country-dropdown">
-                        <input
-                          type="text"
-                          placeholder="Select Country"
-                          value={countrySearch}
-                          onChange={(e) => {
-                            setCountrySearch(e.target.value);
-                            setIsCountryDropdownOpen(true);
-                            if (e.target.value === "") {
-                              handleCountryChange("");
-                            }
-                          }}
-                          onClick={() => {
-                            setIsCountryDropdownOpen(true);
-                            if (newAuction.country && countrySearch !== newAuction.country) {
-                              setCountrySearch(newAuction.country);
-                            }
-                          }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        />
-                        {isCountryDropdownOpen && (
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                            {filteredCountries.length > 0 ? (
-                              filteredCountries.map((c) => (
-                                <div
-                                  key={c}
-                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
-                                  onClick={() => {
-                                    handleCountryChange(c);
-                                  }}
-                                >
-                                  {c}
-                                </div>
-                              ))
-                            ) : (
-                              <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+              <form onSubmit={handleAddAuction} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Country Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Origin Country *
+                    </label>
+                    <div className="relative relative-country-dropdown">
+                      <input
+                        type="text"
+                        placeholder="Select Country"
+                        value={countrySearch}
+                        onChange={(e) => {
+                          setCountrySearch(e.target.value);
+                          setIsCountryDropdownOpen(true);
+                          if (e.target.value === "") {
+                            handleCountryChange("");
+                          }
+                        }}
+                        onClick={() => {
+                          setIsCountryDropdownOpen(true);
+                          if (
+                            newAuction.country &&
+                            countrySearch !== newAuction.country
+                          ) {
+                            setCountrySearch(newAuction.country);
+                          }
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+                      />
+                      {isCountryDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {filteredCountries.length > 0 ? (
+                            filteredCountries.map((c) => (
+                              <div
+                                key={c}
+                                className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                                onClick={() => {
+                                  handleCountryChange(c);
+                                }}
+                              >
+                                {c}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-4 py-2 text-gray-500 text-sm">
+                              No countries found
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Warehouse Selection */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Warehouse *
-                      </label>
-                      <select
-                        required
-                        value={newAuction.warehouseId}
-                        onChange={handleWarehouseChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        disabled={!newAuction.country || isWarehouseLoading}
-                      >
-                        <option value="" disabled>Select Warehouse</option>
-                        {Array.isArray(warehouses) && warehouses.map((w) => (
+                  {/* Warehouse Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Warehouse *
+                    </label>
+                    <select
+                      required
+                      value={newAuction.warehouseId}
+                      onChange={handleWarehouseChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+                      disabled={!newAuction.country || isWarehouseLoading}
+                    >
+                      <option value="" disabled>
+                        Select Warehouse
+                      </option>
+                      {Array.isArray(warehouses) &&
+                        warehouses.map((w) => (
                           <option key={w._id || w.id} value={w._id || w.id}>
                             {w.warehouse_name || w.name}
                           </option>
                         ))}
-                      </select>
-                      {isWarehouseLoading && <p className="text-xs text-gray-500 mt-1">Loading warehouses...</p>}
-                    </div>
+                    </select>
+                    {isWarehouseLoading && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Loading warehouses...
+                      </p>
+                    )}
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Select Product *
-                      </label>
-                      <select
-                        required
-                        value={newAuction.productId}
-                        onChange={(e) =>
-                          setNewAuction({
-                            ...newAuction,
-                            productId: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      >
-                        <option value="" disabled>Select Product</option>
-                        {Array.isArray(products) && products.length > 0 ? (
-                          products.map((product) => (
-                            <option
-                              key={product.productId || product._id || product.id}
-                              value={product.productId || product._id || product.id}
-                            >
-                              {product.product_name || product.name || "Unnamed Product"}
-                            </option>
-                          ))
-                        ) : (
-                          <option disabled>
-                            {!newAuction.warehouseId
-                              ? "Please Select Warehouse First"
-                              : "No products found in this warehouse"}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Select Product *
+                    </label>
+                    <select
+                      required
+                      value={newAuction.productId}
+                      onChange={(e) =>
+                        setNewAuction({
+                          ...newAuction,
+                          productId: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    >
+                      <option value="" disabled>
+                        Select Product
+                      </option>
+                      {Array.isArray(products) && products.length > 0 ? (
+                        products.map((product) => (
+                          <option
+                            key={product.productId || product._id || product.id}
+                            value={
+                              product.productId || product._id || product.id
+                            }
+                          >
+                            {product.product_name ||
+                              product.name ||
+                              "Unnamed Product"}
                           </option>
-                        )}
-                      </select>
-                    </div>
+                        ))
+                      ) : (
+                        <option disabled>
+                          {!newAuction.warehouseId
+                            ? "Please Select Warehouse First"
+                            : "No products found in this warehouse"}
+                        </option>
+                      )}
+                    </select>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Start Date & Time *
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative w-full">
-                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                          <input
-                            type="date"
-                            required
-                            min={new Date().toLocaleDateString('en-CA')}
-                            value={newAuction.startDate ? newAuction.startDate.split("T")[0] : ""}
-                            onChange={(e) => {
-                              const date = e.target.value;
-                              const time = newAuction.startDate && newAuction.startDate.includes("T") ? newAuction.startDate.split("T")[1] : "00:00";
-                              setNewAuction({
-                                ...newAuction,
-                                startDate: `${date}T${time}`,
-                              });
-                            }}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          />
-                        </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Start Date & Time *
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative w-full">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                         <input
-                          type="time"
+                          type="date"
                           required
-                          value={newAuction.startDate && newAuction.startDate.includes("T") ? newAuction.startDate.split("T")[1] : ""}
+                          min={new Date().toLocaleDateString("en-CA")}
+                          value={
+                            newAuction.startDate
+                              ? newAuction.startDate.split("T")[0]
+                              : ""
+                          }
                           onChange={(e) => {
-                            const time = e.target.value;
-                            const date = newAuction.startDate ? newAuction.startDate.split("T")[0] : new Date().toLocaleDateString('en-CA');
+                            const date = e.target.value;
+                            const time =
+                              newAuction.startDate &&
+                              newAuction.startDate.includes("T")
+                                ? newAuction.startDate.split("T")[1]
+                                : "00:00";
                             setNewAuction({
                               ...newAuction,
                               startDate: `${date}T${time}`,
                             });
                           }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Starting Bid (₹) *
-                      </label>
                       <input
-                        type="number"
+                        type="time"
                         required
-                        value={newAuction.startingBid}
-                        onChange={(e) =>
+                        value={
+                          newAuction.startDate &&
+                          newAuction.startDate.includes("T")
+                            ? newAuction.startDate.split("T")[1]
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const time = e.target.value;
+                          const date = newAuction.startDate
+                            ? newAuction.startDate.split("T")[0]
+                            : new Date().toLocaleDateString("en-CA");
                           setNewAuction({
                             ...newAuction,
-                            startingBid: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        placeholder="Enter starting bid"
+                            startDate: `${date}T${time}`,
+                          });
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Reserve Price (₹) *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={newAuction.reservePrice}
-                        onChange={(e) =>
-                          setNewAuction({
-                            ...newAuction,
-                            reservePrice: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        placeholder="Enter reserve price"
-                      />
-                    </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Minimum Bid Amount (₹) *
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        value={newAuction.minBidAmount}
-                        onChange={(e) =>
-                          setNewAuction({
-                            ...newAuction,
-                            minBidAmount: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        placeholder="Enter min bid amount"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Starting Bid (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newAuction.startingBid}
+                      onChange={(e) =>
+                        setNewAuction({
+                          ...newAuction,
+                          startingBid: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      placeholder="Enter starting bid"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reserve Price (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newAuction.reservePrice}
+                      onChange={(e) =>
+                        setNewAuction({
+                          ...newAuction,
+                          reservePrice: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      placeholder="Enter reserve price"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Hard Close Date & Time *
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative w-full">
-                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-                          <input
-                            type="date"
-                            required
-                            min={newAuction.startDate ? newAuction.startDate.split("T")[0] : new Date().toLocaleDateString('en-CA')}
-                            value={newAuction.endDate ? newAuction.endDate.split("T")[0] : ""}
-                            onChange={(e) => {
-                              const date = e.target.value;
-                              const time = newAuction.endDate && newAuction.endDate.includes("T") ? newAuction.endDate.split("T")[1] : "00:00";
-                              setNewAuction({
-                                ...newAuction,
-                                endDate: `${date}T${time}`,
-                              });
-                            }}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                          />
-                        </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Minimum Bid Amount (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newAuction.minBidAmount}
+                      onChange={(e) =>
+                        setNewAuction({
+                          ...newAuction,
+                          minBidAmount: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      placeholder="Enter min bid amount"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hard Close Date & Time *
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative w-full">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                         <input
-                          type="time"
+                          type="date"
                           required
-                          value={newAuction.endDate && newAuction.endDate.includes("T") ? newAuction.endDate.split("T")[1] : ""}
+                          min={
+                            newAuction.startDate
+                              ? newAuction.startDate.split("T")[0]
+                              : new Date().toLocaleDateString("en-CA")
+                          }
+                          value={
+                            newAuction.endDate
+                              ? newAuction.endDate.split("T")[0]
+                              : ""
+                          }
                           onChange={(e) => {
-                            const time = e.target.value;
-                            const date = newAuction.endDate ? newAuction.endDate.split("T")[0] : (newAuction.startDate ? newAuction.startDate.split("T")[0] : new Date().toLocaleDateString('en-CA'));
+                            const date = e.target.value;
+                            const time =
+                              newAuction.endDate &&
+                              newAuction.endDate.includes("T")
+                                ? newAuction.endDate.split("T")[1]
+                                : "00:00";
                             setNewAuction({
                               ...newAuction,
                               endDate: `${date}T${time}`,
                             });
                           }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Quantity *
-                      </label>
                       <input
-                        type="number"
+                        type="time"
                         required
-                        value={newAuction.quantity}
-                        onChange={(e) =>
-                          setNewAuction({ ...newAuction, quantity: e.target.value })
+                        value={
+                          newAuction.endDate && newAuction.endDate.includes("T")
+                            ? newAuction.endDate.split("T")[1]
+                            : ""
                         }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        placeholder="Enter quantity"
+                        onChange={(e) => {
+                          const time = e.target.value;
+                          const date = newAuction.endDate
+                            ? newAuction.endDate.split("T")[0]
+                            : newAuction.startDate
+                              ? newAuction.startDate.split("T")[0]
+                              : new Date().toLocaleDateString("en-CA");
+                          setNewAuction({
+                            ...newAuction,
+                            endDate: `${date}T${time}`,
+                          });
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddForm(false)}
-                      className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-                      disabled={loading}
-                    >
-                      {loading ? "Creating..." : "Add Auction"}
-                    </button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantity *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newAuction.quantity}
+                      onChange={(e) =>
+                        setNewAuction({
+                          ...newAuction,
+                          quantity: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      placeholder="Enter quantity"
+                    />
                   </div>
-                </form>
-              </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                    disabled={loading}
+                  >
+                    {loading ? "Creating..." : "Add Auction"}
+                  </button>
+                </div>
+              </form>
             </div>
-          )
-        }
+          </div>
+        )}
         <ToastContainer />
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

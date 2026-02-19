@@ -12,7 +12,7 @@ import {
   AlertCircle,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { needAssistanceControllers } from "../api/needAssistance";
 const NEED_ASSISTANCE_STATUS = {
@@ -54,7 +54,7 @@ const NeedAssistanceDashboard = () => {
       const response = await needAssistanceControllers.getAllNeedAssistance(
         limit,
         page,
-        statusFilter === "ALL" ? "" : statusFilter
+        statusFilter === "ALL" ? "" : statusFilter,
       );
       console.log("API Response:", JSON.stringify(response.data, null, 2));
 
@@ -74,8 +74,9 @@ const NeedAssistanceDashboard = () => {
         const createdByUser = ticket.createdBy;
         const userName =
           createdByUser?.name ||
-          `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
-            }`.trim() ||
+          `${createdByUser?.firstName || ""} ${
+            createdByUser?.lastName || ""
+          }`.trim() ||
           (createdByUser?.email
             ? createdByUser.email.split("@")[0]
             : "Unknown User");
@@ -116,15 +117,16 @@ const NeedAssistanceDashboard = () => {
   const handleViewDetails = async (ticket) => {
     try {
       const response = await needAssistanceControllers.getNeedAssistanceById(
-        ticket.id
+        ticket.id,
       );
       let fullTicket =
         response.data?.data || response.data || ticket.rawTicket || ticket;
       const createdByUser = fullTicket.createdBy;
       const userName =
         createdByUser?.name ||
-        `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
-          }`.trim() ||
+        `${createdByUser?.firstName || ""} ${
+          createdByUser?.lastName || ""
+        }`.trim() ||
         (createdByUser?.email
           ? createdByUser.email.split("@")[0]
           : "Unknown User");
@@ -164,19 +166,19 @@ const NeedAssistanceDashboard = () => {
       };
       await needAssistanceControllers.updateNeedAssistanceStatus(
         selectedTicket.id,
-        updateData
+        updateData,
       );
       setData((prev) =>
         prev.map((item) =>
           item.id === selectedTicket.id
             ? {
-              ...item,
-              status: newStatus,
-              adminRemarks: updateData.adminRemarks,
-              updatedAt: new Date().toISOString(),
-            }
-            : item
-        )
+                ...item,
+                status: newStatus,
+                adminRemarks: updateData.adminRemarks,
+                updatedAt: new Date().toISOString(),
+              }
+            : item,
+        ),
       );
       toast.success("Status updated successfully!");
       setShowModal(false);
@@ -288,14 +290,14 @@ const NeedAssistanceDashboard = () => {
               <input
                 type="text"
                 placeholder="Search by name, email, or description..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="relative min-w-[150px]">
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -309,7 +311,7 @@ const NeedAssistanceDashboard = () => {
             </div>
             <div className="relative min-w-[150px]">
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 appearance-none bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 value={issueTypeFilter}
                 onChange={(e) => setIssueTypeFilter(e.target.value)}
               >
@@ -400,7 +402,7 @@ const NeedAssistanceDashboard = () => {
                           setRowsPerPage(newLimit);
                           setCurrentPage(1);
                         }}
-                        className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
                       >
                         <option value={10}>10</option>
                         <option value={25}>25</option>
@@ -411,17 +413,19 @@ const NeedAssistanceDashboard = () => {
 
                     <div className="text-base text-gray-600 font-medium justify-self-center">
                       {(currentPage - 1) * rowsPerPage + 1}–
-                      {Math.min(currentPage * rowsPerPage, totalDocs)} of {totalDocs}
+                      {Math.min(currentPage * rowsPerPage, totalDocs)} of{" "}
+                      {totalDocs}
                     </div>
 
                     <div className="flex items-center gap-4 justify-self-end">
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                          ? "text-gray-300 cursor-not-allowed"
-                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                          }`}
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                          currentPage === 1
+                            ? "text-gray-300 cursor-not-allowed"
+                            : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
@@ -429,10 +433,11 @@ const NeedAssistanceDashboard = () => {
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                          ? "text-gray-300 cursor-not-allowed"
-                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                          }`}
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                          currentPage === totalPages
+                            ? "text-gray-300 cursor-not-allowed"
+                            : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                        }`}
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
@@ -444,8 +449,7 @@ const NeedAssistanceDashboard = () => {
                 <div className="text-center py-12 text-gray-500">
                   <p>No assistance requests found</p>
                 </div>
-              )
-              }
+              )}
             </>
           )}
         </div>
@@ -536,7 +540,7 @@ const NeedAssistanceDashboard = () => {
                     Update Status
                   </label>
                   <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                     value={newStatus}
                     onChange={(e) => setNewStatus(e.target.value)}
                   >
@@ -554,7 +558,7 @@ const NeedAssistanceDashboard = () => {
                     Admin Remarks
                   </label>
                   <textarea
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 h-32"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 h-32"
                     placeholder="Enter your remarks here..."
                     value={adminRemarks}
                     onChange={(e) => setAdminRemarks(e.target.value)}
@@ -603,7 +607,6 @@ const NeedAssistanceDashboard = () => {
         )}
       </div>
       <ToastContainer position="top-right" autoClose={2000} />
-
     </div>
   );
 };

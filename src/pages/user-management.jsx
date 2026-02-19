@@ -60,11 +60,11 @@ function UserManagement() {
       await userControllers.updateUserStatus(selectedUser.id, newStatus);
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === selectedUser.id ? { ...u, status: newStatus } : u
-        )
+          u.id === selectedUser.id ? { ...u, status: newStatus } : u,
+        ),
       );
       toast.success(
-        `User ${newStatus === "BLOCKED" ? "Blocked" : "Activated"} Successfully!`
+        `User ${newStatus === "BLOCKED" ? "Blocked" : "Activated"} Successfully!`,
       );
     } catch (err) {
       toast.error("Something went wrong!");
@@ -80,7 +80,8 @@ function UserManagement() {
       (user.lastName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.email || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "ALL" || user.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "ALL" || user.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -121,13 +122,13 @@ function UserManagement() {
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white min-w-[150px]"
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white min-w-[150px]"
             >
               <option value="ALL">All Status</option>
               <option value="ACTIVE">Active</option>
@@ -140,15 +141,26 @@ function UserManagement() {
           <table className="w-full">
             <thead className="bg-gray-50 text-left">
               <tr>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">User Name</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">Mobile Number</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">Status</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">View Details</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">
+                  User Name
+                </th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">
+                  Mobile Number
+                </th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center w-[20%]">
+                  View Details
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.map((user) => (
-                <tr key={user.id || user._id} className="border-b hover:bg-gray-50 transition-colors">
+                <tr
+                  key={user.id || user._id}
+                  className="border-b hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
@@ -157,7 +169,7 @@ function UserManagement() {
                           src={
                             user.avatar ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              fullName(user)
+                              fullName(user),
                             )}&background=random`
                           }
                           alt=""
@@ -168,7 +180,10 @@ function UserManagement() {
                           {fullName(user)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
+                          Joined:{" "}
+                          {user.createdAt
+                            ? new Date(user.createdAt).toLocaleDateString()
+                            : "N/A"}
                         </div>
                       </div>
                     </div>
@@ -182,17 +197,19 @@ function UserManagement() {
                     <Switch
                       checked={user?.status === "ACTIVE"}
                       onChange={() => handleToggle(user)}
-                      className={`${user?.status === "ACTIVE"
-                        ? "bg-orange-600"
-                        : "bg-gray-300"
-                        } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
+                      className={`${
+                        user?.status === "ACTIVE"
+                          ? "bg-orange-600"
+                          : "bg-gray-300"
+                      } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
                     >
                       <span className="sr-only">Toggle Status</span>
                       <span
-                        className={`${user?.status === "ACTIVE"
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                        className={`${
+                          user?.status === "ACTIVE"
+                            ? "translate-x-6"
+                            : "translate-x-1"
+                        } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                       />
                     </Switch>
                   </td>
@@ -223,7 +240,7 @@ function UserManagement() {
                   setRowsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -233,28 +250,36 @@ function UserManagement() {
             </div>
 
             <div className="text-base text-gray-600 font-medium justify-self-center">
-              {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredUsers.length)} of {filteredUsers.length}
+              {indexOfFirstItem + 1}–
+              {Math.min(indexOfLastItem, filteredUsers.length)} of{" "}
+              {filteredUsers.length}
             </div>
 
             <div className="flex items-center gap-4 justify-self-end">
               <button
-                onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                  currentPage === 1
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
 
               <button
-                onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                  currentPage === totalPages
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -266,7 +291,11 @@ function UserManagement() {
           <DisableModal
             onClose={() => setOpenModal(false)}
             onConfirm={confirmDisable}
-            title={selectedUser?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
+            title={
+              selectedUser?.status === "ACTIVE"
+                ? "Disable Profile"
+                : "Activate Profile"
+            }
             message={
               selectedUser?.status === "ACTIVE"
                 ? "Are you sure you want to disable this user's profile?"

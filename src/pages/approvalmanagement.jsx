@@ -280,8 +280,8 @@ const ApprovalManagement = () => {
   const handleApprove = (id) => {
     setPendingApprovals((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, status: "Approved" } : item
-      )
+        item.id === id ? { ...item, status: "Approved" } : item,
+      ),
     );
     alert("Product approved successfully!");
   };
@@ -293,8 +293,8 @@ const ApprovalManagement = () => {
         prev.map((item) =>
           item.id === id
             ? { ...item, status: "Rejected", rejectionReason: reason }
-            : item
-        )
+            : item,
+        ),
       );
       alert("Product rejected successfully!");
     }
@@ -399,7 +399,7 @@ const ApprovalManagement = () => {
               <p className="text-xl font-bold text-gray-800">
                 {
                   pendingApprovals.filter(
-                    (item) => item.status === "Under Review"
+                    (item) => item.status === "Under Review",
                   ).length
                 }
               </p>
@@ -448,7 +448,7 @@ const ApprovalManagement = () => {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
             >
               <option>All Categories</option>
               <option>Handloom</option>
@@ -460,7 +460,7 @@ const ApprovalManagement = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
             >
               <option>All Status</option>
               <option>Pending</option>
@@ -564,7 +564,7 @@ const ApprovalManagement = () => {
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                        item.status
+                        item.status,
                       )}`}
                     >
                       {item.status}

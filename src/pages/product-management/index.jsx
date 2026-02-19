@@ -139,7 +139,7 @@ export default function ProductManagement() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
             <Link to={"/product-management/add-product"}>
@@ -262,7 +262,7 @@ export default function ProductManagement() {
                     setRowsPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
                 >
                   <option value={10}>10</option>
                   <option value={25}>25</option>
@@ -281,10 +281,11 @@ export default function ProductManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -294,10 +295,11 @@ export default function ProductManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                    currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

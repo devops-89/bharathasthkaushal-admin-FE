@@ -59,9 +59,8 @@ const ArtisanManagement = () => {
   const filteredCountries = countryCodes.filter(
     (country) =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
-      country.dial_code.includes(countrySearchTerm)
+      country.dial_code.includes(countrySearchTerm),
   );
-
 
   const [partnersData, setPartnersData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,7 +70,11 @@ const ArtisanManagement = () => {
 
   const fetchArtisans = async (page = 1, limit = 10) => {
     try {
-      const response = await userControllers.getUserListGroup("EMPLOYEE", page, limit);
+      const response = await userControllers.getUserListGroup(
+        "EMPLOYEE",
+        page,
+        limit,
+      );
       console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
       if (!Array.isArray(artisans)) {
@@ -85,7 +88,11 @@ const ArtisanManagement = () => {
         joinedDate: user.createdAt
           ? new Date(user.createdAt).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        name: user.name || user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Unknown",
+        name:
+          user.name ||
+          user.fullName ||
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          "Unknown",
         email: user.email || "No email",
         phoneNo: user.phoneNo || "",
         countryCode: user.countryCode || "+91",
@@ -138,13 +145,14 @@ const ArtisanManagement = () => {
       await userControllers.updateUserStatus(selectedEmployee.id, newStatus);
       setPartnersData((prev) =>
         prev.map((a) =>
-          a.id === selectedEmployee.id ? { ...a, status: newStatus } : a
-        )
+          a.id === selectedEmployee.id ? { ...a, status: newStatus } : a,
+        ),
       );
 
       toast.success(
-        `Employee ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
-        } Successfully!`
+        `Employee ${
+          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        } Successfully!`,
       );
     } catch (error) {
       toast.error("Something went wrong!");
@@ -163,7 +171,12 @@ const ArtisanManagement = () => {
     let newValue = value;
 
     // Validation for Name, Email and Location fields
-    if (name === "firstName" || name === "lastName" || name === "email" || name === "location") {
+    if (
+      name === "firstName" ||
+      name === "lastName" ||
+      name === "email" ||
+      name === "location"
+    ) {
       // Actively remove leading spaces
       newValue = newValue.replace(/^\s+/, "");
       // Actively remove multiple consecutive spaces
@@ -185,11 +198,13 @@ const ArtisanManagement = () => {
     }
 
     if (name === "firstName") {
-      newErrors.firstName = newValue.trim() === "" ? "First name is required" : "";
+      newErrors.firstName =
+        newValue.trim() === "" ? "First name is required" : "";
     }
 
     if (name === "lastName") {
-      newErrors.lastName = newValue.trim() === "" ? "Last name is required" : "";
+      newErrors.lastName =
+        newValue.trim() === "" ? "Last name is required" : "";
     }
 
     if (name === "location") {
@@ -253,7 +268,11 @@ const ArtisanManagement = () => {
         toast.error(response.data?.message || "Something went wrong.");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Error registering employee");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error registering employee",
+      );
     }
   };
   const filteredPartners = partnersData.filter((partner) => {
@@ -314,7 +333,7 @@ const ArtisanManagement = () => {
                 placeholder="Search by name, email, or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
 
@@ -376,7 +395,7 @@ const ArtisanManagement = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                         placeholder="Enter First Name"
                         required
                       />
@@ -391,7 +410,7 @@ const ArtisanManagement = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                         placeholder="Enter Last Name"
                         required
                       />
@@ -407,7 +426,7 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                       placeholder="Enter Email Address"
                     />
                     {errors.email && (
@@ -420,12 +439,12 @@ const ArtisanManagement = () => {
                         Country Code
                       </label>
                       <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer bg-white flex items-center justify-between"
-                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 cursor-pointer bg-white flex items-center justify-between"
+                        onClick={() =>
+                          setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                        }
                       >
-                        <span className="truncate">
-                          {formData.countryCode}
-                        </span>
+                        <span className="truncate">{formData.countryCode}</span>
                         <span className="ml-2 text-gray-400">▼</span>
                       </div>
 
@@ -438,8 +457,10 @@ const ArtisanManagement = () => {
                                 type="text"
                                 placeholder="Search country..."
                                 value={countrySearchTerm}
-                                onChange={(e) => setCountrySearchTerm(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                onChange={(e) =>
+                                  setCountrySearchTerm(e.target.value)
+                                }
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-orange-500"
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
                               />
@@ -452,13 +473,20 @@ const ArtisanManagement = () => {
                                   key={country.code}
                                   className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
                                   onClick={() => {
-                                    setFormData({ ...formData, countryCode: country.dial_code });
+                                    setFormData({
+                                      ...formData,
+                                      countryCode: country.dial_code,
+                                    });
                                     setIsCountryDropdownOpen(false);
                                     setCountrySearchTerm("");
                                   }}
                                 >
-                                  <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
-                                  <span className="text-gray-600 truncate">{country.name}</span>
+                                  <span className="font-medium text-gray-900 w-12">
+                                    {country.dial_code}
+                                  </span>
+                                  <span className="text-gray-600 truncate">
+                                    {country.name}
+                                  </span>
                                 </div>
                               ))
                             ) : (
@@ -482,10 +510,13 @@ const ArtisanManagement = () => {
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, "");
                           if (value.length <= 10) {
-                            setFormData((prev) => ({ ...prev, phoneNo: value }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              phoneNo: value,
+                            }));
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                         placeholder="Enter Phone Number"
                       />
                       {errors.phoneNo && (
@@ -506,10 +537,13 @@ const ArtisanManagement = () => {
                       onChange={(e) => {
                         const value = e.target.value.replace(/\D/g, "");
                         if (value.length <= 12) {
-                          setFormData((prev) => ({ ...prev, aadhaarNumber: value }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            aadhaarNumber: value,
+                          }));
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                       placeholder="Enter Aadhaar Number"
                       required
                     />
@@ -523,7 +557,7 @@ const ArtisanManagement = () => {
                       name="location"
                       value={formData.location}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                       placeholder="Enter Location"
                     />
                   </div>
@@ -570,7 +604,7 @@ const ArtisanManagement = () => {
                           src={
                             selectedPartner.avatar ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              selectedPartner.name
+                              selectedPartner.name,
                             )}&background=random`
                           }
                           alt={selectedPartner.name}
@@ -584,10 +618,11 @@ const ArtisanManagement = () => {
                       </h3>
                       <p className="text-gray-500">{selectedPartner.email}</p>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                          selectedPartner.status === "ACTIVE"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
                       >
                         {selectedPartner.status || "ACTIVE"}
                       </span>
@@ -686,7 +721,7 @@ const ArtisanManagement = () => {
                             src={
                               partner.avatar ||
                               `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                `${partner.firstName} ${partner.lastName}`
+                                `${partner.firstName} ${partner.lastName}`,
                               )}&background=random`
                             }
                             alt=""
@@ -716,17 +751,19 @@ const ArtisanManagement = () => {
                       <Switch
                         checked={partner.status === "ACTIVE"}
                         onChange={() => handleToggleStatus(partner)}
-                        className={`${partner.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        className={`${
+                          partner.status === "ACTIVE"
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
+                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                       >
                         <span className="sr-only">Toggle Status</span>
                         <span
-                          className={`${partner.status === "ACTIVE"
-                            ? "translate-x-6"
-                            : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          className={`${
+                            partner.status === "ACTIVE"
+                              ? "translate-x-6"
+                              : "translate-x-1"
+                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                         />
                       </Switch>
                     </td>
@@ -754,7 +791,7 @@ const ArtisanManagement = () => {
                       setRowsPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
                   >
                     <option value={10}>10</option>
                     <option value={25}>25</option>
@@ -773,10 +810,11 @@ const ArtisanManagement = () => {
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                      }`}
+                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                      currentPage === 1
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -784,10 +822,11 @@ const ArtisanManagement = () => {
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                      }`}
+                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${
+                      currentPage === totalPages
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -808,7 +847,11 @@ const ArtisanManagement = () => {
           <DisableModal
             onClose={() => setShowStatusModal(false)}
             onConfirm={confirmStatusChange}
-            title={selectedEmployee?.status === "ACTIVE" ? "Disable Profile" : "Activate Profile"}
+            title={
+              selectedEmployee?.status === "ACTIVE"
+                ? "Disable Profile"
+                : "Activate Profile"
+            }
             message={
               selectedEmployee?.status === "ACTIVE"
                 ? "Are you sure you want to disable this user's profile?"
@@ -818,8 +861,7 @@ const ArtisanManagement = () => {
         )}
         <ToastContainer position="top-right" autoClose={5000} />
       </div>
-    </div >
-
+    </div>
   );
 };
 

@@ -473,10 +473,11 @@ const ProductDetails = () => {
                             <button
                               key={index}
                               onClick={() => setSelectedImageIndex(index)}
-                              className={`w-2 h-2 rounded-full transition-all ${selectedImageIndex === index
-                                ? "bg-white scale-125"
-                                : "bg-white bg-opacity-50 hover:bg-opacity-75"
-                                }`}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                selectedImageIndex === index
+                                  ? "bg-white scale-125"
+                                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                              }`}
                             />
                           ))}
                         </div>
@@ -496,10 +497,11 @@ const ProductDetails = () => {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
-                          ? "border-orange-500 shadow-lg scale-105"
-                          : "border-gray-200 hover:border-orange-300"
-                          }`}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImageIndex === index
+                            ? "border-orange-500 shadow-lg scale-105"
+                            : "border-gray-200 hover:border-orange-300"
+                        }`}
                       >
                         <SecureImage
                           src={img.imageUrl}
@@ -525,12 +527,12 @@ const ProductDetails = () => {
                         const maxSequence =
                           buildSteps.length > 0
                             ? Math.max(
-                              ...buildSteps.map(
-                                (step) =>
-                                  Number(step.stepNumber || step.sequence) ||
-                                  0,
-                              ),
-                            )
+                                ...buildSteps.map(
+                                  (step) =>
+                                    Number(step.stepNumber || step.sequence) ||
+                                    0,
+                                ),
+                              )
                             : 0;
                         const nextSequence = maxSequence + 1;
 
@@ -602,24 +604,26 @@ const ProductDetails = () => {
                                       step.status === "APPROVED" ||
                                       step.status === "ADMIN_APPROVED"
                                     }
-                                    className={`p-2 rounded-full transition-colors ${step.status === "APPROVED" ||
+                                    className={`p-2 rounded-full transition-colors ${
+                                      step.status === "APPROVED" ||
                                       step.status === "ADMIN_APPROVED"
-                                      ? "bg-gray-100 cursor-not-allowed opacity-50"
-                                      : "hover:bg-gray-100 cursor-pointer"
-                                      }`}
+                                        ? "bg-gray-100 cursor-not-allowed opacity-50"
+                                        : "hover:bg-gray-100 cursor-pointer"
+                                    }`}
                                     title={
                                       step.status === "APPROVED" ||
-                                        step.status === "ADMIN_APPROVED"
+                                      step.status === "ADMIN_APPROVED"
                                         ? "Cannot edit lock step"
                                         : "Edit Step"
                                     }
                                   >
                                     <Pencil
-                                      className={`w-5 h-5 ${step.status === "APPROVED" ||
+                                      className={`w-5 h-5 ${
+                                        step.status === "APPROVED" ||
                                         step.status === "ADMIN_APPROVED"
-                                        ? "text-gray-400"
-                                        : "text-blue-600"
-                                        }`}
+                                          ? "text-gray-400"
+                                          : "text-blue-600"
+                                      }`}
                                     />
                                   </button>
                                 )}
@@ -649,9 +653,10 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm">
                                       {step.artisan.firstName ||
-                                        step.artisan.lastName
-                                        ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
-                                        }`
+                                      step.artisan.lastName
+                                        ? `${step.artisan.firstName ?? ""} ${
+                                            step.artisan.lastName ?? ""
+                                          }`
                                         : "No Artisan Assigned"}
                                     </p>
                                   </div>
@@ -773,16 +778,18 @@ const ProductDetails = () => {
                     Availability:
                   </span>
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.quantity || 0) < 10
-                      ? "bg-red-100 text-red-700"
-                      : "bg-green-100 text-green-700"
-                      }`}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
+                      parseInt(product?.quantity || 0) < 10
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
                   >
                     <div
-                      className={`w-2 h-2 rounded-full ${parseInt(product?.quantity || 0) < 10
-                        ? "bg-red-500"
-                        : "bg-green-500"
-                        }`}
+                      className={`w-2 h-2 rounded-full ${
+                        parseInt(product?.quantity || 0) < 10
+                          ? "bg-red-500"
+                          : "bg-green-500"
+                      }`}
                     ></div>
                     {parseInt(product?.quantity || 0) < 10
                       ? "Low Stock"
@@ -813,7 +820,7 @@ const ProductDetails = () => {
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                           placeholder="Enter rejection reason..."
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-red-500"
                         />
 
                         <div className="flex gap-3 mt-6">
@@ -850,7 +857,7 @@ const ProductDetails = () => {
                               } catch (err) {
                                 toast.error(
                                   err.response?.data?.message ||
-                                  "Failed to Reject Product",
+                                    "Failed to Reject Product",
                                 );
                                 console.log(err);
                               }
@@ -906,7 +913,7 @@ const ProductDetails = () => {
                                     setCountrySearch(approveCountry);
                                   }
                                 }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                               />
                               {isCountryDropdownOpen && (
                                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -944,7 +951,7 @@ const ProductDetails = () => {
                               onChange={(e) =>
                                 setApproveWarehouseId(e.target.value)
                               }
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                               disabled={!approveCountry || isWarehouseLoading}
                             >
                               <option value="" disabled>
@@ -1007,7 +1014,7 @@ const ProductDetails = () => {
                               } catch (err) {
                                 toast.error(
                                   err.response?.data?.message ||
-                                  "Failed to Approve Product",
+                                    "Failed to Approve Product",
                                 );
                                 console.log(err);
                               }
@@ -1064,8 +1071,6 @@ const ProductDetails = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Product Details Grid */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-500" />
@@ -1122,8 +1127,11 @@ const ProductDetails = () => {
                             Added By
                           </p>
                           <h4 className="text-gray-900 font-bold capitalize text-base">
-                            {product.addedBy.firstName || product.addedBy.name || "System"}{" "}
-                            {product.addedBy.lastName || ""}
+                            {product.addedBy.firstName ||
+                              product.addedBy.name ||
+                              "System"}{" "}
+                            {product.addedBy.lastName || ""} (ID:{" "}
+                            {product.addedBy.id || product.addedBy._id})
                           </h4>
                           {product.addedBy.phoneNo && (
                             <p className="text-gray-600 text-xs flex items-center gap-2 mt-0.5">
@@ -1373,330 +1381,323 @@ const ProductDetails = () => {
         </div>
       </div>
       {/* Create Build Step Modal */}
-      {
-        showCreateStepForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Create New Build Step
-                </h2>
-                <button
-                  onClick={() => setShowCreateStepForm(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sequence <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="sequence"
-                      value={createStepForm.sequence}
-                      onChange={handleCreateStepFormChange}
-                      required
-                      min="1"
-                      disabled
-                      placeholder="e.g., 4"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Proposed Price (₹) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="proposedPrice"
-                      value={createStepForm.proposedPrice}
-                      onChange={handleCreateStepFormChange}
-                      required
-                      min="0"
-                      step="0.01"
-                      placeholder="e.g., 200.00"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Step Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="stepName"
-                    value={createStepForm.stepName}
-                    onChange={handleCreateStepFormChange}
-                    required
-                    placeholder="e.g., Adding Decorative Elements"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    name="description"
-                    value={createStepForm.description}
-                    onChange={handleCreateStepFormChange}
-                    required
-                    rows="3"
-                    placeholder="e.g., Adding Decorative Elements & Final Touches"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Materials
-                  </label>
-                  <input
-                    type="text"
-                    name="materials"
-                    value={createStepForm.materials}
-                    onChange={handleCreateStepFormChange}
-                    placeholder="e.g., Sticker and Stone"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Admin Remarks
-                  </label>
-                  <textarea
-                    name="admin_remarks"
-                    value={createStepForm.admin_remarks}
-                    onChange={handleCreateStepFormChange}
-                    rows="3"
-                    placeholder="e.g., Insert the clock movement (mechanism) into the hole you drilled..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Instructions
-                  </label>
-                  <textarea
-                    name="instructions"
-                    value={createStepForm.instructions}
-                    onChange={handleCreateStepFormChange}
-                    rows="4"
-                    placeholder="e.g., Use a Dremel tool or carving set to add custom designs..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Reference Images
-                  </label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) =>
-                      setReferenceImages(Array.from(e.target.files))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateStepForm(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-500 text-white rounded-lg hover:from-orange-600 hover:to-orange-600 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? "Creating..." : "Create Step"}
-                  </button>
-                </div>
-              </form>
+      {showCreateStepForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Create New Build Step
+              </h2>
+              <button
+                onClick={() => setShowCreateStepForm(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
             </div>
-          </div>
-        )
-      }
-      {/* Assign Steps to Artisan Modal */}
-      {
-        showAssignForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Create Assigned Step
-                </h2>
-                <button
-                  onClick={() => setShowAssignForm(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-
-              <form onSubmit={handleAssignFormSubmit}>
-                {/* Due Date */}
+            <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Due Date <span className="text-red-500">*</span>
+                    Sequence <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="datetime-local"
-                    name="dueDate"
-                    value={assignForm.dueDate}
-                    onChange={handleAssignFormChange}
+                    type="number"
+                    name="sequence"
+                    value={createStepForm.sequence}
+                    onChange={handleCreateStepFormChange}
                     required
-                    min={moment().format("YYYY-MM-DDTHH:mm")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    min="1"
+                    disabled
+                    placeholder="e.g., 4"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-500"
                   />
                 </div>
-                {/* Build Step Dropdown */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select Build Step
+                    Proposed Price (₹) <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="buildStepId"
-                    value={assignForm.buildStepId}
-                    onChange={handleAssignFormChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  <input
+                    type="number"
+                    name="proposedPrice"
+                    value={createStepForm.proposedPrice}
+                    onChange={handleCreateStepFormChange}
                     required
-                  >
-                    <option value="">Choose step...</option>
-                    {buildSteps.map((step) => (
-                      <option key={step.id} value={step.id}>
-                        Step {step.sequence} - {step.stepName}
-                      </option>
-                    ))}
-                  </select>
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g., 200.00"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  />
                 </div>
-                {/* Artisan Dropdown */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Select Artisan
-                  </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Step Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="stepName"
+                  value={createStepForm.stepName}
+                  onChange={handleCreateStepFormChange}
+                  required
+                  placeholder="e.g., Adding Decorative Elements"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="description"
+                  value={createStepForm.description}
+                  onChange={handleCreateStepFormChange}
+                  required
+                  rows="3"
+                  placeholder="e.g., Adding Decorative Elements & Final Touches"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
 
-                  <div className="relative">
-                    <div
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer flex justify-between items-center bg-white"
-                      onClick={() =>
-                        setIsArtisanDropdownOpen(!isArtisanDropdownOpen)
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Materials
+                </label>
+                <input
+                  type="text"
+                  name="materials"
+                  value={createStepForm.materials}
+                  onChange={handleCreateStepFormChange}
+                  placeholder="e.g., Sticker and Stone"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin Remarks
+                </label>
+                <textarea
+                  name="admin_remarks"
+                  value={createStepForm.admin_remarks}
+                  onChange={handleCreateStepFormChange}
+                  rows="3"
+                  placeholder="e.g., Insert the clock movement (mechanism) into the hole you drilled..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Instructions
+                </label>
+                <textarea
+                  name="instructions"
+                  value={createStepForm.instructions}
+                  onChange={handleCreateStepFormChange}
+                  rows="4"
+                  placeholder="e.g., Use a Dremel tool or carving set to add custom designs..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reference Images
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) =>
+                    setReferenceImages(Array.from(e.target.files))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateStepForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-500 text-white rounded-lg hover:from-orange-600 hover:to-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Creating..." : "Create Step"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Assign Steps to Artisan Modal */}
+      {showAssignForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Create Assigned Step
+              </h2>
+              <button
+                onClick={() => setShowAssignForm(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAssignFormSubmit}>
+              {/* Due Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  name="dueDate"
+                  value={assignForm.dueDate}
+                  onChange={handleAssignFormChange}
+                  required
+                  min={moment().format("YYYY-MM-DDTHH:mm")}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                />
+              </div>
+              {/* Build Step Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Build Step
+                </label>
+                <select
+                  name="buildStepId"
+                  value={assignForm.buildStepId}
+                  onChange={handleAssignFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                >
+                  <option value="">Choose step...</option>
+                  {buildSteps.map((step) => (
+                    <option key={step.id} value={step.id}>
+                      Step {step.sequence} - {step.stepName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Artisan Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Artisan
+                </label>
+
+                <div className="relative">
+                  <div
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg cursor-pointer flex justify-between items-center bg-white"
+                    onClick={() =>
+                      setIsArtisanDropdownOpen(!isArtisanDropdownOpen)
+                    }
+                  >
+                    <span
+                      className={
+                        assignForm.artisanId ? "text-gray-900" : "text-gray-500"
                       }
                     >
-                      <span
-                        className={
-                          assignForm.artisanId ? "text-gray-900" : "text-gray-500"
-                        }
-                      >
-                        {assignForm.artisanId
-                          ? artisans.find((a) => a.id === assignForm.artisanId)
+                      {assignForm.artisanId
+                        ? artisans.find((a) => a.id === assignForm.artisanId)
                             ?.name || "Selected Artisan"
-                          : "Choose artisan..."}
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    </div>
+                        : "Choose artisan..."}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                  </div>
 
-                    {isArtisanDropdownOpen && (
-                      <div
-                        className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto"
-                        onScroll={(e) => {
-                          const { scrollTop, clientHeight, scrollHeight } =
-                            e.target;
-                          if (
-                            scrollHeight - scrollTop <= clientHeight + 20 &&
-                            !isArtisanLoading &&
-                            hasMoreArtisans
-                          ) {
-                            setArtisanPage((prev) => prev + 1);
-                          }
-                        }}
-                      >
-                        {artisans.map((a) => (
-                          <div
-                            key={a.id}
-                            className={`px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 transition-colors ${assignForm.artisanId === a.id
+                  {isArtisanDropdownOpen && (
+                    <div
+                      className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+                      onScroll={(e) => {
+                        const { scrollTop, clientHeight, scrollHeight } =
+                          e.target;
+                        if (
+                          scrollHeight - scrollTop <= clientHeight + 20 &&
+                          !isArtisanLoading &&
+                          hasMoreArtisans
+                        ) {
+                          setArtisanPage((prev) => prev + 1);
+                        }
+                      }}
+                    >
+                      {artisans.map((a) => (
+                        <div
+                          key={a.id}
+                          className={`px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 transition-colors ${
+                            assignForm.artisanId === a.id
                               ? "bg-orange-50 text-orange-700 font-medium"
                               : "text-gray-700"
-                              }`}
-                            onClick={() => {
-                              handleAssignFormChange({
-                                target: { name: "artisanId", value: a.id },
-                              });
-                              setIsArtisanDropdownOpen(false);
-                            }}
-                          >
-                            {a.name}
-                          </div>
-                        ))}
-                        {isArtisanLoading && (
-                          <div className="px-4 py-3 text-center text-gray-500 text-xs font-medium">
-                            <span className="inline-block animate-pulse">
-                              Loading more artisans...
-                            </span>
-                          </div>
-                        )}
-                        {!hasMoreArtisans && artisans.length > 0 && (
-                          <div className="px-4 py-2 text-center text-gray-400 text-xs">
-                            End of list
-                          </div>
-                        )}
-                        {!isArtisanLoading && artisans.length === 0 && (
-                          <div className="px-4 py-2 text-center text-gray-400 text-xs">
-                            No artisans found
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                          }`}
+                          onClick={() => {
+                            handleAssignFormChange({
+                              target: { name: "artisanId", value: a.id },
+                            });
+                            setIsArtisanDropdownOpen(false);
+                          }}
+                        >
+                          {a.name}
+                        </div>
+                      ))}
+                      {isArtisanLoading && (
+                        <div className="px-4 py-3 text-center text-gray-500 text-xs font-medium">
+                          <span className="inline-block animate-pulse">
+                            Loading more artisans...
+                          </span>
+                        </div>
+                      )}
+                      {!hasMoreArtisans && artisans.length > 0 && (
+                        <div className="px-4 py-2 text-center text-gray-400 text-xs">
+                          End of list
+                        </div>
+                      )}
+                      {!isArtisanLoading && artisans.length === 0 && (
+                        <div className="px-4 py-2 text-center text-gray-400 text-xs">
+                          No artisans found
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {/* Submit */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAssignForm(false)}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-                  >
-                    Assign
-                  </button>
-                </div>
-              </form>
-            </div>
+              </div>
+              {/* Submit */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAssignForm(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                >
+                  Assign
+                </button>
+              </div>
+            </form>
           </div>
-        )
-      }
-      {
-        showStepDetails && (
-          <BuildStepDetailsModal
-            stepId={selectedStepId}
-            onClose={() => setShowStepDetails(false)}
-          />
-        )
-      }
-      {
-        editStepId && (
-          <EditBuildStepModal
-            stepId={editStepId}
-            onClose={() => setEditStepId(null)}
-          />
-        )
-      }
+        </div>
+      )}
+      {showStepDetails && (
+        <BuildStepDetailsModal
+          stepId={selectedStepId}
+          onClose={() => setShowStepDetails(false)}
+        />
+      )}
+      {editStepId && (
+        <EditBuildStepModal
+          stepId={editStepId}
+          onClose={() => setEditStepId(null)}
+        />
+      )}
       <ToastContainer position="top-right" autoClose={3000} />
-    </div >
+    </div>
   );
 };
 export default ProductDetails;
