@@ -294,7 +294,7 @@ const ArtisanManagement = () => {
   ];
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
@@ -368,10 +368,9 @@ const ArtisanManagement = () => {
             </div>
           )}
         </div>
-        {/* Register Artisan Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">
@@ -395,7 +394,7 @@ const ArtisanManagement = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                         placeholder="Enter First Name"
                         required
                       />
@@ -410,7 +409,7 @@ const ArtisanManagement = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                         placeholder="Enter Last Name"
                         required
                       />
@@ -426,7 +425,7 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter Email Address"
                     />
                     {errors.email && (
@@ -439,7 +438,7 @@ const ArtisanManagement = () => {
                         Country Code
                       </label>
                       <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 cursor-pointer bg-white flex items-center justify-between"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
                         onClick={() =>
                           setIsCountryDropdownOpen(!isCountryDropdownOpen)
                         }
@@ -460,7 +459,7 @@ const ArtisanManagement = () => {
                                 onChange={(e) =>
                                   setCountrySearchTerm(e.target.value)
                                 }
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-orange-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
                               />
@@ -516,7 +515,7 @@ const ArtisanManagement = () => {
                             }));
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                         placeholder="Enter Phone Number"
                       />
                       {errors.phoneNo && (
@@ -543,7 +542,7 @@ const ArtisanManagement = () => {
                           }));
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter Aadhaar Number"
                       required
                     />
@@ -557,7 +556,7 @@ const ArtisanManagement = () => {
                       name="location"
                       value={formData.location}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter Location"
                     />
                   </div>

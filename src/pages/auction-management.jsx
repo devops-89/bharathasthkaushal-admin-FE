@@ -255,6 +255,7 @@ const AuctionManagement = () => {
   };
 
   const getStatusBadge = (status) => {
+    if (!status) return "px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-800";
     const statusMap = {
       DRAFT: "bg-gray-200 text-gray-700",
       SCHEDULED: "bg-blue-200 text-blue-800",
@@ -265,8 +266,9 @@ const AuctionManagement = () => {
       WON: "bg-teal-200 text-teal-800",
       ACTIVE: "bg-green-200 text-green-800",
     };
+    const upperStatus = status.toUpperCase();
     return `px-3 py-1 rounded-full text-sm font-medium ${
-      statusMap[status] || "bg-gray-200 text-gray-800"
+      statusMap[upperStatus] || "bg-gray-200 text-gray-800"
     }`;
   };
 
@@ -654,7 +656,7 @@ const AuctionManagement = () => {
                     >
                       <Eye size={18} />
                     </button>
-                    {auction.status === "Scheduled" && (
+                    {auction.status?.toUpperCase() === "SCHEDULED" && (
                       <button
                         onClick={() => handleStartAuction(auction.auction_id)}
                         className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"

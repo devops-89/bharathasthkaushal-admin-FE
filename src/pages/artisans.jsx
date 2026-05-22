@@ -406,7 +406,7 @@ const ArtisanManagement = () => {
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
@@ -490,10 +490,9 @@ const ArtisanManagement = () => {
           )}
         </div>
 
-        {/* Register Artisan Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">
@@ -516,7 +515,7 @@ const ArtisanManagement = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter first name"
                     />
                   </div>
@@ -529,7 +528,7 @@ const ArtisanManagement = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter last name"
                     />
                   </div>
@@ -543,7 +542,7 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter email address"
                     />
                   </div>
@@ -556,7 +555,7 @@ const ArtisanManagement = () => {
                       name="location"
                       value={formData.location}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder=" Enter your Address"
                     />
                   </div>
@@ -566,7 +565,7 @@ const ArtisanManagement = () => {
                         Country Code
                       </label>
                       <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 cursor-pointer bg-white flex items-center justify-between"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
                         onClick={() =>
                           setIsCountryDropdownOpen(!isCountryDropdownOpen)
                         }
@@ -587,7 +586,7 @@ const ArtisanManagement = () => {
                                 onChange={(e) =>
                                   setCountrySearchTerm(e.target.value)
                                 }
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-orange-500"
+                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
                                 autoFocus
                                 onClick={(e) => e.stopPropagation()}
                               />
@@ -635,12 +634,12 @@ const ArtisanManagement = () => {
                         value={formData.phoneNo}
                         maxLength={10}
                         onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "");
-                          if (value.length <= 10) {
-                            setFormData({ ...formData, phoneNo: value });
-                          }
+                           const value = e.target.value.replace(/\D/g, "");
+                           if (value.length <= 10) {
+                             setFormData({ ...formData, phoneNo: value });
+                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                         placeholder="Enter phone Number"
                       />
                     </div>
@@ -651,7 +650,7 @@ const ArtisanManagement = () => {
                     </label>
                     <div className="relative" ref={expertiseDropdownRef}>
                       <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 cursor-pointer bg-white flex items-center justify-between"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
                         onClick={() =>
                           setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)
                         }
@@ -725,7 +724,7 @@ const ArtisanManagement = () => {
                           setFormData({ ...formData, aadhaarNumber: value });
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder="Enter Aadhar Number"
                     />
                   </div>
@@ -737,7 +736,7 @@ const ArtisanManagement = () => {
                       name="user_caste_category"
                       value={formData.user_caste_category}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     >
                       <option value="" hidden>
                         Select Caste Category
@@ -765,7 +764,7 @@ const ArtisanManagement = () => {
                           handleFormChange(e);
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                     >
                       <option value="" hidden>
                         Select Sub Caste
@@ -786,7 +785,7 @@ const ArtisanManagement = () => {
                         value={formData.subCaste}
                         onChange={handleFormChange}
                         placeholder="Enter custom sub caste"
-                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       />
                     )}
                   </div>
@@ -805,7 +804,7 @@ const ArtisanManagement = () => {
                         });
                       }}
                       maxLength={15}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       placeholder=" Enter GST Number"
                     />
                   </div>

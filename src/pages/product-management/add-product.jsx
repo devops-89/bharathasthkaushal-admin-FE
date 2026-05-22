@@ -866,6 +866,7 @@ const AddProduct = () => {
     pattern: "",
     country: "",
     warehouseId: "",
+    isReadyForAuction: false,
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -998,10 +999,10 @@ const AddProduct = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -1061,6 +1062,7 @@ const AddProduct = () => {
       data.append("netWeight", netWeight);
       data.append("country", formData.country);
       data.append("warehouseId", formData.warehouseId);
+      data.append("isReadyForAuction", formData.isReadyForAuction);
 
       if (images.length > 0) {
         images.forEach((file) => {
@@ -1603,6 +1605,29 @@ const AddProduct = () => {
                   {errors.description}
                 </p>
               )}
+            </div>
+
+            {/* Ready for Auction Checkbox */}
+            <div className="md:col-span-2 flex items-center gap-3 bg-orange-50/50 p-4 rounded-xl border border-orange-100 mt-2">
+              <input
+                type="checkbox"
+                name="isReadyForAuction"
+                id="isReadyForAuction"
+                checked={formData.isReadyForAuction}
+                onChange={handleInputChange}
+                className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer transition-all duration-200"
+              />
+              <div>
+                <label
+                  htmlFor="isReadyForAuction"
+                  className="block text-gray-800 font-semibold cursor-pointer select-none text-base"
+                >
+                  Ready for Auction
+                </label>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  Check this box if you want this product to be available for auction immediately.
+                </p>
+              </div>
             </div>
 
             {/* Image Upload */}

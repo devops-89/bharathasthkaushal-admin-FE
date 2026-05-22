@@ -31,6 +31,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { productControllers } from "../../api/product";
 import { userControllers } from "../../api/user";
 import { warehouseControllers } from "../../api/warehouse";
+import { categoryControllers } from "../../api/category";
 import { countries } from "../../constants/countries";
 import BuildStepDetailsModal from "../../components/BuildStepDetailsModal";
 import EditBuildStepModal from "../../components/EditBuildStepModal";
@@ -62,6 +63,7 @@ const ProductDetails = () => {
     admin_remarks: "",
     materials: "",
     instructions: "",
+    skills: [],
   });
   const [showStepDetails, setShowStepDetails] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState(null);
@@ -103,6 +105,20 @@ const ProductDetails = () => {
   useEffect(() => {
     fetchArtisans(artisanPage);
   }, [artisanPage]);
+
+  const [subCategories, setSubCategories] = useState([]);
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      try {
+        const res = await categoryControllers.getallSubcategory();
+        setSubCategories(res.data?.data?.docs || res.data?.data || []);
+      } catch (err) {
+        console.error("Error fetching subcategories:", err);
+      }
+    };
+    fetchSubCategories();
+  }, []);
+
   console.log("buildstep", buildSteps);
   console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -111,6 +127,7 @@ const ProductDetails = () => {
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [approveCountry, setApproveCountry] = useState("");
   const [approveWarehouseId, setApproveWarehouseId] = useState("");
+  const [isReadyForAuction, setIsReadyForAuction] = useState(false);
   const [warehouses, setWarehouses] = useState([]);
   const [isWarehouseLoading, setIsWarehouseLoading] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
@@ -138,10 +155,15 @@ const ProductDetails = () => {
     }
   };
 
+  const [isSkillsDropdownOpen, setIsSkillsDropdownOpen] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".relative-country-dropdown")) {
         setIsCountryDropdownOpen(false);
+      }
+      if (!event.target.closest(".relative-skills-dropdown")) {
+        setIsSkillsDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -314,6 +336,10 @@ const ProductDetails = () => {
       toast.error("Description cannot be empty or just spaces.");
       return;
     }
+    if (!createStepForm.skills || createStepForm.skills.length === 0) {
+      toast.error("Please select at least one required skill.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -323,6 +349,7 @@ const ProductDetails = () => {
       formData.append("stepName", createStepForm.stepName.trim());
       formData.append("description", createStepForm.description.trim());
       formData.append("proposedPrice", createStepForm.proposedPrice);
+      formData.append("skills", createStepForm.skills.join(", "));
       formData.append(
         "admin_remarks",
         (createStepForm.admin_remarks || "").trim(),
@@ -353,6 +380,7 @@ const ProductDetails = () => {
         admin_remarks: "",
         materials: "",
         instructions: "",
+        skills: [],
       });
       setReferenceImages([]);
       setShowCreateStepForm(false);
@@ -972,11 +1000,31 @@ const ProductDetails = () => {
                               </p>
                             )}
                           </div>
+
+                          {/* Ready for Auction Checkbox */}
+                          <div className="flex items-center gap-2.5 pt-2">
+                            <input
+                              type="checkbox"
+                              id="isReadyForAuction"
+                              checked={isReadyForAuction}
+                              onChange={(e) => setIsReadyForAuction(e.target.checked)}
+                              className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                            />
+                            <label
+                              htmlFor="isReadyForAuction"
+                              className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                            >
+                              Ready for Auction
+                            </label>
+                          </div>
                         </div>
 
                         <div className="flex gap-3 mt-6">
                           <button
-                            onClick={() => setShowApproveModal(false)}
+                            onClick={() => {
+                              setShowApproveModal(false);
+                              setIsReadyForAuction(false);
+                            }}
                             className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
                           >
                             Cancel
@@ -993,6 +1041,7 @@ const ProductDetails = () => {
                                   {
                                     country: approveCountry,
                                     warehouseId: approveWarehouseId,
+                                    isReadyForAuction: isReadyForAuction,
                                   },
                                 );
 
@@ -1011,6 +1060,7 @@ const ProductDetails = () => {
                                 setApproveCountry("");
                                 setApproveWarehouseId("");
                                 setCountrySearch("");
+                                setIsReadyForAuction(false);
                               } catch (err) {
                                 toast.error(
                                   err.response?.data?.message ||
@@ -1443,6 +1493,58 @@ const ProductDetails = () => {
                   placeholder="e.g., Adding Decorative Elements"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
                 />
+              </div>
+              <div className="relative relative-skills-dropdown">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Skills <span className="text-red-500">*</span>
+                </label>
+                <div
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus-within:border-green-500 cursor-pointer bg-white flex items-center justify-between"
+                  onClick={() => setIsSkillsDropdownOpen(!isSkillsDropdownOpen)}
+                >
+                  <span className="truncate text-gray-700">
+                    {createStepForm.skills.length > 0
+                      ? createStepForm.skills.join(", ")
+                      : "Select Skills"}
+                  </span>
+                  <span className="ml-2 text-gray-400">▼</span>
+                </div>
+
+                {isSkillsDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {subCategories.map((sub, index) => {
+                      const isSelected = createStepForm.skills.includes(sub.category_name);
+                      return (
+                        <div
+                          key={sub.id || sub._id || index}
+                          className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm flex items-center gap-2"
+                          onClick={() => {
+                            let newSkills;
+                            if (isSelected) {
+                              newSkills = createStepForm.skills.filter(
+                                (item) => item !== sub.category_name
+                              );
+                            } else {
+                              newSkills = [...createStepForm.skills, sub.category_name];
+                            }
+                            setCreateStepForm((prev) => ({
+                              ...prev,
+                              skills: newSkills,
+                            }));
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            readOnly
+                            className="rounded text-green-600 focus:ring-green-500"
+                          />
+                          <span className="text-gray-700">{sub.category_name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

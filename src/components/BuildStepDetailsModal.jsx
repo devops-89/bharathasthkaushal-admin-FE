@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Eye } from "lucide-react";
+import { X, Eye, Phone } from "lucide-react";
 import axios from "axios";
 import { productControllers } from "../api/product";
 import { ToastContainer, toast } from "react-toastify";
@@ -109,6 +109,13 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                     ? `${stepDetails.artisan.firstName ?? ""} ${stepDetails.artisan.lastName ?? ""}`
                     : "Unknown Artisan"}
                 </p>
+                {stepDetails.artisan.phoneNo && (
+                  <p className="text-gray-600 text-xs flex items-center gap-1.5 mt-1 font-semibold">
+                    <Phone className="w-3.5 h-3.5 text-gray-500" />
+                    {stepDetails.artisan.countryCode ? `${stepDetails.artisan.countryCode} ` : ""}
+                    {stepDetails.artisan.phoneNo}
+                  </p>
+                )}
               </div>
             )}
 
@@ -121,6 +128,18 @@ const BuildStepDetailsModal = ({ stepId, onClose }) => {
                 {stepDetails?.stepName}
               </p>
             </div>
+
+            {/* Skills */}
+            {stepDetails?.skills && (
+              <div className="mb-2">
+                <p className="text-xs text-gray-500 uppercase font-semibold">
+                  Required Skills
+                </p>
+                <p className="text-sm font-semibold text-gray-900 capitalize">
+                  {stepDetails.skills}
+                </p>
+              </div>
+            )}
 
             {/* Price and Due Date Row */}
             <div className="flex justify-between items-start mb-6">

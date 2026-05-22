@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
 import { productControllers } from "../api/product";
+import { categoryControllers } from "../api/category";
 
 const EditBuildStepModal = ({ stepId, onClose }) => {
   const [loading, setLoading] = useState(true);
+  const [subCategories, setSubCategories] = useState([]);
+  const [isSkillsDropdownOpen, setIsSkillsDropdownOpen] = useState(false);
   const [stepData, setStepData] = useState({
     stepName: "",
     description: "",
@@ -13,8 +16,34 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
     adminRemarks: "",
     instructions: "",
     materials: "",
+    skills: [],
   });
   const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      try {
+        const res = await categoryControllers.getallSubcategory();
+        setSubCategories(res.data?.data?.docs || res.data?.data || []);
+      } catch (err) {
+        console.error("Error fetching subcategories:", err);
+      }
+    };
+    fetchSubCategories();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".relative-skills-dropdown")) {
+        setIsSkillsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     const loadDetails = async () => {
       try {
@@ -28,6 +57,9 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
           adminRemarks: d.adminRemarks || "",
           instructions: d.instructions || "",
           materials: d.materials || "",
+          skills: d.skills
+            ? d.skills.split(",").map((s) => s.trim()).filter(Boolean)
+            : [],
         });
       } catch {
         toast.error("Failed to load step details");
@@ -47,9 +79,13 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
-      Object.entries(stepData).forEach(([key, value]) =>
-        formData.append(key, value),
-      );
+      Object.entries(stepData).forEach(([key, value]) => {
+        if (key === "skills" && Array.isArray(value)) {
+          formData.append(key, value.join(", "));
+        } else {
+          formData.append(key, value);
+        }
+      });
 
       images.forEach((file) => formData.append("reference_images", file));
 
@@ -93,6 +129,59 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Step Name"
               />
+            </div>
+
+            <div className="col-span-1 relative relative-skills-dropdown">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Skills *
+              </label>
+              <div
+                className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus-within:border-orange-500 cursor-pointer bg-white flex items-center justify-between text-sm"
+                onClick={() => setIsSkillsDropdownOpen(!isSkillsDropdownOpen)}
+              >
+                <span className="truncate text-gray-700">
+                  {stepData.skills.length > 0
+                    ? stepData.skills.join(", ")
+                    : "Select Skills"}
+                </span>
+                <span className="ml-2 text-gray-400">▼</span>
+              </div>
+
+              {isSkillsDropdownOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {subCategories.map((sub, index) => {
+                    const isSelected = stepData.skills.includes(sub.category_name);
+                    return (
+                      <div
+                        key={sub.id || sub._id || index}
+                        className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                        onClick={() => {
+                          let newSkills;
+                          if (isSelected) {
+                            newSkills = stepData.skills.filter(
+                              (item) => item !== sub.category_name
+                            );
+                          } else {
+                            newSkills = [...stepData.skills, sub.category_name];
+                          }
+                          setStepData((prev) => ({
+                            ...prev,
+                            skills: newSkills,
+                          }));
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          readOnly
+                          className="rounded text-orange-600 focus:ring-orange-500"
+                        />
+                        <span className="text-gray-700">{sub.category_name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="col-span-1">

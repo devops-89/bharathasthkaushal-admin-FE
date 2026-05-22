@@ -28,6 +28,7 @@ const EditProduct = () => {
     dimension: "",
     country: "",
     warehouseId: "",
+    isReadyForAuction: false,
     // color: "",
     // size: "",
   });
@@ -170,6 +171,7 @@ const EditProduct = () => {
           dimension: p.dimension || "",
           country: p.country || "",
           warehouseId: finalWarehouseId || "",
+          isReadyForAuction: p.isReadyForAuction || false,
         });
         setCountrySearch(p.country || "");
       } catch (err) {
@@ -227,10 +229,10 @@ const EditProduct = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setProductData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -536,6 +538,29 @@ const EditProduct = () => {
               onChange={handleChange}
               className="w-full p-2 border rounded-lg"
             ></textarea>
+          </div>
+
+          {/* Ready for Auction Checkbox */}
+          <div className="flex items-center gap-3 bg-orange-50/50 p-4 rounded-xl border border-orange-100 mt-2">
+            <input
+              type="checkbox"
+              name="isReadyForAuction"
+              id="isReadyForAuction"
+              checked={productData.isReadyForAuction}
+              onChange={handleChange}
+              className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer transition-all duration-200"
+            />
+            <div>
+              <label
+                htmlFor="isReadyForAuction"
+                className="block text-gray-800 font-semibold cursor-pointer select-none text-base"
+              >
+                Ready for Auction
+              </label>
+              <p className="text-gray-500 text-xs mt-0.5">
+                Check this box if you want this product to be available for auction immediately.
+              </p>
+            </div>
           </div>
 
           {/* IMAGES */}
