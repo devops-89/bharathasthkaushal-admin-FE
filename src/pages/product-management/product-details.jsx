@@ -64,6 +64,7 @@ const ProductDetails = () => {
     materials: "",
     instructions: "",
     skills: [],
+    dueDate: "",
   });
   const [showStepDetails, setShowStepDetails] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState(null);
@@ -340,6 +341,17 @@ const ProductDetails = () => {
       toast.error("Please select at least one required skill.");
       return;
     }
+    if (!createStepForm.dueDate) {
+      toast.error("Due Date is required.");
+      return;
+    }
+    const selectedDate = new Date(createStepForm.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      toast.error("Due Date cannot be in the past.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -354,7 +366,7 @@ const ProductDetails = () => {
         "admin_remarks",
         (createStepForm.admin_remarks || "").trim(),
       );
-      // formData.append("dueDate", createStepForm.dueDate); // Removed due date
+      formData.append("dueDate", createStepForm.dueDate);
       formData.append("materials", (createStepForm.materials || "").trim());
       formData.append(
         "instructions",
@@ -381,6 +393,7 @@ const ProductDetails = () => {
         materials: "",
         instructions: "",
         skills: [],
+        dueDate: "",
       });
       setReferenceImages([]);
       setShowCreateStepForm(false);
@@ -390,7 +403,10 @@ const ProductDetails = () => {
         "Error creating build step:",
         err.response?.data || err.message,
       );
-      toast.error("Error creating build step. Please try again.");
+      const errorMessage =
+        err.response?.data?.message ||
+        "Error creating build step. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -576,13 +592,13 @@ const ProductDetails = () => {
                       <FileText className="w-3 h-5" />
                       Create Build Step
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => setShowAssignForm(true)}
                       className="w-full px-4 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                     >
                       <Users className="w-5 h-5" />
                       Assigned Step To Artisan
-                    </button>
+                    </button> */}
                   </div>
                 )}
                 {/* Build Steps FAQ Section */}
@@ -1446,7 +1462,7 @@ const ProductDetails = () => {
               </button>
             </div>
             <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Sequence <span className="text-red-500">*</span>
@@ -1476,6 +1492,19 @@ const ProductDetails = () => {
                     min="0"
                     step="0.01"
                     placeholder="e.g., 200.00"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Due Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="dueDate"
+                    value={createStepForm.dueDate}
+                    onChange={handleCreateStepFormChange}
+                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
                   />
                 </div>
