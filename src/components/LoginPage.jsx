@@ -41,7 +41,7 @@ export default function LoginPage({ onLogin }) {
     setState(prev => ({ ...prev, email: emailTrimmed }));
 
     if (!emailTrimmed) {
-      frontendErrors.email = "Invalid email";
+      frontendErrors.email = "Email is required";
     } else {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(emailTrimmed)) {
@@ -50,7 +50,7 @@ export default function LoginPage({ onLogin }) {
     }
 
     if (!state.password.trim()) {
-      frontendErrors.password = "Invalid password";
+      frontendErrors.password = "Password is required";
     }
 
     const hasEmailError = frontendErrors.email !== "";

@@ -25,6 +25,12 @@ import countryCodes from "../utils/countryCodes.json";
 import SecureImage from "../components/SecureImage";
 import SecureVideo from "../components/SecureVideo";
 
+const formatAadhaar = (number) => {
+    if (!number) return "";
+    const cleaned = number.toString().replace(/\D/g, "");
+    return cleaned.replace(/(\d{4})(?=\d)/g, "$1 ");
+  };
+
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -516,7 +522,7 @@ const ArtisanManagement = () => {
                       value={formData.firstName}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder="Enter first name"
+                      placeholder="Enter First Name"
                     />
                   </div>
                   <div>
@@ -529,7 +535,7 @@ const ArtisanManagement = () => {
                       value={formData.lastName}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder="Enter last name"
+                      placeholder="Enter Last Name"
                     />
                   </div>
                   <div>
@@ -543,7 +549,7 @@ const ArtisanManagement = () => {
                       value={formData.email}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder="Enter email address"
+                      placeholder="Enter Email Address"
                     />
                   </div>
                   <div>
@@ -556,7 +562,7 @@ const ArtisanManagement = () => {
                       value={formData.location}
                       onChange={handleFormChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder=" Enter your Address"
+                      placeholder=" Enter Your Address"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -640,7 +646,7 @@ const ArtisanManagement = () => {
                            }
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                        placeholder="Enter phone Number"
+                        placeholder="Enter Phone Number"
                       />
                     </div>
                   </div>
@@ -716,8 +722,9 @@ const ArtisanManagement = () => {
                     <input
                       type="text"
                       name="aadhaarNumber"
-                      value={formData.aadhaarNumber}
-                      maxLength={12}
+                      value={formatAadhaar(formData.aadhaarNumber)}
+                    //  value={formData.aadhaarNumber}
+                      maxLength={14}
                       onChange={(e) => {
                         const value = e.target.value.replace(/\D/g, "");
                         if (value.length <= 12) {
@@ -784,7 +791,7 @@ const ArtisanManagement = () => {
                         name="subCaste"
                         value={formData.subCaste}
                         onChange={handleFormChange}
-                        placeholder="Enter custom sub caste"
+                        placeholder="Enter Custom Sub Caste"
                         className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       />
                     )}
@@ -944,7 +951,8 @@ const ArtisanManagement = () => {
                       <div>
                         <p className="text-sm text-gray-500">Aadhaar Number</p>
                         <p className="font-medium break-words">
-                          {selectedPartner.aadhaarNumber || "N/A"}
+                        {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
+                       {/* {selectedPartner.aadhaarNumber || "N/A"} */}
                         </p>
                       </div>
                     </div>
