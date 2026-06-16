@@ -31,7 +31,7 @@ const Wrapper = ({ isOpen, toggleSidebar }) => {
     // {path:'/approval-management', name:'Approval Management', icon:ThumbsUp},
     { path: '/employee-management', name: 'Employee Management', icon: User2Icon },
     { path: '/payment-management', name: 'Payment Management', icon: CreditCard },
-    { path: '/permission-management', name: 'Permission Management', icon: Lock },
+    // { path: '/permission-management', name: 'Permission Management', icon: Lock },
     { path: '/user-management', name: 'User Management', icon: UserCheck },
     { path: '/need-assistant', name: 'Need Assistant', icon: HelpCircle },
   ]

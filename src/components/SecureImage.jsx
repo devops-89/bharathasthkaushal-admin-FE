@@ -126,3 +126,5 @@ const SecureImage = ({ src, alt, className, fallbackIcon }) => {
 };
 
 export default SecureImage;
+
+

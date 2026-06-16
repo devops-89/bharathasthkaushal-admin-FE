@@ -69,6 +69,8 @@ const ArtisanManagement = () => {
   const [showSubCasteOther, setShowSubCasteOther] = useState(false);
   const dropdownRef = React.useRef(null);
   const expertiseDropdownRef = React.useRef(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -238,6 +240,44 @@ const ArtisanManagement = () => {
     setSelectedPartner(partner);
     setShowDetailsModal(true);
   };
+
+  const handleEditClick = () => {
+    setShowDetailsModal(false);
+    setIsEditMode(true);
+    setEditId(selectedPartner.id);
+
+    let parsedExpertise = [];
+    const exp = selectedPartner.expertizeField;
+    if (exp && exp !== "Not Specified") {
+      parsedExpertise = typeof exp === 'string' ? exp.split(',').map(s => s.trim()) : exp;
+    }
+
+    const casteCat = selectedPartner.user_caste_category;
+    const subCst = selectedPartner.subCaste;
+    if (casteCat && casteCat !== "—" && casteCategories[casteCat]) {
+      if (subCst && subCst !== "_" && !casteCategories[casteCat].includes(subCst)) {
+        setShowSubCasteOther(true);
+      }
+    }
+
+    setFormData({
+      firstName: selectedPartner.firstName !== "—" ? selectedPartner.firstName : "",
+      lastName: selectedPartner.lastName !== "—" ? selectedPartner.lastName : "",
+      email: selectedPartner.email !== "—" ? selectedPartner.email : "",
+      countryCode: selectedPartner.countryCode || "+91",
+      phoneNo: selectedPartner.phoneNo !== "—" ? selectedPartner.phoneNo : "",
+      expertizeField: parsedExpertise,
+      location: selectedPartner.location !== "—" ? selectedPartner.location : "",
+      aadhaarNumber: selectedPartner.aadhaarNumber !== "N/A" ? selectedPartner.aadhaarNumber : "",
+      user_caste_category: casteCat !== "—" ? casteCat : "",
+      subCaste: subCst !== "_" ? subCst : "",
+      introVideo: selectedPartner.introVideo || "",
+      gstNumber: selectedPartner.gstNumber !== "—" ? selectedPartner.gstNumber : "",
+    });
+
+    setShowAddForm(true);
+  };
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
@@ -255,6 +295,10 @@ const ArtisanManagement = () => {
       newValue = newValue.replace(/\s{2,}/g, " ");
     }
 
+    if (name === "firstName" || name === "lastName") {
+      newValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+    }
+
     setFormData((prev) => {
       const newFormData = { ...prev, [name]: newValue };
       if (name === "user_caste_category") {
@@ -263,6 +307,27 @@ const ArtisanManagement = () => {
       }
       return newFormData;
     });
+  };
+
+  const handleCloseForm = () => {
+    setShowAddForm(false);
+    setIsEditMode(false);
+    setEditId(null);
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      countryCode: "+91",
+      phoneNo: "",
+      expertizeField: [], 
+      location: "",
+      aadhaarNumber: "",
+      user_caste_category: "",
+      subCaste: "",
+      introVideo: "",
+      gstNumber: "",
+    });
+    setShowSubCasteOther(false); 
   };
 
   const handleAddEmployee = async () => {
@@ -439,7 +504,7 @@ const ArtisanManagement = () => {
                     isActive ? "text-orange-600 font-semibold" : ""
                   }
                 >
-                  Artisans
+                  Artisan Management
                 </NavLink>
               </nav>
             </div>
@@ -502,10 +567,10 @@ const ArtisanManagement = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">
-                    Register New Artisan
+                    {isEditMode ? "Edit Artisan Details" : "Register New Artisan"}
                   </h2>
                   <button
-                    onClick={() => setShowAddForm(false)}
+                    onClick={handleCloseForm}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     <X className="w-6 h-6" />
@@ -514,7 +579,7 @@ const ArtisanManagement = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name *
+                      First Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -527,7 +592,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name *
+                      Last Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -540,7 +605,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address *
+                      Email Address <span className="text-red-500">*</span>
                     </label>
 
                     <input
@@ -554,7 +619,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Address
+                      Address <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -576,7 +641,20 @@ const ArtisanManagement = () => {
                           setIsCountryDropdownOpen(!isCountryDropdownOpen)
                         }
                       >
-                        <span className="truncate">{formData.countryCode}</span>
+                        <div className="flex items-center gap-2 truncate">
+                           {(() => {
+                             const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
+                             return selected && selected.code ? (
+                               <img 
+                                 src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`} 
+                                 alt={selected.code} 
+                                 className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                               />
+                             ) : null;
+                           })()}
+                           <span>{formData.countryCode}</span>
+                         </div>
+                        {/*<span className="truncate">{formData.countryCode}</span>*/}
                         <span className="ml-2 text-gray-400">▼</span>
                       </div>
 
@@ -613,6 +691,13 @@ const ArtisanManagement = () => {
                                     setCountrySearchTerm("");
                                   }}
                                 >
+                                  {country.code && (
+                                    <img 
+                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                                      alt={country.code} 
+                                      className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
+                                    />
+                                  )}
                                   <span className="font-medium text-gray-900 w-12">
                                     {country.dial_code}
                                   </span>
@@ -632,7 +717,7 @@ const ArtisanManagement = () => {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
+                        Phone Number <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
@@ -652,7 +737,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expertise Field *
+                      Expertise Field <span className="text-red-500">*</span>
                     </label>
                     <div className="relative" ref={expertiseDropdownRef}>
                       <div
@@ -717,7 +802,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number *
+                      Aadhaar Number <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -737,7 +822,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Caste Category *
+                      Caste Category <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="user_caste_category"
@@ -757,11 +842,12 @@ const ArtisanManagement = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub Caste *
+                      Sub Caste <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="subCaste"
                       value={showSubCasteOther ? "Other" : formData.subCaste}
+                      disabled={!formData.user_caste_category}
                       onChange={(e) => {
                         if (e.target.value === "Other") {
                           setShowSubCasteOther(true);
@@ -771,7 +857,9 @@ const ArtisanManagement = () => {
                           handleFormChange(e);
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
+                        !formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"
+                      }`}
                     >
                       <option value="" hidden>
                         Select Sub Caste
@@ -817,7 +905,7 @@ const ArtisanManagement = () => {
                   </div>
                   <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => setShowAddForm(false)}
+                      onClick={handleCloseForm}
                       className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Cancel
@@ -852,7 +940,7 @@ const ArtisanManagement = () => {
                           Processing...
                         </span>
                       ) : (
-                        "Register Artisan"
+                        isEditMode ? "Update Artisan" : "Register Artisan"
                       )}
                     </button>
                   </div>
@@ -1000,14 +1088,18 @@ const ArtisanManagement = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 mt-6">
-                  {selectedPartner?.introVideo && (
+                  {selectedPartner?.introVideo ? (
                     <button
                       onClick={() => setShowVideoModal(true)}
                       className="px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg shadow-sm hover:bg-orange-700 transition-all"
                     >
                       View Intro Video
                     </button>
-                  )}
+                  ) : (
+                   <span className="px-5 py-2.5 bg-gray-50 text-gray-500 text-sm font-medium rounded-lg border border-gray-200 flex items-center shadow-sm">
+                     No Intro Video Uploaded
+                   </span>
+                 )}
                   {selectedPartner?.user_group === "ARTISAN" &&
                     selectedPartner?.verify_status !== "VERIFIED" && (
                       <button
@@ -1019,7 +1111,13 @@ const ArtisanManagement = () => {
                     )}
                 </div>
 
-                <div className="flex justify-end mt-6 pt-4 border-t">
+                <div className="flex justify-end mt-6 pt-4 border-t space-x-3">
+                  <button
+                    onClick={handleEditClick}
+                    className="px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    Edit Details
+                  </button>
                   <button
                     onClick={() => setShowDetailsModal(false)}
                     className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"

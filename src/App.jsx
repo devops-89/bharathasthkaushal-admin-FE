@@ -73,10 +73,10 @@ function App() {
         /> */}
         <Route path="/employee-management" element={<EmployeeManagement />} />
         <Route path="/payment-management" element={<PaymentManagement />} />
-        <Route
+        {/*<Route
           path="/permission-management"
           element={<PermissionManagement />}
-        />
+        />*/}
         <Route
           path="/category-management/sub-category/:id"
           element={<Subcategory />}
