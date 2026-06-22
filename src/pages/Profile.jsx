@@ -119,12 +119,27 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
+
+    const newName = formData.name.trim();
+    const newEmail = formData.email.trim();
+
+    if (newName === user.name && newEmail === user.email) {
+      toast.info("No changes detected");
+      setIsEditing(false);
+      return; 
+    }
+
     try {
-      await userControllers.updateUserProfile(formData);
+      await userControllers.updateUserProfile({
+        name: newName,
+        email: newEmail
+      });
       setUser((prev) => ({
         ...prev,
-        name: formData.name,
-        email: formData.email,
+      //  name: formData.name,
+      //  email: formData.email,
+        name: newName,
+        email: newEmail,
       }));
 
       // Update localStorage to persist changes across the app if used elsewhere
@@ -133,8 +148,10 @@ const Profile = () => {
         const parsedUser = JSON.parse(storedUser);
         const updatedUser = {
           ...parsedUser,
-          name: formData.name,
-          email: formData.email,
+        //  name: formData.name,
+        //  email: formData.email,
+          name: newName,
+          email: newEmail,
         };
         localStorage.setItem("user", JSON.stringify(updatedUser));
       }

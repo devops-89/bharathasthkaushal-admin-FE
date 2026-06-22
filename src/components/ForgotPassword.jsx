@@ -19,7 +19,7 @@ export default function ForgotPassword() {
 
         if (!trimmedEmail) {
             const msg = "Please enter your email address";
-            toast.error(msg);
+         // toast.error(msg);
             setError(msg);
             return;
         }
@@ -27,7 +27,7 @@ export default function ForgotPassword() {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(trimmedEmail)) {
             const msg = "Please enter a valid email address";
-            toast.error(msg);
+         // toast.error(msg);
             setError(msg);
             return;
         }
@@ -55,7 +55,7 @@ export default function ForgotPassword() {
                 errorMessage = errorMessage.join(", ");
             }
             errorMessage = errorMessage || "Failed to send OTP";
-            toast.error(errorMessage);
+        //  toast.error(errorMessage);
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -184,7 +184,7 @@ export default function ForgotPassword() {
                     >
                         <ArrowLeft size={16} style={{ marginRight: "4px" }} /> Back to Login
                     </button>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <div style={fieldContainerStyle}>
                             <label htmlFor="email" style={labelStyle}>
                                 Email Address
@@ -193,7 +193,6 @@ export default function ForgotPassword() {
                                 id="email"
                                 type="email"
                                 value={email}
-                                required
                                 onChange={(e) => {
                                     setEmail(e.target.value.replace(/\s+/g, "").trim());
                                     if (error) setError("");

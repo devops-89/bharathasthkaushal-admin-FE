@@ -37,6 +37,7 @@ export default function WarehouseManagement() {
     latitude: "",
     address: "",
   });
+  const [errors, setErrors] = useState({});
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
@@ -107,12 +108,17 @@ export default function WarehouseManagement() {
       ...prev,
       [name]: value,
     }));
+    // Instantly clear the inline error when the user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    let newErrors = {};
 
-    if (!formData.warehouse_name.trim()) {
+    {/*if (!formData.warehouse_name.trim()) {
       toast.error("Warehouse Name is required");
       return;
     }
@@ -134,16 +140,38 @@ export default function WarehouseManagement() {
     if (!formData.address.trim()) {
       toast.error("Address is required");
       return;
+    } */}
+    if (!formData.warehouse_name.trim()) newErrors.warehouse_name = "Warehouse Name is required";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.latitude.trim()) newErrors.latitude = "Latitude is required";
+    if (!formData.longitude.trim()) newErrors.longitude = "Longitude is required";
+
+    if (!formData.origin_country.trim()) {
+      newErrors.origin_country = "Origin Country is required";
+    } else {
+      const isValidCountry = countries.some(
+        (country) => country.toLowerCase() === formData.origin_country.trim().toLowerCase()
+      );
+      if (!isValidCountry) newErrors.origin_country = "This is not a valid country";
     }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
 
     try {
       const payload = {
         name: formData.warehouse_name,
         country: formData.origin_country,
         location: formData.address,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
-      if (formData.latitude) payload.latitude = formData.latitude;
-      if (formData.longitude) payload.longitude = formData.longitude;
+    //  if (formData.latitude) payload.latitude = formData.latitude;
+    //  if (formData.longitude) payload.longitude = formData.longitude;
       await warehouseControllers.addWarehouse(payload);
       toast.success("Warehouse added successfully!");
       resetForm();
@@ -163,6 +191,7 @@ export default function WarehouseManagement() {
       address: "",
     });
     setCountrySearch("");
+    setErrors({});
     setShowForm(false);
   };
 
@@ -415,30 +444,33 @@ export default function WarehouseManagement() {
                   <X size={24} />
                 </button>
               </div>
-              <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleFormSubmit} noValidate className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Warehouse Name *
+                    Warehouse Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="warehouse_name"
                     value={formData.warehouse_name}
                     onChange={handleFormChange}
-                    placeholder="Enter warehouse name"
+                    placeholder="Enter Warehouse Name"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
+                      errors.warehouse_name ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                    }`}
                   />
+                  {errors.warehouse_name && <p className="text-red-400 text-xs mt-1 font-medium">{errors.warehouse_name}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Origin Country *
+                    Origin Country <span className="text-red-500">*</span>
                   </label>
                   <div className="relative" ref={dropdownRef}>
                     <input
                       type="text"
-                      placeholder="Select origin country"
+                      placeholder="Select Origin Country"
                       value={countrySearch}
                       onChange={(e) => {
                         setCountrySearch(e.target.value);
@@ -453,8 +485,11 @@ export default function WarehouseManagement() {
                         setIsCountryDropdownOpen(true);
                         setCountrySearch(""); // Reset search to show all countries
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
+                        errors.origin_country ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                      }`}
                     />
+                    {errors.origin_country && <p className="text-red-400 text-xs mt-1 font-medium">{errors.origin_country}</p>}
                     {isCountryDropdownOpen && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         {filteredCountries.length > 0 ? (
@@ -488,45 +523,54 @@ export default function WarehouseManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address *
+                    Address <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="address"
                     value={formData.address}
                     onChange={handleFormChange}
-                    placeholder="Enter full address"
+                    placeholder="Enter Full Address"
                     required
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none ${
+                      errors.address ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                    }`}
                   />
+                  {errors.address && <p className="text-red-400 text-xs mt-1 font-medium">{errors.address}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Latitude
+                      Latitude <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="latitude"
                       value={formData.latitude}
                       onChange={handleFormChange}
-                      placeholder="Optional"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      placeholder="Enter Latitude"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${
+                        errors.latitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                      }`}
                     />
+                    {errors.latitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.latitude}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Longitude
+                      Longitude <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="longitude"
                       value={formData.longitude}
                       onChange={handleFormChange}
-                      placeholder="Optional"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                      placeholder="Enter Longitude"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${
+                        errors.longitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                      }`}
                     />
+                    {errors.longitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.longitude}</p>}
                   </div>
                 </div>
 

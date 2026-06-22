@@ -477,7 +477,7 @@ const ProductDetails = () => {
                   {product?.images?.length > 0 ? (
                     <div className="relative group">
                       <SecureImage
-                        src={product.images[selectedImageIndex]?.imageUrl}
+                        src={product.images[selectedImageIndex]?.downloadUrl || product.images[selectedImageIndex]?.imageUrl}
                         alt={product?.product_name}
                         className="w-full h-64 lg:h-80 object-cover rounded-2xl shadow-lg transition-transform group-hover:scale-105"
                       />
@@ -517,11 +517,10 @@ const ProductDetails = () => {
                             <button
                               key={index}
                               onClick={() => setSelectedImageIndex(index)}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                selectedImageIndex === index
-                                  ? "bg-white scale-125"
-                                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
-                              }`}
+                              className={`w-2 h-2 rounded-full transition-all ${selectedImageIndex === index
+                                ? "bg-white scale-125"
+                                : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                                }`}
                             />
                           ))}
                         </div>
@@ -541,14 +540,13 @@ const ProductDetails = () => {
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImageIndex === index
-                            ? "border-orange-500 shadow-lg scale-105"
-                            : "border-gray-200 hover:border-orange-300"
-                        }`}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === index
+                          ? "border-orange-500 shadow-lg scale-105"
+                          : "border-gray-200 hover:border-orange-300"
+                          }`}
                       >
                         <SecureImage
-                          src={img.imageUrl}
+                          src={img.downloadUrl || img.imageUrl}
                           alt={`${product?.product_name} ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -571,12 +569,12 @@ const ProductDetails = () => {
                         const maxSequence =
                           buildSteps.length > 0
                             ? Math.max(
-                                ...buildSteps.map(
-                                  (step) =>
-                                    Number(step.stepNumber || step.sequence) ||
-                                    0,
-                                ),
-                              )
+                              ...buildSteps.map(
+                                (step) =>
+                                  Number(step.stepNumber || step.sequence) ||
+                                  0,
+                              ),
+                            )
                             : 0;
                         const nextSequence = maxSequence + 1;
 
@@ -648,26 +646,24 @@ const ProductDetails = () => {
                                       step.status === "APPROVED" ||
                                       step.status === "ADMIN_APPROVED"
                                     }
-                                    className={`p-2 rounded-full transition-colors ${
-                                      step.status === "APPROVED" ||
+                                    className={`p-2 rounded-full transition-colors ${step.status === "APPROVED" ||
                                       step.status === "ADMIN_APPROVED"
-                                        ? "bg-gray-100 cursor-not-allowed opacity-50"
-                                        : "hover:bg-gray-100 cursor-pointer"
-                                    }`}
+                                      ? "bg-gray-100 cursor-not-allowed opacity-50"
+                                      : "hover:bg-gray-100 cursor-pointer"
+                                      }`}
                                     title={
                                       step.status === "APPROVED" ||
-                                      step.status === "ADMIN_APPROVED"
+                                        step.status === "ADMIN_APPROVED"
                                         ? "Cannot edit lock step"
                                         : "Edit Step"
                                     }
                                   >
                                     <Pencil
-                                      className={`w-5 h-5 ${
-                                        step.status === "APPROVED" ||
+                                      className={`w-5 h-5 ${step.status === "APPROVED" ||
                                         step.status === "ADMIN_APPROVED"
-                                          ? "text-gray-400"
-                                          : "text-blue-600"
-                                      }`}
+                                        ? "text-gray-400"
+                                        : "text-blue-600"
+                                        }`}
                                     />
                                   </button>
                                 )}
@@ -697,10 +693,9 @@ const ProductDetails = () => {
                                     </h4>
                                     <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm">
                                       {step.artisan.firstName ||
-                                      step.artisan.lastName
-                                        ? `${step.artisan.firstName ?? ""} ${
-                                            step.artisan.lastName ?? ""
-                                          }`
+                                        step.artisan.lastName
+                                        ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
+                                        }`
                                         : "No Artisan Assigned"}
                                     </p>
                                   </div>
@@ -822,18 +817,16 @@ const ProductDetails = () => {
                     Availability:
                   </span>
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
-                      parseInt(product?.quantity || 0) < 10
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.quantity || 0) < 10
+                      ? "bg-red-100 text-red-700"
+                      : "bg-green-100 text-green-700"
+                      }`}
                   >
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        parseInt(product?.quantity || 0) < 10
-                          ? "bg-red-500"
-                          : "bg-green-500"
-                      }`}
+                      className={`w-2 h-2 rounded-full ${parseInt(product?.quantity || 0) < 10
+                        ? "bg-red-500"
+                        : "bg-green-500"
+                        }`}
                     ></div>
                     {parseInt(product?.quantity || 0) < 10
                       ? "Low Stock"
@@ -901,7 +894,7 @@ const ProductDetails = () => {
                               } catch (err) {
                                 toast.error(
                                   err.response?.data?.message ||
-                                    "Failed to Reject Product",
+                                  "Failed to Reject Product",
                                 );
                                 console.log(err);
                               }
@@ -1080,7 +1073,7 @@ const ProductDetails = () => {
                               } catch (err) {
                                 toast.error(
                                   err.response?.data?.message ||
-                                    "Failed to Approve Product",
+                                  "Failed to Approve Product",
                                 );
                                 console.log(err);
                               }
@@ -1094,7 +1087,7 @@ const ProductDetails = () => {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <span className="text-gray-700 font-medium">Status:</span>
                     <div className="flex items-center gap-3">
                       {product.admin_approval_status === "PENDING" && (
@@ -1735,7 +1728,7 @@ const ProductDetails = () => {
                     >
                       {assignForm.artisanId
                         ? artisans.find((a) => a.id === assignForm.artisanId)
-                            ?.name || "Selected Artisan"
+                          ?.name || "Selected Artisan"
                         : "Choose artisan..."}
                     </span>
                     <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -1759,11 +1752,10 @@ const ProductDetails = () => {
                       {artisans.map((a) => (
                         <div
                           key={a.id}
-                          className={`px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 transition-colors ${
-                            assignForm.artisanId === a.id
-                              ? "bg-orange-50 text-orange-700 font-medium"
-                              : "text-gray-700"
-                          }`}
+                          className={`px-4 py-3 hover:bg-orange-50 cursor-pointer text-sm border-b border-gray-50 last:border-0 transition-colors ${assignForm.artisanId === a.id
+                            ? "bg-orange-50 text-orange-700 font-medium"
+                            : "text-gray-700"
+                            }`}
                           onClick={() => {
                             handleAssignFormChange({
                               target: { name: "artisanId", value: a.id },
@@ -1816,15 +1808,28 @@ const ProductDetails = () => {
         </div>
       )}
       {showStepDetails && (
+        // <BuildStepDetailsModal
+        //   stepId={selectedStepId}
+        //   onClose={() => setShowStepDetails(false)}
+        // />
         <BuildStepDetailsModal
           stepId={selectedStepId}
+          stepDetailsData={buildSteps.find((s) => s.id === selectedStepId)}
           onClose={() => setShowStepDetails(false)}
         />
       )}
       {editStepId && (
+        // <EditBuildStepModal
+        //   stepId={editStepId}
+        //   onClose={() => setEditStepId(null)}
+        // />
         <EditBuildStepModal
           stepId={editStepId}
-          onClose={() => setEditStepId(null)}
+          stepDetails={buildSteps.find((s) => s.id === editStepId)}
+          onClose={() => {
+            setEditStepId(null);
+            fetchBuildSteps();
+          }}
         />
       )}
       <ToastContainer position="top-right" autoClose={3000} />

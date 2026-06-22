@@ -833,7 +833,7 @@
 //   );
 // };
 // export default AddProduct;
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, ChevronDown } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
@@ -1130,7 +1130,7 @@ const AddProduct = () => {
             {/* Product Name */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Product Name *
+                Product Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1152,7 +1152,7 @@ const AddProduct = () => {
             {/* Country */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Origin Country *
+                Origin Country <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -1214,13 +1214,14 @@ const AddProduct = () => {
             {/* Warehouse */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Warehouse *
+                Warehouse <span className="text-red-500">*</span>
               </label>
+              <div className="relative">
               <select
                 name="warehouseId"
                 value={formData.warehouseId}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
                   errors.warehouseId ? "border-red-500" : "border-gray-300"
                 }`}
                 disabled={!formData.country}
@@ -1234,6 +1235,8 @@ const AddProduct = () => {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
               {errors.warehouseId && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.warehouseId}
@@ -1244,13 +1247,14 @@ const AddProduct = () => {
             {/* Category */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Category *
+                Category <span className="text-red-500">*</span>
               </label>
+              <div className="relative">
               <select
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleCategoryChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
                   errors.categoryId ? "border-red-500" : "border-gray-300"
                 }`}
               >
@@ -1261,6 +1265,8 @@ const AddProduct = () => {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
               {errors.categoryId && (
                 <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
               )}
@@ -1269,13 +1275,14 @@ const AddProduct = () => {
             {/* SubCategory */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                SubCategory *
+                Sub Category <span className="text-red-500">*</span>
               </label>
+              <div className="relative">
               <select
                 name="subCategoryId"
                 value={formData.subCategoryId}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
                   errors.subCategoryId ? "border-red-500" : "border-gray-300"
                 }`}
                 disabled={!subCategories.length}
@@ -1287,6 +1294,8 @@ const AddProduct = () => {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
               {errors.subCategoryId && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.subCategoryId}
@@ -1297,7 +1306,7 @@ const AddProduct = () => {
             {/* Product Price Per Piece */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Price Per Piece (₹) *
+                Price Per Piece (₹) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -1324,7 +1333,7 @@ const AddProduct = () => {
             {/* Quantity */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Quantity *
+                Quantity <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -1381,7 +1390,7 @@ const AddProduct = () => {
             {/* Material */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Material *
+                Material <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1403,6 +1412,7 @@ const AddProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Finish / Texture
               </label>
+              <div className="relative">
               <select
                 name="finish"
                 value={showFinishOther ? "Other" : formData.finish}
@@ -1415,7 +1425,7 @@ const AddProduct = () => {
                     handleInputChange(e);
                   }
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
               >
                 <option value="">Select Finish</option>
                 <option value="Matte">Matte</option>
@@ -1425,6 +1435,8 @@ const AddProduct = () => {
                 <option value="Smooth">Smooth</option>
                 <option value="Other">Other</option>
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
               {showFinishOther && (
                 <input
                   type="text"
@@ -1442,6 +1454,7 @@ const AddProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Wash Care
               </label>
+              <div className="relative">
               <select
                 name="washCare"
                 value={showWashCareOther ? "Other" : formData.washCare}
@@ -1454,7 +1467,7 @@ const AddProduct = () => {
                     handleInputChange(e);
                   }
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
               >
                 <option value="">Select Wash Care</option>
                 <option value="Dry Clean Only">Dry Clean Only</option>
@@ -1463,6 +1476,8 @@ const AddProduct = () => {
                 <option value="Do Not Wash">Do Not Wash</option>
                 <option value="Other">Other</option>
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
               {showWashCareOther && (
                 <input
                   type="text"
@@ -1522,15 +1537,18 @@ const AddProduct = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Weight"
                 />
+                <div className="relative">
                 <select
                   name="weightUnit"
                   value={formData.weightUnit}
                   onChange={handleInputChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="pl-2 pr-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
                 >
                   <option value="gm">gm</option>
                   <option value="kg">kg</option>
                 </select>
+                <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -1572,7 +1590,7 @@ const AddProduct = () => {
                   onKeyDown={preventNegative}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Height"
-                />
+                />     
                 <select
                   name="dimensionUnit"
                   value={formData.dimensionUnit}
@@ -1588,7 +1606,7 @@ const AddProduct = () => {
             {/* Description */}
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
-                Description *
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
@@ -1633,7 +1651,7 @@ const AddProduct = () => {
             {/* Image Upload */}
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
-                Product Images *
+                Product Images <span className="text-red-500">*</span>
               </label>
               <input
                 type="file"

@@ -13,6 +13,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
@@ -61,6 +62,7 @@ const ArtisanManagement = () => {
     introVideo: "",
     gstNumber: "",
   });
+  const [errors, setErrors] = useState({});
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
@@ -307,6 +309,15 @@ const ArtisanManagement = () => {
       }
       return newFormData;
     });
+
+  // Clear error for the field being typed in
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    // Also clear Sub Caste error if Category changes
+    if (name === "user_caste_category" && errors.subCaste) {
+      setErrors((prev) => ({ ...prev, subCaste: "" }));
+    }
   };
 
   const handleCloseForm = () => {
@@ -327,7 +338,8 @@ const ArtisanManagement = () => {
       introVideo: "",
       gstNumber: "",
     });
-    setShowSubCasteOther(false); 
+    setShowSubCasteOther(false);
+    setErrors({});
   };
 
   const handleAddEmployee = async () => {
@@ -335,7 +347,7 @@ const ArtisanManagement = () => {
     setIsSubmitting(true);
     console.log("Starting Add Artisan process. Checking validations...");
 
-    const handleValidationError = (message) => {
+    {/*const handleValidationError = (message) => {
       toast.error(message);
       setTimeout(() => {
         setIsSubmitting(false);
@@ -363,6 +375,11 @@ const ArtisanManagement = () => {
       handleValidationError("Please enter a valid email address");
       return;
     }
+    {/*if (!formData.location || !formData.location.trim()) {
+      console.log("Validation Error: Address is missing");
+      handleValidationError("Address is required");
+      return;
+    }
     if (!formData.phoneNo || formData.phoneNo.length !== 10) {
       console.log("Validation Error: Invalid Phone Number");
       handleValidationError("Phone Number must be 10 digits");
@@ -371,11 +388,6 @@ const ArtisanManagement = () => {
     if (!formData.expertizeField || formData.expertizeField.length === 0) {
       console.log("Validation Error: Expertise Field is missing");
       handleValidationError("Please select at least 1 area of expertise");
-      return;
-    }
-    if (!formData.location || !formData.location.trim()) {
-      console.log("Validation Error: Address is missing");
-      handleValidationError("Address is required");
       return;
     }
     if (!formData.aadhaarNumber || !aadhaarRegex.test(formData.aadhaarNumber)) {
@@ -397,7 +409,51 @@ const ArtisanManagement = () => {
       console.log("Validation Error: Invalid GST Number");
       handleValidationError("Invalid GST Number Format");
       return;
+    }*/}
+    let newErrors = {};
+
+    // Validate all mandatory fields
+    if (!formData.firstName.trim()) newErrors.firstName = "First Name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required";
+    
+    if (!formData.email || !formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
     }
+
+    if (!formData.phoneNo || formData.phoneNo.length !== 10) {
+      newErrors.phoneNo = "Phone Number must be 10 digits";
+    }
+
+    if (!formData.expertizeField || formData.expertizeField.length === 0) {
+      newErrors.expertizeField = "Please select at least 1 area of expertise";
+    }
+
+    if (!formData.aadhaarNumber || !aadhaarRegex.test(formData.aadhaarNumber)) {
+      newErrors.aadhaarNumber = "Aadhaar Number must be 12 digits";
+    }
+
+    if (!formData.user_caste_category) {
+      newErrors.user_caste_category = "Caste Category is required";
+    }
+
+    if (!formData.subCaste) {
+      newErrors.subCaste = "Sub Caste is required";
+    }
+
+    if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
+      newErrors.gstNumber = "Invalid GST Number Format";
+    }
+
+    // Stop and show inline errors if any exist
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    setErrors({});
 
     try {
       console.log("All validations passed. Preparing API payload...");
@@ -586,9 +642,12 @@ const ArtisanManagement = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
+                        errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
                       placeholder="Enter First Name"
                     />
+                    {errors.firstName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -599,9 +658,12 @@ const ArtisanManagement = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
+                        errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
                       placeholder="Enter Last Name"
                     />
+                    {errors.lastName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -613,13 +675,16 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
+                        errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
                       placeholder="Enter Email Address"
                     />
+                    {errors.email && <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Address <span className="text-red-500">*</span>
+                      Address {/*<span className="text-red-500">*</span>*/}
                     </label>
                     <input
                       type="text"
@@ -655,7 +720,8 @@ const ArtisanManagement = () => {
                            <span>{formData.countryCode}</span>
                          </div>
                         {/*<span className="truncate">{formData.countryCode}</span>*/}
-                        <span className="ml-2 text-gray-400">▼</span>
+                        {/*<span className="ml-2 text-gray-400">▼</span>*/}
+                        <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
                       </div>
 
                       {isCountryDropdownOpen && (
@@ -728,11 +794,15 @@ const ArtisanManagement = () => {
                            const value = e.target.value.replace(/\D/g, "");
                            if (value.length <= 10) {
                              setFormData({ ...formData, phoneNo: value });
+                             if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                            }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
+                          errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                         placeholder="Enter Phone Number"
                       />
+                      {errors.phoneNo && <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>}
                     </div>
                   </div>
                   <div>
@@ -751,7 +821,8 @@ const ArtisanManagement = () => {
                             ? `${formData.expertizeField.length} selected`
                             : "Select Expertise"}
                         </span>
-                        <span className="ml-2 text-gray-400">▼</span>
+                        {/*<span className="ml-2 text-gray-400">▼</span>*/}
+                        <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
                       </div>
 
                       {isExpertiseDropdownOpen && (
@@ -824,11 +895,12 @@ const ArtisanManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Caste Category <span className="text-red-500">*</span>
                     </label>
+                    <div className="relative">
                     <select
                       name="user_caste_category"
                       value={formData.user_caste_category}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none"
                     >
                       <option value="" hidden>
                         Select Caste Category
@@ -839,11 +911,14 @@ const ArtisanManagement = () => {
                         </option>
                       ))}
                     </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Sub Caste <span className="text-red-500">*</span>
                     </label>
+                    <div className="relative">
                     <select
                       name="subCaste"
                       value={showSubCasteOther ? "Other" : formData.subCaste}
@@ -857,7 +932,7 @@ const ArtisanManagement = () => {
                           handleFormChange(e);
                         }
                       }}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none ${
                         !formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"
                       }`}
                     >
@@ -873,6 +948,8 @@ const ArtisanManagement = () => {
                           ),
                         )}
                     </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                    </div>
                     {showSubCasteOther && (
                       <input
                         type="text"

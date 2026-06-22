@@ -4,7 +4,8 @@ import { toast } from "react-toastify";
 import { productControllers } from "../api/product";
 import { categoryControllers } from "../api/category";
 
-const EditBuildStepModal = ({ stepId, onClose }) => {
+// const EditBuildStepModal = ({ stepId, onClose }) => {
+const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [subCategories, setSubCategories] = useState([]);
   const [isSkillsDropdownOpen, setIsSkillsDropdownOpen] = useState(false);
@@ -45,31 +46,52 @@ const EditBuildStepModal = ({ stepId, onClose }) => {
   }, []);
 
   useEffect(() => {
-    const loadDetails = async () => {
-      try {
-        const res = await productControllers.getBuildStepDetails(stepId);
-        const d = res.data?.data;
-        setStepData({
-          stepName: d.stepName || "",
-          description: d.description || "",
-          dueDate: d.dueDate ? d.dueDate.split("T")[0] : "",
-          proposedPrice: d.proposedPrice || "",
-          adminRemarks: d.adminRemarks || "",
-          instructions: d.instructions || "",
-          materials: d.materials || "",
-          skills: d.skills
-            ? d.skills.split(",").map((s) => s.trim()).filter(Boolean)
-            : [],
-        });
-      } catch {
-        toast.error("Failed to load step details");
-      } finally {
-        setLoading(false);
-      }
-    };
+    // const loadDetails = async () => {
+    //   try {
+    //     const res = await productControllers.getBuildStepDetails(stepId);
+    //     const d = res.data?.data;
+    //     setStepData({
+    //       stepName: d.stepName || "",
+    //       description: d.description || "",
+    //       dueDate: d.dueDate ? d.dueDate.split("T")[0] : "",
+    //       proposedPrice: d.proposedPrice || "",
+    //       adminRemarks: d.adminRemarks || "",
+    //       instructions: d.instructions || "",
+    //       materials: d.materials || "",
+    //       skills: d.skills
+    //         ? d.skills.split(",").map((s) => s.trim()).filter(Boolean)
+    //         : [],
+    //     });
+    //   } catch {
+    //     toast.error("Failed to load step details");
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // loadDetails();
 
-    loadDetails();
-  }, [stepId]);
+    if (stepDetails) {
+      setStepData({
+        stepName: stepDetails.stepName || "",
+        description: stepDetails.description || "",
+        dueDate: stepDetails.dueDate ? stepDetails.dueDate.split("T")[0] : "",
+        proposedPrice: stepDetails.proposedPrice || "",
+        adminRemarks: stepDetails.adminRemarks || stepDetails.admin_remarks || "",
+        instructions: stepDetails.instructions || "",
+        materials: stepDetails.materials || "",
+        skills: stepDetails.skills
+          ? (typeof stepDetails.skills === 'string' 
+              ? stepDetails.skills.split(",") 
+              : Array.isArray(stepDetails.skills) 
+                ? stepDetails.skills 
+                : []).map((s) => (s.trim ? s.trim() : s)).filter(Boolean)
+          : [],
+      });
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [stepId, stepDetails]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -6,25 +6,32 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SecureImage from "./SecureImage";
 
-const BuildStepDetailsModal = ({ stepId, onClose }) => {
+// const BuildStepDetailsModal = ({ stepId, onClose }) => {
+const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [stepDetails, setStepDetails] = useState(null);
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [remarks, setRemarks] = useState("");
   useEffect(() => {
     if (!stepId) return;
-    const fetchDetails = async () => {
-      try {
-        const res = await productControllers.getBuildStepDetails(stepId);
-        setStepDetails(res.data?.data || res.data);
-      } catch (err) {
-        toast.error("Error fetching build step details:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDetails();
-  }, [stepId]);
+    // const fetchDetails = async () => {
+    //   try {
+    //     const res = await productControllers.getBuildStepDetails(stepId);
+    //     setStepDetails(res.data?.data || res.data);
+    //   } catch (err) {
+    //     toast.error("Error fetching build step details:", err);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // fetchDetails();
+    if (stepDetailsData) {
+      setStepDetails(stepDetailsData);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [stepId, stepDetailsData]);
 
   if (!stepId) return null;
   const [processing, setProcessing] = useState(false);

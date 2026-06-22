@@ -79,12 +79,12 @@ export default function LoginPage({ onLogin }) {
       .catch((err) => {
         let errMessage = err?.response?.data?.message || "Login failed";
         let errorMsgLower = errMessage.toLowerCase();
-        if (errorMsgLower.includes("phone")) {
+      {/*  if (errorMsgLower.includes("phone")) {
           errMessage = "Invalid email";
           errorMsgLower = "invalid email";
-        }
+        }  */}
         let apiErrors = { email: "", password: "", general: "" };
-        if (errorMsgLower.includes("password") ||
+      {/*  if (errorMsgLower.includes("password") ||
           errorMsgLower.includes("incorrect") ||
           errorMsgLower.includes("wrong") ||
           errorMsgLower.includes("invalid credential")) {
@@ -101,6 +101,21 @@ export default function LoginPage({ onLogin }) {
           toast.error(errMessage);
         }
 
+        setIsLoading(false);
+      });  */}
+
+      const secureKeywords = [
+          "password", "incorrect", "wrong", "invalid", "credential", 
+          "user", "email", "account", "not found", "exist", "phone"
+        ];
+
+        if (secureKeywords.some(keyword => errorMsgLower.includes(keyword))) {
+          apiErrors.general = "Please enter registered email or valid password";
+        } else {
+          toast.error(errMessage);
+        }
+
+        setErrors(apiErrors);
         setIsLoading(false);
       });
   };
@@ -294,6 +309,19 @@ export default function LoginPage({ onLogin }) {
                 </p>
               )}
             </div>
+
+            {/* General Form Error (Secure Message from Backend) */}
+            {errors.general && (
+              <p style={{ 
+                color: "#FF0000", 
+                fontSize: "12px", 
+                fontWeight: "400", 
+                textAlign: "center", 
+                margin: "0 0 16px 0" 
+              }}>
+                {errors.general}
+              </p>
+            )}
 
             <div style={{ textAlign: "right", marginBottom: "16px" }}>
               <span
