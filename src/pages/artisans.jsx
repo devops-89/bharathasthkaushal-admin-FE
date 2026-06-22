@@ -27,10 +27,10 @@ import SecureImage from "../components/SecureImage";
 import SecureVideo from "../components/SecureVideo";
 
 const formatAadhaar = (number) => {
-    if (!number) return "";
-    const cleaned = number.toString().replace(/\D/g, "");
-    return cleaned.replace(/(\d{4})(?=\d)/g, "$1 ");
-  };
+  if (!number) return "";
+  const cleaned = number.toString().replace(/\D/g, "");
+  return cleaned.replace(/(\d{4})(?=\d)/g, "$1 ");
+};
 
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -144,8 +144,7 @@ const ArtisanManagement = () => {
       );
 
       toast.success(
-        `Artisan ${
-          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        `Artisan ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`,
       );
     } catch (error) {
@@ -208,8 +207,8 @@ const ArtisanManagement = () => {
         user_caste_category: user.user_caste_category || "—",
         joinedDate: user.createdAt
           ? new Date(user.createdAt)
-              .toLocaleDateString("en-GB")
-              .replace(/\//g, "-")
+            .toLocaleDateString("en-GB")
+            .replace(/\//g, "-")
           : "—",
         aadhaarNumber: user.aadhaarNumber || "N/A",
         subCaste: user.subCaste || "_",
@@ -310,7 +309,7 @@ const ArtisanManagement = () => {
       return newFormData;
     });
 
-  // Clear error for the field being typed in
+    // Clear error for the field being typed in
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -330,7 +329,7 @@ const ArtisanManagement = () => {
       email: "",
       countryCode: "+91",
       phoneNo: "",
-      expertizeField: [], 
+      expertizeField: [],
       location: "",
       aadhaarNumber: "",
       user_caste_category: "",
@@ -415,7 +414,7 @@ const ArtisanManagement = () => {
     // Validate all mandatory fields
     if (!formData.firstName.trim()) newErrors.firstName = "First Name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required";
-    
+
     if (!formData.email || !formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
@@ -503,8 +502,8 @@ const ArtisanManagement = () => {
       console.error("API Request Failed (Catch Block):", error);
       toast.error(
         error.response?.data?.message ||
-          error.message ||
-          "Error registering artisan",
+        error.message ||
+        "Error registering artisan",
       );
       console.error("Error registering artisan:", error);
     } finally {
@@ -642,9 +641,8 @@ const ArtisanManagement = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
-                        errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter First Name"
                     />
                     {errors.firstName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>}
@@ -658,9 +656,8 @@ const ArtisanManagement = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
-                        errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter Last Name"
                     />
                     {errors.lastName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>}
@@ -675,9 +672,8 @@ const ArtisanManagement = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
-                        errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter Email Address"
                     />
                     {errors.email && <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>}
@@ -707,18 +703,18 @@ const ArtisanManagement = () => {
                         }
                       >
                         <div className="flex items-center gap-2 truncate">
-                           {(() => {
-                             const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
-                             return selected && selected.code ? (
-                               <img 
-                                 src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`} 
-                                 alt={selected.code} 
-                                 className="w-5 h-auto rounded-sm object-cover shadow-sm"
-                               />
-                             ) : null;
-                           })()}
-                           <span>{formData.countryCode}</span>
-                         </div>
+                          {(() => {
+                            const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
+                            return selected && selected.code ? (
+                              <img
+                                src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
+                                alt={selected.code}
+                                className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                              />
+                            ) : null;
+                          })()}
+                          <span>{formData.countryCode}</span>
+                        </div>
                         {/*<span className="truncate">{formData.countryCode}</span>*/}
                         {/*<span className="ml-2 text-gray-400">▼</span>*/}
                         <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
@@ -758,9 +754,9 @@ const ArtisanManagement = () => {
                                   }}
                                 >
                                   {country.code && (
-                                    <img 
-                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
-                                      alt={country.code} 
+                                    <img
+                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                      alt={country.code}
                                       className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
                                     />
                                   )}
@@ -791,15 +787,14 @@ const ArtisanManagement = () => {
                         value={formData.phoneNo}
                         maxLength={10}
                         onChange={(e) => {
-                           const value = e.target.value.replace(/\D/g, "");
-                           if (value.length <= 10) {
-                             setFormData({ ...formData, phoneNo: value });
-                             if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
-                           }
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value.length <= 10) {
+                            setFormData({ ...formData, phoneNo: value });
+                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                          }
                         }}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${
-                          errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                        }`}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                          }`}
                         placeholder="Enter Phone Number"
                       />
                       {errors.phoneNo && <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>}
@@ -811,7 +806,7 @@ const ArtisanManagement = () => {
                     </label>
                     <div className="relative" ref={expertiseDropdownRef}>
                       <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer bg-white flex items-center justify-between ${errors.expertizeField ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                         onClick={() =>
                           setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)
                         }
@@ -852,6 +847,7 @@ const ArtisanManagement = () => {
                                   ...formData,
                                   expertizeField: newSelected,
                                 });
+                                if (errors.expertizeField) setErrors((prev) => ({ ...prev, expertizeField: "" }));
                               }}
                             >
                               <input
@@ -870,6 +866,7 @@ const ArtisanManagement = () => {
                         </div>
                       )}
                     </div>
+                    {errors.expertizeField && <p className="text-red-400 text-xs mt-1 font-medium">{errors.expertizeField}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -879,7 +876,7 @@ const ArtisanManagement = () => {
                       type="text"
                       name="aadhaarNumber"
                       value={formatAadhaar(formData.aadhaarNumber)}
-                    //  value={formData.aadhaarNumber}
+                      //  value={formData.aadhaarNumber}
                       maxLength={14}
                       onChange={(e) => {
                         const value = e.target.value.replace(/\D/g, "");
@@ -896,59 +893,58 @@ const ArtisanManagement = () => {
                       Caste Category <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                    <select
-                      name="user_caste_category"
-                      value={formData.user_caste_category}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none"
-                    >
-                      <option value="" hidden>
-                        Select Caste Category
-                      </option>
-                      {Object.keys(casteCategories).map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      <select
+                        name="user_caste_category"
+                        value={formData.user_caste_category}
+                        onChange={handleFormChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none"
+                      >
+                        <option value="" hidden>
+                          Select Caste Category
                         </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                  </div>
+                        {Object.keys(casteCategories).map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Sub Caste <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                    <select
-                      name="subCaste"
-                      value={showSubCasteOther ? "Other" : formData.subCaste}
-                      disabled={!formData.user_caste_category}
-                      onChange={(e) => {
-                        if (e.target.value === "Other") {
-                          setShowSubCasteOther(true);
-                          setFormData((prev) => ({ ...prev, subCaste: "" }));
-                        } else {
-                          setShowSubCasteOther(false);
-                          handleFormChange(e);
-                        }
-                      }}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none ${
-                        !formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"
-                      }`}
-                    >
-                      <option value="" hidden>
-                        Select Sub Caste
-                      </option>
-                      {formData.user_caste_category &&
-                        casteCategories[formData.user_caste_category]?.map(
-                          (subCaste) => (
-                            <option key={subCaste} value={subCaste}>
-                              {subCaste}
-                            </option>
-                          ),
-                        )}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                      <select
+                        name="subCaste"
+                        value={showSubCasteOther ? "Other" : formData.subCaste}
+                        disabled={!formData.user_caste_category}
+                        onChange={(e) => {
+                          if (e.target.value === "Other") {
+                            setShowSubCasteOther(true);
+                            setFormData((prev) => ({ ...prev, subCaste: "" }));
+                          } else {
+                            setShowSubCasteOther(false);
+                            handleFormChange(e);
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none ${!formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"
+                          }`}
+                      >
+                        <option value="" hidden>
+                          Select Sub Caste
+                        </option>
+                        {formData.user_caste_category &&
+                          casteCategories[formData.user_caste_category]?.map(
+                            (subCaste) => (
+                              <option key={subCaste} value={subCaste}>
+                                {subCaste}
+                              </option>
+                            ),
+                          )}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                     </div>
                     {showSubCasteOther && (
                       <input
@@ -1074,11 +1070,10 @@ const ArtisanManagement = () => {
                         {selectedPartner.email || "N/A"}
                       </p>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                          selectedPartner.status === "ACTIVE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {selectedPartner.status || "Approved Artisan"}
                       </span>
@@ -1090,9 +1085,8 @@ const ArtisanManagement = () => {
                       <Phone className="w-5 h-5 text-gray-400" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium break-words">{`${
-                          selectedPartner.countryCode || ""
-                        } ${selectedPartner.phoneNo || "N/A"}`}</p>
+                        <p className="font-medium break-words">{`${selectedPartner.countryCode || ""
+                          } ${selectedPartner.phoneNo || "N/A"}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -1116,8 +1110,8 @@ const ArtisanManagement = () => {
                       <div>
                         <p className="text-sm text-gray-500">Aadhaar Number</p>
                         <p className="font-medium break-words">
-                        {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
-                       {/* {selectedPartner.aadhaarNumber || "N/A"} */}
+                          {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
+                          {/* {selectedPartner.aadhaarNumber || "N/A"} */}
                         </p>
                       </div>
                     </div>
@@ -1173,10 +1167,10 @@ const ArtisanManagement = () => {
                       View Intro Video
                     </button>
                   ) : (
-                   <span className="px-5 py-2.5 bg-gray-50 text-gray-500 text-sm font-medium rounded-lg border border-gray-200 flex items-center shadow-sm">
-                     No Intro Video Uploaded
-                   </span>
-                 )}
+                    <span className="px-5 py-2.5 bg-gray-50 text-gray-500 text-sm font-medium rounded-lg border border-gray-200 flex items-center shadow-sm">
+                      No Intro Video Uploaded
+                    </span>
+                  )}
                   {selectedPartner?.user_group === "ARTISAN" &&
                     selectedPartner?.verify_status !== "VERIFIED" && (
                       <button
@@ -1297,9 +1291,8 @@ const ArtisanManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{`${
-                          partner.countryCode || ""
-                        } ${partner.phoneNo || "N/A"}`}</div>
+                        <div className="text-sm text-gray-900">{`${partner.countryCode || ""
+                          } ${partner.phoneNo || "N/A"}`}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
@@ -1316,19 +1309,17 @@ const ArtisanManagement = () => {
                         <Switch
                           checked={partner.status === "ACTIVE"}
                           onChange={() => handleToggleStatus(partner)}
-                          className={`${
-                            partner.status === "ACTIVE"
-                              ? "bg-orange-600"
-                              : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                          className={`${partner.status === "ACTIVE"
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
+                            } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                         >
                           <span className="sr-only">Toggle Status</span>
                           <span
-                            className={`${
-                              partner.status === "ACTIVE"
-                                ? "translate-x-6"
-                                : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                            className={`${partner.status === "ACTIVE"
+                              ? "translate-x-6"
+                              : "translate-x-1"
+                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                           />
                         </Switch>
                       </td>
@@ -1388,11 +1379,10 @@ const ArtisanManagement = () => {
                   currentPage > 1 && setCurrentPage(currentPage - 1)
                 }
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -1402,11 +1392,10 @@ const ArtisanManagement = () => {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

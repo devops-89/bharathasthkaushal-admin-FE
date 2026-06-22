@@ -1656,9 +1656,10 @@ const AddProduct = () => {
               <input
                 type="file"
                 multiple
+                required
                 accept="image/*"
                 onChange={handleFileChange}
-                className={`w-full ${errors.images ? "text-red-500" : ""}`}
+                className={`w-full border p-2 rounded-lg ${errors.images ? "border-red-500 text-red-500" : "border-gray-300"}`}
               />
               {errors.images ? (
                 <p className="text-red-500 text-sm mt-1">{errors.images}</p>
