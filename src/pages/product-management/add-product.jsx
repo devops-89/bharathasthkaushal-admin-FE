@@ -960,28 +960,50 @@ const AddProduct = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.product_name.trim())
+    const nameRegex = /^[a-zA-Z0-9\s\-&]{3,100}$/;
+    const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
+    const artRegex = /^[a-zA-Z\s\-]{2,50}$/;
+    const patternRegex = /^[a-zA-Z\s\-]{2,50}$/;
+
+    if (!formData.product_name.trim()) {
       newErrors.product_name = "Product Name is required";
+    } else if (!nameRegex.test(formData.product_name)) {
+      newErrors.product_name = "Invalid Product Name (3-100 characters, alphanumeric, space, -, & only)";
+    }
+
     if (!formData.categoryId) newErrors.categoryId = "Category is required";
-    if (!formData.subCategoryId)
-      newErrors.subCategoryId = "SubCategory is required";
+    if (!formData.subCategoryId) newErrors.subCategoryId = "Sub Category is required";
 
-    if (!formData.productPricePerPiece)
+    if (!formData.productPricePerPiece) {
       newErrors.productPricePerPiece = "Price is required";
-    else if (Number(formData.productPricePerPiece) <= 0)
+    } else if (Number(formData.productPricePerPiece) <= 0) {
       newErrors.productPricePerPiece = "Price must be greater than 0";
+    }
 
-    if (!formData.quantity) newErrors.quantity = "Quantity is required";
-    else if (Number(formData.quantity) <= 0)
+    if (!formData.quantity) {
+      newErrors.quantity = "Quantity is required";
+    } else if (Number(formData.quantity) <= 0) {
       newErrors.quantity = "Quantity must be greater than 0";
+    }
 
-    if (!formData.material.trim()) newErrors.material = "Material is required";
-    if (!formData.description.trim())
-      newErrors.description = "Description is required";
+    if (!formData.material.trim()) {
+      newErrors.material = "Material is required";
+    } else if (!materialRegex.test(formData.material)) {
+      newErrors.material = "Invalid Material (2-50 characters, letters, space, &, - only)";
+    }
+
+    if (formData.artUsed && !artRegex.test(formData.artUsed)) {
+      newErrors.artUsed = "Invalid Art (2-50 characters, letters, space, - only)";
+    }
+
+    if (formData.pattern && !patternRegex.test(formData.pattern)) {
+      newErrors.pattern = "Invalid Pattern (2-50 characters, letters, space, - only)";
+    }
+
+    if (!formData.description.trim()) newErrors.description = "Description is required";
     if (!formData.country) newErrors.country = "Country is required";
     if (!formData.warehouseId) newErrors.warehouseId = "Warehouse is required";
-    if (images.length === 0)
-      newErrors.images = "At least one product image is required";
+    if (images.length === 0) newErrors.images = "At least one product image is required";
 
     if (formData.weightValue && Number(formData.weightValue) <= 0)
       newErrors.weightValue = "Weight must be greater than 0";
@@ -995,6 +1017,7 @@ const AddProduct = () => {
       newErrors.timeToMake = "Time to make must be greater than 0";
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -1137,13 +1160,12 @@ const AddProduct = () => {
                 name="product_name"
                 value={formData.product_name}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                  errors.product_name ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.product_name ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter product name"
               />
               {errors.product_name && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.product_name}
                 </p>
               )}
@@ -1178,9 +1200,8 @@ const AddProduct = () => {
                       setCountrySearch(formData.country);
                     }
                   }}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                    errors.country ? "border-red-500" : "border-gray-300"
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.country ? "border-red-500" : "border-gray-300"
+                    }`}
                 />
                 {isCountryDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -1207,7 +1228,7 @@ const AddProduct = () => {
                 )}
               </div>
               {errors.country && (
-                <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+                <p className="text-red-400 text-sm mt-1">{errors.country}</p>
               )}
             </div>
 
@@ -1217,28 +1238,27 @@ const AddProduct = () => {
                 Warehouse <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-              <select
-                name="warehouseId"
-                value={formData.warehouseId}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
-                  errors.warehouseId ? "border-red-500" : "border-gray-300"
-                }`}
-                disabled={!formData.country}
-              >
-                <option value="" disabled>
-                  Select Warehouse
-                </option>
-                {warehouses.map((w) => (
-                  <option key={w._id || w.id} value={w._id || w.id}>
-                    {w.warehouse_name || w.name}
+                <select
+                  name="warehouseId"
+                  value={formData.warehouseId}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.warehouseId ? "border-red-500" : "border-gray-300"
+                    }`}
+                  disabled={!formData.country}
+                >
+                  <option value="" disabled>
+                    Select Warehouse
                   </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  {warehouses.map((w) => (
+                    <option key={w._id || w.id} value={w._id || w.id}>
+                      {w.warehouse_name || w.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
               {errors.warehouseId && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.warehouseId}
                 </p>
               )}
@@ -1250,25 +1270,24 @@ const AddProduct = () => {
                 Category <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-              <select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleCategoryChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
-                  errors.categoryId ? "border-red-500" : "border-gray-300"
-                }`}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <select
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleCategoryChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.categoryId ? "border-red-500" : "border-gray-300"
+                    }`}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.category_id} value={cat.category_id}>
+                      {cat.category_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
               {errors.categoryId && (
-                <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
+                <p className="text-red-400 text-sm mt-1">{errors.categoryId}</p>
               )}
             </div>
 
@@ -1278,26 +1297,25 @@ const AddProduct = () => {
                 Sub Category <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-              <select
-                name="subCategoryId"
-                value={formData.subCategoryId}
-                onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${
-                  errors.subCategoryId ? "border-red-500" : "border-gray-300"
-                }`}
-                disabled={!subCategories.length}
-              >
-                <option value="">Select SubCategory</option>
-                {subCategories.map((sub) => (
-                  <option key={sub.category_id} value={sub.category_id}>
-                    {sub.category_name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <select
+                  name="subCategoryId"
+                  value={formData.subCategoryId}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
+                    }`}
+                  disabled={!subCategories.length}
+                >
+                  <option value="">Select SubCategory</option>
+                  {subCategories.map((sub) => (
+                    <option key={sub.category_id} value={sub.category_id}>
+                      {sub.category_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
               {errors.subCategoryId && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.subCategoryId}
                 </p>
               )}
@@ -1313,18 +1331,17 @@ const AddProduct = () => {
                 name="productPricePerPiece"
                 value={formData.productPricePerPiece}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                  errors.productPricePerPiece
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.productPricePerPiece
+                  ? "border-red-500"
+                  : "border-gray-300"
+                  }`}
                 min="0.01"
                 step="0.01"
                 onKeyDown={preventNegative}
                 placeholder="0.00"
               />
               {errors.productPricePerPiece && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.productPricePerPiece}
                 </p>
               )}
@@ -1340,9 +1357,8 @@ const AddProduct = () => {
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                  errors.quantity ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.quantity ? "border-red-500" : "border-gray-300"
+                  }`}
                 min="1"
                 step="1"
                 onKeyDown={preventNegative}
@@ -1383,7 +1399,7 @@ const AddProduct = () => {
                 placeholder="Days"
               />
               {errors.timeToMake && (
-                <p className="text-red-500 text-sm mt-1">{errors.timeToMake}</p>
+                <p className="text-red-400 text-sm mt-1">{errors.timeToMake}</p>
               )}
             </div>
 
@@ -1397,13 +1413,12 @@ const AddProduct = () => {
                 name="material"
                 value={formData.material}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                  errors.material ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.material ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Cotton, Silk, etc."
               />
               {errors.material && (
-                <p className="text-red-500 text-sm mt-1">{errors.material}</p>
+                <p className="text-red-400 text-sm mt-1">{errors.material}</p>
               )}
             </div>
 
@@ -1413,29 +1428,29 @@ const AddProduct = () => {
                 Finish / Texture
               </label>
               <div className="relative">
-              <select
-                name="finish"
-                value={showFinishOther ? "Other" : formData.finish}
-                onChange={(e) => {
-                  if (e.target.value === "Other") {
-                    setShowFinishOther(true);
-                    setFormData((prev) => ({ ...prev, finish: "" }));
-                  } else {
-                    setShowFinishOther(false);
-                    handleInputChange(e);
-                  }
-                }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
-              >
-                <option value="">Select Finish</option>
-                <option value="Matte">Matte</option>
-                <option value="Glossy">Glossy</option>
-                <option value="Handwoven">Handwoven</option>
-                <option value="Rough">Rough</option>
-                <option value="Smooth">Smooth</option>
-                <option value="Other">Other</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <select
+                  name="finish"
+                  value={showFinishOther ? "Other" : formData.finish}
+                  onChange={(e) => {
+                    if (e.target.value === "Other") {
+                      setShowFinishOther(true);
+                      setFormData((prev) => ({ ...prev, finish: "" }));
+                    } else {
+                      setShowFinishOther(false);
+                      handleInputChange(e);
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                >
+                  <option value="">Select Finish</option>
+                  <option value="Matte">Matte</option>
+                  <option value="Glossy">Glossy</option>
+                  <option value="Handwoven">Handwoven</option>
+                  <option value="Rough">Rough</option>
+                  <option value="Smooth">Smooth</option>
+                  <option value="Other">Other</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
               {showFinishOther && (
                 <input
@@ -1455,28 +1470,28 @@ const AddProduct = () => {
                 Wash Care
               </label>
               <div className="relative">
-              <select
-                name="washCare"
-                value={showWashCareOther ? "Other" : formData.washCare}
-                onChange={(e) => {
-                  if (e.target.value === "Other") {
-                    setShowWashCareOther(true);
-                    setFormData((prev) => ({ ...prev, washCare: "" }));
-                  } else {
-                    setShowWashCareOther(false);
-                    handleInputChange(e);
-                  }
-                }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
-              >
-                <option value="">Select Wash Care</option>
-                <option value="Dry Clean Only">Dry Clean Only</option>
-                <option value="Hand Wash">Hand Wash</option>
-                <option value="Machine Wash">Machine Wash</option>
-                <option value="Do Not Wash">Do Not Wash</option>
-                <option value="Other">Other</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <select
+                  name="washCare"
+                  value={showWashCareOther ? "Other" : formData.washCare}
+                  onChange={(e) => {
+                    if (e.target.value === "Other") {
+                      setShowWashCareOther(true);
+                      setFormData((prev) => ({ ...prev, washCare: "" }));
+                    } else {
+                      setShowWashCareOther(false);
+                      handleInputChange(e);
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                >
+                  <option value="">Select Wash Care</option>
+                  <option value="Dry Clean Only">Dry Clean Only</option>
+                  <option value="Hand Wash">Hand Wash</option>
+                  <option value="Machine Wash">Machine Wash</option>
+                  <option value="Do Not Wash">Do Not Wash</option>
+                  <option value="Other">Other</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
               </div>
               {showWashCareOther && (
                 <input
@@ -1500,9 +1515,12 @@ const AddProduct = () => {
                 name="artUsed"
                 value={formData.artUsed}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.artUsed ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Madhubani, Warli, etc."
               />
+              {errors.artUsed && (
+                <p className="text-red-400 text-sm mt-1">{errors.artUsed}</p>
+              )}
             </div>
 
             {/* Pattern Used */}
@@ -1515,9 +1533,12 @@ const AddProduct = () => {
                 name="pattern"
                 value={formData.pattern}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.pattern ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Floral, Geometric, Striped, etc."
               />
+              {errors.pattern && (
+                <p className="text-red-400 text-sm mt-1">{errors.pattern}</p>
+              )}
             </div>
 
             {/* Net Weight */}
@@ -1538,16 +1559,16 @@ const AddProduct = () => {
                   placeholder="Weight"
                 />
                 <div className="relative">
-                <select
-                  name="weightUnit"
-                  value={formData.weightUnit}
-                  onChange={handleInputChange}
-                  className="pl-2 pr-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
-                >
-                  <option value="gm">gm</option>
-                  <option value="kg">kg</option>
-                </select>
-                <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <select
+                    name="weightUnit"
+                    value={formData.weightUnit}
+                    onChange={handleInputChange}
+                    className="pl-2 pr-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                  >
+                    <option value="gm">gm</option>
+                    <option value="kg">kg</option>
+                  </select>
+                  <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -1590,7 +1611,7 @@ const AddProduct = () => {
                   onKeyDown={preventNegative}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Height"
-                />     
+                />
                 <select
                   name="dimensionUnit"
                   value={formData.dimensionUnit}
@@ -1613,13 +1634,12 @@ const AddProduct = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows="4"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.description ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Describe your product..."
               />
               {errors.description && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="text-red-400 text-sm mt-1">
                   {errors.description}
                 </p>
               )}
@@ -1656,15 +1676,14 @@ const AddProduct = () => {
               <input
                 type="file"
                 multiple
-                required
                 accept="image/*"
                 onChange={handleFileChange}
                 className={`w-full border p-2 rounded-lg ${errors.images ? "border-red-500 text-red-500" : "border-gray-300"}`}
               />
               {errors.images ? (
-                <p className="text-red-500 text-sm mt-1">{errors.images}</p>
+                <p className="text-red-400 text-sm mt-1">{errors.images}</p>
               ) : (
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-400 text-sm mt-1">
                   Only JPEG, JPG, and PNG formats are allowed.
                 </p>
               )}

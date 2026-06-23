@@ -22,6 +22,7 @@ import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { isValidPhoneNumber } from "libphonenumber-js";
 import countryCodes from "../utils/countryCodes.json";
 import SecureImage from "../components/SecureImage";
 import SecureVideo from "../components/SecureVideo";
@@ -421,8 +422,13 @@ const ArtisanManagement = () => {
       newErrors.email = "Please enter a valid email address";
     }
 
-    if (!formData.phoneNo || formData.phoneNo.length !== 10) {
-      newErrors.phoneNo = "Phone Number must be 10 digits";
+    if (!formData.phoneNo) {
+      newErrors.phoneNo = "Phone Number is required";
+    } else {
+      const fullNumber = formData.countryCode + formData.phoneNo;
+      if (!isValidPhoneNumber(fullNumber)) {
+        newErrors.phoneNo = "Invalid phone number for the selected country";
+      }
     }
 
     if (!formData.expertizeField || formData.expertizeField.length === 0) {
@@ -472,7 +478,41 @@ const ArtisanManagement = () => {
         gstNumber: formData.gstNumber,
         user_group: "ARTISAN",
       };
-      console.log("Sending API request to addArtisan...", payload);
+      let response;
+
+      if (isEditMode) {
+        console.log("Sending API request to updateArtisan...", payload);
+        response = await userControllers.updateArtisan(editId, payload);
+      } else {
+        console.log("Sending API request to addArtisan...", payload);
+        response = await authControllers.addArtisan(payload);
+      }
+
+      console.log("API Response received:", response);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success(
+          isEditMode
+            ? "Artisan updated successfully!"
+            : "Artisan registered successfully! Login credentials sent to email."
+        );
+        handleCloseForm();
+        await fetchArtisans(currentPage, rowsPerPage);
+      } else {
+        console.warn("API returned error status:", response);
+        toast.error(response.data?.message || `Error ${isEditMode ? 'updating' : 'registering'} artisan`);
+      }
+    } catch (error) {
+      console.error("API Request Failed (Catch Block):", error);
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        `Error ${isEditMode ? 'updating' : 'registering'} artisan`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+    {/*console.log("Sending API request to addArtisan...", payload);
       const response = await authControllers.addArtisan(payload);
       console.log("API Response received:", response);
       if (response.status === 200 || response.status === 201) {
@@ -508,7 +548,7 @@ const ArtisanManagement = () => {
       console.error("Error registering artisan:", error);
     } finally {
       setIsSubmitting(false);
-    }
+    }*/}
   };
 
   const filteredPartners = partnersData.filter((partner) => {
@@ -570,7 +610,7 @@ const ArtisanManagement = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by name, email..."
+                placeholder="Search by Name & Email"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
@@ -785,10 +825,10 @@ const ArtisanManagement = () => {
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
-                        maxLength={10}
+                        maxLength={15}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, "");
-                          if (value.length <= 10) {
+                          if (value.length <= 15) {
                             setFormData({ ...formData, phoneNo: value });
                             if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                           }
@@ -951,7 +991,10 @@ const ArtisanManagement = () => {
                         type="text"
                         name="subCaste"
                         value={formData.subCaste}
-                        onChange={handleFormChange}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                          setFormData({ ...formData, subCaste: value });
+                        }}
                         placeholder="Enter Custom Sub Caste"
                         className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
                       />

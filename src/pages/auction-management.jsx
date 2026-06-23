@@ -1402,7 +1402,7 @@ const AuctionManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Start Date & Time <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-rows gap-2">
                       <div className="relative w-full">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                         <input
@@ -1457,7 +1457,7 @@ const AuctionManagement = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Hard Close Date & Time <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-rows gap-2">
                       <div className="relative w-full">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                         <input

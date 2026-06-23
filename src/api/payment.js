@@ -4,7 +4,7 @@ export const paymentControllers = {
         page = 1,
         limit = 10,
         sortBy = "date",
-        sortOrder = "asc",
+        sortOrder = "desc",
     ) => {
         try {
             const response = await paymentSecuredApi.get(`/payments`, {

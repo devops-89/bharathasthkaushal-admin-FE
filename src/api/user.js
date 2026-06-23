@@ -94,4 +94,12 @@ export const userControllers = {
       throw error;
     }
   },
+  updateArtisan: async (id, payload) => {
+    try {
+      const result = await getuserSecuredApi.patch(`/users/${id}`, payload);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

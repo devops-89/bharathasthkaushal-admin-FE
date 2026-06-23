@@ -743,13 +743,24 @@ const ProductDetails = () => {
 
             {/* Product Information - Right Side */}
             <div className="lg:col-span-5 p-8 bg-gradient-to-br from-gray-50 to-white">
-              <button
-                onClick={() => navigate(-1)}
-                className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
-              >
-                <ChevronLeft className="w-5 h-5" />
-                Back
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  Back
+                </button>
+                {!product?.isReadyForAuction && (
+                  <button
+                    onClick={() => navigate(`/edit-product/${product.productId}`)}
+                    className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit Product
+                  </button>
+                )}
+              </div>
               <div className="space-y-6">
                 {/* Product Title */}
                 {/* <div>
@@ -761,7 +772,7 @@ const ProductDetails = () => {
                   <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2 capitalize">
                     {product?.product_name || "Unnamed Product"}
                   </h1>
-
+                  {/*
                   {product.admin_approval_status !== "APPROVED" && (
                     <button
                       onClick={() =>
@@ -786,6 +797,7 @@ const ProductDetails = () => {
                       </svg>
                     </button>
                   )}
+                  */}
                 </div>
 
                 {/* Price Section */}
@@ -1186,11 +1198,14 @@ const ProductDetails = () => {
                             Added By
                           </p>
                           <h4 className="text-gray-900 font-bold capitalize text-base">
-                            {product.addedBy.firstName ||
-                              product.addedBy.name ||
-                              "System"}{" "}
-                            {product.addedBy.lastName || ""} (ID:{" "}
-                            {product.addedBy.id || product.addedBy._id})
+                            {product.addedBy.name
+                              ? product.addedBy.name
+                              : product.addedBy.firstName
+                                ? product.addedBy.lastName
+                                  ? `${product.addedBy.firstName} ${product.addedBy.lastName}`
+                                  : product.addedBy.firstName
+                                : "System"}{" "}
+                            {/*(ID: {product.addedBy.id || product.addedBy._id})*/}
                           </h4>
                           {product.addedBy.phoneNo && (
                             <p className="text-gray-600 text-xs flex items-center gap-2 mt-0.5">
