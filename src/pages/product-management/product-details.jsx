@@ -47,6 +47,39 @@ const ProductDetails = () => {
   const [buildSteps, setBuildSteps] = useState([]);
   const [expandedStep, setExpandedStep] = useState(null);
 
+  const getMinDueDate = () => {
+    let minDate = new Date();
+    minDate.setHours(0, 0, 0, 0); // start of today
+
+    if (buildSteps && buildSteps.length > 0) {
+      const stepDates = buildSteps
+        .map((s) => (s.dueDate ? new Date(s.dueDate).getTime() : 0))
+        .filter((t) => t > 0);
+
+      if (stepDates.length > 0) {
+        const maxStepTime = Math.max(...stepDates);
+        const maxStepDate = new Date(maxStepTime);
+        maxStepDate.setHours(0, 0, 0, 0);
+
+        const nextDay = new Date(maxStepDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        if (nextDay > minDate) {
+          minDate = nextDay;
+        }
+      }
+    }
+
+    const year = minDate.getFullYear();
+    const month = String(minDate.getMonth() + 1).padStart(2, "0");
+    const day = String(minDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getMinDateTimeLocal = () => {
+    return `${getMinDueDate()}T00:00`;
+  };
+
   const [referenceImages, setReferenceImages] = useState([]);
   const [assignForm, setAssignForm] = useState({
     productId: "",
@@ -66,6 +99,7 @@ const ProductDetails = () => {
     skills: [],
     dueDate: "",
   });
+  const [stepErrors, setStepErrors] = useState({});
   const [showStepDetails, setShowStepDetails] = useState(false);
   const [selectedStepId, setSelectedStepId] = useState(null);
   const [editStepId, setEditStepId] = useState(null);
@@ -315,6 +349,50 @@ const ProductDetails = () => {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "stepName") {
+      const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
+      if (!value.trim()) {
+        setStepErrors(prev => ({ ...prev, stepName: "Step Name is required" }));
+      } else if (!nameRegex.test(value)) {
+        setStepErrors(prev => ({ ...prev, stepName: "Special characters are not allowed" }));
+      } else {
+        setStepErrors(prev => ({ ...prev, stepName: "" }));
+      }
+    }
+
+    if (name === "materials") {
+      const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
+      if (value.length > 0) {
+        if (!value.trim()) {
+          setStepErrors(prev => ({ ...prev, materials: "Material cannot be empty spaces" }));
+        } else if (!materialRegex.test(value)) {
+          setStepErrors(prev => ({ ...prev, materials: "Invalid Material (2-50 characters, letters, space, &, - only)" }));
+        } else {
+          setStepErrors(prev => ({ ...prev, materials: "" }));
+        }
+      } else {
+        setStepErrors(prev => ({ ...prev, materials: "" }));
+      }
+    }
+  };
+
+  const handleCloseCreateStepForm = () => {
+    setShowCreateStepForm(false);
+    setCreateStepForm({
+      productId: "",
+      sequence: "",
+      stepName: "",
+      description: "",
+      proposedPrice: "",
+      admin_remarks: "",
+      materials: "",
+      instructions: "",
+      skills: [],
+      dueDate: "",
+    });
+    setStepErrors({});
+    setReferenceImages([]);
   };
 
   const handleCreateStepFormSubmit = async (e) => {
@@ -333,9 +411,21 @@ const ProductDetails = () => {
       toast.error("Step Name cannot be empty or just spaces.");
       return;
     }
+    const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
+    if (!nameRegex.test(createStepForm.stepName)) {
+      toast.error("Special characters are not allowed in Step Name.");
+      return;
+    }
     if (!createStepForm.description.trim()) {
       toast.error("Description cannot be empty or just spaces.");
       return;
+    }
+    if (createStepForm.materials.trim()) {
+      const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
+      if (!materialRegex.test(createStepForm.materials)) {
+        toast.error("Invalid Material (2-50 characters, letters, space, &, - only)");
+        return;
+      }
     }
     if (!createStepForm.skills || createStepForm.skills.length === 0) {
       toast.error("Please select at least one required skill.");
@@ -383,20 +473,7 @@ const ProductDetails = () => {
         icon: <CheckCircle className="text-orange-600" />,
         progressStyle: { background: "#ea580c" },
       });
-      setCreateStepForm({
-        productId: "",
-        sequence: "",
-        stepName: "",
-        description: "",
-        proposedPrice: "",
-        admin_remarks: "",
-        materials: "",
-        instructions: "",
-        skills: [],
-        dueDate: "",
-      });
-      setReferenceImages([]);
-      setShowCreateStepForm(false);
+      handleCloseCreateStepForm();
       await fetchBuildSteps();
     } catch (err) {
       console.error(
@@ -1463,7 +1540,7 @@ const ProductDetails = () => {
                 Create New Build Step
               </h2>
               <button
-                onClick={() => setShowCreateStepForm(false)}
+                onClick={handleCloseCreateStepForm}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -1500,7 +1577,7 @@ const ProductDetails = () => {
                     min="0"
                     step="0.01"
                     placeholder="e.g., 200.00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   />
                 </div>
                 <div>
@@ -1512,8 +1589,9 @@ const ProductDetails = () => {
                     name="dueDate"
                     value={createStepForm.dueDate}
                     onChange={handleCreateStepFormChange}
+                    min={getMinDueDate()}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   />
                 </div>
               </div>
@@ -1528,8 +1606,9 @@ const ProductDetails = () => {
                   onChange={handleCreateStepFormChange}
                   required
                   placeholder="e.g., Adding Decorative Elements"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.stepName ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                 />
+                {stepErrors.stepName && <p className="text-red-400 text-sm mt-1">{stepErrors.stepName}</p>}
               </div>
               <div className="relative relative-skills-dropdown">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1594,7 +1673,7 @@ const ProductDetails = () => {
                   required
                   rows="3"
                   placeholder="e.g., Adding Decorative Elements & Final Touches"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               </div>
 
@@ -1608,8 +1687,9 @@ const ProductDetails = () => {
                   value={createStepForm.materials}
                   onChange={handleCreateStepFormChange}
                   placeholder="e.g., Sticker and Stone"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.materials ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                 />
+                {stepErrors.materials && <p className="text-red-400 text-sm mt-1">{stepErrors.materials}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1621,7 +1701,7 @@ const ProductDetails = () => {
                   onChange={handleCreateStepFormChange}
                   rows="3"
                   placeholder="e.g., Insert the clock movement (mechanism) into the hole you drilled..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
@@ -1634,7 +1714,7 @@ const ProductDetails = () => {
                   onChange={handleCreateStepFormChange}
                   rows="4"
                   placeholder="e.g., Use a Dremel tool or carving set to add custom designs..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
@@ -1648,13 +1728,13 @@ const ProductDetails = () => {
                   onChange={(e) =>
                     setReferenceImages(Array.from(e.target.files))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateStepForm(false)}
+                  onClick={handleCloseCreateStepForm}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel

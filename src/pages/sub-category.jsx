@@ -35,6 +35,7 @@ const SubcategoryManagement = () => {
     description: "",
     type: "Sub-Category",
   });
+  const [formErrors, setFormErrors] = useState({});
 
   // Server-side pagination: subcategories contains only current page items
   const currentSubcategories = subcategories;
@@ -102,10 +103,27 @@ const SubcategoryManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+
+    if (name === "category_name") {
+      const categoryRegex = /^[A-Za-z0-9][A-Za-z0-9\s&'-]*$/;
+      if (value !== "" && !categoryRegex.test(value)) {
+        return;
+      }
+    }
+
+    if (name === "description") {
+      const words = value.trim() === "" ? [] : value.trim().split(/\s+/);
+      if (words.length > 20) {
+        finalValue = words.slice(0, 20).join(" ");
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: finalValue,
     }));
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleFileChange = (e) => {
@@ -129,10 +147,27 @@ const SubcategoryManagement = () => {
         ...prev,
         category_logo: file,
       }));
+      setFormErrors((prev) => ({ ...prev, category_logo: "" }));
     }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const errors = {};
+    if (!formData.category_name.trim()) errors.category_name = "Subcategory Name is required";
+    if (!formData.category_logo) errors.category_logo = "Subcategory Image is required";
+    if (!formData.description.trim()) errors.description = "Description is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    if (formData.description.trim().split(/\s+/).length > 20) {
+      toast.error("Description cannot exceed 20 words");
+      return;
+    }
+
     const formDataToSend = new FormData();
     formDataToSend.append("category_name", formData.category_name);
     formDataToSend.append("category_logo", formData.category_logo);
@@ -172,6 +207,7 @@ const SubcategoryManagement = () => {
       description: "",
       type: "Sub-Category",
     });
+    setFormErrors({});
     setShowAddForm(false);
   };
 
@@ -265,10 +301,10 @@ const SubcategoryManagement = () => {
                     name="category_name"
                     value={formData.category_name}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${formErrors.category_name ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                     placeholder="Enter subcategory name"
-                    required
                   />
+                  {formErrors.category_name && <p className="text-red-400 text-sm mt-1">{formErrors.category_name}</p>}
                 </div>
 
                 {/* Subcategory Image */}
@@ -284,7 +320,6 @@ const SubcategoryManagement = () => {
                       accept="image/*"
                       className="hidden"
                       id="logo-upload"
-                      required
                     />
                     <label htmlFor="logo-upload" className="cursor-pointer">
                       <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
@@ -300,6 +335,7 @@ const SubcategoryManagement = () => {
                       </div>
                     )}
                   </div>
+                  {formErrors.category_logo && <p className="text-red-400 text-sm mt-1">{formErrors.category_logo}</p>}
                 </div>
 
                 {/* Description */}
@@ -312,10 +348,10 @@ const SubcategoryManagement = () => {
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${formErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                     placeholder="Enter description"
-                    required
                   />
+                  {formErrors.description && <p className="text-red-400 text-sm mt-1">{formErrors.description}</p>}
                 </div>
               </div>
 

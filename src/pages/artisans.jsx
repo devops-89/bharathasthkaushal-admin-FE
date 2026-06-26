@@ -22,7 +22,7 @@ import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import { isValidPhoneNumber, validatePhoneNumberLength } from "libphonenumber-js";
 import countryCodes from "../utils/countryCodes.json";
 import SecureImage from "../components/SecureImage";
 import SecureVideo from "../components/SecureVideo";
@@ -425,9 +425,22 @@ const ArtisanManagement = () => {
     if (!formData.phoneNo) {
       newErrors.phoneNo = "Phone Number is required";
     } else {
-      const fullNumber = formData.countryCode + formData.phoneNo;
-      if (!isValidPhoneNumber(fullNumber)) {
-        newErrors.phoneNo = "Invalid phone number for the selected country";
+      const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+      const countryIso = selectedCountry ? selectedCountry.code : undefined;
+
+      try {
+        if (countryIso) {
+          if (!isValidPhoneNumber(formData.phoneNo, countryIso)) {
+            newErrors.phoneNo = "Invalid phone number for the selected country";
+          }
+        } else {
+          const fullNumber = formData.countryCode + formData.phoneNo;
+          if (!isValidPhoneNumber(fullNumber)) {
+            newErrors.phoneNo = "Invalid phone number format";
+          }
+        }
+      } catch (e) {
+        newErrors.phoneNo = "Invalid phone number";
       }
     }
 
@@ -825,12 +838,47 @@ const ArtisanManagement = () => {
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
-                        maxLength={15}
+                        maxLength={
+                          countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
+                        }
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, "");
-                          if (value.length <= 15) {
+
+                          const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+                          const countryIso = selectedCountry ? selectedCountry.code : undefined;
+
+                          if (countryIso) {
+                            // Only block if we are ADDING characters
+                            if (value.length > (formData.phoneNo || "").length) {
+                              let isTooLong = false;
+                              // Strict limit for India (10 digits for standard mobile numbers)
+                              if (countryIso === 'IN' && value.length > 10) {
+                                isTooLong = true;
+                              } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
+                                isTooLong = true;
+                              }
+
+                              if (isTooLong) return; // Block typing
+                            }
+
                             setFormData({ ...formData, phoneNo: value });
-                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+
+                            // Start digit / validity validation using libphonenumber-js
+                            const maxLength = selectedCountry.max_length;
+                            if (value.length > 0 && maxLength && value.length === maxLength) {
+                              if (!isValidPhoneNumber(value, countryIso)) {
+                                setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
+                              } else {
+                                if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                              }
+                            } else {
+                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                            }
+                          } else {
+                            if (value.length <= 15) {
+                              setFormData({ ...formData, phoneNo: value });
+                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                            }
                           }
                         }}
                         className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
@@ -922,11 +970,13 @@ const ArtisanManagement = () => {
                         const value = e.target.value.replace(/\D/g, "");
                         if (value.length <= 12) {
                           setFormData({ ...formData, aadhaarNumber: value });
+                          if (errors.aadhaarNumber) setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                       placeholder="Enter Aadhar Number"
                     />
+                    {errors.aadhaarNumber && <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -936,8 +986,11 @@ const ArtisanManagement = () => {
                       <select
                         name="user_caste_category"
                         value={formData.user_caste_category}
-                        onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none"
+                        onChange={(e) => {
+                          handleFormChange(e);
+                          if (errors.user_caste_category) setErrors((prev) => ({ ...prev, user_caste_category: "" }));
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none appearance-none ${errors.user_caste_category ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                       >
                         <option value="" hidden>
                           Select Caste Category
@@ -950,6 +1003,7 @@ const ArtisanManagement = () => {
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                     </div>
+                    {errors.user_caste_category && <p className="text-red-400 text-xs mt-1 font-medium">{errors.user_caste_category}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -968,9 +1022,9 @@ const ArtisanManagement = () => {
                             setShowSubCasteOther(false);
                             handleFormChange(e);
                           }
+                          if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
                         }}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 appearance-none ${!formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none appearance-none ${!formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"} ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                       >
                         <option value="" hidden>
                           Select Sub Caste
@@ -994,11 +1048,13 @@ const ArtisanManagement = () => {
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
                           setFormData({ ...formData, subCaste: value });
+                          if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
                         }}
                         placeholder="Enter Custom Sub Caste"
-                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                        className={`mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                       />
                     )}
+                    {errors.subCaste && <p className="text-red-400 text-xs mt-1 font-medium">{errors.subCaste}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1174,22 +1230,26 @@ const ArtisanManagement = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">GST Number</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.gstNumber || "N/A"}
-                        </p>
+                    {selectedPartner.gstNumber && selectedPartner.gstNumber !== "null" && selectedPartner.gstNumber !== "N/A" && selectedPartner.gstNumber !== "-" && selectedPartner.gstNumber.trim() !== "" && (
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <p className="text-sm text-gray-500">GST Number</p>
+                          <p className="font-medium break-words">
+                            {selectedPartner.gstNumber}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Address</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.location || "N/A"}
-                        </p>
+                    )}
+                    {selectedPartner.location && selectedPartner.location !== "null" && selectedPartner.location !== "N/A" && selectedPartner.location !== "-" && selectedPartner.location.trim() !== "" && (
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <p className="text-sm text-gray-500">Address</p>
+                          <p className="font-medium break-words">
+                            {selectedPartner.location}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="flex items-center space-x-3">
                       <div>
                         <p className="text-sm text-gray-500">Status</p>

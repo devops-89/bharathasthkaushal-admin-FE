@@ -23,7 +23,7 @@ const Wrapper = ({ isOpen, toggleSidebar }) => {
 
   const menuItems = [
     { path: '/dashboard', name: 'Dashboard', icon: Home },
-    { path: '/artisans', name: 'Artisans', icon: Users },
+    { path: '/artisans', name: 'Artisan Management', icon: Users },
     { path: '/product-management', name: 'Product Management', icon: Package },
     { path: '/category-management', name: 'Category Management', icon: Grid },
     { path: '/auction-management', name: 'Auction Management', icon: Gavel },

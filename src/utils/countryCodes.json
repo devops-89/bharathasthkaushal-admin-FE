@@ -2,1211 +2,1453 @@
     {
         "name": "Afghanistan",
         "dial_code": "+93",
-        "code": "AF"
+        "code": "AF",
+        "max_length": 9
     },
     {
         "name": "Aland Islands",
         "dial_code": "+358",
-        "code": "AX"
+        "code": "AX",
+        "max_length": 9
     },
     {
         "name": "Albania",
         "dial_code": "+355",
-        "code": "AL"
+        "code": "AL",
+        "max_length": 9
     },
     {
         "name": "Algeria",
         "dial_code": "+213",
-        "code": "DZ"
+        "code": "DZ",
+        "max_length": 9
     },
     {
         "name": "American Samoa",
         "dial_code": "+1684",
-        "code": "AS"
+        "code": "AS",
+        "max_length": 10
     },
     {
         "name": "Andorra",
         "dial_code": "+376",
-        "code": "AD"
+        "code": "AD",
+        "max_length": 6
     },
     {
         "name": "Angola",
         "dial_code": "+244",
-        "code": "AO"
+        "code": "AO",
+        "max_length": 9
     },
     {
         "name": "Anguilla",
         "dial_code": "+1264",
-        "code": "AI"
+        "code": "AI",
+        "max_length": 10
     },
     {
         "name": "Antarctica",
         "dial_code": "+672",
-        "code": "AQ"
+        "code": "AQ",
+        "max_length": 15
     },
     {
         "name": "Antigua and Barbuda",
         "dial_code": "+1268",
-        "code": "AG"
+        "code": "AG",
+        "max_length": 10
     },
     {
         "name": "Argentina",
         "dial_code": "+54",
-        "code": "AR"
+        "code": "AR",
+        "max_length": 11
     },
     {
         "name": "Armenia",
         "dial_code": "+374",
-        "code": "AM"
+        "code": "AM",
+        "max_length": 8
     },
     {
         "name": "Aruba",
         "dial_code": "+297",
-        "code": "AW"
+        "code": "AW",
+        "max_length": 7
     },
     {
         "name": "Australia",
         "dial_code": "+61",
-        "code": "AU"
+        "code": "AU",
+        "max_length": 9
     },
     {
         "name": "Austria",
         "dial_code": "+43",
-        "code": "AT"
+        "code": "AT",
+        "max_length": 9
     },
     {
         "name": "Azerbaijan",
         "dial_code": "+994",
-        "code": "AZ"
+        "code": "AZ",
+        "max_length": 9
     },
     {
         "name": "Bahamas",
         "dial_code": "+1242",
-        "code": "BS"
+        "code": "BS",
+        "max_length": 10
     },
     {
         "name": "Bahrain",
         "dial_code": "+973",
-        "code": "BH"
+        "code": "BH",
+        "max_length": 8
     },
     {
         "name": "Bangladesh",
         "dial_code": "+880",
-        "code": "BD"
+        "code": "BD",
+        "max_length": 10
     },
     {
         "name": "Barbados",
         "dial_code": "+1246",
-        "code": "BB"
+        "code": "BB",
+        "max_length": 10
     },
     {
         "name": "Belarus",
         "dial_code": "+375",
-        "code": "BY"
+        "code": "BY",
+        "max_length": 9
     },
     {
         "name": "Belgium",
         "dial_code": "+32",
-        "code": "BE"
+        "code": "BE",
+        "max_length": 9
     },
     {
         "name": "Belize",
         "dial_code": "+501",
-        "code": "BZ"
+        "code": "BZ",
+        "max_length": 7
     },
     {
         "name": "Benin",
         "dial_code": "+229",
-        "code": "BJ"
+        "code": "BJ",
+        "max_length": 10
     },
     {
         "name": "Bermuda",
         "dial_code": "+1441",
-        "code": "BM"
+        "code": "BM",
+        "max_length": 10
     },
     {
         "name": "Bhutan",
         "dial_code": "+975",
-        "code": "BT"
+        "code": "BT",
+        "max_length": 8
     },
     {
         "name": "Bolivia",
         "dial_code": "+591",
-        "code": "BO"
+        "code": "BO",
+        "max_length": 8
     },
     {
         "name": "Bosnia and Herzegovina",
         "dial_code": "+387",
-        "code": "BA"
+        "code": "BA",
+        "max_length": 8
     },
     {
         "name": "Botswana",
         "dial_code": "+267",
-        "code": "BW"
+        "code": "BW",
+        "max_length": 8
     },
     {
         "name": "Bouvet Island",
         "dial_code": "+47",
-        "code": "BV"
+        "code": "BV",
+        "max_length": 15
     },
     {
         "name": "Brazil",
         "dial_code": "+55",
-        "code": "BR"
+        "code": "BR",
+        "max_length": 11
     },
     {
         "name": "British Indian Ocean Territory",
         "dial_code": "+246",
-        "code": "IO"
+        "code": "IO",
+        "max_length": 7
     },
     {
         "name": "Brunei Darussalam",
         "dial_code": "+673",
-        "code": "BN"
+        "code": "BN",
+        "max_length": 7
     },
     {
         "name": "Bulgaria",
         "dial_code": "+359",
-        "code": "BG"
+        "code": "BG",
+        "max_length": 8
     },
     {
         "name": "Burkina Faso",
         "dial_code": "+226",
-        "code": "BF"
+        "code": "BF",
+        "max_length": 8
     },
     {
         "name": "Burundi",
         "dial_code": "+257",
-        "code": "BI"
+        "code": "BI",
+        "max_length": 8
     },
     {
         "name": "Cambodia",
         "dial_code": "+855",
-        "code": "KH"
+        "code": "KH",
+        "max_length": 8
     },
     {
         "name": "Cameroon",
         "dial_code": "+237",
-        "code": "CM"
+        "code": "CM",
+        "max_length": 9
     },
     {
         "name": "Canada",
         "dial_code": "+1",
-        "code": "CA"
+        "code": "CA",
+        "max_length": 10
     },
     {
         "name": "Cape Verde",
         "dial_code": "+238",
-        "code": "CV"
+        "code": "CV",
+        "max_length": 7
     },
     {
         "name": "Cayman Islands",
         "dial_code": "+345",
-        "code": "KY"
+        "code": "KY",
+        "max_length": 10
     },
     {
         "name": "Central African Republic",
         "dial_code": "+236",
-        "code": "CF"
+        "code": "CF",
+        "max_length": 8
     },
     {
         "name": "Chad",
         "dial_code": "+235",
-        "code": "TD"
+        "code": "TD",
+        "max_length": 8
     },
     {
         "name": "Chile",
         "dial_code": "+56",
-        "code": "CL"
+        "code": "CL",
+        "max_length": 9
     },
     {
         "name": "China",
         "dial_code": "+86",
-        "code": "CN"
+        "code": "CN",
+        "max_length": 11
     },
     {
         "name": "Christmas Island",
         "dial_code": "+61",
-        "code": "CX"
+        "code": "CX",
+        "max_length": 9
     },
     {
         "name": "Cocos (Keeling) Islands",
         "dial_code": "+61",
-        "code": "CC"
+        "code": "CC",
+        "max_length": 9
     },
     {
         "name": "Colombia",
         "dial_code": "+57",
-        "code": "CO"
+        "code": "CO",
+        "max_length": 10
     },
     {
         "name": "Comoros",
         "dial_code": "+269",
-        "code": "KM"
+        "code": "KM",
+        "max_length": 7
     },
     {
         "name": "Congo",
         "dial_code": "+242",
-        "code": "CG"
+        "code": "CG",
+        "max_length": 9
     },
     {
         "name": "Congo, The Democratic Republic of the",
         "dial_code": "+243",
-        "code": "CD"
+        "code": "CD",
+        "max_length": 9
     },
     {
         "name": "Cook Islands",
         "dial_code": "+682",
-        "code": "CK"
+        "code": "CK",
+        "max_length": 5
     },
     {
         "name": "Costa Rica",
         "dial_code": "+506",
-        "code": "CR"
+        "code": "CR",
+        "max_length": 8
     },
     {
         "name": "Cote D'Ivoire",
         "dial_code": "+225",
-        "code": "CI"
+        "code": "CI",
+        "max_length": 10
     },
     {
         "name": "Croatia",
         "dial_code": "+385",
-        "code": "HR"
+        "code": "HR",
+        "max_length": 9
     },
     {
         "name": "Cuba",
         "dial_code": "+53",
-        "code": "CU"
+        "code": "CU",
+        "max_length": 8
     },
     {
         "name": "Cyprus",
         "dial_code": "+357",
-        "code": "CY"
+        "code": "CY",
+        "max_length": 8
     },
     {
         "name": "Czech Republic",
         "dial_code": "+420",
-        "code": "CZ"
+        "code": "CZ",
+        "max_length": 9
     },
     {
         "name": "Denmark",
         "dial_code": "+45",
-        "code": "DK"
+        "code": "DK",
+        "max_length": 8
     },
     {
         "name": "Djibouti",
         "dial_code": "+253",
-        "code": "DJ"
+        "code": "DJ",
+        "max_length": 8
     },
     {
         "name": "Dominica",
         "dial_code": "+1767",
-        "code": "DM"
+        "code": "DM",
+        "max_length": 10
     },
     {
         "name": "Dominican Republic",
         "dial_code": "+1849",
-        "code": "DO"
+        "code": "DO",
+        "max_length": 10
     },
     {
         "name": "Ecuador",
         "dial_code": "+593",
-        "code": "EC"
+        "code": "EC",
+        "max_length": 9
     },
     {
         "name": "Egypt",
         "dial_code": "+20",
-        "code": "EG"
+        "code": "EG",
+        "max_length": 10
     },
     {
         "name": "El Salvador",
         "dial_code": "+503",
-        "code": "SV"
+        "code": "SV",
+        "max_length": 8
     },
     {
         "name": "Equatorial Guinea",
         "dial_code": "+240",
-        "code": "GQ"
+        "code": "GQ",
+        "max_length": 9
     },
     {
         "name": "Eritrea",
         "dial_code": "+291",
-        "code": "ER"
+        "code": "ER",
+        "max_length": 7
     },
     {
         "name": "Estonia",
         "dial_code": "+372",
-        "code": "EE"
+        "code": "EE",
+        "max_length": 8
     },
     {
         "name": "Ethiopia",
         "dial_code": "+251",
-        "code": "ET"
+        "code": "ET",
+        "max_length": 9
     },
     {
         "name": "Falkland Islands (Malvinas)",
         "dial_code": "+500",
-        "code": "FK"
+        "code": "FK",
+        "max_length": 5
     },
     {
         "name": "Faroe Islands",
         "dial_code": "+298",
-        "code": "FO"
+        "code": "FO",
+        "max_length": 6
     },
     {
         "name": "Fiji",
         "dial_code": "+679",
-        "code": "FJ"
+        "code": "FJ",
+        "max_length": 7
     },
     {
         "name": "Finland",
         "dial_code": "+358",
-        "code": "FI"
+        "code": "FI",
+        "max_length": 9
     },
     {
         "name": "France",
         "dial_code": "+33",
-        "code": "FR"
+        "code": "FR",
+        "max_length": 9
     },
     {
         "name": "French Guiana",
         "dial_code": "+594",
-        "code": "GF"
+        "code": "GF",
+        "max_length": 9
     },
     {
         "name": "French Polynesia",
         "dial_code": "+689",
-        "code": "PF"
+        "code": "PF",
+        "max_length": 8
     },
     {
         "name": "Gabon",
         "dial_code": "+241",
-        "code": "GA"
+        "code": "GA",
+        "max_length": 8
     },
     {
         "name": "Gambia",
         "dial_code": "+220",
-        "code": "GM"
+        "code": "GM",
+        "max_length": 7
     },
     {
         "name": "Georgia",
         "dial_code": "+995",
-        "code": "GE"
+        "code": "GE",
+        "max_length": 9
     },
     {
         "name": "Germany",
         "dial_code": "+49",
-        "code": "DE"
+        "code": "DE",
+        "max_length": 11
     },
     {
         "name": "Ghana",
         "dial_code": "+233",
-        "code": "GH"
+        "code": "GH",
+        "max_length": 9
     },
     {
         "name": "Gibraltar",
         "dial_code": "+350",
-        "code": "GI"
+        "code": "GI",
+        "max_length": 8
     },
     {
         "name": "Greece",
         "dial_code": "+30",
-        "code": "GR"
+        "code": "GR",
+        "max_length": 10
     },
     {
         "name": "Greenland",
         "dial_code": "+299",
-        "code": "GL"
+        "code": "GL",
+        "max_length": 6
     },
     {
         "name": "Grenada",
         "dial_code": "+1473",
-        "code": "GD"
+        "code": "GD",
+        "max_length": 10
     },
     {
         "name": "Guadeloupe",
         "dial_code": "+590",
-        "code": "GP"
+        "code": "GP",
+        "max_length": 9
     },
     {
         "name": "Guam",
         "dial_code": "+1671",
-        "code": "GU"
+        "code": "GU",
+        "max_length": 10
     },
     {
         "name": "Guatemala",
         "dial_code": "+502",
-        "code": "GT"
+        "code": "GT",
+        "max_length": 8
     },
     {
         "name": "Guernsey",
         "dial_code": "+44",
-        "code": "GG"
+        "code": "GG",
+        "max_length": 10
     },
     {
         "name": "Guinea",
         "dial_code": "+224",
-        "code": "GN"
+        "code": "GN",
+        "max_length": 9
     },
     {
         "name": "Guinea-Bissau",
         "dial_code": "+245",
-        "code": "GW"
+        "code": "GW",
+        "max_length": 9
     },
     {
         "name": "Guyana",
         "dial_code": "+592",
-        "code": "GY"
+        "code": "GY",
+        "max_length": 7
     },
     {
         "name": "Haiti",
         "dial_code": "+509",
-        "code": "HT"
+        "code": "HT",
+        "max_length": 8
     },
     {
         "name": "Holy See (Vatican City State)",
         "dial_code": "+379",
-        "code": "VA"
+        "code": "VA",
+        "max_length": 10
     },
     {
         "name": "Honduras",
         "dial_code": "+504",
-        "code": "HN"
+        "code": "HN",
+        "max_length": 8
     },
     {
         "name": "Hong Kong",
         "dial_code": "+852",
-        "code": "HK"
+        "code": "HK",
+        "max_length": 8
     },
     {
         "name": "Hungary",
         "dial_code": "+36",
-        "code": "HU"
+        "code": "HU",
+        "max_length": 9
     },
     {
         "name": "Iceland",
         "dial_code": "+354",
-        "code": "IS"
+        "code": "IS",
+        "max_length": 7
     },
     {
         "name": "India",
         "dial_code": "+91",
-        "code": "IN"
+        "code": "IN",
+        "max_length": 10
     },
     {
         "name": "Indonesia",
         "dial_code": "+62",
-        "code": "ID"
+        "code": "ID",
+        "max_length": 9
     },
     {
         "name": "Iran, Islamic Republic of",
         "dial_code": "+98",
-        "code": "IR"
+        "code": "IR",
+        "max_length": 10
     },
     {
         "name": "Iraq",
         "dial_code": "+964",
-        "code": "IQ"
+        "code": "IQ",
+        "max_length": 10
     },
     {
         "name": "Ireland",
         "dial_code": "+353",
-        "code": "IE"
+        "code": "IE",
+        "max_length": 9
     },
     {
         "name": "Isle of Man",
         "dial_code": "+44",
-        "code": "IM"
+        "code": "IM",
+        "max_length": 10
     },
     {
         "name": "Israel",
         "dial_code": "+972",
-        "code": "IL"
+        "code": "IL",
+        "max_length": 9
     },
     {
         "name": "Italy",
         "dial_code": "+39",
-        "code": "IT"
+        "code": "IT",
+        "max_length": 10
     },
     {
         "name": "Jamaica",
         "dial_code": "+1876",
-        "code": "JM"
+        "code": "JM",
+        "max_length": 10
     },
     {
         "name": "Japan",
         "dial_code": "+81",
-        "code": "JP"
+        "code": "JP",
+        "max_length": 10
     },
     {
         "name": "Jersey",
         "dial_code": "+44",
-        "code": "JE"
+        "code": "JE",
+        "max_length": 10
     },
     {
         "name": "Jordan",
         "dial_code": "+962",
-        "code": "JO"
+        "code": "JO",
+        "max_length": 9
     },
     {
         "name": "Kazakhstan",
         "dial_code": "+77",
-        "code": "KZ"
+        "code": "KZ",
+        "max_length": 10
     },
     {
         "name": "Kenya",
         "dial_code": "+254",
-        "code": "KE"
+        "code": "KE",
+        "max_length": 9
     },
     {
         "name": "Kiribati",
         "dial_code": "+686",
-        "code": "KI"
+        "code": "KI",
+        "max_length": 8
     },
     {
         "name": "Korea, Democratic People's Republic of",
         "dial_code": "+850",
-        "code": "KP"
+        "code": "KP",
+        "max_length": 10
     },
     {
         "name": "Korea, Republic of",
         "dial_code": "+82",
-        "code": "KR"
+        "code": "KR",
+        "max_length": 10
     },
     {
         "name": "Kuwait",
         "dial_code": "+965",
-        "code": "KW"
+        "code": "KW",
+        "max_length": 8
     },
     {
         "name": "Kyrgyzstan",
         "dial_code": "+996",
-        "code": "KG"
+        "code": "KG",
+        "max_length": 9
     },
     {
         "name": "Lao People's Democratic Republic",
         "dial_code": "+856",
-        "code": "LA"
+        "code": "LA",
+        "max_length": 10
     },
     {
         "name": "Latvia",
         "dial_code": "+371",
-        "code": "LV"
+        "code": "LV",
+        "max_length": 8
     },
     {
         "name": "Lebanon",
         "dial_code": "+961",
-        "code": "LB"
+        "code": "LB",
+        "max_length": 8
     },
     {
         "name": "Lesotho",
         "dial_code": "+266",
-        "code": "LS"
+        "code": "LS",
+        "max_length": 8
     },
     {
         "name": "Liberia",
         "dial_code": "+231",
-        "code": "LR"
+        "code": "LR",
+        "max_length": 9
     },
     {
         "name": "Libyan Arab Jamahiriya",
         "dial_code": "+218",
-        "code": "LY"
+        "code": "LY",
+        "max_length": 9
     },
     {
         "name": "Liechtenstein",
         "dial_code": "+423",
-        "code": "LI"
+        "code": "LI",
+        "max_length": 9
     },
     {
         "name": "Lithuania",
         "dial_code": "+370",
-        "code": "LT"
+        "code": "LT",
+        "max_length": 8
     },
     {
         "name": "Luxembourg",
         "dial_code": "+352",
-        "code": "LU"
+        "code": "LU",
+        "max_length": 9
     },
     {
         "name": "Macao",
         "dial_code": "+853",
-        "code": "MO"
+        "code": "MO",
+        "max_length": 8
     },
     {
         "name": "Macedonia, The Former Yugoslav Republic of",
         "dial_code": "+389",
-        "code": "MK"
+        "code": "MK",
+        "max_length": 8
     },
     {
         "name": "Madagascar",
         "dial_code": "+261",
-        "code": "MG"
+        "code": "MG",
+        "max_length": 9
     },
     {
         "name": "Malawi",
         "dial_code": "+265",
-        "code": "MW"
+        "code": "MW",
+        "max_length": 9
     },
     {
         "name": "Malaysia",
         "dial_code": "+60",
-        "code": "MY"
+        "code": "MY",
+        "max_length": 9
     },
     {
         "name": "Maldives",
         "dial_code": "+960",
-        "code": "MV"
+        "code": "MV",
+        "max_length": 7
     },
     {
         "name": "Mali",
         "dial_code": "+223",
-        "code": "ML"
+        "code": "ML",
+        "max_length": 8
     },
     {
         "name": "Malta",
         "dial_code": "+356",
-        "code": "MT"
+        "code": "MT",
+        "max_length": 8
     },
     {
         "name": "Marshall Islands",
         "dial_code": "+692",
-        "code": "MH"
+        "code": "MH",
+        "max_length": 7
     },
     {
         "name": "Martinique",
         "dial_code": "+596",
-        "code": "MQ"
+        "code": "MQ",
+        "max_length": 9
     },
     {
         "name": "Mauritania",
         "dial_code": "+222",
-        "code": "MR"
+        "code": "MR",
+        "max_length": 8
     },
     {
         "name": "Mauritius",
         "dial_code": "+230",
-        "code": "MU"
+        "code": "MU",
+        "max_length": 8
     },
     {
         "name": "Mayotte",
         "dial_code": "+262",
-        "code": "YT"
+        "code": "YT",
+        "max_length": 9
     },
     {
         "name": "Mexico",
         "dial_code": "+52",
-        "code": "MX"
+        "code": "MX",
+        "max_length": 10
     },
     {
         "name": "Micronesia, Federated States of",
         "dial_code": "+691",
-        "code": "FM"
+        "code": "FM",
+        "max_length": 7
     },
     {
         "name": "Moldova, Republic of",
         "dial_code": "+373",
-        "code": "MD"
+        "code": "MD",
+        "max_length": 8
     },
     {
         "name": "Monaco",
         "dial_code": "+377",
-        "code": "MC"
+        "code": "MC",
+        "max_length": 9
     },
     {
         "name": "Mongolia",
         "dial_code": "+976",
-        "code": "MN"
+        "code": "MN",
+        "max_length": 8
     },
     {
         "name": "Montenegro",
         "dial_code": "+382",
-        "code": "ME"
+        "code": "ME",
+        "max_length": 8
     },
     {
         "name": "Montserrat",
         "dial_code": "+1664",
-        "code": "MS"
+        "code": "MS",
+        "max_length": 10
     },
     {
         "name": "Morocco",
         "dial_code": "+212",
-        "code": "MA"
+        "code": "MA",
+        "max_length": 9
     },
     {
         "name": "Mozambique",
         "dial_code": "+258",
-        "code": "MZ"
+        "code": "MZ",
+        "max_length": 9
     },
     {
         "name": "Myanmar",
         "dial_code": "+95",
-        "code": "MM"
+        "code": "MM",
+        "max_length": 8
     },
     {
         "name": "Namibia",
         "dial_code": "+264",
-        "code": "NA"
+        "code": "NA",
+        "max_length": 9
     },
     {
         "name": "Nauru",
         "dial_code": "+674",
-        "code": "NR"
+        "code": "NR",
+        "max_length": 7
     },
     {
         "name": "Nepal",
         "dial_code": "+977",
-        "code": "NP"
+        "code": "NP",
+        "max_length": 10
     },
     {
         "name": "Netherlands",
         "dial_code": "+31",
-        "code": "NL"
+        "code": "NL",
+        "max_length": 9
     },
     {
         "name": "Netherlands Antilles",
         "dial_code": "+599",
-        "code": "AN"
+        "code": "AN",
+        "max_length": 15
     },
     {
         "name": "New Caledonia",
         "dial_code": "+687",
-        "code": "NC"
+        "code": "NC",
+        "max_length": 6
     },
     {
         "name": "New Zealand",
         "dial_code": "+64",
-        "code": "NZ"
+        "code": "NZ",
+        "max_length": 9
     },
     {
         "name": "Nicaragua",
         "dial_code": "+505",
-        "code": "NI"
+        "code": "NI",
+        "max_length": 8
     },
     {
         "name": "Niger",
         "dial_code": "+227",
-        "code": "NE"
+        "code": "NE",
+        "max_length": 8
     },
     {
         "name": "Nigeria",
         "dial_code": "+234",
-        "code": "NG"
+        "code": "NG",
+        "max_length": 10
     },
     {
         "name": "Niue",
         "dial_code": "+683",
-        "code": "NU"
+        "code": "NU",
+        "max_length": 7
     },
     {
         "name": "Norfolk Island",
         "dial_code": "+672",
-        "code": "NF"
+        "code": "NF",
+        "max_length": 6
     },
     {
         "name": "Northern Mariana Islands",
         "dial_code": "+1670",
-        "code": "MP"
+        "code": "MP",
+        "max_length": 10
     },
     {
         "name": "Norway",
         "dial_code": "+47",
-        "code": "NO"
+        "code": "NO",
+        "max_length": 8
     },
     {
         "name": "Oman",
         "dial_code": "+968",
-        "code": "OM"
+        "code": "OM",
+        "max_length": 8
     },
     {
         "name": "Pakistan",
         "dial_code": "+92",
-        "code": "PK"
+        "code": "PK",
+        "max_length": 10
     },
     {
         "name": "Palau",
         "dial_code": "+680",
-        "code": "PW"
+        "code": "PW",
+        "max_length": 7
     },
     {
         "name": "Palestinian Territory, Occupied",
         "dial_code": "+970",
-        "code": "PS"
+        "code": "PS",
+        "max_length": 9
     },
     {
         "name": "Panama",
         "dial_code": "+507",
-        "code": "PA"
+        "code": "PA",
+        "max_length": 8
     },
     {
         "name": "Papua New Guinea",
         "dial_code": "+675",
-        "code": "PG"
+        "code": "PG",
+        "max_length": 8
     },
     {
         "name": "Paraguay",
         "dial_code": "+595",
-        "code": "PY"
+        "code": "PY",
+        "max_length": 9
     },
     {
         "name": "Peru",
         "dial_code": "+51",
-        "code": "PE"
+        "code": "PE",
+        "max_length": 9
     },
     {
         "name": "Philippines",
         "dial_code": "+63",
-        "code": "PH"
+        "code": "PH",
+        "max_length": 10
     },
     {
         "name": "Pitcairn",
         "dial_code": "+872",
-        "code": "PN"
+        "code": "PN",
+        "max_length": 15
     },
     {
         "name": "Poland",
         "dial_code": "+48",
-        "code": "PL"
+        "code": "PL",
+        "max_length": 9
     },
     {
         "name": "Portugal",
         "dial_code": "+351",
-        "code": "PT"
+        "code": "PT",
+        "max_length": 9
     },
     {
         "name": "Puerto Rico",
         "dial_code": "+1939",
-        "code": "PR"
+        "code": "PR",
+        "max_length": 10
     },
     {
         "name": "Qatar",
         "dial_code": "+974",
-        "code": "QA"
+        "code": "QA",
+        "max_length": 8
     },
     {
         "name": "Romania",
         "dial_code": "+40",
-        "code": "RO"
+        "code": "RO",
+        "max_length": 9
     },
     {
         "name": "Russia",
         "dial_code": "+7",
-        "code": "RU"
+        "code": "RU",
+        "max_length": 10
     },
     {
         "name": "Rwanda",
         "dial_code": "+250",
-        "code": "RW"
+        "code": "RW",
+        "max_length": 9
     },
     {
         "name": "Reunion",
         "dial_code": "+262",
-        "code": "RE"
+        "code": "RE",
+        "max_length": 9
     },
     {
         "name": "Saint Barthelemy",
         "dial_code": "+590",
-        "code": "BL"
+        "code": "BL",
+        "max_length": 9
     },
     {
         "name": "Saint Helena, Ascension and Tristan Da Cunha",
         "dial_code": "+290",
-        "code": "SH"
+        "code": "SH",
+        "max_length": 5
     },
     {
         "name": "Saint Kitts and Nevis",
         "dial_code": "+1869",
-        "code": "KN"
+        "code": "KN",
+        "max_length": 10
     },
     {
         "name": "Saint Lucia",
         "dial_code": "+1758",
-        "code": "LC"
+        "code": "LC",
+        "max_length": 10
     },
     {
         "name": "Saint Martin",
         "dial_code": "+590",
-        "code": "MF"
+        "code": "MF",
+        "max_length": 9
     },
     {
         "name": "Saint Pierre and Miquelon",
         "dial_code": "+508",
-        "code": "PM"
+        "code": "PM",
+        "max_length": 6
     },
     {
         "name": "Saint Vincent and the Grenadines",
         "dial_code": "+1784",
-        "code": "VC"
+        "code": "VC",
+        "max_length": 10
     },
     {
         "name": "Samoa",
         "dial_code": "+685",
-        "code": "WS"
+        "code": "WS",
+        "max_length": 7
     },
     {
         "name": "San Marino",
         "dial_code": "+378",
-        "code": "SM"
+        "code": "SM",
+        "max_length": 8
     },
     {
         "name": "Sao Tome and Principe",
         "dial_code": "+239",
-        "code": "ST"
+        "code": "ST",
+        "max_length": 7
     },
     {
         "name": "Saudi Arabia",
         "dial_code": "+966",
-        "code": "SA"
+        "code": "SA",
+        "max_length": 9
     },
     {
         "name": "Senegal",
         "dial_code": "+221",
-        "code": "SN"
+        "code": "SN",
+        "max_length": 9
     },
     {
         "name": "Serbia",
         "dial_code": "+381",
-        "code": "RS"
+        "code": "RS",
+        "max_length": 9
     },
     {
         "name": "Seychelles",
         "dial_code": "+248",
-        "code": "SC"
+        "code": "SC",
+        "max_length": 7
     },
     {
         "name": "Sierra Leone",
         "dial_code": "+232",
-        "code": "SL"
+        "code": "SL",
+        "max_length": 8
     },
     {
         "name": "Singapore",
         "dial_code": "+65",
-        "code": "SG"
+        "code": "SG",
+        "max_length": 8
     },
     {
         "name": "Slovakia",
         "dial_code": "+421",
-        "code": "SK"
+        "code": "SK",
+        "max_length": 9
     },
     {
         "name": "Slovenia",
         "dial_code": "+386",
-        "code": "SI"
+        "code": "SI",
+        "max_length": 8
     },
     {
         "name": "Solomon Islands",
         "dial_code": "+677",
-        "code": "SB"
+        "code": "SB",
+        "max_length": 7
     },
     {
         "name": "Somalia",
         "dial_code": "+252",
-        "code": "SO"
+        "code": "SO",
+        "max_length": 8
     },
     {
         "name": "South Africa",
         "dial_code": "+27",
-        "code": "ZA"
+        "code": "ZA",
+        "max_length": 9
     },
     {
         "name": "South Sudan",
         "dial_code": "+211",
-        "code": "SS"
+        "code": "SS",
+        "max_length": 9
     },
     {
         "name": "Spain",
         "dial_code": "+34",
-        "code": "ES"
+        "code": "ES",
+        "max_length": 9
     },
     {
         "name": "Sri Lanka",
         "dial_code": "+94",
-        "code": "LK"
+        "code": "LK",
+        "max_length": 9
     },
     {
         "name": "Sudan",
         "dial_code": "+249",
-        "code": "SD"
+        "code": "SD",
+        "max_length": 9
     },
     {
         "name": "Suriname",
         "dial_code": "+597",
-        "code": "SR"
+        "code": "SR",
+        "max_length": 7
     },
     {
         "name": "Svalbard and Jan Mayen",
         "dial_code": "+47",
-        "code": "SJ"
+        "code": "SJ",
+        "max_length": 8
     },
     {
         "name": "Swaziland",
         "dial_code": "+268",
-        "code": "SZ"
+        "code": "SZ",
+        "max_length": 8
     },
     {
         "name": "Sweden",
         "dial_code": "+46",
-        "code": "SE"
+        "code": "SE",
+        "max_length": 9
     },
     {
         "name": "Switzerland",
         "dial_code": "+41",
-        "code": "CH"
+        "code": "CH",
+        "max_length": 9
     },
     {
         "name": "Syrian Arab Republic",
         "dial_code": "+963",
-        "code": "SY"
+        "code": "SY",
+        "max_length": 9
     },
     {
         "name": "Taiwan",
         "dial_code": "+886",
-        "code": "TW"
+        "code": "TW",
+        "max_length": 9
     },
     {
         "name": "Tajikistan",
         "dial_code": "+992",
-        "code": "TJ"
+        "code": "TJ",
+        "max_length": 9
     },
     {
         "name": "Tanzania, United Republic of",
         "dial_code": "+255",
-        "code": "TZ"
+        "code": "TZ",
+        "max_length": 9
     },
     {
         "name": "Thailand",
         "dial_code": "+66",
-        "code": "TH"
+        "code": "TH",
+        "max_length": 9
     },
     {
         "name": "Timor-Leste",
         "dial_code": "+670",
-        "code": "TL"
+        "code": "TL",
+        "max_length": 8
     },
     {
         "name": "Togo",
         "dial_code": "+228",
-        "code": "TG"
+        "code": "TG",
+        "max_length": 8
     },
     {
         "name": "Tokelau",
         "dial_code": "+690",
-        "code": "TK"
+        "code": "TK",
+        "max_length": 4
     },
     {
         "name": "Tonga",
         "dial_code": "+676",
-        "code": "TO"
+        "code": "TO",
+        "max_length": 7
     },
     {
         "name": "Trinidad and Tobago",
         "dial_code": "+1868",
-        "code": "TT"
+        "code": "TT",
+        "max_length": 10
     },
     {
         "name": "Tunisia",
         "dial_code": "+216",
-        "code": "TN"
+        "code": "TN",
+        "max_length": 8
     },
     {
         "name": "Turkey",
         "dial_code": "+90",
-        "code": "TR"
+        "code": "TR",
+        "max_length": 10
     },
     {
         "name": "Turkmenistan",
         "dial_code": "+993",
-        "code": "TM"
+        "code": "TM",
+        "max_length": 8
     },
     {
         "name": "Turks and Caicos Islands",
         "dial_code": "+1649",
-        "code": "TC"
+        "code": "TC",
+        "max_length": 10
     },
     {
         "name": "Tuvalu",
         "dial_code": "+688",
-        "code": "TV"
+        "code": "TV",
+        "max_length": 6
     },
     {
         "name": "Uganda",
         "dial_code": "+256",
-        "code": "UG"
+        "code": "UG",
+        "max_length": 9
     },
     {
         "name": "Ukraine",
         "dial_code": "+380",
-        "code": "UA"
+        "code": "UA",
+        "max_length": 9
     },
     {
         "name": "United Arab Emirates",
         "dial_code": "+971",
-        "code": "AE"
+        "code": "AE",
+        "max_length": 9
     },
     {
         "name": "United Kingdom",
         "dial_code": "+44",
-        "code": "GB"
+        "code": "GB",
+        "max_length": 10
     },
     {
         "name": "United States",
         "dial_code": "+1",
-        "code": "US"
+        "code": "US",
+        "max_length": 10
     },
     {
         "name": "Uruguay",
         "dial_code": "+598",
-        "code": "UY"
+        "code": "UY",
+        "max_length": 8
     },
     {
         "name": "Uzbekistan",
         "dial_code": "+998",
-        "code": "UZ"
+        "code": "UZ",
+        "max_length": 9
     },
     {
         "name": "Vanuatu",
         "dial_code": "+678",
-        "code": "VU"
+        "code": "VU",
+        "max_length": 7
     },
     {
         "name": "Venezuela, Bolivarian Republic of",
         "dial_code": "+58",
-        "code": "VE"
+        "code": "VE",
+        "max_length": 10
     },
     {
         "name": "Viet Nam",
         "dial_code": "+84",
-        "code": "VN"
+        "code": "VN",
+        "max_length": 9
     },
     {
         "name": "Virgin Islands, British",
         "dial_code": "+1284",
-        "code": "VG"
+        "code": "VG",
+        "max_length": 10
     },
     {
         "name": "Virgin Islands, U.S.",
         "dial_code": "+1340",
-        "code": "VI"
+        "code": "VI",
+        "max_length": 10
     },
     {
         "name": "Wallis and Futuna",
         "dial_code": "+681",
-        "code": "WF"
+        "code": "WF",
+        "max_length": 6
     },
     {
         "name": "Yemen",
         "dial_code": "+967",
-        "code": "YE"
+        "code": "YE",
+        "max_length": 9
     },
     {
         "name": "Zambia",
         "dial_code": "+260",
-        "code": "ZM"
+        "code": "ZM",
+        "max_length": 9
     },
     {
         "name": "Zimbabwe",
         "dial_code": "+263",
-        "code": "ZW"
+        "code": "ZW",
+        "max_length": 9
     }
 ]

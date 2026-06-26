@@ -313,12 +313,22 @@ const EditProduct = () => {
         formData.append("images", file);
       });
 
-      // Append retained existing images so the backend knows what wasn't deleted
+      /*
       existingImages.forEach((img) => {
         formData.append("existingImages", typeof img === "object" ? JSON.stringify(img) : img);
       });
       // Just in case the backend uses a different key for retained images
       formData.append("retainedImages", JSON.stringify(existingImages));
+       */
+
+      if (existingImages.length === 0) {
+        formData.append("existingImages", "[]");
+      } else {
+        const existingImageUrls = existingImages
+          .map((img) => (typeof img === "object" ? (img.imageUrl || img.downloadUrl) : img))
+          .filter(Boolean);
+        formData.append("existingImages", JSON.stringify(existingImageUrls));
+      }
 
       await productControllers.updateProduct(id, formData);
 

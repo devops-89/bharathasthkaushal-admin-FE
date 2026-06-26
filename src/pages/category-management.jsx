@@ -30,6 +30,7 @@ export default function CategoryManagement() {
     category_logo: null,
     description: "",
   });
+  const [formErrors, setFormErrors] = useState({});
 
   const currentCategories = categories?.docs || [];
   const totalDocs = categories?.totalDocs || 0;
@@ -93,10 +94,27 @@ export default function CategoryManagement() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+    let finalValue = value;
+
+    if (name === "category_name") {
+      const categoryRegex = /^[A-Za-z0-9][A-Za-z0-9\s&'-]*$/;
+      if (value !== "" && !categoryRegex.test(value)) {
+        return;
+      }
+    }
+
+    if (name === "description") {
+      const words = value.trim() === "" ? [] : value.trim().split(/\s+/);
+      if (words.length > 20) {
+        finalValue = words.slice(0, 20).join(" ");
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: finalValue,
     }));
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleFileChange = (e) => {
@@ -116,15 +134,23 @@ export default function CategoryManagement() {
         e.target.value = null;
         return;
       }
-      setFormData((prev) => ({
-        ...prev,
-        category_logo: file,
-      }));
+      setFormData((prev) => ({ ...prev, category_logo: file }));
+      setFormErrors((prev) => ({ ...prev, category_logo: "" }));
     }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    const errors = {};
+    if (!formData.category_name.trim()) errors.category_name = "Category Name is required";
+    if (!formData.category_logo) errors.category_logo = "Category Logo is required";
+    if (!formData.description.trim()) errors.description = "Description is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
 
     if (formData.description.trim().split(/\s+/).length > 20) {
       toast.error("Description cannot exceed 20 words");
@@ -150,6 +176,7 @@ export default function CategoryManagement() {
       category_logo: null,
       description: "",
     });
+    setFormErrors({});
     setShowForm(false);
   };
 
@@ -239,7 +266,7 @@ export default function CategoryManagement() {
                       {cat.description
                         ? cat.description.split(" ").length > 20
                           ? cat.description.split(" ").slice(0, 20).join(" ") +
-                            "..."
+                          "..."
                           : cat.description
                         : "No description available"}
                     </p>
@@ -286,11 +313,10 @@ export default function CategoryManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === 1
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -300,11 +326,10 @@ export default function CategoryManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === totalPages
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -330,7 +355,7 @@ export default function CategoryManagement() {
               <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name *
+                    Category Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -338,14 +363,14 @@ export default function CategoryManagement() {
                     value={formData.category_name}
                     onChange={handleFormChange}
                     placeholder="Enter category name"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${formErrors.category_name ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                   />
+                  {formErrors.category_name && <p className="text-red-400 text-sm mt-1">{formErrors.category_name}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Logo *
+                    Category Logo <span className="text-red-500">*</span>
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
                     <input
@@ -354,7 +379,6 @@ export default function CategoryManagement() {
                       name="category_logo"
                       onChange={handleFileChange}
                       accept="image/*"
-                      required
                       className="hidden"
                     />
                     <label htmlFor="category_logo" className="cursor-pointer">
@@ -369,11 +393,12 @@ export default function CategoryManagement() {
                       </p>
                     </label>
                   </div>
+                  {formErrors.category_logo && <p className="text-red-400 text-sm mt-1">{formErrors.category_logo}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *{" "}
+                    Description <span className="text-red-500">*</span>{" "}
                     <span className="text-xs text-gray-500">
                       (Max 20 words)
                     </span>
@@ -383,10 +408,10 @@ export default function CategoryManagement() {
                     value={formData.description}
                     onChange={handleFormChange}
                     placeholder="Enter description"
-                    required
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none resize-none ${formErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                   />
+                  {formErrors.description && <p className="text-red-400 text-sm mt-1">{formErrors.description}</p>}
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button

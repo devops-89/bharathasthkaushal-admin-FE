@@ -17,10 +17,12 @@
     "moment": "^2.30.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-phone-input-2": "^2.15.1",
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.30.1",
     "react-toastify": "^11.0.5",
-    "recharts": "^2.5.0"
+    "recharts": "^2.5.0",
+    "validator": "^13.15.35"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

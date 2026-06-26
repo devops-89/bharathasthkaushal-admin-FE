@@ -732,9 +732,9 @@ const AuctionManagement = () => {
                   <h2 className="text-2xl font-bold text-gray-900">
                     Auction Details
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  {/*<p className="text-sm text-gray-500 mt-1">
                     ID: #{selectedAuction.auction_id}
-                  </p>
+                  </p>*/}
                 </div>
                 <button
                   onClick={() => setShowDetailsModal(false)}
