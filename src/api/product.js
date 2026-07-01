@@ -17,6 +17,15 @@ export const productControllers = {
     }
   },
 
+  getExpertiseDropdown: async () => {
+    try {
+      const result = await productSecuredApi.get("/product/expertise-dropdown");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getDashboardProductCount: async (status) => {
     try {
       const config = {};

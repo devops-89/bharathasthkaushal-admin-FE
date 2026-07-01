@@ -12,6 +12,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   CreditCard,
 } from "lucide-react";
 import { authControllers } from "../api/auth";
@@ -19,13 +20,21 @@ import { userControllers } from "../api/user";
 import { NavLink } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { isValidPhoneNumber, validatePhoneNumberLength } from "libphonenumber-js";
 import countryCodes from "../utils/countryCodes.json";
 import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import SecureImage from "../components/SecureImage";
 
+const formatAadhaar = (number) => {
+  if (!number) return "";
+  const cleaned = number.toString().replace(/\D/g, "");
+  return cleaned.replace(/(\d{4})(?=\d)/g, "$1 ");
+};
+
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [locationFilter, setLocationFilter] = useState("");
@@ -68,12 +77,21 @@ const ArtisanManagement = () => {
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchArtisans = async (page = 1, limit = 10) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const fetchArtisans = async (page = 1, limit = 10, search = "") => {
     try {
       const response = await userControllers.getUserListGroup(
         "EMPLOYEE",
         page,
         limit,
+        null,
+        search
       );
       console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
@@ -113,12 +131,12 @@ const ArtisanManagement = () => {
   };
 
   useEffect(() => {
-    fetchArtisans(currentPage, rowsPerPage);
-  }, [currentPage, rowsPerPage]);
+    fetchArtisans(currentPage, rowsPerPage, debouncedSearch);
+  }, [currentPage, rowsPerPage, debouncedSearch]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, locationFilter]);
+  }, [debouncedSearch, locationFilter]);
 
   // Prevent background scrolling when modals are open
   useEffect(() => {
@@ -150,8 +168,7 @@ const ArtisanManagement = () => {
       );
 
       toast.success(
-        `Employee ${
-          newStatus === "BLOCKED" ? "Blocked" : "Activated"
+        `Employee ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`,
       );
     } catch (error) {
@@ -170,6 +187,11 @@ const ArtisanManagement = () => {
     const { name, value } = e.target;
     let newValue = value;
 
+    // Allow only alphabetic characters and spaces for name fields
+    if (name === "firstName" || name === "lastName") {
+      newValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+    }
+
     // Validation for Name, Email and Location fields
     if (
       name === "firstName" ||
@@ -186,15 +208,10 @@ const ArtisanManagement = () => {
     let newErrors = { ...errors };
 
     if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       newErrors.email =
-        !newValue.includes("@") || !newValue.includes(".com")
-          ? "Enter a valid email"
-          : "";
-    }
-
-    if (name === "phoneNo") {
-      newErrors.phoneNo =
-        newValue.length !== 10 ? "Phone number must be 10 digits" : "";
+        newValue.trim() === "" ? "Email is required" :
+          !emailRegex.test(newValue) ? "Enter a valid email address" : "";
     }
 
     if (name === "firstName") {
@@ -208,32 +225,70 @@ const ArtisanManagement = () => {
     }
 
     if (name === "location") {
-      newErrors.location = newValue.trim() === "" ? "Location is required" : "";
+      const locationRegex = /^[a-zA-Z0-9,\s]*$/;
+      newErrors.location = newValue.trim() === ""
+        ? "Location is required"
+        : !locationRegex.test(newValue)
+          ? "Invalid location format. Only alphanumeric characters and commas are allowed"
+          : "";
     }
 
     setErrors(newErrors);
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
   const handleAddEmployee = async () => {
+    let newErrors = {};
+
     // Validation
     if (!formData.firstName.trim()) {
-      return toast.error("First Name is required");
+      newErrors.firstName = "First Name is required";
     }
     if (!formData.lastName.trim()) {
-      return toast.error("Last Name is required");
+      newErrors.lastName = "Last Name is required";
     }
-    if (!formData.email.trim() || !formData.email.includes("@")) {
-      return toast.error("Enter a valid email address");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = "Enter a valid email address";
     }
-    if (!formData.phoneNo || formData.phoneNo.length !== 10) {
-      return toast.error("Phone Number must be 10 digits");
+    if (!formData.phoneNo) {
+      newErrors.phoneNo = "Phone Number is required";
+    } else {
+      const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+      const countryIso = selectedCountry ? selectedCountry.code : undefined;
+
+      try {
+        if (countryIso) {
+          if (!isValidPhoneNumber(formData.phoneNo, countryIso)) {
+            newErrors.phoneNo = "Invalid phone number for the selected country";
+          }
+        } else {
+          const fullNumber = formData.countryCode + formData.phoneNo;
+          if (!isValidPhoneNumber(fullNumber)) {
+            newErrors.phoneNo = "Invalid phone number format";
+          }
+        }
+      } catch (e) {
+        newErrors.phoneNo = "Invalid phone number";
+      }
     }
 
-    if (!formData.aadhaarNumber || formData.aadhaarNumber.length !== 12) {
-      return toast.error("Aadhaar Number must be 12 digits");
+    const aadhaarRegex = /^[0-9]{12}$/;
+    const unformattedAadhaar = formData.aadhaarNumber ? formData.aadhaarNumber.replace(/\D/g, "") : "";
+    if (!unformattedAadhaar || !aadhaarRegex.test(unformattedAadhaar)) {
+      newErrors.aadhaarNumber = "Aadhaar Number must be 12 digits";
     }
+    const locationRegex = /^[a-zA-Z0-9,\s]*$/;
     if (!formData.location.trim()) {
-      return toast.error("Location is required");
+      newErrors.location = "Location is required";
+    } else if (!locationRegex.test(formData.location)) {
+      newErrors.location = "Invalid location format. Only alphanumeric characters and commas are allowed";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
     try {
@@ -245,36 +300,41 @@ const ArtisanManagement = () => {
         location: formData.location.trim(),
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        aadhaarNumber: formData.aadhaarNumber.trim(),
+        aadhaarNumber: unformattedAadhaar,
       };
       const response = await authControllers.addEmployee(payload);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Employee registered successfully!");
         fetchArtisans(currentPage, rowsPerPage);
-        setShowAddForm(false);
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          phoneNo: "",
-          countryCode: "+91",
-          user_group: "EMPLOYEE",
-          location: "",
-          aadhaarNumber: "",
-        });
-        setErrors({});
+        handleCloseAddForm();
       } else {
         toast.error(response.data?.message || "Something went wrong.");
       }
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          error.message ||
-          "Error registering employee",
+        error.message ||
+        "Error registering employee",
       );
     }
   };
+  const handleCloseAddForm = () => {
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNo: "",
+      countryCode: "+91",
+      user_group: "EMPLOYEE",
+      location: "",
+      aadhaarNumber: "",
+    });
+    setErrors({});
+    setShowAddForm(false);
+  };
+
+  /*
   const filteredPartners = partnersData.filter((partner) => {
     const matchesSearch =
       partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -287,8 +347,9 @@ const ArtisanManagement = () => {
 
     return matchesSearch && matchesLocation && matchesTab;
   });
+  */
 
-  const currentPartners = filteredPartners;
+  const currentPartners = partnersData;
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.location.split(",")[0])),
   ];
@@ -377,7 +438,7 @@ const ArtisanManagement = () => {
                     Register New Employee
                   </h2>
                   <button
-                    onClick={() => setShowAddForm(false)}
+                    onClick={handleCloseAddForm}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     <X className="w-6 h-6" />
@@ -387,53 +448,62 @@ const ArtisanManagement = () => {
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name *
+                        First Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                          }`}
                         placeholder="Enter First Name"
                         required
                       />
+                      {errors.firstName && (
+                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>
+                      )}
                     </div>
 
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name *
+                        Last Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleFormChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                          }`}
                         placeholder="Enter Last Name"
                         required
                       />
+                      {errors.lastName && (
+                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>
+                      )}
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address *
+                      Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter Email Address"
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs">{errors.email}</p>
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <div className="w-40 relative" ref={dropdownRef}>
+                    <div className="w-30 relative" ref={dropdownRef}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Country Code
                       </label>
@@ -443,8 +513,20 @@ const ArtisanManagement = () => {
                           setIsCountryDropdownOpen(!isCountryDropdownOpen)
                         }
                       >
-                        <span className="truncate">{formData.countryCode}</span>
-                        <span className="ml-2 text-gray-400">▼</span>
+                        <div className="flex items-center gap-2 truncate">
+                          {(() => {
+                            const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
+                            return selected && selected.code ? (
+                              <img
+                                src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
+                                alt={selected.code}
+                                className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                              />
+                            ) : null;
+                          })()}
+                          <span>{formData.countryCode}</span>
+                        </div>
+                        <ChevronDown className="ml-2 text-gray-400 w-4 h-4" />
                       </div>
 
                       {isCountryDropdownOpen && (
@@ -480,6 +562,13 @@ const ArtisanManagement = () => {
                                     setCountrySearchTerm("");
                                   }}
                                 >
+                                  {country.code && (
+                                    <img
+                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                      alt={country.code}
+                                      className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
+                                    />
+                                  )}
                                   <span className="font-medium text-gray-900 w-12">
                                     {country.dial_code}
                                   </span>
@@ -499,70 +588,116 @@ const ArtisanManagement = () => {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
+                        Phone Number <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
                         name="phoneNo"
                         value={formData.phoneNo}
-                        maxLength={10}
+                        maxLength={
+                          countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
+                        }
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, "");
-                          if (value.length <= 10) {
-                            setFormData((prev) => ({
-                              ...prev,
-                              phoneNo: value,
-                            }));
+
+                          const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+                          const countryIso = selectedCountry ? selectedCountry.code : undefined;
+
+                          if (countryIso) {
+                            // Only block if we are ADDING characters
+                            if (value.length > (formData.phoneNo || "").length) {
+                              let isTooLong = false;
+                              // Strict limit for India (10 digits for standard mobile numbers)
+                              if (countryIso === 'IN' && value.length > 10) {
+                                isTooLong = true;
+                              } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
+                                isTooLong = true;
+                              }
+
+                              if (isTooLong) return; // Block typing
+                            }
+
+                            setFormData((prev) => ({ ...prev, phoneNo: value }));
+
+                            // Start digit / validity validation using libphonenumber-js
+                            const maxLength = selectedCountry.max_length;
+                            if (value.length > 0 && maxLength && value.length === maxLength) {
+                              if (!isValidPhoneNumber(value, countryIso)) {
+                                setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
+                              } else {
+                                if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                              }
+                            } else {
+                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                            }
+                          } else {
+                            if (value.length <= 15) {
+                              setFormData((prev) => ({ ...prev, phoneNo: value }));
+                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                            }
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                          }`}
                         placeholder="Enter Phone Number"
                       />
                       {errors.phoneNo && (
-                        <p className="text-red-500 text-xs">{errors.phoneNo}</p>
+                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>
                       )}
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number *
+                      Aadhaar Number <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="aadhaarNumber"
                       value={formData.aadhaarNumber}
-                      maxLength={12}
+                      maxLength={14}
                       onChange={(e) => {
                         const value = e.target.value.replace(/\D/g, "");
                         if (value.length <= 12) {
+                          const formattedValue = formatAadhaar(value);
                           setFormData((prev) => ({
                             ...prev,
-                            aadhaarNumber: value,
+                            aadhaarNumber: formattedValue,
                           }));
+                          if (errors.aadhaarNumber) {
+                            setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
+                          }
                         }
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter Aadhaar Number"
                       required
                     />
+                    {errors.aadhaarNumber && (
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location
+                      Location <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="location"
                       value={formData.location}
                       onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.location ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
                       placeholder="Enter Location"
                     />
+                    {errors.location && (
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.location}</p>
+                    )}
                   </div>
                   <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => setShowAddForm(false)}
+                      onClick={handleCloseAddForm}
                       className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Cancel
@@ -617,11 +752,10 @@ const ArtisanManagement = () => {
                       </h3>
                       <p className="text-gray-500">{selectedPartner.email}</p>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                          selectedPartner.status === "ACTIVE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {selectedPartner.status || "ACTIVE"}
                       </span>
@@ -663,7 +797,7 @@ const ArtisanManagement = () => {
                       <div>
                         <p className="text-sm text-gray-500">Aadhaar Number</p>
                         <p className="font-medium">
-                          {selectedPartner.aadhaarNumber || "N/A"}
+                          {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
                         </p>
                       </div>
                     </div>
@@ -750,19 +884,17 @@ const ArtisanManagement = () => {
                       <Switch
                         checked={partner.status === "ACTIVE"}
                         onChange={() => handleToggleStatus(partner)}
-                        className={`${
-                          partner.status === "ACTIVE"
-                            ? "bg-orange-600"
-                            : "bg-gray-300"
-                        } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                        className={`${partner.status === "ACTIVE"
+                          ? "bg-orange-600"
+                          : "bg-gray-300"
+                          } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
                       >
                         <span className="sr-only">Toggle Status</span>
                         <span
-                          className={`${
-                            partner.status === "ACTIVE"
-                              ? "translate-x-6"
-                              : "translate-x-1"
-                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          className={`${partner.status === "ACTIVE"
+                            ? "translate-x-6"
+                            : "translate-x-1"
+                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                         />
                       </Switch>
                     </td>
@@ -809,11 +941,10 @@ const ArtisanManagement = () => {
                   <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                      currentPage === 1
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                      }`}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -821,11 +952,10 @@ const ArtisanManagement = () => {
                   <button
                     onClick={() => setCurrentPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                      currentPage === totalPages
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                    }`}
+                    className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                      }`}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -835,7 +965,7 @@ const ArtisanManagement = () => {
           </div>
         </div>
 
-        {filteredPartners.length === 0 && (
+        {totalDocs === 0 && (
           <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
             <p className="text-gray-500">
               No employees found matching your search criteria.

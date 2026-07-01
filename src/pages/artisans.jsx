@@ -18,6 +18,7 @@ import {
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
 import { categoryControllers } from "../api/category";
+import { productControllers } from "../api/product";
 import { Switch } from "@headlessui/react";
 import DisableModal from "../components/DisableModal";
 import { ToastContainer, toast } from "react-toastify";
@@ -35,9 +36,11 @@ const formatAadhaar = (number) => {
 
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
-  const [locationFilter, setLocationFilter] = useState("");
+  // const [showFilter, setShowFilter] = useState(false);
+  // const [locationFilter, setLocationFilter] = useState("");
+  // const [uniqueLocations, setUniqueLocations] = useState([]);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
@@ -183,13 +186,25 @@ const ArtisanManagement = () => {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
-  const fetchArtisans = async (page = 1, limit = 10) => {
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm /*, locationFilter*/]);
+
+  const fetchArtisans = async (page = 1, limit = 10, search = "" /*, location = ""*/) => {
     try {
       setLoading(true);
       const response = await userControllers.getUserListGroup(
         "ARTISAN",
         page,
         limit,
+        null,
+        search
+        // location
       );
       const responseData = response.data?.data || response.data || {};
       let artisans = responseData.docs || responseData || [];
@@ -203,7 +218,7 @@ const ArtisanManagement = () => {
         phoneNo: user.phoneNo || "—",
         countryCode: user.countryCode || "+91",
         expertizeField: user.expertizeField || "Not Specified",
-        location: user.location || "—",
+        location: user.address || user.location || "—",
         gstNumber: user.gstNumber || "—",
         user_caste_category: user.user_caste_category || "—",
         joinedDate: user.createdAt
@@ -233,9 +248,27 @@ const ArtisanManagement = () => {
   };
 
   useEffect(() => {
-    fetchArtisans(currentPage, rowsPerPage);
+    fetchArtisans(currentPage, rowsPerPage, debouncedSearchTerm /*, locationFilter*/);
     getallSubcategory("categoryId");
-  }, [currentPage, rowsPerPage]);
+  }, [currentPage, rowsPerPage, debouncedSearchTerm /*, locationFilter*/]);
+
+  /*
+  useEffect(() => {
+    const fetchExpertise = async () => {
+      try {
+        const res = await productControllers.getExpertiseDropdown();
+        if (res.data?.data) {
+          const expertiseData = res.data.data;
+          const mapped = expertiseData.map(item => item.expertise || item.name || item);
+          setUniqueLocations(mapped.filter(field => field && field !== "Not Specified"));
+        }
+      } catch (err) {
+        console.error("Failed to load expertise dropdown", err);
+      }
+    };
+    fetchExpertise();
+  }, []);
+  */
 
   console.log("hdwjhed", subCategories);
   const handleViewDetails = (partner) => {
@@ -485,6 +518,7 @@ const ArtisanManagement = () => {
           ? formData.expertizeField.join(", ")
           : formData.expertizeField,
         location: formData.location,
+        address: formData.location,
         aadhaarNumber: formData.aadhaarNumber,
         user_caste_category: formData.user_caste_category,
         subCaste: formData.subCaste,
@@ -564,22 +598,9 @@ const ArtisanManagement = () => {
     }*/}
   };
 
-  const filteredPartners = partnersData.filter((partner) => {
-    const matchesSearch =
-      partner.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      partner.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      partner.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation =
-      !locationFilter || partner.expertizeField === locationFilter;
-    const matchesTab =
-      !partner.user_group || partner.user_group.toUpperCase() === "ARTISAN";
-    return matchesSearch && matchesLocation && matchesTab;
-  });
+  const filteredPartners = partnersData;
 
   // console.log("Filtered Partners:", filteredPartners);
-  const uniqueLocations = [
-    ...new Set(partnersData.map((p) => p.expertizeField)),
-  ].filter((field) => field && field !== "Not Specified");
 
   const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
@@ -629,14 +650,26 @@ const ArtisanManagement = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
-            >
-              <Plus className="w-5 h-5 mr-2" /> Register Artisan
-            </button>
+            {/*
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowFilter(!showFilter)}
+                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                  showFilter ? 'bg-orange-100 text-orange-600' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                <Filter className="w-5 h-5 mr-2" /> Filters
+              </button>
+            */}
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                <Plus className="w-5 h-5 mr-2" /> Register Artisan
+              </button>
+            {/* </div> */}
           </div>
-          {showFilter && (
+          {/* showFilter && (
             <div className="mt-4 p-4 border-t border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
@@ -666,7 +699,7 @@ const ArtisanManagement = () => {
                 </button>
               </div>
             </div>
-          )}
+          ) */}
         </div>
 
         {showAddForm && (

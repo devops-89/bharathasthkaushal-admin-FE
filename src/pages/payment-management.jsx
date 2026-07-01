@@ -27,6 +27,7 @@ import {
 
 const PaymentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,13 @@ const PaymentManagement = () => {
   const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const fetchPayments = async () => {
       setLoading(true);
       try {
@@ -46,6 +54,8 @@ const PaymentManagement = () => {
           currentPage,
           limit,
           sortBy,
+          "desc",
+          debouncedSearch
         );
         if (res.data?.data) {
           setPayments(res.data.data.docs || []);
@@ -61,7 +71,11 @@ const PaymentManagement = () => {
     };
 
     fetchPayments();
-  }, [currentPage, limit, sortBy]);
+  }, [currentPage, limit, sortBy, debouncedSearch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   // Disable background scrolling when modal is open
   useEffect(() => {

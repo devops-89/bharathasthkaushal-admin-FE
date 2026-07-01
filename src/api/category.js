@@ -8,9 +8,9 @@ export const categoryControllers = {
       },
     });
   },
-  getCategory: async (page = 1, pageSize = 1000) => {
+  getCategory: async (page = 1, pageSize = 1000, search = "") => {
     try {
-      const params = { page, pageSize };
+      const params = { page, pageSize, search };
       const filteredParams = Object.fromEntries(
         Object.entries(params).filter(
           ([_, value]) => value !== "" && value !== null && value !== undefined,

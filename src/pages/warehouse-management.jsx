@@ -141,10 +141,27 @@ export default function WarehouseManagement() {
       toast.error("Address is required");
       return;
     } */}
-    if (!formData.warehouse_name.trim()) newErrors.warehouse_name = "Warehouse Name is required";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    if (!formData.latitude.trim()) newErrors.latitude = "Latitude is required";
-    if (!formData.longitude.trim()) newErrors.longitude = "Longitude is required";
+    if (!formData.warehouse_name.trim()) {
+      newErrors.warehouse_name = "Warehouse Name is required";
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9\s&'.,()/-]*$/.test(formData.warehouse_name.trim())) {
+      newErrors.warehouse_name = "Invalid warehouse name format";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    if (!formData.latitude.trim()) {
+      newErrors.latitude = "Latitude is required";
+    } else if (!/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/.test(formData.latitude.trim())) {
+      newErrors.latitude = "Invalid latitude format";
+    }
+
+    if (!formData.longitude.trim()) {
+      newErrors.longitude = "Longitude is required";
+    } else if (!/^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/.test(formData.longitude.trim())) {
+      newErrors.longitude = "Invalid longitude format";
+    }
 
     if (!formData.origin_country.trim()) {
       newErrors.origin_country = "Origin Country is required";
@@ -152,7 +169,7 @@ export default function WarehouseManagement() {
       const isValidCountry = countries.some(
         (country) => country.toLowerCase() === formData.origin_country.trim().toLowerCase()
       );
-      if (!isValidCountry) newErrors.origin_country = "This is not a valid country";
+      if (!isValidCountry) newErrors.origin_country = "This is not a valid country.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -170,8 +187,8 @@ export default function WarehouseManagement() {
         latitude: formData.latitude,
         longitude: formData.longitude,
       };
-    //  if (formData.latitude) payload.latitude = formData.latitude;
-    //  if (formData.longitude) payload.longitude = formData.longitude;
+      //  if (formData.latitude) payload.latitude = formData.latitude;
+      //  if (formData.longitude) payload.longitude = formData.longitude;
       await warehouseControllers.addWarehouse(payload);
       toast.success("Warehouse added successfully!");
       resetForm();
@@ -403,11 +420,10 @@ export default function WarehouseManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -417,11 +433,10 @@ export default function WarehouseManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -456,9 +471,8 @@ export default function WarehouseManagement() {
                     onChange={handleFormChange}
                     placeholder="Enter Warehouse Name"
                     required
-                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
-                      errors.warehouse_name ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
-                    }`}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.warehouse_name ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                      }`}
                   />
                   {errors.warehouse_name && <p className="text-red-400 text-xs mt-1 font-medium">{errors.warehouse_name}</p>}
                 </div>
@@ -475,19 +489,19 @@ export default function WarehouseManagement() {
                       onChange={(e) => {
                         setCountrySearch(e.target.value);
                         setIsCountryDropdownOpen(true);
-                        if (e.target.value === "") {
-                          handleFormChange({
-                            target: { name: "origin_country", value: "" },
-                          });
-                        }
+                        handleFormChange({
+                          target: { name: "origin_country", value: e.target.value },
+                        });
                       }}
                       onClick={() => {
                         setIsCountryDropdownOpen(true);
                         setCountrySearch(""); // Reset search to show all countries
+                        handleFormChange({
+                          target: { name: "origin_country", value: "" },
+                        });
                       }}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${
-                        errors.origin_country ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.origin_country ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                        }`}
                     />
                     {errors.origin_country && <p className="text-red-400 text-xs mt-1 font-medium">{errors.origin_country}</p>}
                     {isCountryDropdownOpen && (
@@ -532,9 +546,8 @@ export default function WarehouseManagement() {
                     placeholder="Enter Full Address"
                     required
                     rows={3}
-                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none ${
-                      errors.address ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
-                    }`}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 resize-none ${errors.address ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                      }`}
                   />
                   {errors.address && <p className="text-red-400 text-xs mt-1 font-medium">{errors.address}</p>}
                 </div>
@@ -550,9 +563,8 @@ export default function WarehouseManagement() {
                       value={formData.latitude}
                       onChange={handleFormChange}
                       placeholder="Enter Latitude"
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${
-                        errors.latitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${errors.latitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                        }`}
                     />
                     {errors.latitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.latitude}</p>}
                   </div>
@@ -566,9 +578,8 @@ export default function WarehouseManagement() {
                       value={formData.longitude}
                       onChange={handleFormChange}
                       placeholder="Enter Longitude"
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${
-                        errors.longitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
-                      }`}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 ${errors.longitude ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-orange-500"
+                        }`}
                     />
                     {errors.longitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.longitude}</p>}
                   </div>

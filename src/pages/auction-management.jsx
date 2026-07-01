@@ -37,6 +37,9 @@ const formatDateForDisplay = (dateString) => {
 
 const AuctionManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [auctions, setAuctions] = useState([]);
   const [products, setProducts] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -98,6 +101,7 @@ const AuctionManagement = () => {
   };
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  /*
   const indexOfLastItem = currentPage * rowsPerPage;
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const filteredAuctions = auctions.filter((auction) =>
@@ -108,6 +112,11 @@ const AuctionManagement = () => {
     indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredAuctions.length / rowsPerPage);
+  */
+  
+  const currentAuctions = auctions;
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -158,17 +167,34 @@ const AuctionManagement = () => {
     };
   }, [showDetailsModal, showAddForm, showWinnersModal, showWinnerModal]);
 
-  const fetchAuctions = async () => {
+  const fetchAuctions = async (page = 1, limit = 10, search = "") => {
     setLoading(true);
     setError(null);
 
     try {
+      /*
       const res = await productControllers.getAllAuctions({
         page: 1,
         pageSize: 50,
       });
 
       const response = res.data.data.docs || res.data.data || [];
+      */
+
+      const res = await productControllers.getAllAuctions({
+        page: page,
+        pageSize: limit,
+        search: search,
+      });
+
+      const responseData = res.data.data;
+      let response = responseData?.docs || responseData || [];
+      const totalDocuments = responseData?.totalDocs || response.length || 0;
+      const totalPageCount = responseData?.totalPages || 1;
+
+      setTotalDocs(totalDocuments);
+      setTotalPages(totalPageCount);
+
       console.log("Raw Auction Data:", response);
 
       const mapped = response.map((auction) => ({
@@ -204,10 +230,27 @@ const AuctionManagement = () => {
     }
   };
 
+  /*
   useEffect(() => {
     // fetchProducts(); // Removed as we fetch on warehouse selection
     fetchAuctions();
   }, []);
+  */
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
+  }, [currentPage, rowsPerPage, debouncedSearch]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
   const [isProductLoading, setIsProductLoading] = useState(false);
 
@@ -1409,6 +1452,7 @@ const AuctionManagement = () => {
                           type="date"
                           required
                           min={new Date().toLocaleDateString("en-CA")}
+                          max="2099-12-31"
                           value={
                             newAuction.startDate
                               ? newAuction.startDate.split("T")[0]
@@ -1416,6 +1460,7 @@ const AuctionManagement = () => {
                           }
                           onChange={(e) => {
                             const date = e.target.value;
+                            if (date && date.split("-")[0].length > 4) return;
                             const time =
                               newAuction.startDate &&
                                 newAuction.startDate.includes("T")
@@ -1468,6 +1513,7 @@ const AuctionManagement = () => {
                               ? newAuction.startDate.split("T")[0]
                               : new Date().toLocaleDateString("en-CA")
                           }
+                          max="2099-12-31"
                           value={
                             newAuction.endDate
                               ? newAuction.endDate.split("T")[0]
@@ -1475,6 +1521,7 @@ const AuctionManagement = () => {
                           }
                           onChange={(e) => {
                             const date = e.target.value;
+                            if (date && date.split("-")[0].length > 4) return;
                             const time =
                               newAuction.endDate &&
                                 newAuction.endDate.includes("T")

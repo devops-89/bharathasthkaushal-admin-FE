@@ -42,17 +42,20 @@ export default function ProductManagement() {
   const fetchProducts = async (page, limit, search = "") => {
     setLoading(true);
     try {
+      /*
       // If searching, fetch more items to ensure we can filter client-side if backend search fails
       const fetchLimit = search ? 1000 : limit;
       const fetchPage = search ? 1 : page;
+      */
 
       const res = await productControllers.getAllProducts(
-        fetchPage,
-        fetchLimit,
+        page, // fetchPage,
+        limit, // fetchLimit,
         search,
       );
       let response = res.data.data;
 
+      /*
       if (search) {
         // Client-side filtering fallback
         const filteredDocs = response.docs.filter((p) =>
@@ -67,6 +70,7 @@ export default function ProductManagement() {
           page: 1,
         };
       }
+      */
 
       setProducts(response);
     } catch (err) {
@@ -281,11 +285,10 @@ export default function ProductManagement() {
                     currentPage > 1 && setCurrentPage(currentPage - 1)
                   }
                   disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === 1
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -295,11 +298,10 @@ export default function ProductManagement() {
                     currentPage < totalPages && setCurrentPage(currentPage + 1)
                   }
                   disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                    currentPage === totalPages
+                  className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                  }`}
+                    }`}
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>

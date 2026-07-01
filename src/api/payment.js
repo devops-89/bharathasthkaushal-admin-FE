@@ -5,15 +5,19 @@ export const paymentControllers = {
         limit = 10,
         sortBy = "date",
         sortOrder = "desc",
+        search = "",
     ) => {
         try {
+            const params = {
+                page,
+                limit: Number(limit),
+                sortBy,
+                sortOrder,
+            };
+            if (search) params.search = search;
+
             const response = await paymentSecuredApi.get(`/payments`, {
-                params: {
-                    page,
-                    limit: Number(limit),
-                    sortBy,
-                    sortOrder,
-                },
+                params: params,
             });
             return response;
         } catch (error) {

@@ -17,23 +17,46 @@ function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1, limit = 10, search = "", status = "") => {
     try {
+      /*
       let response = await userControllers.getUserListGroup("USER");
       if (response?.data?.data?.docs) {
         setUsers(response.data.data.docs);
+      }
+      */
+
+      let response = await userControllers.getUserListGroup("USER", page, limit, null, search, "", status);
+      if (response?.data?.data) {
+        setUsers(response.data.data.docs || []);
+        setTotalDocs(response.data.data.totalDocs || 0);
+        setTotalPages(response.data.data.totalPages || 1);
       }
     } catch (error) {
       console.log(error);
       toast.error("Failed to fetch users");
     }
   };
+
+  useEffect(() => {
+    fetchUsers(currentPage, rowsPerPage, debouncedSearch, statusFilter);
+  }, [currentPage, rowsPerPage, debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, statusFilter]);
 
   const handleToggle = (user) => {
     setSelectedUser(user);
@@ -73,6 +96,7 @@ function UserManagement() {
     setOpenModal(false);
   };
 
+  /*
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       (user.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,6 +114,11 @@ function UserManagement() {
   const indexOfFirstItem = indexOfLastItem - rowsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+  */
+
+  const currentUsers = users;
+  const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
@@ -197,19 +226,17 @@ function UserManagement() {
                     <Switch
                       checked={user?.status === "ACTIVE"}
                       onChange={() => handleToggle(user)}
-                      className={`${
-                        user?.status === "ACTIVE"
+                      className={`${user?.status === "ACTIVE"
                           ? "bg-orange-600"
                           : "bg-gray-300"
-                      } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
+                        } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
                     >
                       <span className="sr-only">Toggle Status</span>
                       <span
-                        className={`${
-                          user?.status === "ACTIVE"
+                        className={`${user?.status === "ACTIVE"
                             ? "translate-x-6"
                             : "translate-x-1"
-                        } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                       />
                     </Switch>
                   </td>
@@ -250,9 +277,9 @@ function UserManagement() {
             </div>
 
             <div className="text-base text-gray-600 font-medium justify-self-center">
-              {indexOfFirstItem + 1}–
-              {Math.min(indexOfLastItem, filteredUsers.length)} of{" "}
-              {filteredUsers.length}
+              {indexOfFirstItem}–
+              {indexOfLastItem} of{" "}
+              {totalDocs}
             </div>
 
             <div className="flex items-center gap-4 justify-self-end">
@@ -261,11 +288,10 @@ function UserManagement() {
                   currentPage > 1 && setCurrentPage(currentPage - 1)
                 }
                 disabled={currentPage === 1}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === 1
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -275,11 +301,10 @@ function UserManagement() {
                   currentPage < totalPages && setCurrentPage(currentPage + 1)
                 }
                 disabled={currentPage === totalPages}
-                className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                  currentPage === totalPages
+                className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                }`}
+                  }`}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

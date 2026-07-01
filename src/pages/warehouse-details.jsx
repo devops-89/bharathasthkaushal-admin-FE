@@ -7,7 +7,13 @@ import {
     Globe,
     Package,
     Calendar,
-    Clock
+    Clock,
+    Warehouse,
+    CheckCircle,
+    Search,
+    ChevronLeft,
+    ChevronRight,
+    Navigation
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -17,6 +23,9 @@ export default function WarehouseDetails() {
     const navigate = useNavigate();
     const [warehouse, setWarehouse] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
         const fetchWarehouseDetails = async () => {
@@ -61,9 +70,19 @@ export default function WarehouseDetails() {
         );
     }
 
+    // Filter and Pagination Logic
+    const products = Array.isArray(warehouse?.products) ? warehouse.products : [];
+    const filteredProducts = products.filter(
+        (product) => product?.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const totalPages = Math.ceil(filteredProducts.length / rowsPerPage) || 1;
+    const indexOfLastItem = currentPage * rowsPerPage;
+    const indexOfFirstItem = indexOfLastItem - rowsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
                     <button
@@ -90,50 +109,60 @@ export default function WarehouseDetails() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Warehouse Info */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6 border-b pb-4">Information</h2>
+                <div className="space-y-8">
+                    {/* Warehouse Info - Full Width Horizontal */}
+                    <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg shadow-orange-500/30">
+                                <Warehouse className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Information</h2>
+                        </div>
 
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Origin Country</label>
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <div className="p-2 bg-orange-50 rounded-lg">
-                                            <Globe className="w-5 h-5 text-orange-600" />
-                                        </div>
-                                        <p className="text-base font-medium text-gray-900">{warehouse.origin_country || warehouse.country || 'N/A'}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Origin Country */}
+                            <div className="group">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Origin Country</label>
+                                <div className="flex items-start gap-4 bg-gray-100/80 px-4 pt-4 pb-2 rounded-2xl group-hover:bg-orange-50/50 transition-colors duration-300 border border-transparent group-hover:border-orange-100 h-full">
+                                    <div className="p-2.5 bg-white rounded-xl shadow-sm">
+                                        <Globe className="w-5 h-5 text-orange-500" />
                                     </div>
+                                    <p className="text-lg font-semibold text-gray-800 pt-1">{warehouse.origin_country || warehouse.country || 'N/A'}</p>
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Address</label>
-                                    <div className="flex items-start gap-3 mt-2">
-                                        <div className="p-2 bg-orange-50 rounded-lg">
-                                            <MapPin className="w-5 h-5 text-orange-600" />
-                                        </div>
-                                        <p className="text-base font-medium text-gray-900 flex-1 break-all">
-                                            {(() => {
-                                                const addr = warehouse.address || warehouse.location;
-                                                if (!addr) return 'N/A';
-                                                if (typeof addr === 'string') return addr;
-                                                return [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
-                                            })()}
-                                        </p>
+                            {/* Address */}
+                            <div className="group md:col-span-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Location</label>
+                                <div className="flex items-start gap-4 bg-gray-100/80 px-4 pt-4 pb-2 rounded-2xl group-hover:bg-orange-50/50 transition-colors duration-300 border border-transparent group-hover:border-orange-100 h-full">
+                                    <div className="p-2.5 bg-white rounded-xl shadow-sm shrink-0">
+                                        <MapPin className="w-5 h-5 text-orange-500" />
                                     </div>
+                                    <p className="text-base font-medium text-gray-700 leading-relaxed break-all pt-1">
+                                        {(() => {
+                                            const addr = warehouse.address || warehouse.location;
+                                            if (!addr) return 'N/A';
+                                            if (typeof addr === 'string') return addr;
+                                            return [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
+                                        })()}
+                                    </p>
                                 </div>
+                            </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Latitude</label>
-                                        <p className="text-sm font-medium text-gray-900 mt-1 bg-gray-50 p-2 rounded-lg">
+                            {/* Coordinates */}
+                            <div className="group md:col-span-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Coordinates</label>
+                                <div className="flex items-start gap-4 bg-gray-100/80 px-4 pt-4 pb-2 rounded-2xl group-hover:bg-orange-50/50 transition-colors duration-300 border border-transparent group-hover:border-orange-100 h-full">
+                                    <div className="p-2.5 bg-white rounded-xl shadow-sm shrink-0">
+                                        <Navigation className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <div className="flex flex-col gap-1.5 pt-1">
+                                        <p className="text-sm font-medium text-gray-700 leading-none">
+                                            <span className="text-xs text-gray-400 uppercase tracking-wider mr-2 font-bold">Lat</span>
                                             {warehouse.latitude || 'N/A'}
                                         </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Longitude</label>
-                                        <p className="text-sm font-medium text-gray-900 mt-1 bg-gray-50 p-2 rounded-lg">
+                                        <p className="text-sm font-medium text-gray-700 leading-none">
+                                            <span className="text-xs text-gray-400 uppercase tracking-wider mr-2 font-bold">Lng</span>
                                             {warehouse.longitude || 'N/A'}
                                         </p>
                                     </div>
@@ -142,76 +171,119 @@ export default function WarehouseDetails() {
                         </div>
                     </div>
 
-                    {/* Right Column - Products & Stats */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Stats Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-orange-500">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-500 font-medium">Total Products</p>
-                                        <p className="text-2xl font-bold text-gray-900 mt-1">
-                                            {warehouse.products?.length || 0}
-                                        </p>
-                                    </div>
-                                    <div className="p-3 bg-orange-50 rounded-full">
-                                        <Package className="w-6 h-6 text-orange-600" />
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Add more stats if available in the future */}
-                        </div>
+                    {/* Products Table with Search & Pagination */}
+                    <div className="bg-white rounded-2xl shadow-lg p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                            <h2 className="text-xl font-bold text-gray-800">
+                                Inventory List
+                            </h2>
 
-                        {/* Products Table */}
-                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                                <h2 className="text-xl font-bold text-gray-900">Products Inventory</h2>
-                                <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
-                                    {warehouse.products?.length || 0} Items
+                            <div className="flex flex-col sm:flex-row items-center gap-4 flex-1 justify-end w-full sm:w-auto">
+                                <span className="px-4 py-1.5 rounded-full text-sm font-bold bg-orange-50 text-orange-600 border border-orange-200 shadow-sm whitespace-nowrap">
+                                    Total Products: {products.length}
                                 </span>
+                                <div className="w-full sm:max-w-md relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by Product Name"
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setCurrentPage(1); // Reset to first page on search
+                                        }}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                                    />
+                                </div>
                             </div>
-
-                            {Array.isArray(warehouse.products) && warehouse.products.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="py-4 px-6 font-semibold text-gray-600 text-sm uppercase tracking-wider">Product Name</th>
-                                                <th className="py-4 px-6 font-semibold text-gray-600 text-sm uppercase tracking-wider text-right">Quantity</th>
-                                                <th className="py-4 px-6 font-semibold text-gray-600 text-sm uppercase tracking-wider text-center">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {warehouse.products.map((product, index) => (
-                                                product ? (
-                                                    <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="py-4 px-6 font-medium text-gray-900">
-                                                            {product.product_name || 'N/A'}
-                                                        </td>
-                                                        <td className="py-4 px-6 text-gray-700 text-right font-mono">
-                                                            {product.quantity || 0}
-                                                        </td>
-                                                        <td className="py-4 px-6 text-center">
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.product_status === 'DRAFT' ? 'bg-gray-100 text-gray-800' :
-                                                                product.product_status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                                                    'bg-blue-100 text-blue-800'
-                                                                }`}>
-                                                                {product.product_status || 'UNKNOWN'}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ) : null
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <div className="p-12 text-center">
-                                    <Package className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-                                    <p className="text-gray-500 text-lg">No products found in this warehouse</p>
-                                </div>
-                            )}
                         </div>
+
+                        {currentProducts.length > 0 ? (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-gray-200">
+                                            <th className="py-4 px-4 font-semibold text-gray-700">Product Name</th>
+                                            <th className="py-4 px-4 font-semibold text-gray-700">Quantity</th>
+                                            <th className="py-4 px-4 font-semibold text-gray-700">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {currentProducts.map((product, index) => (
+                                            product ? (
+                                                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                                    <td className="py-4 px-4 font-medium text-gray-800 capitalize">
+                                                        {product.product_name || 'N/A'}
+                                                    </td>
+                                                    <td className="py-4 px-4 text-gray-600">
+                                                        {product.quantity || 0}
+                                                    </td>
+                                                    <td className="py-4 px-4 text-gray-600">
+                                                        {product.product_status || 'UNKNOWN'}
+                                                    </td>
+                                                </tr>
+                                            ) : null
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="text-center py-16">
+                                <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <p className="text-gray-500 text-lg">
+                                    {searchTerm ? "No products found" : "No products found in this warehouse"}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Pagination Controls */}
+                        {filteredProducts.length > 0 && (
+                            <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
+                                <div className="flex items-center gap-4 text-base font-medium justify-self-start">
+                                    <span className="text-gray-700">Rows per page:</span>
+                                    <select
+                                        value={rowsPerPage}
+                                        onChange={(e) => {
+                                            setRowsPerPage(Number(e.target.value));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                    </select>
+                                </div>
+
+                                <div className="text-base text-gray-600 font-medium justify-self-center">
+                                    {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length}
+                                </div>
+
+                                <div className="flex items-center gap-4 justify-self-end">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
+                                            ? 'text-gray-300 cursor-not-allowed'
+                                            : 'text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200'
+                                            }`}
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </button>
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
+                                            ? 'text-gray-300 cursor-not-allowed'
+                                            : 'text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200'
+                                            }`}
+                                    >
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <ToastContainer />

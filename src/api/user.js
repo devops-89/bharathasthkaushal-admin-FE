@@ -1,6 +1,6 @@
 import { getuserSecuredApi, dashboardSecuredApi } from "./config";
 export const userControllers = {
-  getUserListGroup: async (group, page = 1, pageSize = 50, hasAddress = null) => {
+  getUserListGroup: async (group, page = 1, pageSize = 50, hasAddress = null, search = "", expertizeField = "", status = "") => {
     try {
       let result = await getuserSecuredApi.get(`/users/getUserList`, {
         params: {
@@ -8,6 +8,9 @@ export const userControllers = {
           page: page,
           limit: pageSize,
           ...(hasAddress !== null && { hasAddress }),
+          ...(search && { search }),
+          ...(expertizeField && { expertizeField }),
+          ...(status && status !== "ALL" && { status }),
         },
         headers: { "Cache-Control": "no-cache" }
       });

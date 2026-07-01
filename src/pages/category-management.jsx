@@ -42,12 +42,15 @@ export default function CategoryManagement() {
   const fetchCategories = async (page, limit, search = "") => {
     setLoading(true);
     try {
+      /*
       const fetchLimit = search ? 1000 : limit;
       const fetchPage = search ? 1 : page;
+      */
 
-      const res = await categoryControllers.getCategory(fetchPage, fetchLimit);
+      const res = await categoryControllers.getCategory(page, limit, search);
       let response = res.data.data;
 
+      /*
       if (search) {
         const filteredDocs = response.docs.filter((c) =>
           c.category_name?.toLowerCase().includes(search.toLowerCase()),
@@ -61,6 +64,7 @@ export default function CategoryManagement() {
           page: 1,
         };
       }
+      */
 
       setCategories(response);
     } catch (err) {
