@@ -270,7 +270,7 @@ const ArtisanManagement = () => {
   }, []);
   */
 
-  console.log("hdwjhed", subCategories);
+  // console.log("hdwjhed", subCategories);
   const handleViewDetails = (partner) => {
     setSelectedPartner(partner);
     setShowDetailsModal(true);
@@ -378,7 +378,7 @@ const ArtisanManagement = () => {
   const handleAddEmployee = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    console.log("Starting Add Artisan process. Checking validations...");
+    // console.log("Starting Add Artisan process. Checking validations...");
 
     {/*const handleValidationError = (message) => {
       toast.error(message);
@@ -389,57 +389,57 @@ const ArtisanManagement = () => {
 
     // Validation
     if (!formData.firstName.trim()) {
-      console.log("Validation Error: First Name is missing");
+      // console.log("Validation Error: First Name is missing");
       handleValidationError("First Name is required");
       return;
     }
     if (!formData.lastName.trim()) {
-      console.log("Validation Error: Last Name is missing");
+      // console.log("Validation Error: Last Name is missing");
       handleValidationError("Last Name is required");
       return;
     }
     if (!formData.email || !formData.email.trim()) {
-      console.log("Validation Error: Email is missing");
+      // console.log("Validation Error: Email is missing");
       handleValidationError("Email is required");
       return;
     }
     if (!emailRegex.test(formData.email)) {
-      console.log("Validation Error: Invalid Email");
+      // console.log("Validation Error: Invalid Email");
       handleValidationError("Please enter a valid email address");
       return;
     }
     {/*if (!formData.location || !formData.location.trim()) {
-      console.log("Validation Error: Address is missing");
+      // console.log("Validation Error: Address is missing");
       handleValidationError("Address is required");
       return;
     }
     if (!formData.phoneNo || formData.phoneNo.length !== 10) {
-      console.log("Validation Error: Invalid Phone Number");
+      // console.log("Validation Error: Invalid Phone Number");
       handleValidationError("Phone Number must be 10 digits");
       return;
     }
     if (!formData.expertizeField || formData.expertizeField.length === 0) {
-      console.log("Validation Error: Expertise Field is missing");
+      // console.log("Validation Error: Expertise Field is missing");
       handleValidationError("Please select at least 1 area of expertise");
       return;
     }
     if (!formData.aadhaarNumber || !aadhaarRegex.test(formData.aadhaarNumber)) {
-      console.log("Validation Error: Invalid Aadhaar Number");
+      // console.log("Validation Error: Invalid Aadhaar Number");
       handleValidationError("Aadhaar Number must be 12 digits");
       return;
     }
     if (!formData.user_caste_category) {
-      console.log("Validation Error: Caste Category is missing");
+      // console.log("Validation Error: Caste Category is missing");
       handleValidationError("Caste Category is required");
       return;
     }
     if (!formData.subCaste) {
-      console.log("Validation Error: Sub Caste is missing");
+      // console.log("Validation Error: Sub Caste is missing");
       handleValidationError("Sub Caste is required");
       return;
     }
     if (formData.gstNumber && !gstRegex.test(formData.gstNumber)) {
-      console.log("Validation Error: Invalid GST Number");
+      // console.log("Validation Error: Invalid GST Number");
       handleValidationError("Invalid GST Number Format");
       return;
     }*/}
@@ -507,7 +507,7 @@ const ArtisanManagement = () => {
     setErrors({});
 
     try {
-      console.log("All validations passed. Preparing API payload...");
+      // console.log("All validations passed. Preparing API payload...");
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -528,14 +528,14 @@ const ArtisanManagement = () => {
       let response;
 
       if (isEditMode) {
-        console.log("Sending API request to updateArtisan...", payload);
+        // console.log("Sending API request to updateArtisan...", payload);
         response = await userControllers.updateArtisan(editId, payload);
       } else {
-        console.log("Sending API request to addArtisan...", payload);
+        // console.log("Sending API request to addArtisan...", payload);
         response = await authControllers.addArtisan(payload);
       }
 
-      console.log("API Response received:", response);
+      // console.log("API Response received:", response);
 
       if (response.status === 200 || response.status === 201) {
         toast.success(
@@ -561,7 +561,7 @@ const ArtisanManagement = () => {
     }
     {/*console.log("Sending API request to addArtisan...", payload);
       const response = await authControllers.addArtisan(payload);
-      console.log("API Response received:", response);
+      // console.log("API Response received:", response);
       if (response.status === 200 || response.status === 201) {
         toast.success(
           "Artisan registered successfully! Login credentials sent to email.",
@@ -1362,31 +1362,9 @@ const ArtisanManagement = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg
-                          className="animate-spin h-10 w-10 text-orange-600 mb-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        <p className="text-gray-500 font-medium">
-                          Loading artisans...
-                        </p>
+                    <td colSpan="5">
+                      <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                       </div>
                     </td>
                   </tr>
@@ -1475,10 +1453,10 @@ const ArtisanManagement = () => {
               </tbody>
             </table>
           </div>
-          {filteredPartners.length === 0 && (
+          {!loading && filteredPartners.length === 0 && (
             <div className="p-8 text-center border-t border-gray-200">
               <p className="text-gray-500">
-                No artisans found matching your search criteria.
+                {searchTerm ? "No artisans found matching your search criteria." : "No artisans found."}
               </p>
             </div>
           )}
@@ -1487,22 +1465,25 @@ const ArtisanManagement = () => {
             <div className="flex items-center gap-4 text-base font-medium justify-self-start">
               <span className="text-gray-700">Rows per page:</span>
 
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  const newLimit = Number(e.target.value);
-                  setRowsPerPage(newLimit);
-                  setCurrentPage(1);
+              <div className="relative">
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    const newLimit = Number(e.target.value);
+                    setRowsPerPage(newLimit);
+                    setCurrentPage(1);
 
-                  fetchArtisans(1, newLimit);
-                }}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
+                    fetchArtisans(1, newLimit);
+                  }}
+                  className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
 
             <div className="text-base text-gray-600 font-medium justify-self-center">

@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import DisableModal from "../components/DisableModal";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import { Eye, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
 import { userControllers } from "../api/user";
 import SecureImage from "../components/SecureImage";
 
@@ -21,6 +21,7 @@ function UserManagement() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,6 +31,7 @@ function UserManagement() {
   }, [searchTerm]);
 
   const fetchUsers = async (page = 1, limit = 10, search = "", status = "") => {
+    setLoading(true);
     try {
       /*
       let response = await userControllers.getUserListGroup("USER");
@@ -45,8 +47,10 @@ function UserManagement() {
         setTotalPages(response.data.data.totalPages || 1);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error("Failed to fetch users");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,21 +152,24 @@ function UserManagement() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search User by Name, Email or Mobile Number"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white min-w-[150px]"
-            >
-              <option value="ALL">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="BLOCKED">Blocked</option>
-            </select>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none p-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white min-w-[150px]"
+              >
+                <option value="ALL">All Status</option>
+                <option value="ACTIVE">Active</option>
+                <option value="BLOCKED">Blocked</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -185,7 +192,22 @@ function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {currentUsers.map((user) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="4">
+                    <div className="flex justify-center items-center py-20">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                    </div>
+                  </td>
+                </tr>
+              ) : currentUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                    {searchTerm ? "No users found matching your search criteria." : "No users found."}
+                  </td>
+                </tr>
+              ) : (
+              currentUsers.map((user) => (
                 <tr
                   key={user.id || user._id}
                   className="border-b hover:bg-gray-50 transition-colors"
@@ -227,15 +249,15 @@ function UserManagement() {
                       checked={user?.status === "ACTIVE"}
                       onChange={() => handleToggle(user)}
                       className={`${user?.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
+                        ? "bg-orange-600"
+                        : "bg-gray-300"
                         } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
                     >
                       <span className="sr-only">Toggle Status</span>
                       <span
                         className={`${user?.status === "ACTIVE"
-                            ? "translate-x-6"
-                            : "translate-x-1"
+                          ? "translate-x-6"
+                          : "translate-x-1"
                           } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
                       />
                     </Switch>
@@ -255,25 +277,29 @@ function UserManagement() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
           <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-b-xl">
             <div className="flex items-center gap-4 text-base font-medium justify-self-start">
               <span className="text-gray-700">Rows per page:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
 
             <div className="text-base text-gray-600 font-medium justify-self-center">
@@ -289,8 +315,8 @@ function UserManagement() {
                 }
                 disabled={currentPage === 1}
                 className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -302,8 +328,8 @@ function UserManagement() {
                 }
                 disabled={currentPage === totalPages}
                 className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                    ? "text-gray-300 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                   }`}
               >
                 <ChevronRight className="w-5 h-5" />

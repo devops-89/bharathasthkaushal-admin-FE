@@ -23,7 +23,7 @@ function UserProfile() {
       let res = await userControllers.getUserProfile(id);
       setUser(res.data.data);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       toast.error("Failed to load user profile");
     }
     setLoading(false);

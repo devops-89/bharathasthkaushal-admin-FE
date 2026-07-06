@@ -53,7 +53,7 @@ export const userControllers = {
         `/users/${id}/verify-status`,
         body
       );
-      console.log("hey guyssss", response);
+      // console.log("hey guyssss", response);
       return response;
     } catch (error) {
       throw error;

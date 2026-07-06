@@ -116,7 +116,7 @@ const EditProduct = () => {
             setSubCategories(subCats);
             subCatId = resolveId(rawSubCat, subCats);
           } catch (err) {
-            console.log("SubCategory Fetch Error", err);
+            // console.log("SubCategory Fetch Error", err);
           }
         }
 
@@ -210,7 +210,7 @@ const EditProduct = () => {
       );
       setSubCategories(onlySubs);
     } catch (err) {
-      console.log("SubCategory Fetch Error");
+      // console.log("SubCategory Fetch Error");
     }
   };
 
@@ -333,7 +333,7 @@ const EditProduct = () => {
       await productControllers.updateProduct(id, formData);
 
       toast.success("Product Updated Successfully!");
-      navigate(`/product-management/product-details/${id}`);
+      navigate(-1);
     } catch (err) {
       toast.error("Failed to update product!");
     } finally {
@@ -369,15 +369,20 @@ const EditProduct = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6 px-4 md:px-0">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center text-gray-600 hover:text-orange-600 transition-colors font-medium"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Product List
+          </button>
+        </div>
+
         {/* Header */}
         <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleGoBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Edit Product

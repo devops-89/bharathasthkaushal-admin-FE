@@ -875,10 +875,10 @@ const AddProduct = () => {
   const fetchCategories = async () => {
     try {
       const res = await categoryControllers.getCategory();
-      console.log("CATEGORY RESPONSE:", res.data.data.docs);
+      // console.log("CATEGORY RESPONSE:", res.data.data.docs);
       setCategories(res.data?.data?.docs || []);
     } catch (error) {
-      console.log("Category Fetch Error:", error);
+      // console.log("Category Fetch Error:", error);
     }
   };
 
@@ -888,7 +888,7 @@ const AddProduct = () => {
 
     try {
       const res = await categoryControllers.getSubCategory(selectedCategoryId);
-      console.log("SUBCATEGORY RESPONSE:", res.data.data.docs);
+      // console.log("SUBCATEGORY RESPONSE:", res.data.data.docs);
 
       const filteredSubs = (res.data?.data?.docs || []).filter(
         (item) => item.type === "Sub-Category",
@@ -896,7 +896,7 @@ const AddProduct = () => {
 
       setSubCategories(filteredSubs);
     } catch (error) {
-      console.log("SubCategory Fetch Error:", error);
+      // console.log("SubCategory Fetch Error:", error);
     }
   };
 
@@ -913,7 +913,7 @@ const AddProduct = () => {
       try {
         const res =
           await warehouseControllers.getWarehousesByCountry(selectedCountry);
-        console.log("Warehouse Response:", res.data);
+        // console.log("Warehouse Response:", res.data);
 
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
@@ -1076,10 +1076,11 @@ const AddProduct = () => {
       data.append("material", formData.material);
       data.append("description", formData.description);
       data.append("timeToMake", formData.timeToMake);
-      data.append("texture", formData.texture);
+      data.append("texture", formData.finish);
       data.append("finish", formData.finish);
       data.append("washCare", formData.washCare);
       data.append("artUsed", formData.artUsed);
+      data.append("patternUsed", formData.pattern);
       data.append("pattern", formData.pattern);
       data.append("dimension", dimension);
       data.append("netWeight", netWeight);
@@ -1093,9 +1094,9 @@ const AddProduct = () => {
         });
       }
 
-      console.log("Request Payload:");
+      // console.log("Request Payload:");
       for (let [key, value] of data.entries()) {
-        console.log(`${key}:`, value);
+        // console.log(`${key}:`, value);
       }
       const res = await productControllers.addProduct(data);
 
@@ -1104,7 +1105,7 @@ const AddProduct = () => {
           icon: <CheckCircle className="text-orange-600" />,
           progressStyle: { background: "#ea580c" },
         });
-        console.log("Product Response:", res.data);
+        // console.log("Product Response:", res.data);
         setTimeout(() => {
           navigate("/product-management", { state: { refresh: true } });
         }, 1500);
@@ -1130,15 +1131,20 @@ const AddProduct = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6 px-4 md:px-0">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center text-gray-600 hover:text-orange-600 transition-colors font-medium"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Product List
+          </button>
+        </div>
+        
         {/* Header */}
         <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleGoBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 text-gray-600" />
-            </button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
                 Add New Product

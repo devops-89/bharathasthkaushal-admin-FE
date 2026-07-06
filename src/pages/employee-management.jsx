@@ -72,6 +72,7 @@ const ArtisanManagement = () => {
   );
 
   const [partnersData, setPartnersData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalDocs, setTotalDocs] = useState(0);
@@ -85,6 +86,7 @@ const ArtisanManagement = () => {
   }, [searchTerm]);
 
   const fetchArtisans = async (page = 1, limit = 10, search = "") => {
+    setLoading(true);
     try {
       const response = await userControllers.getUserListGroup(
         "EMPLOYEE",
@@ -93,7 +95,7 @@ const ArtisanManagement = () => {
         null,
         search
       );
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
       if (!Array.isArray(artisans)) {
         toast.error("Expected docs to be an array, got:", artisans);
@@ -127,6 +129,8 @@ const ArtisanManagement = () => {
     } catch (error) {
       toast.error("Error fetching artisans:", error);
       toast.error("Error fetching employee data: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -841,7 +845,22 @@ const ArtisanManagement = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentPartners.map((partner) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentPartners.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      {searchTerm ? "No employees found matching your search criteria." : "No employees found."}
+                    </td>
+                  </tr>
+                ) : (
+                currentPartners.map((partner) => (
                   <tr
                     key={partner.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -908,7 +927,8 @@ const ArtisanManagement = () => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
             {/* Pagination Controls */}
@@ -916,19 +936,22 @@ const ArtisanManagement = () => {
               <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
                 <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                   <span className="text-gray-700">Rows per page:</span>
-                  <select
-                    value={rowsPerPage}
-                    onChange={(e) => {
-                      setRowsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 <div className="text-base text-gray-600 font-medium justify-self-center">
@@ -965,13 +988,7 @@ const ArtisanManagement = () => {
           </div>
         </div>
 
-        {totalDocs === 0 && (
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
-            <p className="text-gray-500">
-              No employees found matching your search criteria.
-            </p>
-          </div>
-        )}
+
         {showStatusModal && (
           <DisableModal
             onClose={() => setShowStatusModal(false)}

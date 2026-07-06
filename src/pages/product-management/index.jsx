@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Plus,
   Phone,
+  ChevronDown,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -74,7 +75,7 @@ export default function ProductManagement() {
 
       setProducts(response);
     } catch (err) {
-      console.log("Error fetching products:", err);
+      // console.log("Error fetching products:", err);
       toast.error("Failed to fetch products");
     } finally {
       setLoading(false);
@@ -166,9 +167,9 @@ export default function ProductManagement() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-              {currentProducts.map((product) => (
+              {currentProducts.map((product, index) => (
                 <div
-                  key={product.id}
+                  key={product.productId || product._id || index}
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
                 >
                   <div className="relative mb-4">
@@ -260,19 +261,22 @@ export default function ProductManagement() {
             <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
               <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                 <span className="text-gray-700">Rows per page:</span>
-                <select
-                  value={rowsPerPage}
-                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="text-base text-gray-600 font-medium justify-self-center">

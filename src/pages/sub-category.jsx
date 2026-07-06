@@ -9,6 +9,7 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { categoryControllers } from "../api/category";
@@ -20,6 +21,15 @@ const SubcategoryManagement = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [subcategories, setSubcategories] = useState([]);
   const [categoryName, setCategoryName] = useState("Loading...");
@@ -44,9 +54,9 @@ const SubcategoryManagement = () => {
 
   const getSubcategories = () => {
     categoryControllers
-      .getSubCategory(id, currentPage, rowsPerPage)
+      .getSubCategory(id, currentPage, rowsPerPage, debouncedSearch)
       .then((res) => {
-        console.log("Subcategories API response:", res.data.data);
+        // console.log("Subcategories API response:", res.data.data);
         const data = res.data.data;
         if (data && Array.isArray(data.docs)) {
           setSubcategories(
@@ -63,11 +73,11 @@ const SubcategoryManagement = () => {
           setTotalPages(data.totalPages || 1);
         } else {
           setSubcategories([]);
-          console.log("No subcategories data found in response");
+          // console.log("No subcategories data found in response");
         }
       })
       .catch((err) => {
-        console.log("Error fetching subcategories:", err);
+        // console.log("Error fetching subcategories:", err);
         const errorMessage =
           err.response?.data?.message || "Failed to fetch subcategories";
         toast.error(errorMessage);
@@ -86,20 +96,17 @@ const SubcategoryManagement = () => {
         }
       })
       .catch((err) => {
-        console.log("Error fetching category name:", err);
+        // console.log("Error fetching category name:", err);
         setCategoryName("Unknown Category");
       });
   };
   useEffect(() => {
     getSubcategories();
     getCategoryName();
-  }, [id, currentPage, rowsPerPage]);
+  }, [id, currentPage, rowsPerPage, debouncedSearch]);
 
-  // Note: Client-side search will only search within the current page.
-  // For full search, backend search API is needed.
-  const filteredSubcategories = currentSubcategories.filter((sub) =>
-    sub.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // backend search
+  const filteredSubcategories = currentSubcategories;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -174,10 +181,10 @@ const SubcategoryManagement = () => {
     formDataToSend.append("parent_id", formData.parent_id);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("type", formData.type);
-    console.log("FormData being sent:", Object.fromEntries(formDataToSend));
+    // console.log("FormData being sent:", Object.fromEntries(formDataToSend));
     try {
       const response = await categoryControllers.addCategory(formDataToSend);
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
       toast.success("Subcategory added successfully!");
       setFormData({
         category_name: "",
@@ -212,7 +219,7 @@ const SubcategoryManagement = () => {
   };
 
   return (
-    <div className="ml-64 pt-24 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       {/* Page Header */}
       <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
         <div className="flex justify-between items-start mb-6">
@@ -426,19 +433,22 @@ const SubcategoryManagement = () => {
         <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-lg shadow-sm mt-6">
           <div className="flex items-center gap-4 text-base font-medium justify-self-start">
             <span className="text-gray-700">Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
+            <div className="relative">
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
 
           <div className="text-base text-gray-600 font-medium justify-self-center">
@@ -449,11 +459,10 @@ const SubcategoryManagement = () => {
             <button
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                currentPage === 1
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                   ? "text-gray-300 cursor-not-allowed"
                   : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
+                }`}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -463,11 +472,10 @@ const SubcategoryManagement = () => {
                 currentPage < totalPages && setCurrentPage(currentPage + 1)
               }
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                currentPage === totalPages
+              className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                   ? "text-gray-300 cursor-not-allowed"
                   : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-              }`}
+                }`}
             >
               <ChevronRight className="w-5 h-5" />
             </button>

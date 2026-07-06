@@ -79,12 +79,12 @@ export default function LoginPage({ onLogin }) {
       .catch((err) => {
         let errMessage = err?.response?.data?.message || "Login failed";
         let errorMsgLower = errMessage.toLowerCase();
-      {/*  if (errorMsgLower.includes("phone")) {
+        {/*  if (errorMsgLower.includes("phone")) {
           errMessage = "Invalid email";
           errorMsgLower = "invalid email";
         }  */}
         let apiErrors = { email: "", password: "", general: "" };
-      {/*  if (errorMsgLower.includes("password") ||
+        {/*  if (errorMsgLower.includes("password") ||
           errorMsgLower.includes("incorrect") ||
           errorMsgLower.includes("wrong") ||
           errorMsgLower.includes("invalid credential")) {
@@ -104,8 +104,8 @@ export default function LoginPage({ onLogin }) {
         setIsLoading(false);
       });  */}
 
-      const secureKeywords = [
-          "password", "incorrect", "wrong", "invalid", "credential", 
+        const secureKeywords = [
+          "password", "incorrect", "wrong", "invalid", "credential",
           "user", "email", "account", "not found", "exist", "phone"
         ];
 
@@ -312,12 +312,12 @@ export default function LoginPage({ onLogin }) {
 
             {/* General Form Error (Secure Message from Backend) */}
             {errors.general && (
-              <p style={{ 
-                color: "#FF0000", 
-                fontSize: "12px", 
-                fontWeight: "400", 
-                textAlign: "center", 
-                margin: "0 0 16px 0" 
+              <p style={{
+                color: "#FF0000",
+                fontSize: "12px",
+                fontWeight: "400",
+                textAlign: "center",
+                margin: "0 0 16px 0"
               }}>
                 {errors.general}
               </p>
@@ -366,7 +366,7 @@ export default function LoginPage({ onLogin }) {
         </div>
       </div>
 
-      <style jsx>{`
+      {/*<style jsx>{`
         @keyframes pulse {
           0%,
           100% {
@@ -376,7 +376,7 @@ export default function LoginPage({ onLogin }) {
             opacity: 0.5;
           }
         }
-      `}</style>
+      `}</style>*/}
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function ForgotPassword() {
         setIsLoading(true);
         try {
             const res = await authControllers.forgotPassword({ email: trimmedEmail });
-            console.log("Forgot Password response:", res);
+            // console.log("Forgot Password response:", res);
             const responseData = res.data;
 
             toast.success("OTP sent to your email!");

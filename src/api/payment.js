@@ -24,6 +24,20 @@ export const paymentControllers = {
             throw error;
         }
     },
+    exportPayments: async (fromDate, toDate) => {
+        try {
+            const params = {};
+            if (fromDate) params.fromDate = fromDate;
+            if (toDate) params.toDate = toDate;
+            const response = await paymentSecuredApi.get('/payments/export', {
+                params,
+                responseType: 'blob'
+            });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
     getPaymentDetails: async (id) => {
         try {
             const response = await paymentSecuredApi.get(`/payments/${id}`);

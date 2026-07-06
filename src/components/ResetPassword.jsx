@@ -57,7 +57,7 @@ export default function ResetPassword() {
                 otp: otp,
                 password: password
             };
-            console.log("Resetting password with:", payload);
+            // console.log("Resetting password with:", payload);
 
             await authControllers.resetPassword(payload);
 

@@ -56,7 +56,7 @@ const NeedAssistanceDashboard = () => {
         page,
         statusFilter === "ALL" ? "" : statusFilter,
       );
-      console.log("API Response:", JSON.stringify(response.data, null, 2));
+      // console.log("API Response:", JSON.stringify(response.data, null, 2));
 
       const responseData = response.data?.data || response.data || {};
       let tickets = responseData.docs || [];
@@ -104,7 +104,7 @@ const NeedAssistanceDashboard = () => {
           rawTicket: ticket,
         };
       });
-      console.log("Mapped Data:", mappedData);
+      // console.log("Mapped Data:", mappedData);
       setData(mappedData);
     } catch (error) {
       toast.error("Error fetching need assistance:", error);

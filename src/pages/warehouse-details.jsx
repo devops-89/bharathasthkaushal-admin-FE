@@ -13,7 +13,8 @@ import {
     Search,
     ChevronLeft,
     ChevronRight,
-    Navigation
+    Navigation,
+    ChevronDown
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,14 +25,23 @@ export default function WarehouseDetails() {
     const [warehouse, setWarehouse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setCurrentPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     useEffect(() => {
         const fetchWarehouseDetails = async () => {
             setLoading(true);
             try {
-                const res = await warehouseControllers.getWarehouseDetails(id);
+                const res = await warehouseControllers.getWarehouseDetails(id, currentPage, rowsPerPage, debouncedSearch);
                 if (res.data?.data) {
                     setWarehouse(res.data.data);
                 }
@@ -46,7 +56,7 @@ export default function WarehouseDetails() {
         if (id) {
             fetchWarehouseDetails();
         }
-    }, [id]);
+    }, [id, currentPage, rowsPerPage, debouncedSearch]);
 
     if (loading) {
         return (
@@ -71,27 +81,27 @@ export default function WarehouseDetails() {
     }
 
     // Filter and Pagination Logic
-    const products = Array.isArray(warehouse?.products) ? warehouse.products : [];
-    const filteredProducts = products.filter(
-        (product) => product?.product_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const totalPages = Math.ceil(filteredProducts.length / rowsPerPage) || 1;
-    const indexOfLastItem = currentPage * rowsPerPage;
-    const indexOfFirstItem = indexOfLastItem - rowsPerPage;
-    const currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    const productsData = warehouse?.products || {};
+    const currentProducts = Array.isArray(productsData) ? productsData : (productsData.docs || []);
+    const totalPages = productsData.totalPages || 1;
+    const totalProducts = productsData.totalDocs || currentProducts.length;
+    const indexOfFirstItem = (currentPage - 1) * rowsPerPage;
+    const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalProducts);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+                <div className="mb-6 px-4 md:px-0">
                     <button
                         onClick={() => navigate("/warehouse-management")}
-                        className="flex items-center text-gray-600 hover:text-orange-600 transition-colors mb-4"
+                        className="flex items-center text-gray-600 hover:text-orange-600 transition-colors font-medium"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
-                        Back to List
+                        Back to Warehouse Management
                     </button>
+                </div>
+                {/* Header */}
+                <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
 
                     <div className="flex justify-between items-start">
                         <div className="w-full">
@@ -180,7 +190,7 @@ export default function WarehouseDetails() {
 
                             <div className="flex flex-col sm:flex-row items-center gap-4 flex-1 justify-end w-full sm:w-auto">
                                 <span className="px-4 py-1.5 rounded-full text-sm font-bold bg-orange-50 text-orange-600 border border-orange-200 shadow-sm whitespace-nowrap">
-                                    Total Products: {products.length}
+                                    Total Products: {totalProducts}
                                 </span>
                                 <div className="w-full sm:max-w-md relative">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -237,26 +247,29 @@ export default function WarehouseDetails() {
                         )}
 
                         {/* Pagination Controls */}
-                        {filteredProducts.length > 0 && (
+                        {totalProducts > 0 && (
                             <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
                                 <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                                     <span className="text-gray-700">Rows per page:</span>
-                                    <select
-                                        value={rowsPerPage}
-                                        onChange={(e) => {
-                                            setRowsPerPage(Number(e.target.value));
-                                            setCurrentPage(1);
-                                        }}
-                                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                    </select>
+                                    <div className="relative">
+                                        <select
+                                            value={rowsPerPage}
+                                            onChange={(e) => {
+                                                setRowsPerPage(Number(e.target.value));
+                                                setCurrentPage(1);
+                                            }}
+                                            className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                                        >
+                                            <option value={10}>10</option>
+                                            <option value={20}>20</option>
+                                            <option value={50}>50</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                    </div>
                                 </div>
 
                                 <div className="text-base text-gray-600 font-medium justify-self-center">
-                                    {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredProducts.length)} of {filteredProducts.length}
+                                    {indexOfFirstItem + 1}–{indexOfLastItem} of {totalProducts}
                                 </div>
 
                                 <div className="flex items-center gap-4 justify-self-end">

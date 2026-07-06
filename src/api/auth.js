@@ -34,7 +34,7 @@ export const authControllers = {
   },
 
   addArtisan: async (data) => {
-    console.log(data)
+    // console.log(data)
     try {
       let result = await securedApi.post("/admin_register_artisan", data);
       return result;

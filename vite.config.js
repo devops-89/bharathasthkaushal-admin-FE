@@ -24,6 +24,9 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
 });
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";

@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Upload,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { categoryControllers } from "../api/category";
@@ -68,7 +69,7 @@ export default function CategoryManagement() {
 
       setCategories(response);
     } catch (err) {
-      console.log("Error fetching categories:", err);
+      // console.log("Error fetching categories:", err);
       const errorMessage =
         err.response?.data?.message || "Failed to fetch categories";
       toast.error(errorMessage);
@@ -292,19 +293,22 @@ export default function CategoryManagement() {
             <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
               <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                 <span className="text-gray-700">Rows per page:</span>
-                <select
-                  value={rowsPerPage}
-                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="text-base text-gray-600 font-medium justify-self-center">

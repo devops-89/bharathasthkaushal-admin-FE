@@ -154,8 +154,8 @@ const ProductDetails = () => {
     fetchSubCategories();
   }, []);
 
-  console.log("buildstep", buildSteps);
-  console.log("stepid", selectedStepId);
+  // console.log("buildstep", buildSteps);
+  // console.log("stepid", selectedStepId);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   // Approval Modal State
@@ -207,14 +207,14 @@ const ProductDetails = () => {
     };
   }, []);
   useEffect(() => {
-    console.log("Route param id:", id);
+    // console.log("Route param id:", id);
     if (id) {
       setLoading(true);
       Promise.all([
         productControllers
           .getProductById(id)
           .then((res) => {
-            console.log("Product API response:", res.data);
+            // console.log("Product API response:", res.data);
             const productData = res.data?.data || res.data;
             setProduct(productData || null);
             return productData;
@@ -237,7 +237,7 @@ const ProductDetails = () => {
   const fetchBuildSteps = async () => {
     try {
       const res = await productControllers.getBuildSteps(id);
-      console.log("Build steps API response:", res.data);
+      // console.log("Build steps API response:", res.data);
       setBuildSteps(res.data?.data || res.data || []);
     } catch (err) {
       toast.error(
@@ -268,7 +268,7 @@ const ProductDetails = () => {
     const { name, value, type, checked } = e.target;
 
     if (name === "artisanId") {
-      console.log("Selected artisanId:", value);
+      // console.log("Selected artisanId:", value);
       setArtisanID(value);
     }
 
@@ -309,7 +309,7 @@ const ProductDetails = () => {
         artisanId: artisanID,
         dueDate: assignForm.dueDate,
       };
-      console.log("assign product", payload);
+      // console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
       toast.success("Step Assigned Successfully!", {
         icon: <CheckCircle className="text-orange-600" />,
@@ -467,7 +467,7 @@ const ProductDetails = () => {
       });
 
       const res = await productControllers.createBuildStep(formData);
-      console.log("Create build step API response:", res.data);
+      // console.log("Create build step API response:", res.data);
       const newStep = res.data?.data || res.data;
       toast.success("Build step created successfully!", {
         icon: <CheckCircle className="text-orange-600" />,
@@ -494,13 +494,22 @@ const ProductDetails = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    if (!status) return "bg-gray-100 text-gray-800";
+    switch (status.toLowerCase()) {
       case "completed":
+      case "approved":
+      case "admin_approved":
         return "bg-green-100 text-green-800";
       case "in_progress":
         return "bg-blue-100 text-blue-800";
       case "pending":
         return "bg-yellow-100 text-yellow-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "assigned":
+        return "bg-purple-100 text-purple-800";
+      case "unassigned":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -697,9 +706,9 @@ const ProductDetails = () => {
                             key={step.id}
                             className="border border-gray-200 rounded-xl overflow-hidden"
                           >
-                            <button
+                            <div
                               onClick={() => toggleStepExpanded(step.id)}
-                              className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between transition-colors"
+                              className="w-full px-4 py-3 bg-white hover:bg-gray-50 flex items-center justify-between transition-colors cursor-pointer text-left"
                             >
                               <div className="flex items-center gap-3">
                                 <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
@@ -713,31 +722,31 @@ const ProductDetails = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       const isEditable =
-                                        step.status !== "APPROVED" &&
-                                        step.status !== "ADMIN_APPROVED";
+                                        step.adminReviewStatus !== "APPROVED" &&
+                                        step.adminReviewStatus !== "ADMIN_APPROVED";
                                       if (isEditable) {
                                         setEditStepId(step.id);
                                       }
                                     }}
                                     disabled={
-                                      step.status === "APPROVED" ||
-                                      step.status === "ADMIN_APPROVED"
+                                      step.adminReviewStatus === "APPROVED" ||
+                                      step.adminReviewStatus === "ADMIN_APPROVED"
                                     }
-                                    className={`p-2 rounded-full transition-colors ${step.status === "APPROVED" ||
-                                      step.status === "ADMIN_APPROVED"
+                                    className={`p-2 rounded-full transition-colors ${step.adminReviewStatus === "APPROVED" ||
+                                      step.adminReviewStatus === "ADMIN_APPROVED"
                                       ? "bg-gray-100 cursor-not-allowed opacity-50"
                                       : "hover:bg-gray-100 cursor-pointer"
                                       }`}
                                     title={
-                                      step.status === "APPROVED" ||
-                                        step.status === "ADMIN_APPROVED"
+                                      step.adminReviewStatus === "APPROVED" ||
+                                        step.adminReviewStatus === "ADMIN_APPROVED"
                                         ? "Cannot edit lock step"
                                         : "Edit Step"
                                     }
                                   >
                                     <Pencil
-                                      className={`w-5 h-5 ${step.status === "APPROVED" ||
-                                        step.status === "ADMIN_APPROVED"
+                                      className={`w-5 h-5 ${step.adminReviewStatus === "APPROVED" ||
+                                        step.adminReviewStatus === "ADMIN_APPROVED"
                                         ? "text-gray-400"
                                         : "text-blue-600"
                                         }`}
@@ -747,10 +756,10 @@ const ProductDetails = () => {
 
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                    step.status,
+                                    step.buildStatus,
                                   )}`}
                                 >
-                                  {step.status?.replace("_", " ").toUpperCase()}
+                                  {step.buildStatus?.replace("_", " ").toUpperCase()}
                                 </span>
                               </div>
                               {expandedStep === step.id ? (
@@ -758,7 +767,7 @@ const ProductDetails = () => {
                               ) : (
                                 <ChevronDown className="w-5 h-5 text-gray-500" />
                               )}
-                            </button>
+                            </div>
 
                             {expandedStep === step.id && (
                               <div className="px-4 pb-4 bg-gray-50">
@@ -768,13 +777,23 @@ const ProductDetails = () => {
                                     <h4 className="font-semibold text-gray-700 mb-2">
                                       Assigned Artisan
                                     </h4>
-                                    <p className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm">
-                                      {step.artisan.firstName ||
-                                        step.artisan.lastName
-                                        ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
-                                        }`
-                                        : "No Artisan Assigned"}
-                                    </p>
+                                    <div className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm flex items-center gap-3">
+                                      <span>
+                                        {step.artisan.firstName ||
+                                          step.artisan.lastName
+                                          ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
+                                          }`
+                                          : "No Artisan Assigned"}
+                                      </span>
+                                      {step.artisan.phoneNo && (
+                                        <>
+                                          <span>|</span>
+                                          <span>
+                                            {step.artisan.countryCode || "+91"} {step.artisan.phoneNo}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
                                   </div>
                                 )}
 
@@ -798,10 +817,10 @@ const ProductDetails = () => {
 
                                     <span
                                       className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(
-                                        step.status,
+                                        step.buildStatus,
                                       )}`}
                                     >
-                                      {step.status
+                                      {step.buildStatus
                                         ?.replace("_", " ")
                                         .toUpperCase()}
                                     </span>
@@ -985,7 +1004,7 @@ const ProductDetails = () => {
                                   err.response?.data?.message ||
                                   "Failed to Reject Product",
                                 );
-                                console.log(err);
+                                // console.log(err);
                               }
                             }}
                             className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium disabled:opacity-50 transition-colors shadow-lg shadow-red-200"
@@ -1164,7 +1183,7 @@ const ProductDetails = () => {
                                   err.response?.data?.message ||
                                   "Failed to Approve Product",
                                 );
-                                console.log(err);
+                                // console.log(err);
                               }
                             }}
                             className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-green-200"
@@ -1332,56 +1351,51 @@ const ProductDetails = () => {
                     )}
 
                     {/* Category */}
-                    {product?.category && (
-                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                          <Layers className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Category
-                          </p>
-                          <p className="text-gray-900 font-semibold capitalize">
-                            {product.category.category_name}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Layers className="w-5 h-5 text-purple-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Category
+                        </p>
+                        <p className="text-gray-900 font-semibold capitalize">
+                          {product?.categoryId?.category_name || product?.categoryId?.name || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
                     {/* Subcategory */}
-                    {product?.subCategory && (
-                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-indigo-100 rounded-lg">
-                          <Tag className="w-5 h-5 text-indigo-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Subcategory
-                          </p>
-                          <p className="text-gray-900 font-semibold capitalize">
-                            {product.subCategory.category_name}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-indigo-100 rounded-lg">
+                        <Tag className="w-5 h-5 text-indigo-600" />
                       </div>
-                    )}
-
-                    {product?.material && (
-                      <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-amber-100 rounded-lg">
-                          <Package className="w-5 h-5 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Material
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.material}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Subcategory
+                        </p>
+                        <p className="text-gray-900 font-semibold capitalize">
+                          {product?.subCategoryId?.category_name || product?.subCategoryId?.name || "Not Specified"}
+                        </p>
                       </div>
-                    )}
+                    </div>
 
-                    {product?.color && (
+                    {/* Material */}
+                    <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <Package className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Material
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.material || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* product?.color && (
                       <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl hover:shadow-md transition-shadow">
                         <div className="p-2 bg-purple-100 rounded-lg">
                           <Palette className="w-5 h-5 text-purple-600" />
@@ -1395,121 +1409,130 @@ const ProductDetails = () => {
                           </p>
                         </div>
                       </div>
-                    )}
+                    ) */}
 
-                    {product?.size?.length > 0 && (
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <Ruler className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Size
-                          </p>
-                          <p className="text-gray-900 font-semibold">
+                    {/*{product?.size?.length > 0 && (
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Ruler className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Size
+                        </p>
+                        <p className="text-gray-900 font-semibold">
                             {Array.isArray(product.size)
                               ? product.size.join(", ")
                               : product.size}
-                          </p>
-                        </div>
+                        </p>
                       </div>
-                    )}
+                    </div>
+                    )}*/}
 
-                    {product?.netWeight && (
-                      <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-rose-100 rounded-lg">
-                          <Package className="w-5 h-5 text-rose-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Net Weight
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.netWeight}
-                          </p>
-                        </div>
+                    {/* Net Weight */}
+                    <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-rose-100 rounded-lg">
+                        <Package className="w-5 h-5 text-rose-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Net Weight
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.netWeight || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
-                    {product?.dimension && (
-                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-indigo-100 rounded-lg">
-                          <Ruler className="w-5 h-5 text-indigo-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Dimensions
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.dimension}
-                          </p>
-                        </div>
+                    {/* Dimensions */}
+                    <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-indigo-100 rounded-lg">
+                        <Ruler className="w-5 h-5 text-indigo-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Dimensions
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.dimension || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
-                    {product?.timeToMake && (
-                      <div className="flex items-center gap-3 p-3 bg-cyan-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-cyan-100 rounded-lg">
-                          <Clock className="w-5 h-5 text-cyan-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Time to Make
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.timeToMake} Days
-                          </p>
-                        </div>
+                    {/* Time to Make */}
+                    <div className="flex items-center gap-3 p-3 bg-cyan-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-cyan-100 rounded-lg">
+                        <Clock className="w-5 h-5 text-cyan-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Time to Make
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.timeToMake ? `${product.timeToMake} Days` : "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
-                    {product?.texture && (
-                      <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-teal-100 rounded-lg">
-                          <Layers className="w-5 h-5 text-teal-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Texture/Finish
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.texture}
-                          </p>
-                        </div>
+                    {/* Texture/Finish */}
+                    <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-teal-100 rounded-lg">
+                        <Layers className="w-5 h-5 text-teal-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Texture/Finish
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.texture || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
-                    {product?.artUsed && (
-                      <div className="flex items-center gap-3 p-3 bg-fuchsia-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-fuchsia-100 rounded-lg">
-                          <Brush className="w-5 h-5 text-fuchsia-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Art Used
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.artUsed}
-                          </p>
-                        </div>
+                    {/* Pattern Used */}
+                    <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-teal-100 rounded-lg">
+                        <Pencil className="w-5 h-5 text-teal-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Pattern Used
+                        </p>
+                        <p className="text-gray-900 font-semibold capitalize">
+                          {product?.patternUsed || product?.pattern || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
 
-                    {product?.washCare && (
-                      <div className="flex items-center gap-3 p-3 bg-sky-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="p-2 bg-sky-100 rounded-lg">
-                          <Droplets className="w-5 h-5 text-sky-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                            Wash Care
-                          </p>
-                          <p className="text-gray-900 font-semibold">
-                            {product.washCare}
-                          </p>
-                        </div>
+                    {/* Art Used */}
+                    <div className="flex items-center gap-3 p-3 bg-fuchsia-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-fuchsia-100 rounded-lg">
+                        <Brush className="w-5 h-5 text-fuchsia-600" />
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Art Used
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.artUsed || product?.art_used || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Wash Care */}
+                    <div className="flex items-center gap-3 p-3 bg-sky-50 rounded-xl hover:shadow-md transition-shadow">
+                      <div className="p-2 bg-sky-100 rounded-lg">
+                        <Droplets className="w-5 h-5 text-sky-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                          Wash Care
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {product?.washCare || "Not Specified"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {/* Description */}

@@ -9,6 +9,7 @@ import {
   MapPin,
   Globe,
   Eye,
+  ChevronDown,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { warehouseControllers } from "../api/warehouse";
@@ -58,7 +59,7 @@ export default function WarehouseManagement() {
       const res = await warehouseControllers.getWarehouses(page, limit, search);
       setWarehouses(res.data.data);
     } catch (err) {
-      console.log("Error fetching warehouses:", err);
+      // console.log("Error fetching warehouses:", err);
       // toast.error("Failed to fetch warehouses");
     } finally {
       setLoading(false);
@@ -263,46 +264,51 @@ export default function WarehouseManagement() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-            </div>
-          ) : !currentWarehouses.length ? (
-            <div className="text-center py-16">
-              <Warehouse className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No warehouses found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="py-4 px-4 font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="py-4 px-4 font-semibold text-gray-700">
-                      Country
-                    </th>
-                    <th className="py-4 px-4 font-semibold text-gray-700">
-                      Address
-                    </th>
-                    <th className="py-4 px-4 font-semibold text-gray-700">
-                      Coordinates
-                    </th>
-                    <th className="py-4 px-4 font-semibold text-gray-700 text-right">
-                      View Details
-                    </th>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Country
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Address
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Coordinates
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    View Details
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {currentWarehouses.map((warehouse) => (
+                ) : currentWarehouses.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      {searchTerm ? "No warehouses found matching your search criteria." : "No warehouses found."}
+                    </td>
+                  </tr>
+                ) : (
+                  currentWarehouses.map((warehouse, index) => (
                     <tr
-                      key={warehouse._id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      key={warehouse.id || warehouse._id || index}
+                      className="hover:bg-gray-50 transition-colors"
                     >
                       <td
-                        className="py-4 px-4 font-medium text-gray-800 capitalize"
+                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize"
                         title={
                           warehouse.name || warehouse.warehouse_name || "N/A"
                         }
@@ -312,7 +318,7 @@ export default function WarehouseManagement() {
                           ? `${(warehouse.name || warehouse.warehouse_name || "N/A").substring(0, 25)}...`
                           : warehouse.name || warehouse.warehouse_name || "N/A"}
                       </td>
-                      <td className="py-4 px-4 text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex items-center gap-2">
                           <Globe className="w-4 h-4 text-gray-400" />
                           {warehouse.country ||
@@ -320,7 +326,7 @@ export default function WarehouseManagement() {
                             "N/A"}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div
                           className="flex items-center gap-2"
                           title={(() => {
@@ -367,7 +373,7 @@ export default function WarehouseManagement() {
                           })()}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-gray-600 text-sm">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {warehouse.latitude && warehouse.longitude ? (
                           <span>
                             {warehouse.latitude}, {warehouse.longitude}
@@ -376,7 +382,7 @@ export default function WarehouseManagement() {
                           <span className="text-gray-400">N/A</span>
                         )}
                       </td>
-                      <td className="py-4 px-4 text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
                         <button
                           onClick={() => handleViewDetails(warehouse.id)}
                           className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -385,29 +391,32 @@ export default function WarehouseManagement() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
                 </tbody>
               </table>
             </div>
-          )}
 
           {totalDocs > 0 && (
             <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
               <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                 <span className="text-gray-700">Rows per page:</span>
-                <select
-                  value={rowsPerPage}
-                  onChange={(e) => {
-                    setRowsPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                >
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
 
               <div className="text-base text-gray-600 font-medium justify-self-center">

@@ -44,7 +44,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
         stepId,
         "APPROVED",
       );
-      console.log("Approve API Response:", res.data);
+      // console.log("Approve API Response:", res.data);
       setStepDetails((prev) => ({
         ...prev,
         status: "APPROVED",
@@ -52,7 +52,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
       }));
       toast.success("Approved Successfully!");
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       toast.error("Approval failed");
     } finally {
       setProcessing(false);
@@ -69,7 +69,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
         "REJECTED",
         remarks,
       );
-      console.log("Reject API Response:", res.data);
+      // console.log("Reject API Response:", res.data);
 
       setStepDetails((prev) => ({
         ...prev,
@@ -82,7 +82,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
       toast.success("Rejected Successfully!");
       setShowRejectPopup(false);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       toast.error("Rejection failed");
     } finally {
       setProcessing(false);
