@@ -1,7 +1,7 @@
 import { getuserSecuredApi } from "./config";
 export const needAssistanceControllers = {
-  getAllNeedAssistance: (pageSize = 10, page = 1, status = "") => {
-    const params = { pageSize, page, status };
+  getAllNeedAssistance: (pageSize = 10, page = 1, status = "", search = "", issueType = "") => {
+    const params = { pageSize, page, status, search, issueType };
 
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(

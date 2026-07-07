@@ -60,7 +60,8 @@ export default function WarehouseManagement() {
       setWarehouses(res.data.data);
     } catch (err) {
       // console.log("Error fetching warehouses:", err);
-      // toast.error("Failed to fetch warehouses");
+      const errorMessage = err.response?.data?.message || "Failed to fetch warehouses";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -281,7 +282,7 @@ export default function WarehouseManagement() {
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Coordinates
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     View Details
                   </th>
                 </tr>
@@ -382,20 +383,22 @@ export default function WarehouseManagement() {
                           <span className="text-gray-400">N/A</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => handleViewDetails(warehouse.id)}
-                          className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                        >
-                          <Eye size={20} />
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex justify-center items-center">
+                          <button
+                            onClick={() => handleViewDetails(warehouse.id)}
+                            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                          >
+                            <Eye size={20} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
                 )}
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
+          </div>
 
           {totalDocs > 0 && (
             <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">

@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { productControllers } from "../api/product";
 import { userControllers } from "../api/user";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { NavLink } from "react-router-dom";
 
@@ -60,8 +60,10 @@ const Dashboard = () => {
     try {
       const res = await productControllers.getDashboardProductCount();
       setProductCount(res.data.data || 0);
+      return null;
     } catch (err) {
       console.error("Failed to fetch product count", err);
+      return err;
     }
   };
 
@@ -73,8 +75,10 @@ const Dashboard = () => {
       ]);
       setTotalPaymentCount(totalRes.data.data || 0);
       setPendingPaymentCount(pendingRes.data.data || 0);
+      return null;
     } catch (err) {
       console.error("Failed to fetch payment count", err);
+      return err;
     }
   };
 
@@ -93,8 +97,10 @@ const Dashboard = () => {
       setLiveAuctionCount(live);
       setScheduledAuctionCount(scheduled);
       setAuctionCount(ended + live + scheduled);
+      return null;
     } catch (err) {
       console.error("Failed to fetch auction count", err);
+      return err;
     }
   };
 
@@ -115,8 +121,10 @@ const Dashboard = () => {
       setTotalBuildSteps(totalRes.data.data || 0);
       setAssignedBuildSteps(assignedRes.data.data || 0);
       setEndedBuildSteps(endedRes.data.data || 0);
+      return null;
     } catch (err) {
       console.error("Failed to fetch build step counts", err);
+      return err;
     }
   };
 
@@ -142,8 +150,10 @@ const Dashboard = () => {
       setVerifiedArtisanCount(vCount);
       setUnverifiedArtisanCount(uvCount);
       setTotalUserCount(aCount + eCount + uCount);
+      return null;
     } catch (err) {
       console.error("Failed to fetch user counts", err);
+      return err;
     }
   };
 
@@ -259,6 +269,7 @@ const Dashboard = () => {
         { month: "Jun", services: 23 },
         { month: "Jul", services: 34 },
       ]);
+      return err;
     }
   };
 
@@ -284,13 +295,14 @@ const Dashboard = () => {
         { name: "ENDED", value: 30, color: "#f97316" },
         { name: "UPCOMING", value: 25, color: "#6b7280" },
       ]);
+      return err;
     }
   };
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([
+      const results = await Promise.all([
         fetchMonthlyReport(),
         fetchStatusSummary(),
         fetchUserCounts(),
@@ -299,6 +311,12 @@ const Dashboard = () => {
         fetchPaymentCount(),
         fetchBuildStepCounts()
       ]);
+
+      const firstError = results.find(result => result instanceof Error || (result && result.response));
+      if (firstError) {
+        toast.error(firstError.response?.data?.message || "Failed to fetch dashboard details");
+      }
+
       setLoading(false);
     };
     loadData();
@@ -484,6 +502,7 @@ const Dashboard = () => {
 
           </div>
         </div>
+        <ToastContainer />
       </div>
     </div>
   );

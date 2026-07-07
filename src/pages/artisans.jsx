@@ -242,6 +242,9 @@ const ArtisanManagement = () => {
       setTotalPages(responseData.totalPages || 1);
     } catch (error) {
       console.error("Failed to load artisans", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to load artisans";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -1354,7 +1357,7 @@ const ArtisanManagement = () => {
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     View Details
                   </th>
                 </tr>
@@ -1439,13 +1442,15 @@ const ArtisanManagement = () => {
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap relative">
-                        <button
-                          onClick={() => handleViewDetails(partner)}
-                          className="flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                          title="View Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
+                        <div className="flex justify-center items-center">
+                          <button
+                            onClick={() => handleViewDetails(partner)}
+                            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={20} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

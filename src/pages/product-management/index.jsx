@@ -17,7 +17,8 @@ import {
 import { NavLink } from "react-router-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import SecureImage from "../../components/SecureImage";
 
@@ -76,7 +77,9 @@ export default function ProductManagement() {
       setProducts(response);
     } catch (err) {
       // console.log("Error fetching products:", err);
-      toast.error("Failed to fetch products");
+      const errorMessage =
+        err.response?.data?.message || "Failed to fetch products";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -313,6 +316,7 @@ export default function ProductManagement() {
             </div>
           )}
         </div>
+        <ToastContainer />
       </div>
     </div>
   );

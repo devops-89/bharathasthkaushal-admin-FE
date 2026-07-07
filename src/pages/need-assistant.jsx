@@ -13,6 +13,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { needAssistanceControllers } from "../api/needAssistance";
 const NEED_ASSISTANCE_STATUS = {
@@ -48,13 +49,28 @@ const NeedAssistanceDashboard = () => {
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
 
-  const fetchNeedAssistance = async (page = 1, limit = 10) => {
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, statusFilter, issueTypeFilter]);
+
+  const fetchNeedAssistance = async (page = 1, limit = 10, status = "", search = "", issueType = "") => {
     setLoading(true);
     try {
       const response = await needAssistanceControllers.getAllNeedAssistance(
         limit,
         page,
-        statusFilter === "ALL" ? "" : statusFilter,
+        status === "ALL" ? "" : status,
+        search,
+        issueType === "ALL" ? "" : issueType
       );
       // console.log("API Response:", JSON.stringify(response.data, null, 2));
 
@@ -107,8 +123,8 @@ const NeedAssistanceDashboard = () => {
       // console.log("Mapped Data:", mappedData);
       setData(mappedData);
     } catch (error) {
-      toast.error("Error fetching need assistance:", error);
-      toast.error("Error fetching need assistance data: " + error.message);
+      const errorMessage = error.response?.data?.message || "Failed to fetch need assistance data. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -183,16 +199,16 @@ const NeedAssistanceDashboard = () => {
       toast.success("Status updated successfully!");
       setShowModal(false);
     } catch (error) {
-      toast.error("Update error:", error);
-      toast.error("Error updating status: " + error.message);
+      const errorMessage = error.response?.data?.message || "Error updating status: " + error.message;
+      toast.error(errorMessage);
     } finally {
       setUpdating(false);
     }
   };
 
   useEffect(() => {
-    fetchNeedAssistance(currentPage, rowsPerPage);
-  }, [currentPage, rowsPerPage, statusFilter]);
+    fetchNeedAssistance(currentPage, rowsPerPage, statusFilter, debouncedSearch, issueTypeFilter);
+  }, [currentPage, rowsPerPage, statusFilter, debouncedSearch, issueTypeFilter]);
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -234,18 +250,7 @@ const NeedAssistanceDashboard = () => {
     return `${day}/${month}/${year}`;
   };
 
-  const filteredData = data.filter((item) => {
-    const matchesSearch =
-      item.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.issueDescription?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "ALL" || item.status === statusFilter;
-    const matchesIssueType =
-      issueTypeFilter === "ALL" || item.issueType === issueTypeFilter;
-    return matchesSearch && matchesStatus && matchesIssueType;
-  });
-  const currentTickets = filteredData;
+  const currentTickets = data;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
@@ -297,7 +302,7 @@ const NeedAssistanceDashboard = () => {
             </div>
             <div className="relative min-w-[150px]">
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -308,10 +313,11 @@ const NeedAssistanceDashboard = () => {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
             <div className="relative min-w-[150px]">
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
+                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 value={issueTypeFilter}
                 onChange={(e) => setIssueTypeFilter(e.target.value)}
               >
@@ -322,6 +328,7 @@ const NeedAssistanceDashboard = () => {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -351,7 +358,7 @@ const NeedAssistanceDashboard = () => {
                       <th className="px-6 py-3 text-left text-xs font-semibold uppercase">
                         Created
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold uppercase">
+                      <th className="px-6 py-3 text-center text-xs font-semibold uppercase">
                         Actions
                       </th>
                     </tr>
@@ -379,12 +386,15 @@ const NeedAssistanceDashboard = () => {
                           {formatDate(item.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => handleViewDetails(item)}
-                            className="text-orange-600 hover:text-orange-800 transition-colors p-2 rounded-lg hover:bg-orange-50"
-                          >
-                            <Eye size={20} />
-                          </button>
+                          <div className="flex justify-center items-center">
+                            <button
+                              onClick={() => handleViewDetails(item)}
+                              className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <Eye size={20} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -395,20 +405,23 @@ const NeedAssistanceDashboard = () => {
                   <div className="grid grid-cols-3 items-center p-6 border-t bg-white rounded-b-lg">
                     <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                       <span className="text-gray-700">Rows per page:</span>
-                      <select
-                        value={rowsPerPage}
-                        onChange={(e) => {
-                          const newLimit = Number(e.target.value);
-                          setRowsPerPage(newLimit);
-                          setCurrentPage(1);
-                        }}
-                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 bg-white"
-                      >
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={rowsPerPage}
+                          onChange={(e) => {
+                            const newLimit = Number(e.target.value);
+                            setRowsPerPage(newLimit);
+                            setCurrentPage(1);
+                          }}
+                          className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
+                        >
+                          <option value={10}>10</option>
+                          <option value={25}>25</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
 
                     <div className="text-base text-gray-600 font-medium justify-self-center">
@@ -445,7 +458,7 @@ const NeedAssistanceDashboard = () => {
                   </div>
                 )}
               </div>
-              {filteredData.length === 0 && (
+              {currentTickets.length === 0 && (
                 <div className="text-center py-12 text-gray-500">
                   <p>No assistance requests found</p>
                 </div>
@@ -539,17 +552,20 @@ const NeedAssistanceDashboard = () => {
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Update Status
                   </label>
-                  <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value)}
-                  >
-                    {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                    >
+                      {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 {/* Admin Remarks */}

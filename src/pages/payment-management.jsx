@@ -75,7 +75,9 @@ const PaymentManagement = () => {
         }
       } catch (err) {
         console.error("Error fetching payments:", err);
-        // toast.error("Failed to fetch payments");
+        const errorMessage =
+          err.response?.data?.message || "Failed to fetch payments";
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -258,7 +260,7 @@ const PaymentManagement = () => {
                   <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-center px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     View Details
                   </th>
                 </tr>
@@ -335,8 +337,8 @@ const PaymentManagement = () => {
                           {payment.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleViewDetails(payment.id)}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"

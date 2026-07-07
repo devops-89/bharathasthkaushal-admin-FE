@@ -131,7 +131,9 @@ const AuctionManagement = () => {
         "Error fetching products:",
         err.response?.data || err.message,
       );
-      setError("Failed to fetch products. Please try again.");
+      const errorMessage =
+        err.response?.data?.message || "Failed to fetch products. Please try again.";
+      toast.error(errorMessage);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -224,7 +226,9 @@ const AuctionManagement = () => {
 
       setAuctions(mapped);
     } catch (err) {
-      setError("Failed to fetch auctions");
+      const errorMessage =
+        err.response?.data?.message || "Failed to fetch auctions";
+      toast.error(errorMessage);
       console.error(err);
     } finally {
       setLoading(false);
@@ -530,7 +534,9 @@ const AuctionManagement = () => {
         "Error fetching auction details:",
         err.response?.data || err.message,
       );
-      setError("Failed to fetch auction details. Please try again.");
+      const errorMessage =
+        err.response?.data?.message || "Failed to fetch auction details. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -638,11 +644,6 @@ const AuctionManagement = () => {
         </div>
 
         {/* Error and Loading States */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-            {error}
-          </div>
-        )}
 
         {/* Auctions Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -665,7 +666,7 @@ const AuctionManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   View Details
                 </th>
               </tr>
@@ -747,23 +748,25 @@ const AuctionManagement = () => {
                       {auction.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
-                    <button
-                      onClick={() => handleViewDetails(auction)}
-                      className="text-blue-600 hover:text-blue-900 flex items-center justify-center p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                      title="View Details"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    {auction.status?.toUpperCase() === "SCHEDULED" && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex justify-center items-center gap-2">
                       <button
-                        onClick={() => handleStartAuction(auction.auction_id)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
-                        title="Start Auction"
+                        onClick={() => handleViewDetails(auction)}
+                        className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        title="View Details"
                       >
-                        <Play size={14} /> Start
+                        <Eye size={20} />
                       </button>
-                    )}
+                      {auction.status?.toUpperCase() === "SCHEDULED" && (
+                        <button
+                          onClick={() => handleStartAuction(auction.auction_id)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
+                          title="Start Auction"
+                        >
+                          <Play size={14} /> Start
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
