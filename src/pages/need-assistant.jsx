@@ -45,6 +45,7 @@ const NeedAssistanceDashboard = () => {
   const [issueTypeFilter, setIssueTypeFilter] = useState("ALL");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [adminRemarks, setAdminRemarks] = useState("");
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
@@ -172,13 +173,22 @@ const NeedAssistanceDashboard = () => {
     }
   };
 
-  const handleUpdateStatus = async () => {
+  const handleUpdateStatus = () => {
     if (!selectedTicket || !newStatus) return;
+    if (selectedTicket.status === newStatus) {
+      toast.info("Status not updated");
+      setShowModal(false);
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const confirmUpdateStatus = async () => {
     setUpdating(true);
     try {
       const updateData = {
         status: newStatus,
-        adminRemarks: adminRemarks || `Status updated to ${newStatus}`,
+        adminRemarks: adminRemarks || `Status updated to ${formatStatus(newStatus)}`,
       };
       await needAssistanceControllers.updateNeedAssistanceStatus(
         selectedTicket.id,
@@ -197,6 +207,7 @@ const NeedAssistanceDashboard = () => {
         ),
       );
       toast.success("Status updated successfully!");
+      setShowConfirmModal(false);
       setShowModal(false);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error updating status: " + error.message;
@@ -206,9 +217,20 @@ const NeedAssistanceDashboard = () => {
     }
   };
 
+  const cancelUpdateStatus = () => {
+    setShowConfirmModal(false);
+    setShowModal(false);
+    toast.info("Status not updated");
+  };
+
   useEffect(() => {
     fetchNeedAssistance(currentPage, rowsPerPage, statusFilter, debouncedSearch, issueTypeFilter);
   }, [currentPage, rowsPerPage, statusFilter, debouncedSearch, issueTypeFilter]);
+
+  const formatStatus = (str) => {
+    if (!str) return "";
+    return str.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  };
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -233,13 +255,13 @@ const NeedAssistanceDashboard = () => {
         className={`${config.bg} ${config.text} px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit`}
       >
         <Icon size={14} />
-        {status}
+        {formatStatus(status)}
       </span>
     );
   };
 
   const getIssueTypeLabel = (type) => {
-    return type ? type.replace(/_/g, " ") : "Other";
+    return type ? type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : "Other";
   };
 
   const formatDate = (dateString) => {
@@ -309,7 +331,7 @@ const NeedAssistanceDashboard = () => {
                 <option value="ALL">All Status</option>
                 {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {formatStatus(status)}
                   </option>
                 ))}
               </select>
@@ -547,39 +569,45 @@ const NeedAssistanceDashboard = () => {
                   {getStatusBadge(selectedTicket.status)}
                 </div>
 
-                {/* Update Status */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Update Status
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
-                      value={newStatus}
-                      onChange={(e) => setNewStatus(e.target.value)}
-                    >
-                      {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  </div>
-                </div>
+                {/* Update Status Dropdown and Admin Remarks Input */}
+                {!["RESOLVED", "REJECTED", "CLOSED"].includes(selectedTicket.status) && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Update Status
+                      </label>
+                      <div className="relative">
+                        <select
+                          className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
+                          value={newStatus}
+                          onChange={(e) => setNewStatus(e.target.value)}
+                        >
+                          {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => {
+                            const formattedStatus = status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                            return (
+                              <option key={status} value={status}>
+                                {formattedStatus}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
 
-                {/* Admin Remarks */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Admin Remarks
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 h-32"
-                    placeholder="Enter your remarks here..."
-                    value={adminRemarks}
-                    onChange={(e) => setAdminRemarks(e.target.value)}
-                  />
-                </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Admin Remarks
+                      </label>
+                      <textarea
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 h-32"
+                        placeholder="Enter your remarks here..."
+                        value={adminRemarks}
+                        onChange={(e) => setAdminRemarks(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Previous Remarks */}
                 {selectedTicket.adminRemarks && (
@@ -595,28 +623,65 @@ const NeedAssistanceDashboard = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4 border-t">
-                  <button
-                    onClick={handleUpdateStatus}
-                    disabled={updating}
-                    className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {updating ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Updating...
-                      </>
-                    ) : (
-                      "Update Status"
-                    )}
-                  </button>
+                  {!["RESOLVED", "REJECTED", "CLOSED"].includes(selectedTicket.status) && (
+                    <button
+                      onClick={handleUpdateStatus}
+                      disabled={updating}
+                      className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {updating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Status"
+                      )}
+                    </button>
+                  )}
                   <button
                     onClick={() => setShowModal(false)}
                     disabled={updating}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
                   >
-                    Cancel
+                    {["RESOLVED", "REJECTED", "CLOSED"].includes(selectedTicket.status) ? "Close" : "Cancel"}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Status Update</h3>
+              <p className="text-gray-600 mb-6">
+                Do you want to change the status from <strong>{formatStatus(selectedTicket?.status)}</strong> to <strong>{formatStatus(newStatus)}</strong>?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmUpdateStatus}
+                  disabled={updating}
+                  className="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {updating ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    "Yes, Update"
+                  )}
+                </button>
+                <button
+                  onClick={cancelUpdateStatus}
+                  disabled={updating}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
+                >
+                  No, Cancel
+                </button>
               </div>
             </div>
           </div>

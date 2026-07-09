@@ -234,4 +234,9 @@ export const productControllers = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+
+  deletePopularAuctionImage: (auctionId) => {
+    // TODO: Update this URL to match the exact endpoint provided by the backend team
+    return productSecuredApi.delete(`/auction/${auctionId}/popular-image`);
+  },
 };

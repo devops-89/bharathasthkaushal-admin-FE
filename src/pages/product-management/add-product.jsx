@@ -306,7 +306,7 @@
 //                 name="product_name"
 //                 value={formData.product_name}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.product_name ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.product_name ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 onBlur={handleBlur}
 //                 placeholder="Enter product name"
@@ -340,7 +340,7 @@
 //                       setCountrySearch(formData.country);
 //                     }
 //                   }}
-//                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.country ? "border-red-500" : "border-gray-300"
+//                   className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.country ? "border-red-500" : "border-gray-300"
 //                     }`}
 //                 />
 //                 {isCountryDropdownOpen && (
@@ -379,7 +379,7 @@
 //                 name="warehouseId"
 //                 value={formData.warehouseId}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.warehouseId ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.warehouseId ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 disabled={!formData.country}
 //               >
@@ -404,7 +404,7 @@
 //                 name="categoryId"
 //                 value={formData.categoryId}
 //                 onChange={handleCategoryChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.categoryId ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.categoryId ? "border-red-500" : "border-gray-300"
 //                   }`}
 //               >
 //                 <option value="">Select Category</option>
@@ -428,7 +428,7 @@
 //                 name="subCategoryId"
 //                 value={formData.subCategoryId}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 disabled={!subCategories.length}
 //               >
@@ -454,7 +454,7 @@
 //                 name="productPricePerPiece"
 //                 value={formData.productPricePerPiece}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.productPricePerPiece ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.productPricePerPiece ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 min="0.01"
 //                 step="0.01"
@@ -483,7 +483,7 @@
 //                 name="quantity"
 //                 value={formData.quantity}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.quantity ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.quantity ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 min="1"
 //                 step="1"
@@ -508,7 +508,7 @@
 //                 type="text"
 //                 value={totalPrice.toFixed(2)}
 //                 readOnly
-//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+//                 className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
 //               />
 //             </div>
 
@@ -525,7 +525,7 @@
 //                 min="1"
 //                 step="1"
 //                 onKeyDown={preventNegative}
-//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+//                 className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 //                 placeholder="Days"
 //                 onBlur={(e) => {
 //                   let val = parseInt(e.target.value);
@@ -547,7 +547,7 @@
 //                 name="material"
 //                 value={formData.material}
 //                 onChange={handleInputChange}
-//                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.material ? "border-red-500" : "border-gray-300"
+//                 className={`w-full bg-white px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${errors.material ? "border-red-500" : "border-gray-300"
 //                   }`}
 //                 placeholder="Cotton, Silk, etc."
 //                 onBlur={handleBlur}
@@ -574,7 +574,7 @@
 //                     handleInputChange(e);
 //                   }
 //                 }}
-//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+//                 className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 //               >
 //                 <option value="">Select Finish</option>
 //                 <option value="Matte">Matte</option>
@@ -591,7 +591,7 @@
 //                   value={formData.finish}
 //                   onChange={handleInputChange}
 //                   placeholder="Enter custom finish"
-//                   className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+//                   className="mt-2 w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 //                   onBlur={handleBlur}
 //                 />
 //               )}
@@ -1141,7 +1141,7 @@ const AddProduct = () => {
             Back to Product List
           </button>
         </div>
-        
+
         {/* Header */}
         <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
           <div className="flex items-center gap-4">
@@ -1166,7 +1166,7 @@ const AddProduct = () => {
                 name="product_name"
                 value={formData.product_name}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.product_name ? "border-red-500" : "border-gray-300"
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.product_name ? "border-red-500" : "border-gray-300"
                   }`}
                 placeholder="Enter product name"
               />
@@ -1206,7 +1206,7 @@ const AddProduct = () => {
                       setCountrySearch(formData.country);
                     }
                   }}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.country ? "border-red-500" : "border-gray-300"
+                  className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.country ? "border-red-500" : "border-gray-300"
                     }`}
                 />
                 {isCountryDropdownOpen && (
@@ -1248,7 +1248,7 @@ const AddProduct = () => {
                   name="warehouseId"
                   value={formData.warehouseId}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.warehouseId ? "border-red-500" : "border-gray-300"
+                  className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white ${errors.warehouseId ? "border-red-500" : "border-gray-300"
                     }`}
                   disabled={!formData.country}
                 >
@@ -1280,7 +1280,7 @@ const AddProduct = () => {
                   name="categoryId"
                   value={formData.categoryId}
                   onChange={handleCategoryChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.categoryId ? "border-red-500" : "border-gray-300"
+                  className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white ${errors.categoryId ? "border-red-500" : "border-gray-300"
                     }`}
                 >
                   <option value="">Select Category</option>
@@ -1307,7 +1307,7 @@ const AddProduct = () => {
                   name="subCategoryId"
                   value={formData.subCategoryId}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
+                  className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white ${errors.subCategoryId ? "border-red-500" : "border-gray-300"
                     }`}
                   disabled={!subCategories.length}
                 >
@@ -1337,7 +1337,7 @@ const AddProduct = () => {
                 name="productPricePerPiece"
                 value={formData.productPricePerPiece}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.productPricePerPiece
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.productPricePerPiece
                   ? "border-red-500"
                   : "border-gray-300"
                   }`}
@@ -1363,7 +1363,7 @@ const AddProduct = () => {
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.quantity ? "border-red-500" : "border-gray-300"
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.quantity ? "border-red-500" : "border-gray-300"
                   }`}
                 min="1"
                 step="1"
@@ -1384,7 +1384,7 @@ const AddProduct = () => {
                 type="text"
                 value={totalPrice.toFixed(2)}
                 readOnly
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+                className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
               />
             </div>
 
@@ -1401,7 +1401,7 @@ const AddProduct = () => {
                 min="1"
                 step="1"
                 onKeyDown={preventNegative}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Days"
               />
               {errors.timeToMake && (
@@ -1419,7 +1419,7 @@ const AddProduct = () => {
                 name="material"
                 value={formData.material}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.material ? "border-red-500" : "border-gray-300"
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.material ? "border-red-500" : "border-gray-300"
                   }`}
                 placeholder="Cotton, Silk, etc."
               />
@@ -1446,7 +1446,7 @@ const AddProduct = () => {
                       handleInputChange(e);
                     }
                   }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                  className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 >
                   <option value="">Select Finish</option>
                   <option value="Matte">Matte</option>
@@ -1465,7 +1465,7 @@ const AddProduct = () => {
                   value={formData.finish}
                   onChange={handleInputChange}
                   placeholder="Enter custom finish"
-                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="mt-2 w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               )}
             </div>
@@ -1488,7 +1488,7 @@ const AddProduct = () => {
                       handleInputChange(e);
                     }
                   }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                  className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 >
                   <option value="">Select Wash Care</option>
                   <option value="Dry Clean Only">Dry Clean Only</option>
@@ -1506,7 +1506,7 @@ const AddProduct = () => {
                   value={formData.washCare}
                   onChange={handleInputChange}
                   placeholder="Enter custom wash care"
-                  className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="mt-2 w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 />
               )}
             </div>
@@ -1521,7 +1521,7 @@ const AddProduct = () => {
                 name="artUsed"
                 value={formData.artUsed}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.artUsed ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.artUsed ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Madhubani, Warli, etc."
               />
               {errors.artUsed && (
@@ -1539,7 +1539,7 @@ const AddProduct = () => {
                 name="pattern"
                 value={formData.pattern}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.pattern ? "border-red-500" : "border-gray-300"}`}
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.pattern ? "border-red-500" : "border-gray-300"}`}
                 placeholder="Floral, Geometric, Striped, etc."
               />
               {errors.pattern && (
@@ -1561,7 +1561,7 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Weight"
                 />
                 <div className="relative">
@@ -1569,7 +1569,7 @@ const AddProduct = () => {
                     name="weightUnit"
                     value={formData.weightUnit}
                     onChange={handleInputChange}
-                    className="pl-2 pr-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none"
+                    className="pl-2 pr-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                   >
                     <option value="gm">gm</option>
                     <option value="kg">kg</option>
@@ -1593,7 +1593,7 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Length"
                 />
                 <input
@@ -1604,7 +1604,7 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Breadth"
                 />
                 <input
@@ -1615,18 +1615,21 @@ const AddProduct = () => {
                   min="0.01"
                   step="0.01"
                   onKeyDown={preventNegative}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                   placeholder="Height"
                 />
-                <select
-                  name="dimensionUnit"
-                  value={formData.dimensionUnit}
-                  onChange={handleInputChange}
-                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
-                >
-                  <option value="cm">cm</option>
-                  <option value="inches">inches</option>
-                </select>
+                <div className="relative">
+                  <select
+                    name="dimensionUnit"
+                    value={formData.dimensionUnit}
+                    onChange={handleInputChange}
+                    className="w-full appearance-none px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+                  >
+                    <option value="cm">cm</option>
+                    <option value="inches">inches</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -1640,7 +1643,7 @@ const AddProduct = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows="4"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.description ? "border-red-500" : "border-gray-300"
+                className={`w-full bg-white px-4 py-3 border rounded-lg focus:outline-none focus:border-orange-500 ${errors.description ? "border-red-500" : "border-gray-300"
                   }`}
                 placeholder="Describe your product..."
               />

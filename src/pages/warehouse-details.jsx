@@ -14,7 +14,11 @@ import {
     ChevronLeft,
     ChevronRight,
     Navigation,
-    ChevronDown
+    ChevronDown,
+    XCircle,
+    Play,
+    FileText,
+    Info,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,6 +32,32 @@ export default function WarehouseDetails() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const formatStatus = (str) => {
+        if (!str) return "N/A";
+        return str.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+    };
+
+    const getStatusBadge = (status) => {
+        if (!status) return null;
+        const badges = {
+            APPROVED: { bg: "bg-green-100", text: "text-green-800", icon: CheckCircle },
+            PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", icon: Clock },
+            REJECTED: { bg: "bg-red-100", text: "text-red-800", icon: XCircle },
+            READY_FOR_AUCTION: { bg: "bg-blue-100", text: "text-blue-800", icon: Play },
+            IN_BUILD: { bg: "bg-orange-100", text: "text-orange-800", icon: Package },
+            DRAFT: { bg: "bg-gray-100", text: "text-gray-800", icon: FileText },
+        };
+        const upperStatus = status.toUpperCase();
+        const config = badges[upperStatus] || { bg: "bg-gray-100", text: "text-gray-800", icon: Info };
+        const Icon = config.icon;
+        return (
+            <span className={`${config.bg} ${config.text} px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit`}>
+                <Icon size={14} />
+                {formatStatus(status)}
+            </span>
+        );
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -58,7 +88,7 @@ export default function WarehouseDetails() {
         }
     }, [id, currentPage, rowsPerPage, debouncedSearch]);
 
-    if (loading) {
+    if (loading && !warehouse) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex justify-center items-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
@@ -182,8 +212,8 @@ export default function WarehouseDetails() {
                     </div>
 
                     {/* Products Table with Search & Pagination */}
-                    <div className="bg-white rounded-2xl shadow-lg p-6">
-                        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                             <h2 className="text-xl font-bold text-gray-800">
                                 Inventory List
                             </h2>
@@ -207,29 +237,43 @@ export default function WarehouseDetails() {
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {currentProducts.length > 0 ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        {loading && warehouse ? (
+                            <div className="flex justify-center items-center py-20">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                            </div>
+                        ) : currentProducts.length > 0 ? (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-gray-200">
-                                            <th className="py-4 px-4 font-semibold text-gray-700">Product Name</th>
-                                            <th className="py-4 px-4 font-semibold text-gray-700">Quantity</th>
-                                            <th className="py-4 px-4 font-semibold text-gray-700">Status</th>
+                                <table className="w-full text-left">
+                                    <thead className="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Status</th>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Build Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="bg-white divide-y divide-gray-200">
                                         {currentProducts.map((product, index) => (
                                             product ? (
-                                                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                                    <td className="py-4 px-4 font-medium text-gray-800 capitalize">
-                                                        {product.product_name || 'N/A'}
+                                                <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-medium text-gray-900 capitalize" title={product.product_name}>
+                                                            {product.product_name || 'N/A'}
+                                                        </div>
                                                     </td>
-                                                    <td className="py-4 px-4 text-gray-600">
-                                                        {product.quantity || 0}
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {product.quantity || 0}
+                                                        </div>
                                                     </td>
-                                                    <td className="py-4 px-4 text-gray-600">
-                                                        {product.product_status || 'UNKNOWN'}
+                                                    <td className="px-6 py-4">
+                                                        {getStatusBadge(product.admin_approval_status || product.status || product.product_status || 'UNKNOWN')}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {getStatusBadge(product.build_status || 'UNKNOWN')}
                                                     </td>
                                                 </tr>
                                             ) : null
@@ -248,7 +292,7 @@ export default function WarehouseDetails() {
 
                         {/* Pagination Controls */}
                         {totalProducts > 0 && (
-                            <div className="grid grid-cols-3 items-center p-6 border-t bg-white mt-4 rounded-b-xl">
+                            <div className="grid grid-cols-3 items-center p-6 border-t border-gray-200 bg-white">
                                 <div className="flex items-center gap-4 text-base font-medium justify-self-start">
                                     <span className="text-gray-700">Rows per page:</span>
                                     <div className="relative">

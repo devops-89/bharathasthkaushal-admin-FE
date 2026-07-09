@@ -25,12 +25,21 @@ import {
   Info,
   ChevronDown,
   Download,
+  CheckCircle,
+  XCircle,
+  Clock,
+  RefreshCw,
 } from "lucide-react";
 
 const formatPaymentType = (type) => {
   if (!type) return "N/A";
   const words = type.toLowerCase().split("_");
   return words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+};
+
+const formatStatus = (status) => {
+  if (!status) return "N/A";
+  return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
 };
 
 const PaymentManagement = () => {
@@ -116,6 +125,26 @@ const PaymentManagement = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      SUCCESS: { bg: "bg-green-100", text: "text-green-800", icon: CheckCircle },
+      FAILED: { bg: "bg-red-100", text: "text-red-800", icon: XCircle },
+      PENDING: { bg: "bg-yellow-100", text: "text-yellow-800", icon: Clock },
+      REFUNDED: { bg: "bg-blue-100", text: "text-blue-800", icon: RefreshCw },
+    };
+    const config = badges[status] || { bg: "bg-gray-100", text: "text-gray-800", icon: Info };
+    const Icon = config.icon;
+    return (
+      <span
+        className={`${config.bg} ${config.text} px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit`}
+      >
+        <Icon size={14} />
+        {formatStatus(status)}
+      </span>
+    );
+  };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -331,11 +360,7 @@ const PaymentManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}
-                        >
-                          {payment.status}
-                        </span>
+                        {getStatusBadge(payment.status)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
@@ -478,11 +503,7 @@ const PaymentManagement = () => {
                       </div>
                     </div>
                     <div>
-                      <span
-                        className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm ${getStatusColor(selectedPayment.status)}`}
-                      >
-                        {selectedPayment.status}
-                      </span>
+                      {getStatusBadge(selectedPayment.status)}
                       <p className="text-xs text-gray-400 mt-2 text-right">
                         Type: {formatPaymentType(selectedPayment.paymentType)}
                       </p>

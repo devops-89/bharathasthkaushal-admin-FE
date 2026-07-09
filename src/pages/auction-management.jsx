@@ -10,6 +10,14 @@ import {
   Calendar,
   Upload,
   ChevronDown,
+  FileText,
+  AlertCircle,
+  XCircle,
+  CheckCircle,
+  Trophy,
+  Clock,
+  Info,
+  Trash2,
 } from "lucide-react";
 import { productControllers } from "../api/product.js";
 import { warehouseControllers } from "../api/warehouse.js";
@@ -18,6 +26,11 @@ import { NavLink } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SecureImage from "../components/SecureImage";
+
+const formatStatus = (status) => {
+  if (!status) return "N/A";
+  return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+};
 
 const formatDateForDisplay = (dateString) => {
   if (!dateString) return "";
@@ -36,6 +49,14 @@ const formatDateForDisplay = (dateString) => {
   return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
 };
 
+const getFullName = (user) => {
+  if (!user) return "";
+  if (user.firstName || user.lastName) {
+    return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  }
+  return user.name || user.FirstName || "";
+};
+
 const AuctionManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -47,6 +68,11 @@ const AuctionManagement = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAuction, setSelectedAuction] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPopularModal, setShowPopularModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [selectedPopularAuction, setSelectedPopularAuction] = useState(null);
+  const [popularImagePreview, setPopularImagePreview] = useState(null);
+  const [popularImageFile, setPopularImageFile] = useState(null);
   const [error, setError] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [newAuction, setNewAuction] = useState({
@@ -222,6 +248,7 @@ const AuctionManagement = () => {
         status: auction.status || "DRAFT",
 
         image: auction.product?.images?.[0]?.imageUrl || null,
+        rawImage: auction.image,
       }));
 
       setAuctions(mapped);
@@ -304,20 +331,30 @@ const AuctionManagement = () => {
   };
 
   const getStatusBadge = (status) => {
-    if (!status) return "px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-800";
-    const statusMap = {
-      DRAFT: "bg-gray-200 text-gray-700",
-      SCHEDULED: "bg-blue-200 text-blue-800",
-      LIVE: "bg-green-200 text-green-800",
-      CHALLENGE: "bg-yellow-200 text-yellow-800",
-      ENDED: "bg-gray-300 text-gray-800",
-      SETTLED: "bg-purple-200 text-purple-800",
-      WON: "bg-teal-200 text-teal-800",
-      ACTIVE: "bg-green-200 text-green-800",
+    if (!status) return null;
+    const badges = {
+      DRAFT: { bg: "bg-gray-200", text: "text-gray-700", icon: FileText },
+      SCHEDULED: { bg: "bg-blue-200", text: "text-blue-800", icon: Calendar },
+      LIVE: { bg: "bg-green-200", text: "text-green-800", icon: Play },
+      CHALLENGE: { bg: "bg-yellow-200", text: "text-yellow-800", icon: AlertCircle },
+      ENDED: { bg: "bg-gray-300", text: "text-gray-800", icon: XCircle },
+      SETTLED: { bg: "bg-purple-200", text: "text-purple-800", icon: CheckCircle },
+      WON: { bg: "bg-teal-200", text: "text-teal-800", icon: Trophy },
+      ACTIVE: { bg: "bg-green-200", text: "text-green-800", icon: Play },
     };
+
     const upperStatus = status.toUpperCase();
-    return `px-3 py-1 rounded-full text-sm font-medium ${statusMap[upperStatus] || "bg-gray-200 text-gray-800"
-      }`;
+    const config = badges[upperStatus] || { bg: "bg-gray-200", text: "text-gray-800", icon: Info };
+    const Icon = config.icon;
+
+    return (
+      <span
+        className={`${config.bg} ${config.text} px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit`}
+      >
+        <Icon size={14} />
+        {formatStatus(upperStatus)}
+      </span>
+    );
   };
 
   const getMinEndTime = () => {
@@ -348,7 +385,7 @@ const AuctionManagement = () => {
     if (!countrySearch && !newAuction.country) errors.country = "Origin Country is required";
     if (!newAuction.warehouseId) errors.warehouseId = "Warehouse is required";
     if (!newAuction.productId) errors.productId = "Product is required";
-    
+
     if (!newAuction.startingBid) {
       errors.startingBid = "Starting Bid is required";
     } else if (parseFloat(newAuction.startingBid) <= 0) {
@@ -472,7 +509,7 @@ const AuctionManagement = () => {
   };
 
   const handleViewDetails = async (auction) => {
-    setLoading(true);
+    //setLoading(true);
     setError(null);
     try {
       const res = await productControllers.getAuctionDetails(
@@ -507,16 +544,13 @@ const AuctionManagement = () => {
 
         quantity: details.quantity || details.product?.quantity || 0,
 
-        status:
-          details.status === "LIVE"
-            ? "Active"
-            : details.status.charAt(0).toUpperCase() +
-            details.status.slice(1).toLowerCase(),
+        status: details.status === "LIVE" ? "Active" : formatStatus(details.status),
         description: details.product?.description || "No description",
         dimensions: details.product?.dimension || "Not specified",
         weight: details.product?.netWeight || "Not specified",
         materials: details.product?.material || "Not specified",
         image: details.product?.images?.[0]?.imageUrl || null,
+        rawImage: details.image || auction.rawImage || null,
         bids: res.data.data.bids || res.data.data.auction?.bids || [],
         winner: res.data.data.winner || res.data.data.auction?.winner || null,
         challenge_minutes: details.challenge_minutes || 15,
@@ -567,24 +601,64 @@ const AuctionManagement = () => {
     }
   };
 
-  const handleImageUpload = async (e, auctionId) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handlePopularClick = (auction) => {
+    if (auction.rawImage) {
+      setSelectedPopularAuction(auction);
+      setShowPopularModal(true);
+    } else {
+      setSelectedPopularAuction(auction);
+      setPopularImagePreview(null);
+      setPopularImageFile(null);
+      setShowPopularModal(true);
+    }
+  };
+
+  const handleConfirmPopularUpload = async () => {
+    if (!popularImageFile || !selectedPopularAuction) return;
 
     const formData = new FormData();
-    formData.append("image", file);
-    formData.append("auctionId", auctionId);
+    formData.append("image", popularImageFile);
+    formData.append("auctionId", selectedPopularAuction.auction_id);
 
     setLoading(true);
     try {
       await productControllers.addImageToAuction(formData);
       toast.success("Image uploaded successfully!");
+      setShowPopularModal(false);
       fetchAuctions();
     } catch (err) {
       console.error("Error uploading image:", err);
       toast.error("Failed to upload image");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeletePopularImage = async () => {
+    if (!selectedPopularAuction) return;
+
+    setLoading(true);
+    try {
+      await productControllers.deletePopularAuctionImage(selectedPopularAuction.auction_id);
+      toast.success("Popular image removed successfully!");
+
+      // Update local state to show upload screen immediately
+      setSelectedPopularAuction({
+        ...selectedPopularAuction,
+        rawImage: null,
+        image: null
+      });
+
+      // Refresh list behind the scenes
+      fetchAuctions(pagination.currentPage, pagination.limit, debouncedSearchTerm);
+    } catch (err) {
+      console.error("Error deleting popular image:", err);
+      toast.error(
+        err.response?.data?.message || "Failed to remove popular image."
+      );
+    } finally {
+      setLoading(false);
+      setShowDeleteConfirmModal(false);
     }
   };
 
@@ -647,132 +721,128 @@ const AuctionManagement = () => {
 
         {/* Auctions Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Add to Popular
-                </th>
-
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bidding Info
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  View Details
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan="6">
-                    <div className="flex justify-center items-center py-20">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                    </div>
-                  </td>
-                </tr>
-              ) : currentAuctions.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
-                    {searchTerm ? "No auctions found matching your search criteria." : "No auctions found."}
-                  </td>
-                </tr>
-              ) : (
-              currentAuctions.map((auction) => (
-                <tr key={auction.auction_id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div
-                      className="text-sm font-medium text-gray-900 capitalize"
-                      title={auction.title}
-                    >
-                      {auction.title.length > 20
-                        ? `${auction.title.substring(0, 20)}...`
-                        : auction.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <label className="cursor-pointer flex items-center justify-center p-2 rounded-lg hover:bg-orange-50 transition-colors text-orange-600 hover:text-orange-700 w-fit">
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleImageUpload(e, auction.auction_id)
-                        }
-                      />
-                      <Upload size={18} />
-                    </label>
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Product Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Add to Popular
+                  </th>
 
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      {auction.currentBid > 0 && (
-                        <div className="text-sm font-medium text-gray-900">
-                          ₹{auction.currentBid.toLocaleString()}
-                        </div>
-                      )}
-                      {auction.startingBid > 0 && (
-                        <div className="text-sm text-gray-500">
-                          Start: ₹{auction.startingBid.toLocaleString()}
-                        </div>
-                      )}
-                      {auction.minBidAmount > 0 && (
-                        <div className="text-sm text-gray-500">
-                          Min Bid: ₹{auction.minBidAmount.toLocaleString()}
-                        </div>
-                      )}
-                      {auction.reservePrice > 0 && (
-                        <div className="text-sm text-gray-500">
-                          Reserve: ₹{auction.reservePrice.toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div>
-                      <div>Start: {auction.startDate}</div>
-                      <div>Hard Close: {auction.endDate}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={getStatusBadge(auction.status)}>
-                      {auction.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex justify-center items-center gap-2">
-                      <button
-                        onClick={() => handleViewDetails(auction)}
-                        className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                        title="View Details"
-                      >
-                        <Eye size={20} />
-                      </button>
-                      {auction.status?.toUpperCase() === "SCHEDULED" && (
-                        <button
-                          onClick={() => handleStartAuction(auction.auction_id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
-                          title="Start Auction"
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Bidding Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    View Details
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan="6">
+                      <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentAuctions.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                      {searchTerm ? "No auctions found matching your search criteria." : "No auctions found."}
+                    </td>
+                  </tr>
+                ) : (
+                  currentAuctions.map((auction) => (
+                    <tr key={auction.auction_id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div
+                          className="text-sm font-medium text-gray-900 capitalize"
+                          title={auction.title}
                         >
-                          <Play size={14} /> Start
+                          {auction.title.length > 20
+                            ? `${auction.title.substring(0, 20)}...`
+                            : auction.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handlePopularClick(auction)}
+                          disabled={auction.status === "ENDED"}
+                          className={`flex items-center justify-center p-2 rounded-lg transition-colors w-fit ${auction.status === "ENDED" ? "text-gray-400 cursor-not-allowed" : "hover:bg-orange-50 text-orange-600 hover:text-orange-700"}`}
+                        >
+                          <Upload size={18} />
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-              )}
-            </tbody>
-          </table>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          {auction.currentBid > 0 && (
+                            <div className="text-sm text-gray-500">
+                              Highest: ₹{auction.currentBid.toLocaleString()}
+                            </div>
+                          )}
+                          {auction.startingBid > 0 && (
+                            <div className="text-sm text-gray-500">
+                              Start: ₹{auction.startingBid.toLocaleString()}
+                            </div>
+                          )}
+                          {auction.minBidAmount > 0 && (
+                            <div className="text-sm text-gray-500">
+                              Min Bid: ₹{auction.minBidAmount.toLocaleString()}
+                            </div>
+                          )}
+                          {auction.reservePrice > 0 && (
+                            <div className="text-sm text-gray-500">
+                              Reserve: ₹{auction.reservePrice.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div>
+                          <div>Start: {auction.startDate}</div>
+                          <div>Hard Close: {auction.endDate}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(auction.status)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => handleViewDetails(auction)}
+                            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={20} />
+                          </button>
+                          {auction.status?.toUpperCase() === "SCHEDULED" && (
+                            <button
+                              onClick={() => handleStartAuction(auction.auction_id)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
+                              title="Start Auction"
+                            >
+                              <Play size={14} /> Start
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}
@@ -1012,32 +1082,25 @@ const AuctionManagement = () => {
 
                   {/* Pricing Cards */}
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-3 sm:col-span-1 bg-gradient-to-br from-orange-500 to-orange-600 p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
-                        💰
-                      </div>
-                      <p className="text-orange-100 text-xs font-bold uppercase tracking-wider mb-1">
-                        Highest Bid
-                      </p>
-                      <p className="text-2xl font-bold text-white">
-                        ₹
-                        {(
-                          selectedAuction.currentBid ||
-                          selectedAuction.startingBid ||
-                          0
-                        ).toLocaleString()}
-                      </p>
-                      {selectedAuction.leadBidder && (
-                        <div className="mt-3 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
-                            👤
-                          </div>
-                          <p className="text-xs text-orange-50 truncate max-w-[100px]">
-                            {selectedAuction.leadBidder.name ||
-                              selectedAuction.leading_bidder}
-                          </p>
+                    <div className={`col-span-3 sm:col-span-1 p-5 rounded-2xl relative overflow-hidden ${selectedAuction.currentBid > 0 ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg" : "bg-white border border-gray-100 shadow-sm"}`}>
+                      {selectedAuction.currentBid > 0 && (
+                        <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">
+                          💰
                         </div>
                       )}
+                      <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${selectedAuction.currentBid > 0 ? "text-orange-100" : "text-gray-400"}`}>
+                        Highest Bid
+                      </p>
+                      {selectedAuction.currentBid > 0 ? (
+                        <p className="text-2xl font-bold text-white">
+                          ₹{selectedAuction.currentBid.toLocaleString()}
+                        </p>
+                      ) : (
+                        <p className="text-xl font-bold text-gray-900">
+                          No bids yet
+                        </p>
+                      )}
+
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
@@ -1113,15 +1176,11 @@ const AuctionManagement = () => {
                             >
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
-                                  {(bid.user?.name ||
-                                    bid.user?.FirstName ||
-                                    "U")[0].toUpperCase()}
+                                  {(getFullName(bid.user) || "U")[0].toUpperCase()}
                                 </div>
                                 <div>
                                   <p className="text-xs font-bold text-gray-900">
-                                    {bid.user?.name ||
-                                      bid.user?.FirstName ||
-                                      `User #${bid.user_id}`}
+                                    {getFullName(bid.user) || `User #${bid.user_id}`}
                                   </p>
                                   <p className="text-[10px] text-gray-400">
                                     {bid.createdAt || bid.created_at
@@ -1171,6 +1230,31 @@ const AuctionManagement = () => {
                           )}
                         </button>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Popular Image Card */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
+                      <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                        Popular Auction Image
+                      </h4>
+                    </div>
+                    <div className="p-5">
+                      {selectedAuction.rawImage ? (
+                        <div className="w-full aspect-[4/3] md:aspect-auto md:h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                          <SecureImage
+                            src={selectedAuction.rawImage}
+                            alt="Popular Auction Image"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                          <span className="text-3xl mb-2">📸</span>
+                          <span className="text-sm font-medium">No popular image added</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1308,8 +1392,8 @@ const AuctionManagement = () => {
         {/* Add Auction Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
+            <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="flex justify-between items-center p-6 border-b border-gray-100 shrink-0">
                 <h2 className="text-xl font-bold text-gray-900">
                   Add New Auction
                 </h2>
@@ -1321,400 +1405,519 @@ const AuctionManagement = () => {
                 </button>
               </div>
 
-              <form noValidate onSubmit={handleAddAuction} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Country Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Origin Country <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative relative-country-dropdown">
-                      <input
-                        type="text"
-                        placeholder="Select Country"
-                        value={countrySearch}
-                        onChange={(e) => {
-                          setCountrySearch(e.target.value);
-                          setIsCountryDropdownOpen(true);
-                          if (e.target.value === "") {
-                            handleCountryChange("");
-                          }
-                        }}
-                        onClick={() => {
-                          setIsCountryDropdownOpen(true);
-                          if (
-                            newAuction.country &&
-                            countrySearch !== newAuction.country
-                          ) {
-                            setCountrySearch(newAuction.country);
-                          }
-                        }}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                      />
-                      {isCountryDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {filteredCountries.length > 0 ? (
-                            filteredCountries.map((c) => (
-                              <div
-                                key={c}
-                                className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
-                                onClick={() => {
-                                  handleCountryChange(c);
-                                }}
-                              >
-                                {c}
+              <div className="p-6 overflow-y-auto flex-1">
+                <form noValidate onSubmit={handleAddAuction} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Country Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Origin Country <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative relative-country-dropdown">
+                        <input
+                          type="text"
+                          placeholder="Select Country"
+                          value={countrySearch}
+                          onChange={(e) => {
+                            setCountrySearch(e.target.value);
+                            setIsCountryDropdownOpen(true);
+                            if (e.target.value === "") {
+                              handleCountryChange("");
+                            }
+                          }}
+                          onClick={() => {
+                            setIsCountryDropdownOpen(true);
+                            if (
+                              newAuction.country &&
+                              countrySearch !== newAuction.country
+                            ) {
+                              setCountrySearch(newAuction.country);
+                            }
+                          }}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+                        />
+                        {isCountryDropdownOpen && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {filteredCountries.length > 0 ? (
+                              filteredCountries.map((c) => (
+                                <div
+                                  key={c}
+                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                                  onClick={() => {
+                                    handleCountryChange(c);
+                                  }}
+                                >
+                                  {c}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-gray-500 text-sm">
+                                No countries found
                               </div>
-                            ))
-                          ) : (
-                            <div className="px-4 py-2 text-gray-500 text-sm">
-                              No countries found
-                            </div>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {formErrors.country && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.country}</p>
                       )}
                     </div>
-                    {formErrors.country && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.country}</p>
-                    )}
-                  </div>
 
-                  {/* Warehouse Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Warehouse <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={newAuction.warehouseId}
-                      onChange={handleWarehouseChange}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                      disabled={!newAuction.country || isWarehouseLoading}
-                    >
-                      <option value="" disabled>
-                        Select Warehouse
-                      </option>
-                      {Array.isArray(warehouses) &&
-                        warehouses.map((w) => (
-                          <option key={w._id || w.id} value={w._id || w.id}>
-                            {w.warehouse_name || w.name}
-                          </option>
-                        ))}
-                    </select>
-                    {isWarehouseLoading && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Loading Warehouses...
-                      </p>
-                    )}
-                    {formErrors.warehouseId && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.warehouseId}</p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Select Product <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={newAuction.productId}
-                      onChange={(e) =>
-                        setNewAuction({
-                          ...newAuction,
-                          productId: e.target.value,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="" disabled>
-                        Select Product
-                      </option>
-                      {Array.isArray(products) && products.length > 0 ? (
-                        products.map((product) => (
-                          <option
-                            key={product.productId || product._id || product.id}
-                            value={
-                              product.productId || product._id || product.id
-                            }
-                          >
-                            {product.product_name ||
-                              product.name ||
-                              "Unnamed Product"}
-                          </option>
-                        ))
-                      ) : (
-                        <option disabled>
-                          {!newAuction.warehouseId
-                            ? "Please Select Warehouse First"
-                            : "No products found in this warehouse"}
+                    {/* Warehouse Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Warehouse <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={newAuction.warehouseId}
+                        onChange={handleWarehouseChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+                        disabled={!newAuction.country || isWarehouseLoading}
+                      >
+                        <option value="" disabled>
+                          Select Warehouse
                         </option>
+                        {Array.isArray(warehouses) &&
+                          warehouses.map((w) => (
+                            <option key={w._id || w.id} value={w._id || w.id}>
+                              {w.warehouse_name || w.name}
+                            </option>
+                          ))}
+                      </select>
+                      {isWarehouseLoading && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Loading Warehouses...
+                        </p>
                       )}
-                    </select>
-                    {formErrors.productId && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.productId}</p>
-                    )}
-                  </div>
+                      {formErrors.warehouseId && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.warehouseId}</p>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Starting Bid (₹) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={newAuction.startingBid}
-                      onChange={(e) =>
-                        setNewAuction({
-                          ...newAuction,
-                          startingBid: e.target.value,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      placeholder="Enter Starting Bid"
-                    />
-                    {formErrors.startingBid && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.startingBid}</p>
-                    )}
-                  </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Select Product <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={newAuction.productId}
+                        onChange={(e) =>
+                          setNewAuction({
+                            ...newAuction,
+                            productId: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      >
+                        <option value="" disabled>
+                          Select Product
+                        </option>
+                        {Array.isArray(products) && products.length > 0 ? (
+                          products.map((product) => (
+                            <option
+                              key={product.productId || product._id || product.id}
+                              value={
+                                product.productId || product._id || product.id
+                              }
+                            >
+                              {product.product_name ||
+                                product.name ||
+                                "Unnamed Product"}
+                            </option>
+                          ))
+                        ) : (
+                          <option disabled>
+                            {!newAuction.warehouseId
+                              ? "Please Select Warehouse First"
+                              : "No products found in this warehouse"}
+                          </option>
+                        )}
+                      </select>
+                      {formErrors.productId && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.productId}</p>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Reserve Price (₹) (Optional)
-                    </label>
-                    <input
-                      type="number"
-                      value={newAuction.reservePrice}
-                      onChange={(e) =>
-                        setNewAuction({
-                          ...newAuction,
-                          reservePrice: e.target.value,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      placeholder="Enter Reserve Price"
-                    />
-                    {formErrors.reservePrice && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.reservePrice}</p>
-                    )}
-                  </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Starting Bid (₹) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={newAuction.startingBid}
+                        onChange={(e) =>
+                          setNewAuction({
+                            ...newAuction,
+                            startingBid: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        placeholder="Enter Starting Bid"
+                      />
+                      {formErrors.startingBid && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.startingBid}</p>
+                      )}
+                    </div>
 
-                  {/* 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Minimum Bid Amount (₹) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={newAuction.minBidAmount}
-                      onChange={(e) =>
-                        setNewAuction({
-                          ...newAuction,
-                          minBidAmount: e.target.value,
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      placeholder="Enter min bid amount"
-                    />
-                  </div>
-                  */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Reserve Price (₹) (Optional)
+                      </label>
+                      <input
+                        type="number"
+                        value={newAuction.reservePrice}
+                        onChange={(e) =>
+                          setNewAuction({
+                            ...newAuction,
+                            reservePrice: e.target.value,
+                          })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        placeholder="Enter Reserve Price"
+                      />
+                      {formErrors.reservePrice && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.reservePrice}</p>
+                      )}
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Start Date & Time <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex flex-rows gap-2">
-                      <div className="relative w-full">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start Date & Time <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex flex-rows gap-2">
+                        <div className="relative w-full">
+                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                          <input
+                            type="date"
+                            min={new Date().toLocaleDateString("en-CA")}
+                            max="2099-12-31"
+                            value={
+                              newAuction.startDate
+                                ? newAuction.startDate.split("T")[0]
+                                : ""
+                            }
+                            onChange={(e) => {
+                              let date = e.target.value;
+                              if (date && date.split("-")[0].length > 4) {
+                                const parts = date.split("-");
+                                parts[0] = parts[0].slice(0, 4);
+                                date = parts.join("-");
+                                e.target.value = date;
+                              }
+                              const time =
+                                newAuction.startDate &&
+                                  newAuction.startDate.includes("T")
+                                  ? newAuction.startDate.split("T")[1]
+                                  : "00:00";
+                              setNewAuction({
+                                ...newAuction,
+                                startDate: `${date}T${time}`,
+                              });
+                            }}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
+                          />
+                        </div>
                         <input
-                          type="date"
-                          min={new Date().toLocaleDateString("en-CA")}
-                          max="2099-12-31"
+                          type="time"
                           value={
-                            newAuction.startDate
-                              ? newAuction.startDate.split("T")[0]
+                            newAuction.startDate &&
+                              newAuction.startDate.includes("T")
+                              ? newAuction.startDate.split("T")[1]
                               : ""
                           }
                           onChange={(e) => {
-                            let date = e.target.value;
-                            if (date && date.split("-")[0].length > 4) {
-                              const parts = date.split("-");
-                              parts[0] = parts[0].slice(0, 4);
-                              date = parts.join("-");
-                              e.target.value = date;
-                            }
-                            const time =
-                              newAuction.startDate &&
-                                newAuction.startDate.includes("T")
-                                ? newAuction.startDate.split("T")[1]
-                                : "00:00";
+                            const time = e.target.value;
+                            const date = newAuction.startDate
+                              ? newAuction.startDate.split("T")[0]
+                              : new Date().toLocaleDateString("en-CA");
                             setNewAuction({
                               ...newAuction,
                               startDate: `${date}T${time}`,
                             });
                           }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                         />
                       </div>
-                      <input
-                        type="time"
-                        value={
-                          newAuction.startDate &&
-                            newAuction.startDate.includes("T")
-                            ? newAuction.startDate.split("T")[1]
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const time = e.target.value;
-                          const date = newAuction.startDate
-                            ? newAuction.startDate.split("T")[0]
-                            : new Date().toLocaleDateString("en-CA");
-                          setNewAuction({
-                            ...newAuction,
-                            startDate: `${date}T${time}`,
-                          });
-                        }}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                      />
+                      {formErrors.startDate && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.startDate}</p>
+                      )}
                     </div>
-                    {formErrors.startDate && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.startDate}</p>
-                    )}
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Hard Close Date & Time <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex flex-rows gap-2">
-                      <div className="relative w-full">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Hard Close Date & Time <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex flex-rows gap-2">
+                        <div className="relative w-full">
+                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                          <input
+                            type="date"
+                            min={
+                              newAuction.startDate
+                                ? newAuction.startDate.split("T")[0]
+                                : new Date().toLocaleDateString("en-CA")
+                            }
+                            max="2099-12-31"
+                            value={
+                              newAuction.endDate
+                                ? newAuction.endDate.split("T")[0]
+                                : ""
+                            }
+                            onChange={(e) => {
+                              let date = e.target.value;
+                              if (date && date.split("-")[0].length > 4) {
+                                const parts = date.split("-");
+                                parts[0] = parts[0].slice(0, 4);
+                                date = parts.join("-");
+                                e.target.value = date;
+                              }
+                              const time =
+                                newAuction.endDate &&
+                                  newAuction.endDate.includes("T")
+                                  ? newAuction.endDate.split("T")[1]
+                                  : "00:00";
+                              setNewAuction({
+                                ...newAuction,
+                                endDate: `${date}T${time}`,
+                              });
+                            }}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
+                          />
+                        </div>
                         <input
-                          type="date"
-                          min={
-                            newAuction.startDate
-                              ? newAuction.startDate.split("T")[0]
-                              : new Date().toLocaleDateString("en-CA")
-                          }
-                          max="2099-12-31"
+                          type="time"
+                          min={getMinEndTime()}
                           value={
-                            newAuction.endDate
-                              ? newAuction.endDate.split("T")[0]
+                            newAuction.endDate && newAuction.endDate.includes("T")
+                              ? newAuction.endDate.split("T")[1]
                               : ""
                           }
                           onChange={(e) => {
-                            let date = e.target.value;
-                            if (date && date.split("-")[0].length > 4) {
-                              const parts = date.split("-");
-                              parts[0] = parts[0].slice(0, 4);
-                              date = parts.join("-");
-                              e.target.value = date;
-                            }
-                            const time =
-                              newAuction.endDate &&
-                                newAuction.endDate.includes("T")
-                                ? newAuction.endDate.split("T")[1]
-                                : "00:00";
+                            const time = e.target.value;
+                            const date = newAuction.endDate
+                              ? newAuction.endDate.split("T")[0]
+                              : newAuction.startDate
+                                ? newAuction.startDate.split("T")[0]
+                                : new Date().toLocaleDateString("en-CA");
                             setNewAuction({
                               ...newAuction,
                               endDate: `${date}T${time}`,
                             });
                           }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 pl-10 bg-white focus:outline-none focus:border-orange-500"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                         />
                       </div>
+                      {formErrors.endDate && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.endDate}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Quantity <span className="text-red-500">*</span>
+                      </label>
                       <input
-                        type="time"
-                        min={getMinEndTime()}
-                        value={
-                          newAuction.endDate && newAuction.endDate.includes("T")
-                            ? newAuction.endDate.split("T")[1]
-                            : ""
-                        }
+                        type="number"
+                        min="1"
+                        value={newAuction.quantity}
                         onChange={(e) => {
-                          const time = e.target.value;
-                          const date = newAuction.endDate
-                            ? newAuction.endDate.split("T")[0]
-                            : newAuction.startDate
-                              ? newAuction.startDate.split("T")[0]
-                              : new Date().toLocaleDateString("en-CA");
+                          const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
+                          const total = product ? parseInt(product.quantity || 0) : 0;
+                          let val = parseInt(e.target.value);
+                          if (isNaN(val) || val < 0) {
+                            val = e.target.value === "" ? "" : 0;
+                          } else if (val > total) {
+                            val = total;
+                          }
                           setNewAuction({
                             ...newAuction,
-                            endDate: `${date}T${time}`,
+                            quantity: val,
                           });
                         }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+                        placeholder="Enter Quantity"
                       />
+                      {formErrors.quantity && (
+                        <p className="text-red-400 text-sm mt-1">{formErrors.quantity}</p>
+                      )}
                     </div>
-                    {formErrors.endDate && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.endDate}</p>
-                    )}
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Quantity <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={newAuction.quantity}
-                      onChange={(e) => {
-                        const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
-                        const total = product ? parseInt(product.quantity || 0) : 0;
-                        let val = parseInt(e.target.value);
-                        if (isNaN(val) || val < 0) {
-                          val = e.target.value === "" ? "" : 0;
-                        } else if (val > total) {
-                          val = total;
-                        }
-                        setNewAuction({
-                          ...newAuction,
-                          quantity: val,
-                        });
-                      }}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                      placeholder="Enter Quantity"
-                    />
-                    {formErrors.quantity && (
-                      <p className="text-red-400 text-sm mt-1">{formErrors.quantity}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Available Quantity
-                    </label>
-                    <div className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-600 flex items-center h-[42px]">
-                      {(() => {
-                        if (!newAuction.productId) return "Please Select a Product";
-                        const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
-                        const total = product ? parseInt(product.quantity || 0) : 0;
-                        if (total === 0) return <span className="text-red-500 font-medium">Not Available</span>;
-                        const inputQty = parseInt(newAuction.quantity) || 0;
-                        const remaining = total - inputQty;
-                        return remaining > 0 ? remaining : 0;
-                      })()}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Available Quantity
+                      </label>
+                      <div className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-600 flex items-center h-[42px]">
+                        {(() => {
+                          if (!newAuction.productId) return "Please Select a Product";
+                          const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
+                          const total = product ? parseInt(product.quantity || 0) : 0;
+                          if (total === 0) return <span className="text-red-500 font-medium">Not Available</span>;
+                          const inputQty = parseInt(newAuction.quantity) || 0;
+                          const remaining = total - inputQty;
+                          return remaining > 0 ? remaining : 0;
+                        })()}
+                      </div>
                     </div>
                   </div>
+
+                  <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={handleCloseAddForm}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center gap-2"
+                    >
+                      {loading ? "Creating..." : "Add Auction"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Popular Modal */}
+        {showPopularModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+              <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={() => setShowPopularModal(false)}></div>
+              <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6 text-left overflow-hidden transform transition-all">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">ADD TO POPULAR</h3>
+                  <button onClick={() => setShowPopularModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <X size={20} />
+                  </button>
                 </div>
 
-                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                {selectedPopularAuction?.rawImage ? (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-3 text-center">Current Popular Image</h4>
+                    <div className="relative mb-6">
+                      <img
+                        src={selectedPopularAuction.rawImage}
+                        alt="Popular Auction Image"
+                        className="w-full h-48 object-cover rounded-xl border border-gray-200"
+                      />
+                      <button
+                        onClick={() => setShowDeleteConfirmModal(true)}
+                        disabled={loading}
+                        className="absolute top-2 right-2 bg-white rounded-full p-2 text-red-600 hover:text-red-700 hover:bg-red-50 shadow-md transition-colors"
+                        title="Remove Image"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <button
+                        onClick={() => setShowPopularModal(false)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {!popularImagePreview ? (
+                      <label className="mt-4 flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-10 hover:bg-gray-50 transition-colors cursor-pointer group">
+                        <div className="text-center">
+                          <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-orange-500 transition-colors" aria-hidden="true" />
+                          <div className="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
+                            <span className="font-semibold text-orange-600 group-hover:text-orange-500">Upload an image</span>
+                            <input type="file" className="sr-only" accept="image/jpeg, image/png" onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                if (file.type !== "image/jpeg" && file.type !== "image/png") {
+                                  toast.error("Only PNG, JPG, and JPEG formats are allowed");
+                                  return;
+                                }
+                                setPopularImageFile(file);
+                                setPopularImagePreview(URL.createObjectURL(file));
+                              }
+                            }} />
+                          </div>
+                          <p className="text-xs leading-5 text-gray-500 mt-2">PNG, JPG, JPEG up to 10MB</p>
+                        </div>
+                      </label>
+                    ) : (
+                      <div className="mt-4">
+                        <div className="relative">
+                          <img src={popularImagePreview} alt="Preview" className="w-full h-48 object-cover rounded-xl border border-gray-200" />
+                          <button
+                            onClick={() => {
+                              setPopularImagePreview(null);
+                              setPopularImageFile(null);
+                            }}
+                            className="absolute top-2 right-2 bg-white rounded-full p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 shadow-md transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3">
+                          <button
+                            onClick={() => setShowPopularModal(false)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleConfirmPopularUpload}
+                            disabled={loading}
+                            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 font-medium transition-colors"
+                          >
+                            {loading ? "Uploading..." : "Upload Image"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirm Modal */}
+        {showDeleteConfirmModal && (
+          <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm transform transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <AlertCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Remove Popular Image</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Are you sure you want to remove this popular image?
+                </p>
+                <div className="flex w-full gap-3">
                   <button
-                    type="button"
-                    onClick={handleCloseAddForm}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                    onClick={() => setShowDeleteConfirmModal(false)}
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                   >
                     Cancel
                   </button>
                   <button
-                    type="submit"
+                    onClick={handleDeletePopularImage}
                     disabled={loading}
-                    className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium flex items-center gap-2"
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 flex justify-center items-center"
                   >
-                    {loading ? "Creating..." : "Add Auction"}
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Remove"
+                    )}
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         )}
+
         <ToastContainer />
       </div>
     </div>

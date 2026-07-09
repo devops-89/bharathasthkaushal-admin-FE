@@ -31,6 +31,7 @@ const SubcategoryManagement = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [subcategories, setSubcategories] = useState([]);
   const [categoryName, setCategoryName] = useState("Loading...");
   const [currentPage, setCurrentPage] = useState(1);
@@ -406,6 +407,7 @@ const SubcategoryManagement = () => {
           {filteredSubcategories.map((sub) => (
             <div
               key={sub.id}
+              onClick={() => setSelectedSubcategory(sub)}
               className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
             >
               <SecureImage
@@ -482,6 +484,47 @@ const SubcategoryManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Subcategory Details Modal */}
+      {selectedSubcategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto transform transition-all">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+              <h2 className="text-xl font-bold text-gray-900 capitalize">
+                Subcategory Details
+              </h2>
+              <button
+                onClick={() => setSelectedSubcategory(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="rounded-xl overflow-hidden mb-6 border border-gray-100 bg-gray-50">
+                <SecureImage
+                  src={selectedSubcategory.image}
+                  alt={selectedSubcategory.name}
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 capitalize mb-4">
+                {selectedSubcategory.name}
+              </h3>
+              
+              <div className="bg-orange-50/50 rounded-lg p-4 border border-orange-100">
+                <h4 className="text-sm font-semibold text-orange-800 mb-2">Description</h4>
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {selectedSubcategory.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer />
     </div>
   );

@@ -664,12 +664,12 @@ const ArtisanManagement = () => {
                 <Filter className="w-5 h-5 mr-2" /> Filters
               </button>
             */}
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
-              >
-                <Plus className="w-5 h-5 mr-2" /> Register Artisan
-              </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              <Plus className="w-5 h-5 mr-2" /> Register Artisan
+            </button>
             {/* </div> */}
           </div>
           {/* showFilter && (
@@ -707,9 +707,8 @@ const ArtisanManagement = () => {
 
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
                   <h2 className="text-xl font-bold text-gray-900">
                     {isEditMode ? "Edit Artisan Details" : "Register New Artisan"}
                   </h2>
@@ -719,8 +718,8 @@ const ArtisanManagement = () => {
                   >
                     <X className="w-6 h-6" />
                   </button>
-                </div>
-                <div className="space-y-4">
+              </div>
+              <div className="p-6 overflow-y-auto space-y-4 flex-1">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       First Name <span className="text-red-500">*</span>
@@ -1155,7 +1154,6 @@ const ArtisanManagement = () => {
                 </div>
               </div>
             </div>
-          </div>
         )}
         {/* Details Modal */}
         {showDetailsModal && selectedPartner && (

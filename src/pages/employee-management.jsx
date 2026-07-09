@@ -435,284 +435,282 @@ const ArtisanManagement = () => {
         </div>
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Register New Employee
-                  </h2>
-                  <button
-                    onClick={handleCloseAddForm}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleFormChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                          }`}
-                        placeholder="Enter First Name"
-                        required
-                      />
-                      {errors.firstName && (
-                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>
-                      )}
-                    </div>
-
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleFormChange}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                          }`}
-                        placeholder="Enter Last Name"
-                        required
-                      />
-                      {errors.lastName && (
-                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
+            <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Register New Employee
+                </h2>
+                <button
+                  onClick={handleCloseAddForm}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto space-y-4 flex-1">
+                <div className="flex gap-2">
+                  <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address <span className="text-red-500">*</span>
+                      First Name <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
                         }`}
-                      placeholder="Enter Email Address"
+                      placeholder="Enter First Name"
+                      required
                     />
-                    {errors.email && (
-                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>
+                    {errors.firstName && (
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>
                     )}
                   </div>
-                  <div className="flex gap-2">
-                    <div className="w-30 relative" ref={dropdownRef}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Country Code
-                      </label>
-                      <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
-                        onClick={() =>
-                          setIsCountryDropdownOpen(!isCountryDropdownOpen)
-                        }
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          {(() => {
-                            const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
-                            return selected && selected.code ? (
-                              <img
-                                src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
-                                alt={selected.code}
-                                className="w-5 h-auto rounded-sm object-cover shadow-sm"
-                              />
-                            ) : null;
-                          })()}
-                          <span>{formData.countryCode}</span>
-                        </div>
-                        <ChevronDown className="ml-2 text-gray-400 w-4 h-4" />
+
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleFormChange}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
+                      placeholder="Enter Last Name"
+                      required
+                    />
+                    {errors.lastName && (
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter Email Address"
+                  />
+                  {errors.email && (
+                    <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-30 relative" ref={dropdownRef}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country Code
+                    </label>
+                    <div
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
+                      onClick={() =>
+                        setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                      }
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        {(() => {
+                          const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
+                          return selected && selected.code ? (
+                            <img
+                              src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
+                              alt={selected.code}
+                              className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                            />
+                          ) : null;
+                        })()}
+                        <span>{formData.countryCode}</span>
                       </div>
+                      <ChevronDown className="ml-2 text-gray-400 w-4 h-4" />
+                    </div>
 
-                      {isCountryDropdownOpen && (
-                        <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
-                          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
-                            <div className="relative">
-                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                              <input
-                                type="text"
-                                placeholder="Search country..."
-                                value={countrySearchTerm}
-                                onChange={(e) =>
-                                  setCountrySearchTerm(e.target.value)
-                                }
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
-                                autoFocus
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                          </div>
-                          <div className="overflow-y-auto flex-1">
-                            {filteredCountries.length > 0 ? (
-                              filteredCountries.map((country) => (
-                                <div
-                                  key={country.code}
-                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
-                                  onClick={() => {
-                                    setFormData({
-                                      ...formData,
-                                      countryCode: country.dial_code,
-                                    });
-                                    setIsCountryDropdownOpen(false);
-                                    setCountrySearchTerm("");
-                                  }}
-                                >
-                                  {country.code && (
-                                    <img
-                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
-                                      alt={country.code}
-                                      className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
-                                    />
-                                  )}
-                                  <span className="font-medium text-gray-900 w-12">
-                                    {country.dial_code}
-                                  </span>
-                                  <span className="text-gray-600 truncate">
-                                    {country.name}
-                                  </span>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                No countries found
-                              </div>
-                            )}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                        <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                              type="text"
+                              placeholder="Search country..."
+                              value={countrySearchTerm}
+                              onChange={(e) =>
+                                setCountrySearchTerm(e.target.value)
+                              }
+                              className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </div>
                         </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phoneNo"
-                        value={formData.phoneNo}
-                        maxLength={
-                          countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "");
+                        <div className="overflow-y-auto flex-1">
+                          {filteredCountries.length > 0 ? (
+                            filteredCountries.map((country) => (
+                              <div
+                                key={country.code}
+                                className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    countryCode: country.dial_code,
+                                  });
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearchTerm("");
+                                }}
+                              >
+                                {country.code && (
+                                  <img
+                                    src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                    alt={country.code}
+                                    className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
+                                  />
+                                )}
+                                <span className="font-medium text-gray-900 w-12">
+                                  {country.dial_code}
+                                </span>
+                                <span className="text-gray-600 truncate">
+                                  {country.name}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                              No countries found
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phoneNo"
+                      value={formData.phoneNo}
+                      maxLength={
+                        countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
 
-                          const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
-                          const countryIso = selectedCountry ? selectedCountry.code : undefined;
+                        const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+                        const countryIso = selectedCountry ? selectedCountry.code : undefined;
 
-                          if (countryIso) {
-                            // Only block if we are ADDING characters
-                            if (value.length > (formData.phoneNo || "").length) {
-                              let isTooLong = false;
-                              // Strict limit for India (10 digits for standard mobile numbers)
-                              if (countryIso === 'IN' && value.length > 10) {
-                                isTooLong = true;
-                              } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
-                                isTooLong = true;
-                              }
-
-                              if (isTooLong) return; // Block typing
+                        if (countryIso) {
+                          // Only block if we are ADDING characters
+                          if (value.length > (formData.phoneNo || "").length) {
+                            let isTooLong = false;
+                            // Strict limit for India (10 digits for standard mobile numbers)
+                            if (countryIso === 'IN' && value.length > 10) {
+                              isTooLong = true;
+                            } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
+                              isTooLong = true;
                             }
 
-                            setFormData((prev) => ({ ...prev, phoneNo: value }));
+                            if (isTooLong) return; // Block typing
+                          }
 
-                            // Start digit / validity validation using libphonenumber-js
-                            const maxLength = selectedCountry.max_length;
-                            if (value.length > 0 && maxLength && value.length === maxLength) {
-                              if (!isValidPhoneNumber(value, countryIso)) {
-                                setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
-                              } else {
-                                if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
-                              }
+                          setFormData((prev) => ({ ...prev, phoneNo: value }));
+
+                          // Start digit / validity validation using libphonenumber-js
+                          const maxLength = selectedCountry.max_length;
+                          if (value.length > 0 && maxLength && value.length === maxLength) {
+                            if (!isValidPhoneNumber(value, countryIso)) {
+                              setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
                             } else {
                               if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                             }
                           } else {
-                            if (value.length <= 15) {
-                              setFormData((prev) => ({ ...prev, phoneNo: value }));
-                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
-                            }
+                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                           }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                          }`}
-                        placeholder="Enter Phone Number"
-                      />
-                      {errors.phoneNo && (
-                        <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="aadhaarNumber"
-                      value={formData.aadhaarNumber}
-                      maxLength={14}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        if (value.length <= 12) {
-                          const formattedValue = formatAadhaar(value);
-                          setFormData((prev) => ({
-                            ...prev,
-                            aadhaarNumber: formattedValue,
-                          }));
-                          if (errors.aadhaarNumber) {
-                            setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
+                        } else {
+                          if (value.length <= 15) {
+                            setFormData((prev) => ({ ...prev, phoneNo: value }));
+                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                           }
                         }
                       }}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
                         }`}
-                      placeholder="Enter Aadhaar Number"
-                      required
+                      placeholder="Enter Phone Number"
                     />
-                    {errors.aadhaarNumber && (
-                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>
+                    {errors.phoneNo && (
+                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Location <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.location ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                        }`}
-                      placeholder="Enter Location"
-                    />
-                    {errors.location && (
-                      <p className="text-red-400 text-xs mt-1 font-medium">{errors.location}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handleCloseAddForm}
-                      className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAddEmployee}
-                      className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
-                    >
-                      Register Employee
-                    </button>
-                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Aadhaar Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="aadhaarNumber"
+                    value={formData.aadhaarNumber}
+                    maxLength={14}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      if (value.length <= 12) {
+                        const formattedValue = formatAadhaar(value);
+                        setFormData((prev) => ({
+                          ...prev,
+                          aadhaarNumber: formattedValue,
+                        }));
+                        if (errors.aadhaarNumber) {
+                          setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
+                        }
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter Aadhaar Number"
+                    required
+                  />
+                  {errors.aadhaarNumber && (
+                    <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.location ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter Location"
+                  />
+                  {errors.location && (
+                    <p className="text-red-400 text-xs mt-1 font-medium">{errors.location}</p>
+                  )}
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={handleCloseAddForm}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddEmployee}
+                    className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+                  >
+                    Register Employee
+                  </button>
                 </div>
               </div>
             </div>
