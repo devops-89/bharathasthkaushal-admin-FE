@@ -37,6 +37,8 @@ const EditProduct = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [originalProduct, setOriginalProduct] = useState(null);
+  const [initialProductData, setInitialProductData] = useState(null);
+  const [initialExistingImages, setInitialExistingImages] = useState([]);
 
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -150,7 +152,7 @@ const EditProduct = () => {
           setShowFinishOther(true);
         }
 
-        setProductData({
+        const initialData = {
           product_name: p.product_name || "",
           description: p.description || "",
           categoryId: catId || "",
@@ -170,7 +172,10 @@ const EditProduct = () => {
           country: p.country || "",
           warehouseId: finalWarehouseId || "",
           isReadyForAuction: p.isReadyForAuction || false,
-        });
+        };
+
+        setProductData(initialData);
+        setInitialProductData(initialData);
 
         let fetchedImages = p.images || [];
         if (typeof fetchedImages === "string") {
@@ -181,6 +186,7 @@ const EditProduct = () => {
           }
         }
         setExistingImages(fetchedImages);
+        setInitialExistingImages(fetchedImages);
 
         setCountrySearch(p.country || "");
       } catch (err) {
@@ -297,6 +303,16 @@ const EditProduct = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
+    const hasProductDataChanged = JSON.stringify(productData) !== JSON.stringify(initialProductData);
+    const haveExistingImagesChanged = existingImages.length !== initialExistingImages.length;
+    const haveNewImagesAdded = images.length > 0;
+
+    if (!hasProductDataChanged && !haveExistingImagesChanged && !haveNewImagesAdded) {
+      toast.info("No changes detected");
+      navigate(-1);
       return;
     }
 
@@ -466,20 +482,23 @@ const EditProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Warehouse *
               </label>
-              <select
-                name="warehouseId"
-                value={productData.warehouseId}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                disabled={!productData.country}
-              >
-                <option value="" disabled>Select Warehouse</option>
-                {warehouses.map((w) => (
-                  <option key={w._id || w.id} value={w._id || w.id}>
-                    {w.warehouse_name || w.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  name="warehouseId"
+                  value={productData.warehouseId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
+                  disabled={!productData.country}
+                >
+                  <option value="" disabled>Select Warehouse</option>
+                  {warehouses.map((w) => (
+                    <option key={w._id || w.id} value={w._id || w.id}>
+                      {w.warehouse_name || w.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
             </div>
 
             {/* Category */}
@@ -487,19 +506,22 @@ const EditProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Category *
               </label>
-              <select
-                name="categoryId"
-                value={productData.categoryId}
-                onChange={handleCategoryChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  name="categoryId"
+                  value={productData.categoryId}
+                  onChange={handleCategoryChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat.category_id} value={cat.category_id}>
+                      {cat.category_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
             </div>
 
             {/* SubCategory */}
@@ -507,20 +529,23 @@ const EditProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 SubCategory *
               </label>
-              <select
-                name="subCategoryId"
-                value={productData.subCategoryId}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                disabled={!subCategories.length}
-              >
-                <option value="">Select SubCategory</option>
-                {subCategories.map((sub) => (
-                  <option key={sub.category_id} value={sub.category_id}>
-                    {sub.category_name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  name="subCategoryId"
+                  value={productData.subCategoryId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
+                  disabled={!subCategories.length}
+                >
+                  <option value="">Select SubCategory</option>
+                  {subCategories.map((sub) => (
+                    <option key={sub.category_id} value={sub.category_id}>
+                      {sub.category_name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
             </div>
 
             {/* Product Price Per Piece */}
@@ -636,7 +661,7 @@ const EditProduct = () => {
                       handleChange(e);
                     }
                   }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none bg-white"
                 >
                   <option value="">Select Finish</option>
                   <option value="Matte">Matte</option>
@@ -871,35 +896,34 @@ const EditProduct = () => {
               </div>
 
               {/* Upload Input */}
-              <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-orange-500 hover:bg-orange-50/50 transition-colors">
-                <div className="space-y-1 text-center">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex text-sm text-gray-600 justify-center">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500"
+              <label htmlFor="file-upload" className="block cursor-pointer group">
+                <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg group-hover:border-orange-500 group-hover:bg-orange-50/50 transition-colors">
+                  <div className="space-y-1 text-center">
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400 group-hover:text-orange-500 transition-colors"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
                     >
-                      <span>Upload new images</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={handleFileChange} />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <div className="flex text-sm text-gray-600 justify-center">
+                      <span className="relative font-medium text-orange-600 group-hover:text-orange-500">
+                        Upload new images
+                        <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={handleFileChange} />
+                      </span>
+                      <p className="pl-1 group-hover:text-gray-700">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500 group-hover:text-gray-600">PNG, JPG, JPEG up to 10MB</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 10MB</p>
                 </div>
-              </div>
+              </label>
             </div>
           </div>
 

@@ -77,6 +77,7 @@ const ArtisanManagement = () => {
   const expertiseDropdownRef = React.useRef(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [initialFormData, setInitialFormData] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -298,7 +299,7 @@ const ArtisanManagement = () => {
       }
     }
 
-    setFormData({
+    const initialData = {
       firstName: selectedPartner.firstName !== "—" ? selectedPartner.firstName : "",
       lastName: selectedPartner.lastName !== "—" ? selectedPartner.lastName : "",
       email: selectedPartner.email !== "—" ? selectedPartner.email : "",
@@ -311,7 +312,10 @@ const ArtisanManagement = () => {
       subCaste: subCst !== "_" ? subCst : "",
       introVideo: selectedPartner.introVideo || "",
       gstNumber: selectedPartner.gstNumber !== "—" ? selectedPartner.gstNumber : "",
-    });
+    };
+
+    setFormData(initialData);
+    setInitialFormData(initialData);
 
     setShowAddForm(true);
   };
@@ -508,6 +512,16 @@ const ArtisanManagement = () => {
     }
 
     setErrors({});
+
+    if (isEditMode) {
+      const hasChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      if (!hasChanged) {
+        toast.info("No changes detected");
+        setIsSubmitting(false);
+        setShowAddForm(false);
+        return;
+      }
+    }
 
     try {
       // console.log("All validations passed. Preparing API payload...");
@@ -709,451 +723,451 @@ const ArtisanManagement = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
               <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-10 shrink-0">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {isEditMode ? "Edit Artisan Details" : "Register New Artisan"}
-                  </h2>
-                  <button
-                    onClick={handleCloseForm}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {isEditMode ? "Edit Artisan Details" : "Register New Artisan"}
+                </h2>
+                <button
+                  onClick={handleCloseForm}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
               <div className="p-6 overflow-y-auto space-y-4 flex-1">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                        }`}
-                      placeholder="Enter First Name"
-                    />
-                    {errors.firstName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                        }`}
-                      placeholder="Enter Last Name"
-                    />
-                    {errors.lastName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address <span className="text-red-500">*</span>
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter First Name"
+                  />
+                  {errors.firstName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.firstName}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none ${errors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter Last Name"
+                  />
+                  {errors.lastName && <p className="text-red-400 text-xs mt-1 font-medium">{errors.lastName}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
 
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleFormChange}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                        }`}
-                      placeholder="Enter Email Address"
-                    />
-                    {errors.email && <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>}
-                  </div>
-                  <div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                      }`}
+                    placeholder="Enter Email Address"
+                  />
+                  {errors.email && <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address {/*<span className="text-red-500">*</span>*/}
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                    placeholder=" Enter Your Address"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-40 relative" ref={dropdownRef}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Address {/*<span className="text-red-500">*</span>*/}
+                      Country Code
                     </label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleFormChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder=" Enter Your Address"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="w-40 relative" ref={dropdownRef}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Country Code
-                      </label>
-                      <div
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
-                        onClick={() =>
-                          setIsCountryDropdownOpen(!isCountryDropdownOpen)
-                        }
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          {(() => {
-                            const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
-                            return selected && selected.code ? (
-                              <img
-                                src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
-                                alt={selected.code}
-                                className="w-5 h-auto rounded-sm object-cover shadow-sm"
-                              />
-                            ) : null;
-                          })()}
-                          <span>{formData.countryCode}</span>
-                        </div>
-                        {/*<span className="truncate">{formData.countryCode}</span>*/}
-                        {/*<span className="ml-2 text-gray-400">▼</span>*/}
-                        <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
+                    <div
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
+                      onClick={() =>
+                        setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                      }
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        {(() => {
+                          const selected = countryCodes.find(c => c.dial_code === formData.countryCode);
+                          return selected && selected.code ? (
+                            <img
+                              src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
+                              alt={selected.code}
+                              className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                            />
+                          ) : null;
+                        })()}
+                        <span>{formData.countryCode}</span>
                       </div>
+                      {/*<span className="truncate">{formData.countryCode}</span>*/}
+                      {/*<span className="ml-2 text-gray-400">▼</span>*/}
+                      <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
+                    </div>
 
-                      {isCountryDropdownOpen && (
-                        <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
-                          <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
-                            <div className="relative">
-                              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                              <input
-                                type="text"
-                                placeholder="Search country..."
-                                value={countrySearchTerm}
-                                onChange={(e) =>
-                                  setCountrySearchTerm(e.target.value)
-                                }
-                                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
-                                autoFocus
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                          </div>
-                          <div className="overflow-y-auto flex-1">
-                            {filteredCountries.length > 0 ? (
-                              filteredCountries.map((country) => (
-                                <div
-                                  key={country.code}
-                                  className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
-                                  onClick={() => {
-                                    setFormData({
-                                      ...formData,
-                                      countryCode: country.dial_code,
-                                    });
-                                    setIsCountryDropdownOpen(false);
-                                    setCountrySearchTerm("");
-                                  }}
-                                >
-                                  {country.code && (
-                                    <img
-                                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
-                                      alt={country.code}
-                                      className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
-                                    />
-                                  )}
-                                  <span className="font-medium text-gray-900 w-12">
-                                    {country.dial_code}
-                                  </span>
-                                  <span className="text-gray-600 truncate">
-                                    {country.name}
-                                  </span>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                No countries found
-                              </div>
-                            )}
+                    {isCountryDropdownOpen && (
+                      <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                        <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                              type="text"
+                              placeholder="Search country..."
+                              value={countrySearchTerm}
+                              onChange={(e) =>
+                                setCountrySearchTerm(e.target.value)
+                              }
+                              className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
+                              autoFocus
+                              onClick={(e) => e.stopPropagation()}
+                            />
                           </div>
                         </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phoneNo"
-                        value={formData.phoneNo}
-                        maxLength={
-                          countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
-                        }
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "");
+                        <div className="overflow-y-auto flex-1">
+                          {filteredCountries.length > 0 ? (
+                            filteredCountries.map((country) => (
+                              <div
+                                key={country.code}
+                                className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    countryCode: country.dial_code,
+                                  });
+                                  setIsCountryDropdownOpen(false);
+                                  setCountrySearchTerm("");
+                                }}
+                              >
+                                {country.code && (
+                                  <img
+                                    src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                    alt={country.code}
+                                    className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
+                                  />
+                                )}
+                                <span className="font-medium text-gray-900 w-12">
+                                  {country.dial_code}
+                                </span>
+                                <span className="text-gray-600 truncate">
+                                  {country.name}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                              No countries found
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phoneNo"
+                      value={formData.phoneNo}
+                      maxLength={
+                        countryCodes.find((c) => c.dial_code === formData.countryCode)?.max_length || 15
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
 
-                          const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
-                          const countryIso = selectedCountry ? selectedCountry.code : undefined;
+                        const selectedCountry = countryCodes.find(c => c.dial_code === formData.countryCode);
+                        const countryIso = selectedCountry ? selectedCountry.code : undefined;
 
-                          if (countryIso) {
-                            // Only block if we are ADDING characters
-                            if (value.length > (formData.phoneNo || "").length) {
-                              let isTooLong = false;
-                              // Strict limit for India (10 digits for standard mobile numbers)
-                              if (countryIso === 'IN' && value.length > 10) {
-                                isTooLong = true;
-                              } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
-                                isTooLong = true;
-                              }
-
-                              if (isTooLong) return; // Block typing
+                        if (countryIso) {
+                          // Only block if we are ADDING characters
+                          if (value.length > (formData.phoneNo || "").length) {
+                            let isTooLong = false;
+                            // Strict limit for India (10 digits for standard mobile numbers)
+                            if (countryIso === 'IN' && value.length > 10) {
+                              isTooLong = true;
+                            } else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') {
+                              isTooLong = true;
                             }
 
-                            setFormData({ ...formData, phoneNo: value });
+                            if (isTooLong) return; // Block typing
+                          }
 
-                            // Start digit / validity validation using libphonenumber-js
-                            const maxLength = selectedCountry.max_length;
-                            if (value.length > 0 && maxLength && value.length === maxLength) {
-                              if (!isValidPhoneNumber(value, countryIso)) {
-                                setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
-                              } else {
-                                if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
-                              }
+                          setFormData({ ...formData, phoneNo: value });
+
+                          // Start digit / validity validation using libphonenumber-js
+                          const maxLength = selectedCountry.max_length;
+                          if (value.length > 0 && maxLength && value.length === maxLength) {
+                            if (!isValidPhoneNumber(value, countryIso)) {
+                              setErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
                             } else {
                               if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                             }
                           } else {
-                            if (value.length <= 15) {
-                              setFormData({ ...formData, phoneNo: value });
-                              if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
-                            }
+                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
                           }
-                        }}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
-                          }`}
-                        placeholder="Enter Phone Number"
-                      />
-                      {errors.phoneNo && <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expertise Field <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative" ref={expertiseDropdownRef}>
-                      <div
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer bg-white flex items-center justify-between ${errors.expertizeField ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
-                        onClick={() =>
-                          setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)
+                        } else {
+                          if (value.length <= 15) {
+                            setFormData({ ...formData, phoneNo: value });
+                            if (errors.phoneNo) setErrors((prev) => ({ ...prev, phoneNo: "" }));
+                          }
                         }
-                      >
-                        <span className="truncate">
-                          {formData.expertizeField.length > 0
-                            ? `${formData.expertizeField.length} selected`
-                            : "Select Expertise"}
-                        </span>
-                        {/*<span className="ml-2 text-gray-400">▼</span>*/}
-                        <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
-                      </div>
+                      }}
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 ${errors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"
+                        }`}
+                      placeholder="Enter Phone Number"
+                    />
+                    {errors.phoneNo && <p className="text-red-400 text-xs mt-1 font-medium">{errors.phoneNo}</p>}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Expertise Field <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative" ref={expertiseDropdownRef}>
+                    <div
+                      className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none cursor-pointer bg-white flex items-center justify-between ${errors.expertizeField ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                      onClick={() =>
+                        setIsExpertiseDropdownOpen(!isExpertiseDropdownOpen)
+                      }
+                    >
+                      <span className="truncate">
+                        {formData.expertizeField.length > 0
+                          ? `${formData.expertizeField.length} selected`
+                          : "Select Expertise"}
+                      </span>
+                      {/*<span className="ml-2 text-gray-400">▼</span>*/}
+                      <ChevronDown className="ml-2 w-4 h-4 text-gray-500" />
+                    </div>
 
-                      {isExpertiseDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                          {subCategories.map((subCategory, index) => (
-                            <div
-                              key={index}
-                              className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
-                              onClick={() => {
-                                const currentSelected = formData.expertizeField;
-                                const isSelected = currentSelected.includes(
-                                  subCategory.category_name,
+                    {isExpertiseDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {subCategories.map((subCategory, index) => (
+                          <div
+                            key={index}
+                            className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                            onClick={() => {
+                              const currentSelected = formData.expertizeField;
+                              const isSelected = currentSelected.includes(
+                                subCategory.category_name,
+                              );
+                              let newSelected;
+                              if (isSelected) {
+                                newSelected = currentSelected.filter(
+                                  (item) =>
+                                    item !== subCategory.category_name,
                                 );
-                                let newSelected;
-                                if (isSelected) {
-                                  newSelected = currentSelected.filter(
-                                    (item) =>
-                                      item !== subCategory.category_name,
-                                  );
-                                } else {
-                                  newSelected = [
-                                    ...currentSelected,
-                                    subCategory.category_name,
-                                  ];
-                                }
-                                setFormData({
-                                  ...formData,
-                                  expertizeField: newSelected,
-                                });
-                                if (errors.expertizeField) setErrors((prev) => ({ ...prev, expertizeField: "" }));
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={formData.expertizeField.includes(
+                              } else {
+                                newSelected = [
+                                  ...currentSelected,
                                   subCategory.category_name,
-                                )}
-                                readOnly
-                                className="rounded text-orange-600 focus:ring-orange-500"
-                              />
-                              <span className="text-gray-700">
-                                {subCategory.category_name}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {errors.expertizeField && <p className="text-red-400 text-xs mt-1 font-medium">{errors.expertizeField}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Aadhaar Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="aadhaarNumber"
-                      value={formatAadhaar(formData.aadhaarNumber)}
-                      //  value={formData.aadhaarNumber}
-                      maxLength={14}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        if (value.length <= 12) {
-                          setFormData({ ...formData, aadhaarNumber: value });
-                          if (errors.aadhaarNumber) setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
-                        }
-                      }}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
-                      placeholder="Enter Aadhar Number"
-                    />
-                    {errors.aadhaarNumber && <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Caste Category <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        name="user_caste_category"
-                        value={formData.user_caste_category}
-                        onChange={(e) => {
-                          handleFormChange(e);
-                          if (errors.user_caste_category) setErrors((prev) => ({ ...prev, user_caste_category: "" }));
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none appearance-none ${errors.user_caste_category ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
-                      >
-                        <option value="" hidden>
-                          Select Caste Category
-                        </option>
-                        {Object.keys(casteCategories).map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                    </div>
-                    {errors.user_caste_category && <p className="text-red-400 text-xs mt-1 font-medium">{errors.user_caste_category}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sub Caste <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        name="subCaste"
-                        value={showSubCasteOther ? "Other" : formData.subCaste}
-                        disabled={!formData.user_caste_category}
-                        onChange={(e) => {
-                          if (e.target.value === "Other") {
-                            setShowSubCasteOther(true);
-                            setFormData((prev) => ({ ...prev, subCaste: "" }));
-                          } else {
-                            setShowSubCasteOther(false);
-                            handleFormChange(e);
-                          }
-                          if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none appearance-none ${!formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"} ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
-                      >
-                        <option value="" hidden>
-                          Select Sub Caste
-                        </option>
-                        {formData.user_caste_category &&
-                          casteCategories[formData.user_caste_category]?.map(
-                            (subCaste) => (
-                              <option key={subCaste} value={subCaste}>
-                                {subCaste}
-                              </option>
-                            ),
-                          )}
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                    </div>
-                    {showSubCasteOther && (
-                      <input
-                        type="text"
-                        name="subCaste"
-                        value={formData.subCaste}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-                          setFormData({ ...formData, subCaste: value });
-                          if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
-                        }}
-                        placeholder="Enter Custom Sub Caste"
-                        className={`mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
-                      />
-                    )}
-                    {errors.subCaste && <p className="text-red-400 text-xs mt-1 font-medium">{errors.subCaste}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Gst Number
-                    </label>
-                    <input
-                      type="text"
-                      name="gstNumber"
-                      value={formData.gstNumber.toUpperCase()}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          gstNumber: e.target.value.toUpperCase(),
-                        });
-                      }}
-                      maxLength={15}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
-                      placeholder=" Enter GST Number"
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      onClick={handleCloseForm}
-                      className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAddEmployee}
-                      disabled={isSubmitting}
-                      className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-                    >
-                      {isSubmitting ? (
-                        <span className="flex items-center justify-center">
-                          <svg
-                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
+                                ];
+                              }
+                              setFormData({
+                                ...formData,
+                                expertizeField: newSelected,
+                              });
+                              if (errors.expertizeField) setErrors((prev) => ({ ...prev, expertizeField: "" }));
+                            }}
                           >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
-                          Processing...
-                        </span>
-                      ) : (
-                        isEditMode ? "Update Artisan" : "Register Artisan"
-                      )}
-                    </button>
+                            <input
+                              type="checkbox"
+                              checked={formData.expertizeField.includes(
+                                subCategory.category_name,
+                              )}
+                              readOnly
+                              className="rounded text-orange-600 focus:ring-orange-500"
+                            />
+                            <span className="text-gray-700">
+                              {subCategory.category_name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                  {errors.expertizeField && <p className="text-red-400 text-xs mt-1 font-medium">{errors.expertizeField}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Aadhaar Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="aadhaarNumber"
+                    value={formatAadhaar(formData.aadhaarNumber)}
+                    //  value={formData.aadhaarNumber}
+                    maxLength={14}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      if (value.length <= 12) {
+                        setFormData({ ...formData, aadhaarNumber: value });
+                        if (errors.aadhaarNumber) setErrors((prev) => ({ ...prev, aadhaarNumber: "" }));
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                    placeholder="Enter Aadhar Number"
+                  />
+                  {errors.aadhaarNumber && <p className="text-red-400 text-xs mt-1 font-medium">{errors.aadhaarNumber}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Caste Category <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="user_caste_category"
+                      value={formData.user_caste_category}
+                      onChange={(e) => {
+                        handleFormChange(e);
+                        if (errors.user_caste_category) setErrors((prev) => ({ ...prev, user_caste_category: "" }));
+                      }}
+                      className={`w-full px-3 py-2  bg-white border rounded-lg focus:outline-none appearance-none ${errors.user_caste_category ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                    >
+                      <option value="" hidden>
+                        Select Caste Category
+                      </option>
+                      {Object.keys(casteCategories).map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  </div>
+                  {errors.user_caste_category && <p className="text-red-400 text-xs mt-1 font-medium">{errors.user_caste_category}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sub Caste <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="subCaste"
+                      value={showSubCasteOther ? "Other" : formData.subCaste}
+                      disabled={!formData.user_caste_category}
+                      onChange={(e) => {
+                        if (e.target.value === "Other") {
+                          setShowSubCasteOther(true);
+                          setFormData((prev) => ({ ...prev, subCaste: "" }));
+                        } else {
+                          setShowSubCasteOther(false);
+                          handleFormChange(e);
+                        }
+                        if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none appearance-none ${!formData.user_caste_category ? "bg-gray-100 cursor-not-allowed text-gray-400" : "bg-white"} ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                    >
+                      <option value="" hidden>
+                        Select Sub Caste
+                      </option>
+                      {formData.user_caste_category &&
+                        casteCategories[formData.user_caste_category]?.map(
+                          (subCaste) => (
+                            <option key={subCaste} value={subCaste}>
+                              {subCaste}
+                            </option>
+                          ),
+                        )}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  </div>
+                  {showSubCasteOther && (
+                    <input
+                      type="text"
+                      name="subCaste"
+                      value={formData.subCaste}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                        setFormData({ ...formData, subCaste: value });
+                        if (errors.subCaste) setErrors((prev) => ({ ...prev, subCaste: "" }));
+                      }}
+                      placeholder="Enter Custom Sub Caste"
+                      className={`mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.subCaste ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                    />
+                  )}
+                  {errors.subCaste && <p className="text-red-400 text-xs mt-1 font-medium">{errors.subCaste}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gst Number
+                  </label>
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    value={formData.gstNumber.toUpperCase()}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        gstNumber: e.target.value.toUpperCase(),
+                      });
+                    }}
+                    maxLength={15}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                    placeholder=" Enter GST Number"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={handleCloseForm}
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddEmployee}
+                    disabled={isSubmitting}
+                    className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      isEditMode ? "Update Artisan" : "Register Artisan"
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
         )}
         {/* Details Modal */}
         {showDetailsModal && selectedPartner && (
@@ -1208,7 +1222,7 @@ const ArtisanManagement = () => {
                           : "bg-red-100 text-red-800"
                           }`}
                       >
-                        {selectedPartner.status || "Approved Artisan"}
+                        {selectedPartner.status ? selectedPartner.status.charAt(0).toUpperCase() + selectedPartner.status.slice(1).toLowerCase() : "Approved Artisan"}
                       </span>
                     </div>
                   </div>
@@ -1288,7 +1302,7 @@ const ArtisanManagement = () => {
                       <div>
                         <p className="text-sm text-gray-500">Status</p>
                         <p className="font-medium break-words">
-                          {selectedPartner.status || "Approved Artisan"}
+                          {selectedPartner.status ? selectedPartner.status.charAt(0).toUpperCase() + selectedPartner.status.slice(1).toLowerCase() : "Approved Artisan"}
                         </p>
                       </div>
                     </div>

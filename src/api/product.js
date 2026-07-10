@@ -236,7 +236,12 @@ export const productControllers = {
   },
 
   deletePopularAuctionImage: (auctionId) => {
-    // TODO: Update this URL to match the exact endpoint provided by the backend team
-    return productSecuredApi.delete(`/auction/${auctionId}/popular-image`);
+    // Send a JSON patch request with image set to null as requested by backend
+    return productSecuredApi.patch("/auction/image", {
+      auctionId,
+      image: null
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
   },
 };

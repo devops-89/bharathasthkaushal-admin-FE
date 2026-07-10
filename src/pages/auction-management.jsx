@@ -392,7 +392,7 @@ const AuctionManagement = () => {
       errors.startingBid = "Starting bid must be greater than 0";
     }
 
-    if (newAuction.reservePrice && parseFloat(newAuction.reservePrice) < parseFloat(newAuction.startingBid)) errors.reservePrice = "Reserve price must be greater than or equal to starting bid";
+    if (newAuction.reservePrice && parseFloat(newAuction.reservePrice) < 0) errors.reservePrice = "Minimum bid price cannot be negative";
     if (!newAuction.startDate) errors.startDate = "Start Date & Time is required";
     else if (new Date(newAuction.startDate) < new Date()) errors.startDate = "Start time cannot be in the past";
     if (!newAuction.endDate) errors.endDate = "End Date & Time is required";
@@ -458,6 +458,8 @@ const AuctionManagement = () => {
       const res = await productControllers.createAuction(auctionData);
       // console.log("Create Auction Response:", res.data);
       toast.success(res.data.message || "Auction created successfully");
+
+      const selectedProduct = products.find((p) => (p.productId || p._id || p.id) == newAuction.productId);
 
       const newAuctionData = {
         ...res.data.data,
@@ -625,7 +627,7 @@ const AuctionManagement = () => {
       await productControllers.addImageToAuction(formData);
       toast.success("Image uploaded successfully!");
       setShowPopularModal(false);
-      fetchAuctions();
+      fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
       console.error("Error uploading image:", err);
       toast.error("Failed to upload image");
@@ -639,18 +641,22 @@ const AuctionManagement = () => {
 
     setLoading(true);
     try {
-      await productControllers.deletePopularAuctionImage(selectedPopularAuction.auction_id);
+      const formData = new FormData();
+      formData.append("auctionId", selectedPopularAuction.auction_id);
+      formData.append("image", "null");
+
+      await productControllers.addImageToAuction(formData);
       toast.success("Popular image removed successfully!");
 
-      // Update local state to show upload screen immediately
       setSelectedPopularAuction({
         ...selectedPopularAuction,
         rawImage: null,
         image: null
       });
 
-      // Refresh list behind the scenes
-      fetchAuctions(pagination.currentPage, pagination.limit, debouncedSearchTerm);
+      setShowPopularModal(false);
+
+      fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
       console.error("Error deleting popular image:", err);
       toast.error(
@@ -796,14 +802,14 @@ const AuctionManagement = () => {
                               Start: ₹{auction.startingBid.toLocaleString()}
                             </div>
                           )}
-                          {auction.minBidAmount > 0 && (
+                          {/*{auction.minBidAmount > 0 && (
                             <div className="text-sm text-gray-500">
                               Min Bid: ₹{auction.minBidAmount.toLocaleString()}
                             </div>
-                          )}
+                          )}*/}
                           {auction.reservePrice > 0 && (
                             <div className="text-sm text-gray-500">
-                              Reserve: ₹{auction.reservePrice.toLocaleString()}
+                              Min Bid: ₹{auction.reservePrice.toLocaleString()}
                             </div>
                           )}
                         </div>
@@ -818,7 +824,7 @@ const AuctionManagement = () => {
                         {getStatusBadge(auction.status)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex justify-center items-center gap-2">
+                        <div className="flex justify-left items-center gap-2">
                           <button
                             onClick={() => handleViewDetails(auction)}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
@@ -1114,7 +1120,7 @@ const AuctionManagement = () => {
 
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                       <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
-                        Reserve
+                        Minimum Bid Price
                       </p>
                       <p className="text-xl font-bold text-gray-900">
                         ₹{selectedAuction.reservePrice.toLocaleString()}
@@ -1414,28 +1420,34 @@ const AuctionManagement = () => {
                         Origin Country <span className="text-red-500">*</span>
                       </label>
                       <div className="relative relative-country-dropdown">
-                        <input
-                          type="text"
-                          placeholder="Select Country"
-                          value={countrySearch}
-                          onChange={(e) => {
-                            setCountrySearch(e.target.value);
-                            setIsCountryDropdownOpen(true);
-                            if (e.target.value === "") {
-                              handleCountryChange("");
-                            }
-                          }}
-                          onClick={() => {
-                            setIsCountryDropdownOpen(true);
-                            if (
-                              newAuction.country &&
-                              countrySearch !== newAuction.country
-                            ) {
-                              setCountrySearch(newAuction.country);
-                            }
-                          }}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                        />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Select Country"
+                            value={countrySearch}
+                            onChange={(e) => {
+                              setCountrySearch(e.target.value);
+                              setIsCountryDropdownOpen(true);
+                              if (e.target.value === "") {
+                                handleCountryChange("");
+                              }
+                            }}
+                            onClick={() => {
+                              setIsCountryDropdownOpen(true);
+                              if (
+                                newAuction.country &&
+                                countrySearch !== newAuction.country
+                              ) {
+                                setCountrySearch(newAuction.country);
+                              }
+                            }}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 pr-10"
+                          />
+                          <ChevronDown
+                            className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`}
+                            size={18}
+                          />
+                        </div>
                         {isCountryDropdownOpen && (
                           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             {filteredCountries.length > 0 ? (
@@ -1468,22 +1480,28 @@ const AuctionManagement = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Warehouse <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        value={newAuction.warehouseId}
-                        onChange={handleWarehouseChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-                        disabled={!newAuction.country || isWarehouseLoading}
-                      >
-                        <option value="" disabled>
-                          Select Warehouse
-                        </option>
-                        {Array.isArray(warehouses) &&
-                          warehouses.map((w) => (
-                            <option key={w._id || w.id} value={w._id || w.id}>
-                              {w.warehouse_name || w.name}
-                            </option>
-                          ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={newAuction.warehouseId}
+                          onChange={handleWarehouseChange}
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 appearance-none pr-10"
+                          disabled={!newAuction.country || isWarehouseLoading}
+                        >
+                          <option value="" disabled>
+                            Select Warehouse
+                          </option>
+                          {Array.isArray(warehouses) &&
+                            warehouses.map((w) => (
+                              <option key={w._id || w.id} value={w._id || w.id}>
+                                {w.warehouse_name || w.name}
+                              </option>
+                            ))}
+                        </select>
+                        <ChevronDown
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                          size={18}
+                        />
+                      </div>
                       {isWarehouseLoading && (
                         <p className="text-xs text-gray-500 mt-1">
                           Loading Warehouses...
@@ -1498,40 +1516,46 @@ const AuctionManagement = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Select Product <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        value={newAuction.productId}
-                        onChange={(e) =>
-                          setNewAuction({
-                            ...newAuction,
-                            productId: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      >
-                        <option value="" disabled>
-                          Select Product
-                        </option>
-                        {Array.isArray(products) && products.length > 0 ? (
-                          products.map((product) => (
-                            <option
-                              key={product.productId || product._id || product.id}
-                              value={
-                                product.productId || product._id || product.id
-                              }
-                            >
-                              {product.product_name ||
-                                product.name ||
-                                "Unnamed Product"}
-                            </option>
-                          ))
-                        ) : (
-                          <option disabled>
-                            {!newAuction.warehouseId
-                              ? "Please Select Warehouse First"
-                              : "No products found in this warehouse"}
+                      <div className="relative">
+                        <select
+                          value={newAuction.productId}
+                          onChange={(e) =>
+                            setNewAuction({
+                              ...newAuction,
+                              productId: e.target.value,
+                            })
+                          }
+                          className="w-full border bg-white border-gray-300 rounded-lg px-3 py-2 appearance-none pr-10"
+                        >
+                          <option value="" disabled>
+                            Select Product
                           </option>
-                        )}
-                      </select>
+                          {Array.isArray(products) && products.length > 0 ? (
+                            products.map((product) => (
+                              <option
+                                key={product.productId || product._id || product.id}
+                                value={
+                                  product.productId || product._id || product.id
+                                }
+                              >
+                                {product.product_name ||
+                                  product.name ||
+                                  "Unnamed Product"}
+                              </option>
+                            ))
+                          ) : (
+                            <option disabled>
+                              {!newAuction.warehouseId
+                                ? "Please Select Warehouse First"
+                                : "No products found in this warehouse"}
+                            </option>
+                          )}
+                        </select>
+                        <ChevronDown
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                          size={18}
+                        />
+                      </div>
                       {formErrors.productId && (
                         <p className="text-red-400 text-sm mt-1">{formErrors.productId}</p>
                       )}
@@ -1560,7 +1584,7 @@ const AuctionManagement = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Reserve Price (₹) (Optional)
+                        Minimum Bid Price (₹) (Optional)
                       </label>
                       <input
                         type="number"
@@ -1572,7 +1596,7 @@ const AuctionManagement = () => {
                           })
                         }
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        placeholder="Enter Reserve Price"
+                        placeholder="Enter Minimum Bid Price"
                       />
                       {formErrors.reservePrice && (
                         <p className="text-red-400 text-sm mt-1">{formErrors.reservePrice}</p>

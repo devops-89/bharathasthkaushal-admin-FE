@@ -24,7 +24,7 @@ export default function CategoryManagement() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(12);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     category_name: "",
@@ -36,6 +36,17 @@ export default function CategoryManagement() {
   const currentCategories = categories?.docs || [];
   const totalDocs = categories?.totalDocs || 0;
   const totalPages = categories?.totalPages || 1;
+
+  useEffect(() => {
+    if (showForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showForm]);
 
   const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
@@ -302,10 +313,10 @@ export default function CategoryManagement() {
                     }}
                     className="appearance-none border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:border-orange-500 bg-white"
                   >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
+                    <option value={12}>12</option>
+                    <option value={24}>24</option>
+                    <option value={48}>48</option>
+                    <option value={96}>96</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
@@ -322,8 +333,8 @@ export default function CategoryManagement() {
                   }
                   disabled={currentPage === 1}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -335,8 +346,8 @@ export default function CategoryManagement() {
                   }
                   disabled={currentPage === totalPages}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -349,7 +360,7 @@ export default function CategoryManagement() {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
                 <h2 className="text-xl font-bold text-gray-900">
                   Add Category
                 </h2>
