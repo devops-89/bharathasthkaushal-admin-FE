@@ -35,6 +35,14 @@ export default function LoginPage({ onLogin }) {
       general: "",
     }));
   };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   const handleSubmit = () => {
     let frontendErrors = { email: "", password: "", general: "" };
     const emailTrimmed = state.email.trim().replace(/\s+/g, "");
@@ -120,13 +128,14 @@ export default function LoginPage({ onLogin }) {
       });
   };
   const containerStyle = {
-    height: "100vh",
+    minHeight: "100vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     background:
       "linear-gradient(135deg, #fef7ed 0%, #fef3c7 50%, #fefce8 100%)",
-    overflow: "hidden",
+    overflowY: "auto",
+    padding: "24px 0",
     fontFamily: "system-ui, -apple-system, sans-serif",
   };
 
@@ -258,6 +267,7 @@ export default function LoginPage({ onLogin }) {
                 autoComplete="off"
                 spellCheck="false"
                 onChange={inputHandler}
+                onKeyDown={handleKeyDown}
                 onBlur={(e) =>
                   setState(prev => ({ ...prev, email: e.target.value.trim() }))
                 }
@@ -284,6 +294,7 @@ export default function LoginPage({ onLogin }) {
                   value={state.password}
                   required
                   onChange={inputHandler}
+                  onKeyDown={handleKeyDown}
                   style={{ ...inputStyle, paddingRight: "40px" }}
                   placeholder="Enter your password"
                 />

@@ -131,7 +131,7 @@ export default function WarehouseDetails() {
                     </button>
                 </div>
                 {/* Header */}
-                <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+                <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
 
                     <div className="flex justify-between items-start">
                         <div className="w-full">

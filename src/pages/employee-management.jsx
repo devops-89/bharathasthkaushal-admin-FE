@@ -43,6 +43,7 @@ const ArtisanManagement = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -241,6 +242,8 @@ const ArtisanManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
   const handleAddEmployee = async () => {
+    if (isRegistering) return;
+    toast.dismiss();
     let newErrors = {};
 
     // Validation
@@ -295,6 +298,7 @@ const ArtisanManagement = () => {
       return;
     }
 
+    setIsRegistering(true);
     try {
       const payload = {
         email: formData.email.trim(),
@@ -309,18 +313,23 @@ const ArtisanManagement = () => {
       const response = await authControllers.addEmployee(payload);
 
       if (response.status === 200 || response.status === 201) {
+        toast.dismiss();
         toast.success("Employee registered successfully!");
         fetchArtisans(currentPage, rowsPerPage);
         handleCloseAddForm();
       } else {
+        toast.dismiss();
         toast.error(response.data?.message || "Something went wrong.");
       }
     } catch (error) {
+      toast.dismiss();
       toast.error(
         error.response?.data?.message ||
         error.message ||
         "Error registering employee",
       );
+    } finally {
+      setIsRegistering(false);
     }
   };
   const handleCloseAddForm = () => {
@@ -361,7 +370,7 @@ const ArtisanManagement = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -707,9 +716,10 @@ const ArtisanManagement = () => {
                   </button>
                   <button
                     onClick={handleAddEmployee}
-                    className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+                    disabled={isRegistering}
+                    className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
                   >
-                    Register Employee
+                    {isRegistering ? "Registering employee..." : "Register Employee"}
                   </button>
                 </div>
               </div>

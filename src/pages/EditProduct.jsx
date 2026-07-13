@@ -21,7 +21,7 @@ const EditProduct = () => {
     texture: "",
     artUsed: "",
     patternUsed: "",
-    quantity: "",
+    remainingQuantity: "",
     material: "",
     netWeight: "",
     dimension: "",
@@ -165,7 +165,7 @@ const EditProduct = () => {
           texture: textureVal,
           artUsed: p.artUsed || "",
           patternUsed: p.patternUsed || p.pattern || "",
-          quantity: p.quantity || "",
+          remainingQuantity: p.remainingQuantity !== undefined ? p.remainingQuantity : (p.quantity || ""),
           material: p.material || "",
           netWeight: p.netWeight || "",
           dimension: p.dimension || "",
@@ -272,6 +272,8 @@ const EditProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    toast.dismiss();
 
     const nameRegex = /^[a-zA-Z0-9\s\-&]{3,100}$/;
     const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
@@ -348,9 +350,11 @@ const EditProduct = () => {
 
       await productControllers.updateProduct(id, formData);
 
+      toast.dismiss();
       toast.success("Product Updated Successfully!");
       navigate(-1);
     } catch (err) {
+      toast.dismiss();
       toast.error("Failed to update product!");
     } finally {
       setLoading(false);
@@ -368,7 +372,7 @@ const EditProduct = () => {
   };
 
   const isAddedByArtisan = originalProduct?.addedBy?.user_group === "ARTISAN";
-  const totalPrice = (parseFloat(productData.productPricePerPiece) || 0) * (parseFloat(productData.quantity) || 0);
+  const totalPrice = (parseFloat(productData.productPricePerPiece) || 0) * (parseFloat(productData.remainingQuantity) || 0);
 
   {/*if (loading) return <p className="p-6 text-center">Loading...</p>;*/ }
   if (loading) {
@@ -574,17 +578,17 @@ const EditProduct = () => {
             {/* Quantity */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Quantity *
+                Remaining Quantity *
               </label>
               <input
                 type="number"
-                name="quantity"
-                value={productData.quantity}
+                name="remainingQuantity"
+                value={productData.remainingQuantity}
                 onChange={handleChange}
                 disabled={isAddedByArtisan}
                 className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${isAddedByArtisan ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""
                   }`}
-                min="1"
+                min="0"
                 step="1"
                 onKeyDown={preventNegative}
                 placeholder="0"

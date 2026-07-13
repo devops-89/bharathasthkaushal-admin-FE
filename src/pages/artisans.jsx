@@ -384,6 +384,7 @@ const ArtisanManagement = () => {
 
   const handleAddEmployee = async () => {
     if (isSubmitting) return;
+    toast.dismiss();
     setIsSubmitting(true);
     // console.log("Starting Add Artisan process. Checking validations...");
 
@@ -555,6 +556,7 @@ const ArtisanManagement = () => {
       // console.log("API Response received:", response);
 
       if (response.status === 200 || response.status === 201) {
+        toast.dismiss();
         toast.success(
           isEditMode
             ? "Artisan updated successfully!"
@@ -563,10 +565,12 @@ const ArtisanManagement = () => {
         handleCloseForm();
         await fetchArtisans(currentPage, rowsPerPage);
       } else {
+        toast.dismiss();
         console.warn("API returned error status:", response);
         toast.error(response.data?.message || `Error ${isEditMode ? 'updating' : 'registering'} artisan`);
       }
     } catch (error) {
+      toast.dismiss();
       console.error("API Request Failed (Catch Block):", error);
       toast.error(
         error.response?.data?.message ||
@@ -625,7 +629,7 @@ const ArtisanManagement = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">

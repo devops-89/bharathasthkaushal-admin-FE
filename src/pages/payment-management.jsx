@@ -178,7 +178,7 @@ const PaymentManagement = () => {
     try {
       setIsExporting(true);
       const res = await paymentControllers.exportPayments(exportFromDate, exportToDate);
-      
+
       const blob = new Blob([res.data], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -188,7 +188,7 @@ const PaymentManagement = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
-      
+
       toast.success("Payments exported successfully!");
       setShowExportModal(false);
       setExportFromDate("");
@@ -209,7 +209,7 @@ const PaymentManagement = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">

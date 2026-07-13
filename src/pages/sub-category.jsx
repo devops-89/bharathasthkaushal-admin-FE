@@ -38,6 +38,7 @@ const SubcategoryManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (showAddForm || selectedSubcategory) {
@@ -171,6 +172,8 @@ const SubcategoryManagement = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    toast.dismiss();
 
     const errors = {};
     if (!formData.category_name.trim()) errors.category_name = "Subcategory Name is required";
@@ -187,6 +190,8 @@ const SubcategoryManagement = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const formDataToSend = new FormData();
     formDataToSend.append("category_name", formData.category_name);
     formDataToSend.append("category_logo", formData.category_logo);
@@ -197,6 +202,7 @@ const SubcategoryManagement = () => {
     try {
       const response = await categoryControllers.addCategory(formDataToSend);
       // console.log("API Response:", response.data);
+      toast.dismiss();
       toast.success("Subcategory added successfully!");
       setFormData({
         category_name: "",
@@ -208,6 +214,7 @@ const SubcategoryManagement = () => {
       setShowAddForm(false);
       getSubcategories();
     } catch (err) {
+      toast.dismiss();
       const errorMessage =
         err.response?.data?.message || "Failed to add subcategory";
       toast.error(errorMessage);
@@ -215,6 +222,8 @@ const SubcategoryManagement = () => {
         "API Error:",
         err.response ? err.response.data : err.message,
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -233,7 +242,7 @@ const SubcategoryManagement = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       {/* Page Header */}
-      <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+      <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent capitalize">
@@ -385,9 +394,10 @@ const SubcategoryManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  disabled={isSubmitting}
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                 >
-                  Add Subcategory
+                  {isSubmitting ? "Adding..." : "Add Subcategory"}
                 </button>
               </div>
             </form>
@@ -473,8 +483,8 @@ const SubcategoryManagement = () => {
               onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
               className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -486,8 +496,8 @@ const SubcategoryManagement = () => {
               }
               disabled={currentPage === totalPages}
               className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                  ? "text-gray-300 cursor-not-allowed"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                ? "text-gray-300 cursor-not-allowed"
+                : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                 }`}
             >
               <ChevronRight className="w-5 h-5" />
@@ -511,7 +521,7 @@ const SubcategoryManagement = () => {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="rounded-xl overflow-hidden mb-6 border border-gray-100 bg-gray-50">
                 <SecureImage
@@ -520,11 +530,11 @@ const SubcategoryManagement = () => {
                   className="w-full h-64 object-cover"
                 />
               </div>
-              
+
               <h3 className="text-2xl font-bold text-gray-900 capitalize mb-4">
                 {selectedSubcategory.name}
               </h3>
-              
+
               <div className="bg-orange-50/50 rounded-lg p-4 border border-orange-100">
                 <h4 className="text-sm font-semibold text-orange-800 mb-2">Description</h4>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">

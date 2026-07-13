@@ -26,19 +26,22 @@ export default function CategoryManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     category_name: "",
     category_logo: null,
     description: "",
   });
   const [formErrors, setFormErrors] = useState({});
+  const [selectedCategoryDetails, setSelectedCategoryDetails] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const currentCategories = categories?.docs || [];
   const totalDocs = categories?.totalDocs || 0;
   const totalPages = categories?.totalPages || 1;
 
   useEffect(() => {
-    if (showForm) {
+    if (showForm || showDetailsModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -46,7 +49,7 @@ export default function CategoryManagement() {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showForm]);
+  }, [showForm, showDetailsModal]);
 
   const indexOfFirstItem = (currentPage - 1) * rowsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * rowsPerPage, totalDocs);
@@ -157,6 +160,8 @@ export default function CategoryManagement() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    toast.dismiss();
 
     const errors = {};
     if (!formData.category_name.trim()) errors.category_name = "Category Name is required";
@@ -173,16 +178,21 @@ export default function CategoryManagement() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await categoryControllers.addCategory(formData);
+      toast.dismiss();
       toast.success("Category added successfully!");
       resetForm();
       fetchCategories(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
+      toast.dismiss();
       const errorMessage =
         err.response?.data?.message || "Failed to add category!";
       toast.error(errorMessage);
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -199,7 +209,7 @@ export default function CategoryManagement() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -262,7 +272,11 @@ export default function CategoryManagement() {
               {currentCategories.map((cat) => (
                 <div
                   key={cat.category_id}
-                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full"
+                  className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-lg transition-shadow flex flex-col h-full cursor-pointer"
+                  onClick={() => {
+                    setSelectedCategoryDetails(cat);
+                    setShowDetailsModal(true);
+                  }}
                 >
                   <div className="relative mb-4">
                     <SecureImage
@@ -288,7 +302,10 @@ export default function CategoryManagement() {
                     </p>
                     <div className="mt-auto pt-3">
                       <button
-                        onClick={() => handleViewDetails(cat.category_id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewDetails(cat.category_id);
+                        }}
                         className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
                       >
                         View Subcategory
@@ -356,6 +373,55 @@ export default function CategoryManagement() {
             </div>
           )}
         </div>
+
+        {showDetailsModal && selectedCategoryDetails && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto max-h-[90vh] flex flex-col">
+              <div className="flex items-center justify-between p-6 border-b shrink-0">
+                <h2 className="text-xl font-bold text-gray-900 capitalize">
+                  Category Details
+                </h2>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
+                <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
+                  <SecureImage
+                    src={selectedCategoryDetails.category_logo}
+                    alt={selectedCategoryDetails.category_name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <h3 className="font-bold text-2xl text-gray-900 capitalize tracking-tight">
+                    {selectedCategoryDetails.category_name}
+                  </h3>
+                  <div className="bg-orange-50/50 rounded-xl p-4 border border-orange-100">
+                    <h4 className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-2">Description</h4>
+                    <p className="text-gray-700 leading-relaxed text-sm">
+                      {selectedCategoryDetails.description || "No description available for this category."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 border-t border-gray-100 shrink-0 bg-gray-50/50 rounded-b-xl">
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    handleViewDetails(selectedCategoryDetails.category_id);
+                  }}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md"
+                >
+                  View Subcategory
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -442,9 +508,10 @@ export default function CategoryManagement() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                   >
-                    Add Category
+                    {isSubmitting ? "Adding..." : "Add Category"}
                   </button>
                 </div>
               </form>

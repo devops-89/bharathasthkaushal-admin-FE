@@ -129,7 +129,7 @@ function UserManagement() {
       <ToastContainer />
 
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -207,77 +207,77 @@ function UserManagement() {
                   </td>
                 </tr>
               ) : (
-              currentUsers.map((user) => (
-                <tr
-                  key={user.id || user._id}
-                  className="border-b hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <SecureImage
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={
-                            user.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              fullName(user),
-                            )}&background=random`
-                          }
-                          alt=""
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 capitalize">
-                          {fullName(user)}
+                currentUsers.map((user) => (
+                  <tr
+                    key={user.id || user._id}
+                    className="border-b hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <SecureImage
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={
+                              user.avatar ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                fullName(user),
+                              )}&background=random`
+                            }
+                            alt=""
+                          />
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Joined:{" "}
-                          {user.createdAt
-                            ? new Date(user.createdAt).toLocaleDateString()
-                            : "N/A"}
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 capitalize">
+                            {fullName(user)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Joined:{" "}
+                            {user.createdAt
+                              ? new Date(user.createdAt).toLocaleDateString()
+                              : "N/A"}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.countryCode ? `${user.countryCode} ` : ""}
-                    {dash(user?.phoneNo)}
-                  </td>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.countryCode ? `${user.countryCode} ` : ""}
+                      {dash(user?.phoneNo)}
+                    </td>
 
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <Switch
-                      checked={user?.status === "ACTIVE"}
-                      onChange={() => handleToggle(user)}
-                      className={`${user?.status === "ACTIVE"
-                        ? "bg-orange-600"
-                        : "bg-gray-300"
-                        } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
-                    >
-                      <span className="sr-only">Toggle Status</span>
-                      <span
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <Switch
+                        checked={user?.status === "ACTIVE"}
+                        onChange={() => handleToggle(user)}
                         className={`${user?.status === "ACTIVE"
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                          } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                      />
-                    </Switch>
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() =>
-                          navigate(`/user-profile/${user.id || user._id}`)
-                        }
-                        className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                        aria-label="View profile"
+                          ? "bg-orange-600"
+                          : "bg-gray-300"
+                          } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
                       >
-                        <Eye size={20} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        <span className="sr-only">Toggle Status</span>
+                        <span
+                          className={`${user?.status === "ACTIVE"
+                            ? "translate-x-6"
+                            : "translate-x-1"
+                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                        />
+                      </Switch>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() =>
+                            navigate(`/user-profile/${user.id || user._id}`)
+                          }
+                          className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                          aria-label="View profile"
+                        >
+                          <Eye size={20} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

@@ -91,9 +91,8 @@ const NeedAssistanceDashboard = () => {
         const createdByUser = ticket.createdBy;
         const userName =
           createdByUser?.name ||
-          `${createdByUser?.firstName || ""} ${
-            createdByUser?.lastName || ""
-          }`.trim() ||
+          `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
+            }`.trim() ||
           (createdByUser?.email
             ? createdByUser.email.split("@")[0]
             : "Unknown User");
@@ -141,9 +140,8 @@ const NeedAssistanceDashboard = () => {
       const createdByUser = fullTicket.createdBy;
       const userName =
         createdByUser?.name ||
-        `${createdByUser?.firstName || ""} ${
-          createdByUser?.lastName || ""
-        }`.trim() ||
+        `${createdByUser?.firstName || ""} ${createdByUser?.lastName || ""
+          }`.trim() ||
         (createdByUser?.email
           ? createdByUser.email.split("@")[0]
           : "Unknown User");
@@ -198,11 +196,11 @@ const NeedAssistanceDashboard = () => {
         prev.map((item) =>
           item.id === selectedTicket.id
             ? {
-                ...item,
-                status: newStatus,
-                adminRemarks: updateData.adminRemarks,
-                updatedAt: new Date().toISOString(),
-              }
+              ...item,
+              status: newStatus,
+              adminRemarks: updateData.adminRemarks,
+              updatedAt: new Date().toISOString(),
+            }
             : item,
         ),
       );
@@ -279,7 +277,7 @@ const NeedAssistanceDashboard = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         {/* Header */}
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -456,11 +454,10 @@ const NeedAssistanceDashboard = () => {
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                          currentPage === 1
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
                             ? "text-gray-300 cursor-not-allowed"
                             : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                        }`}
+                          }`}
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
@@ -468,11 +465,10 @@ const NeedAssistanceDashboard = () => {
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${
-                          currentPage === totalPages
+                        className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
                             ? "text-gray-300 cursor-not-allowed"
                             : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
-                        }`}
+                          }`}
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>

@@ -1054,6 +1054,7 @@ const AddProduct = () => {
   };
 
   const handleSubmit = async () => {
+    if (loading) return;
     toast.dismiss(); // Clear any existing toasts
     if (!validateForm()) {
       return;

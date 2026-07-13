@@ -25,6 +25,7 @@ export default function WarehouseManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleViewDetails = (id) => {
@@ -118,6 +119,8 @@ export default function WarehouseManagement() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    toast.dismiss();
     let newErrors = {};
 
     {/*if (!formData.warehouse_name.trim()) {
@@ -180,6 +183,7 @@ export default function WarehouseManagement() {
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
     try {
       const payload = {
@@ -192,12 +196,16 @@ export default function WarehouseManagement() {
       //  if (formData.latitude) payload.latitude = formData.latitude;
       //  if (formData.longitude) payload.longitude = formData.longitude;
       await warehouseControllers.addWarehouse(payload);
+      toast.dismiss();
       toast.success("Warehouse added successfully!");
       resetForm();
       fetchWarehouses(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
+      toast.dismiss();
       toast.error(err.response?.data?.message || "Failed to add warehouse!");
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -217,7 +225,7 @@ export default function WarehouseManagement() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -606,10 +614,11 @@ export default function WarehouseManagement() {
                     Cancel
                   </button>
                   <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    onClick={handleFormSubmit}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
                   >
-                    Add Warehouse
+                    {isSubmitting ? "Adding..." : "Add Warehouse"}
                   </button>
                 </div>
               </form>

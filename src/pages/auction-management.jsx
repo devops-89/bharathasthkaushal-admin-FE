@@ -393,10 +393,31 @@ const AuctionManagement = () => {
     }
 
     if (newAuction.reservePrice && parseFloat(newAuction.reservePrice) < 0) errors.reservePrice = "Minimum bid price cannot be negative";
+    const maxDate = new Date("2099-12-31T23:59:59");
     if (!newAuction.startDate) errors.startDate = "Start Date & Time is required";
-    else if (new Date(newAuction.startDate) < new Date()) errors.startDate = "Start time cannot be in the past";
+    else {
+      const startObj = new Date(newAuction.startDate);
+      if (isNaN(startObj.getTime())) {
+        errors.startDate = "Invalid start date";
+      } else if (startObj < new Date()) {
+        errors.startDate = "Start time cannot be in the past";
+      } else if (startObj > maxDate) {
+        errors.startDate = "Start date must be less than 2099";
+      }
+    }
+
     if (!newAuction.endDate) errors.endDate = "End Date & Time is required";
-    else if (new Date(newAuction.endDate) <= new Date(newAuction.startDate)) errors.endDate = "End time must be after start time";
+    else {
+      const endObj = new Date(newAuction.endDate);
+      const startObj = new Date(newAuction.startDate);
+      if (isNaN(endObj.getTime())) {
+        errors.endDate = "Invalid end date";
+      } else if (!isNaN(startObj.getTime()) && endObj <= startObj) {
+        errors.endDate = "End time must be after start time";
+      } else if (endObj > maxDate) {
+        errors.endDate = "End date must be less than 2099";
+      }
+    }
 
     if (!newAuction.quantity || parseInt(newAuction.quantity) <= 0) {
       errors.quantity = "Quantity must be at least 1";
@@ -432,6 +453,7 @@ const AuctionManagement = () => {
 
   const handleAddAuction = async (e) => {
     e.preventDefault();
+    if (loading) return;
 
     if (!validateForm()) {
       return;
@@ -452,10 +474,12 @@ const AuctionManagement = () => {
 
     // console.log("Sending Auction Data:", auctionData);
 
+    toast.dismiss();
     setLoading(true);
     setError(null);
     try {
       const res = await productControllers.createAuction(auctionData);
+      toast.dismiss();
       // console.log("Create Auction Response:", res.data);
       toast.success(res.data.message || "Auction created successfully");
 
@@ -497,14 +521,10 @@ const AuctionManagement = () => {
         "Error creating auction:",
         err.response?.data || err.message,
       );
-      setError(
-        "Error creating auction: " +
-        (err.response?.data?.message || err.message || "Unknown error"),
-      );
-      toast.error(
-        "Error creating auction: " +
-        (err.response?.data?.message || err.message || "Unknown error"),
-      );
+      const errorMsg = "Error creating auction: " + (err.response?.data?.message || err.message || "Unknown error");
+      setError(errorMsg);
+      toast.dismiss();
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -1566,14 +1586,19 @@ const AuctionManagement = () => {
                         Starting Bid (₹) <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={newAuction.startingBid}
-                        onChange={(e) =>
+                        onKeyDown={(e) => {
+                          if (['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                          if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
                           setNewAuction({
                             ...newAuction,
-                            startingBid: e.target.value,
-                          })
-                        }
+                            startingBid: val,
+                          });
+                        }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         placeholder="Enter Starting Bid"
                       />
@@ -1587,14 +1612,19 @@ const AuctionManagement = () => {
                         Minimum Bid Price (₹) (Optional)
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={newAuction.reservePrice}
-                        onChange={(e) =>
+                        onKeyDown={(e) => {
+                          if (['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                          if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "");
                           setNewAuction({
                             ...newAuction,
-                            reservePrice: e.target.value,
-                          })
-                        }
+                            reservePrice: val,
+                          });
+                        }}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
                         placeholder="Enter Minimum Bid Price"
                       />
@@ -1740,15 +1770,19 @@ const AuctionManagement = () => {
                         Quantity <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
-                        min="1"
+                        type="text"
                         value={newAuction.quantity}
+                        onKeyDown={(e) => {
+                          if (['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                          if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+                        }}
                         onChange={(e) => {
+                          const rawVal = e.target.value.replace(/\D/g, "");
                           const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
                           const total = product ? parseInt(product.quantity || 0) : 0;
-                          let val = parseInt(e.target.value);
+                          let val = parseInt(rawVal);
                           if (isNaN(val) || val < 0) {
-                            val = e.target.value === "" ? "" : 0;
+                            val = rawVal === "" ? "" : 0;
                           } else if (val > total) {
                             val = total;
                           }

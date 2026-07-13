@@ -902,7 +902,10 @@ const ProductDetails = () => {
                     <span className="text-4xl font-bold text-orange-600">
                       ₹
                       {parseInt(product.productPricePerPiece) *
-                        product.quantity}
+                        (product?.remainingQuantity || 0)}
+                    </span>
+                    <span className="text-xl font-medium text-gray-500">
+                      (Original: ₹{parseInt(product.productPricePerPiece) * (product?.quantity || 0)})
                     </span>
                     {product?.discount > 0 && (
                       <span className="text-xl text-gray-500 line-through"></span>
@@ -925,21 +928,24 @@ const ProductDetails = () => {
                     Availability:
                   </span>
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.quantity || 0) < 10
+                    className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${parseInt(product?.remainingQuantity || 0) < 10
                       ? "bg-red-100 text-red-700"
                       : "bg-green-100 text-green-700"
                       }`}
                   >
                     <div
-                      className={`w-2 h-2 rounded-full ${parseInt(product?.quantity || 0) < 10
+                      className={`w-2 h-2 rounded-full ${parseInt(product?.remainingQuantity || 0) < 10
                         ? "bg-red-500"
                         : "bg-green-500"
                         }`}
                     ></div>
-                    {parseInt(product?.quantity || 0) < 10
-                      ? "Low Stock"
-                      : "In Stock"}
-                    ({product?.quantity || 0} units)
+                    {parseInt(product?.remainingQuantity || 0) < 10
+                      ? "Low Stock "
+                      : "In Stock "}
+                    ({product?.remainingQuantity || 0} units)
+                  </span>
+                  <span className="text-gray-500 text-sm font-medium">
+                    (Original: {product?.quantity || 0} units)
                   </span>
                 </div>
                 {/* Product Details */}

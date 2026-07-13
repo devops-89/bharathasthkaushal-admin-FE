@@ -110,7 +110,7 @@ export default function ProductManagement() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         {/* Header */}
-        <div className="bg-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-white rounded-2xl p-5 mb-8 shadow-lg">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-3xl font-bold leading-normal bg-gradient-to-r from-orange-500 to-orange-700 bg-clip-text text-transparent">
@@ -224,7 +224,8 @@ export default function ProductManagement() {
                               {product.artisan.lastName}
                             </p>
                             <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="w-3 h-3" />
+                              <Phone className="w-3 h-3 text-orange-500" />
+                              {product.artisan.countryCode}{" "}
                               {product.artisan.phoneNo || "N/A"}
                             </p>
                           </div>
@@ -293,8 +294,8 @@ export default function ProductManagement() {
                   }
                   disabled={currentPage === 1}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -306,8 +307,8 @@ export default function ProductManagement() {
                   }
                   disabled={currentPage === totalPages}
                   className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                      ? "text-gray-300 cursor-not-allowed"
-                      : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                     }`}
                 >
                   <ChevronRight className="w-5 h-5" />
