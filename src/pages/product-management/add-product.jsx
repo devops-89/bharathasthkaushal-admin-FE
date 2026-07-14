@@ -1014,8 +1014,11 @@ const AddProduct = () => {
       newErrors.breadth = "Breadth must be greater than 0";
     if (formData.height && Number(formData.height) <= 0)
       newErrors.height = "Height must be greater than 0";
-    if (formData.timeToMake && Number(formData.timeToMake) <= 0)
+    if (!formData.timeToMake || formData.timeToMake.toString().trim() === "") {
+      newErrors.timeToMake = "Time to Make is required";
+    } else if (Number(formData.timeToMake) <= 0) {
       newErrors.timeToMake = "Time to make must be greater than 0";
+    }
 
     setErrors(newErrors);
 
@@ -1396,7 +1399,7 @@ const AddProduct = () => {
             {/* Time to Make */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Time to Make (Days)
+                Time to Make (Days) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
