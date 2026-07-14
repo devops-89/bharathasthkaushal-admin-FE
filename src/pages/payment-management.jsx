@@ -86,6 +86,7 @@ const PaymentManagement = () => {
         console.error("Error fetching payments:", err);
         const errorMessage =
           err.response?.data?.message || "Failed to fetch payments";
+        toast.dismiss();
         toast.error(errorMessage);
       } finally {
         setLoading(false);
@@ -167,6 +168,7 @@ const PaymentManagement = () => {
       }
     } catch (err) {
       console.error("Error fetching payment details:", err);
+      toast.dismiss();
       toast.error("Failed to fetch payment details");
       setShowModal(false);
     } finally {
@@ -189,12 +191,14 @@ const PaymentManagement = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
 
+      toast.dismiss();
       toast.success("Payments exported successfully!");
       setShowExportModal(false);
       setExportFromDate("");
       setExportToDate("");
     } catch (err) {
       // console.error("Error exporting payments:", err);
+      toast.dismiss();
       toast.error("Failed to export payments");
     } finally {
       setIsExporting(false);

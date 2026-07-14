@@ -79,6 +79,10 @@ const ArtisanManagement = () => {
   const [editId, setEditId] = useState(null);
   const [initialFormData, setInitialFormData] = useState(null);
 
+  const hasChanges = React.useMemo(() => {
+    return isEditMode ? JSON.stringify(formData) !== JSON.stringify(initialFormData) : true;
+  }, [isEditMode, formData, initialFormData]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -148,11 +152,13 @@ const ArtisanManagement = () => {
         ),
       );
 
+      toast.dismiss();
       toast.success(
         `Artisan ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`,
       );
     } catch (error) {
+      toast.dismiss();
       toast.error("Something went wrong!");
     }
 
@@ -174,16 +180,19 @@ const ArtisanManagement = () => {
     try {
       const partner = partnersData.find((p) => p.id === id);
       if (partner.verify_status === "VERIFIED") {
+        toast.dismiss();
         toast.warning("This artisan is already verified");
         return;
       }
       const response = await userControllers.verifyArtisan(id);
+      toast.dismiss();
       toast.success("Artisan Verified Successfully ");
       setSelectedPartner((prev) =>
         prev && prev.id === id ? { ...prev, verify_status: "VERIFIED" } : prev,
       );
       fetchArtisans(currentPage, rowsPerPage);
     } catch (error) {
+      toast.dismiss();
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
@@ -245,6 +254,7 @@ const ArtisanManagement = () => {
       console.error("Failed to load artisans", error);
       const errorMessage =
         error.response?.data?.message || "Failed to load artisans";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -389,6 +399,7 @@ const ArtisanManagement = () => {
     // console.log("Starting Add Artisan process. Checking validations...");
 
     {/*const handleValidationError = (message) => {
+      toast.dismiss();
       toast.error(message);
       setTimeout(() => {
         setIsSubmitting(false);
@@ -515,9 +526,7 @@ const ArtisanManagement = () => {
     setErrors({});
 
     if (isEditMode) {
-      const hasChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      if (!hasChanged) {
-        toast.info("No changes detected");
+      if (!hasChanges) {
         setIsSubmitting(false);
         setShowAddForm(false);
         return;
@@ -567,15 +576,31 @@ const ArtisanManagement = () => {
       } else {
         toast.dismiss();
         console.warn("API returned error status:", response);
+        toast.dismiss();
         toast.error(response.data?.message || `Error ${isEditMode ? 'updating' : 'registering'} artisan`);
       }
     } catch (error) {
       toast.dismiss();
       console.error("API Request Failed (Catch Block):", error);
+
+      if (
+        error.response?.status === 422 &&
+        error.response?.data?.message?.includes("Invalid email format")
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "Invalid email format",
+        }));
+        return;
+      }
+
+      toast.dismiss();
       toast.error(
-        error.response?.data?.message ||
-        error.message ||
-        `Error ${isEditMode ? 'updating' : 'registering'} artisan`
+        Array.isArray(error.response?.data?.message)
+          ? error.response.data.message.join(", ")
+          : error.response?.data?.message ||
+          error.message ||
+          `Error ${isEditMode ? 'updating' : 'registering'} artisan`
       );
     } finally {
       setIsSubmitting(false);
@@ -584,6 +609,7 @@ const ArtisanManagement = () => {
       const response = await authControllers.addArtisan(payload);
       // console.log("API Response received:", response);
       if (response.status === 200 || response.status === 201) {
+        toast.dismiss();
         toast.success(
           "Artisan registered successfully! Login credentials sent to email.",
         );
@@ -604,10 +630,12 @@ const ArtisanManagement = () => {
         await fetchArtisans(currentPage, rowsPerPage);
       } else {
         console.warn("API returned error status:", response);
+        toast.dismiss();
         toast.error(response.data?.message || "Error registering artisan");
       }
     } catch (error) {
       console.error("API Request Failed (Catch Block):", error);
+      toast.dismiss();
       toast.error(
         error.response?.data?.message ||
         error.message ||
@@ -1137,8 +1165,8 @@ const ArtisanManagement = () => {
                   </button>
                   <button
                     onClick={handleAddEmployee}
-                    disabled={isSubmitting}
-                    className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={isSubmitting || (isEditMode && !hasChanges)}
+                    className={`flex-1 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors ${isSubmitting || (isEditMode && !hasChanges) ? "opacity-50 cursor-not-allowed" : ""}`}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">

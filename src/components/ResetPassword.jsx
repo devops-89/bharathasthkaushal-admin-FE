@@ -22,6 +22,7 @@ export default function ResetPassword() {
 
     useEffect(() => {
         if (!email && !referenceId) {
+            toast.dismiss();
             toast.warning("Please initiate password reset from the Forgot Password page.");
             // navigate("/forgot-password"); // Optional: redirect back
         }
@@ -31,21 +32,25 @@ export default function ResetPassword() {
         e.preventDefault();
 
         if (!referenceId) {
+            toast.dismiss();
             toast.error("Missing reference ID. Please try 'Forgot Password' again.");
             return;
         }
 
         if (!otp) {
+            toast.dismiss();
             toast.error("Please enter the OTP sent to your email.");
             return;
         }
 
         if (password !== confirmPassword) {
+            toast.dismiss();
             toast.error("Passwords do not match");
             return;
         }
 
         if (password.length < 6) {
+            toast.dismiss();
             toast.error("Password must be at least 6 characters long");
             return;
         }
@@ -61,6 +66,7 @@ export default function ResetPassword() {
 
             await authControllers.resetPassword(payload);
 
+            toast.dismiss();
             toast.success("Password reset successful! Redirecting to login...");
             setTimeout(() => {
                 navigate("/login");
@@ -68,6 +74,7 @@ export default function ResetPassword() {
         } catch (err) {
             console.error("Reset Password Error:", err);
             const errorMessage = err?.response?.data?.message || "Failed to reset password. Please check your OTP.";
+            toast.dismiss();
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);

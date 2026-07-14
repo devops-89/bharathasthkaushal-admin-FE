@@ -183,6 +183,7 @@ const ProductDetails = () => {
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
         console.error("Error fetching warehouses:", error);
+        toast.dismiss();
         toast.error("Failed to fetch warehouses");
       } finally {
         setIsWarehouseLoading(false);
@@ -220,6 +221,7 @@ const ProductDetails = () => {
             return productData;
           })
           .catch((err) => {
+            toast.dismiss();
             toast.error(
               "Error fetching product:",
               err.response?.data || err.message,
@@ -240,6 +242,7 @@ const ProductDetails = () => {
       // console.log("Build steps API response:", res.data);
       setBuildSteps(res.data?.data || res.data || []);
     } catch (err) {
+      toast.dismiss();
       toast.error(
         "Error fetching build steps:",
         err.response?.data || err.message,
@@ -292,6 +295,7 @@ const ProductDetails = () => {
     setLoading(true);
     try {
       if (!assignForm.dueDate) {
+        toast.dismiss();
         toast.error("Due Date is required");
         setLoading(false);
         return;
@@ -299,6 +303,7 @@ const ProductDetails = () => {
       const selectedDate = new Date(assignForm.dueDate);
       const now = new Date();
       if (selectedDate < now.setSeconds(0, 0, 0)) {
+        toast.dismiss();
         toast.error("Due Date cannot be in the past.");
         setLoading(false);
         return;
@@ -311,6 +316,7 @@ const ProductDetails = () => {
       };
       // console.log("assign product", payload);
       await productControllers.assignStepToArtisan(payload);
+      toast.dismiss();
       toast.success("Step Assigned Successfully!", {
         icon: <CheckCircle className="text-orange-600" />,
         progressStyle: { background: "#ea580c" },
@@ -328,6 +334,7 @@ const ProductDetails = () => {
       console.error("Error assigning step:", err);
       const errorMessage =
         err.response?.data?.message || "Failed to assign step";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -400,38 +407,46 @@ const ProductDetails = () => {
 
     // Validation
     if (Number(createStepForm.sequence) <= 0) {
+      toast.dismiss();
       toast.error("Sequence must be a positive number greater than 0.");
       return;
     }
     if (Number(createStepForm.proposedPrice) <= 0) {
+      toast.dismiss();
       toast.error("Proposed Price must be a positive number greater than 0.");
       return;
     }
     if (!createStepForm.stepName.trim()) {
+      toast.dismiss();
       toast.error("Step Name cannot be empty or just spaces.");
       return;
     }
     const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
     if (!nameRegex.test(createStepForm.stepName)) {
+      toast.dismiss();
       toast.error("Special characters are not allowed in Step Name.");
       return;
     }
     if (!createStepForm.description.trim()) {
+      toast.dismiss();
       toast.error("Description cannot be empty or just spaces.");
       return;
     }
     if (createStepForm.materials.trim()) {
       const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
       if (!materialRegex.test(createStepForm.materials)) {
+        toast.dismiss();
         toast.error("Invalid Material (2-50 characters, letters, space, &, - only)");
         return;
       }
     }
     if (!createStepForm.skills || createStepForm.skills.length === 0) {
+      toast.dismiss();
       toast.error("Please select at least one required skill.");
       return;
     }
     if (!createStepForm.dueDate) {
+      toast.dismiss();
       toast.error("Due Date is required.");
       return;
     }
@@ -439,6 +454,7 @@ const ProductDetails = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) {
+      toast.dismiss();
       toast.error("Due Date cannot be in the past.");
       return;
     }
@@ -469,6 +485,7 @@ const ProductDetails = () => {
       const res = await productControllers.createBuildStep(formData);
       // console.log("Create build step API response:", res.data);
       const newStep = res.data?.data || res.data;
+      toast.dismiss();
       toast.success("Build step created successfully!", {
         icon: <CheckCircle className="text-orange-600" />,
         progressStyle: { background: "#ea580c" },
@@ -483,6 +500,7 @@ const ProductDetails = () => {
       const errorMessage =
         err.response?.data?.message ||
         "Error creating build step. Please try again.";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -647,6 +665,7 @@ const ProductDetails = () => {
                     <button
                       onClick={() => {
                         if (buildSteps.length >= 10) {
+                          toast.dismiss();
                           toast.error(
                             "You can create only up to 10 build steps!",
                           );
@@ -992,6 +1011,7 @@ const ProductDetails = () => {
                                   rejectReason.trim(),
                                 );
 
+                                toast.dismiss();
                                 toast.success("Product Rejected Successfully", {
                                   icon: (
                                     <CheckCircle className="text-orange-600" />
@@ -1006,6 +1026,7 @@ const ProductDetails = () => {
                                 setShowRejectModal(false);
                                 setRejectReason("");
                               } catch (err) {
+                                toast.dismiss();
                                 toast.error(
                                   err.response?.data?.message ||
                                   "Failed to Reject Product",
@@ -1168,6 +1189,7 @@ const ProductDetails = () => {
                                   },
                                 );
 
+                                toast.dismiss();
                                 toast.success("Product Approved Successfully", {
                                   icon: (
                                     <CheckCircle className="text-orange-600" />
@@ -1185,6 +1207,7 @@ const ProductDetails = () => {
                                 setCountrySearch("");
                                 setIsReadyForAuction(false);
                               } catch (err) {
+                                toast.dismiss();
                                 toast.error(
                                   err.response?.data?.message ||
                                   "Failed to Approve Product",

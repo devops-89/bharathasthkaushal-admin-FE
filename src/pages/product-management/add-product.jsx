@@ -918,6 +918,7 @@ const AddProduct = () => {
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
         console.error("Error fetching warehouses:", error);
+        toast.dismiss();
         toast.error("Failed to fetch warehouses");
       }
     }
@@ -1038,6 +1039,7 @@ const AddProduct = () => {
 
     if (invalidFiles.length > 0) {
       const errorMessage = "only jpeg ,jpg and png format are allowed";
+      toast.dismiss();
       toast.error(errorMessage);
       setErrors((prev) => ({ ...prev, images: errorMessage }));
       e.target.value = null; // Reset input
@@ -1102,6 +1104,7 @@ const AddProduct = () => {
       const res = await productControllers.addProduct(data);
 
       if (res && res.data) {
+        toast.dismiss();
         toast.success("Product added successfully!", {
           icon: <CheckCircle className="text-orange-600" />,
           progressStyle: { background: "#ea580c" },
@@ -1115,6 +1118,7 @@ const AddProduct = () => {
       }
     } catch (err) {
       console.error("Error adding product:", err.response?.data || err);
+      toast.dismiss();
       toast.error(err.response?.data?.message || "Something went wrong!");
     } finally {
       setLoading(false);

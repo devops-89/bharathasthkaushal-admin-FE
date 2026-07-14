@@ -50,9 +50,11 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
         status: "APPROVED",
         buildStatus: "APPROVED",
       }));
+      toast.dismiss();
       toast.success("Approved Successfully!");
     } catch (err) {
       // console.log(err);
+      toast.dismiss();
       toast.error("Approval failed");
     } finally {
       setProcessing(false);
@@ -79,10 +81,12 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
         admin_remarks: remarks,
       }));
 
+      toast.dismiss();
       toast.success("Rejected Successfully!");
       setShowRejectPopup(false);
     } catch (err) {
       // console.log(err);
+      toast.dismiss();
       toast.error("Rejection failed");
     } finally {
       setProcessing(false);

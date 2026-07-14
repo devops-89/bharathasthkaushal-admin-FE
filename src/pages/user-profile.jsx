@@ -24,6 +24,7 @@ function UserProfile() {
       setUser(res.data.data);
     } catch (error) {
       // console.log(error);
+      toast.dismiss();
       toast.error("Failed to load user profile");
     }
     setLoading(false);

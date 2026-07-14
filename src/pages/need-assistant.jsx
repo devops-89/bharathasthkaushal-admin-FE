@@ -124,6 +124,7 @@ const NeedAssistanceDashboard = () => {
       setData(mappedData);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to fetch need assistance data. Please try again.";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -163,6 +164,7 @@ const NeedAssistanceDashboard = () => {
       setAdminRemarks("");
       setShowModal(true);
     } catch (error) {
+      toast.dismiss();
       toast.error("Error fetching ticket details:", error);
       setSelectedTicket(ticket);
       setNewStatus(ticket.status);
@@ -174,6 +176,7 @@ const NeedAssistanceDashboard = () => {
   const handleUpdateStatus = () => {
     if (!selectedTicket || !newStatus) return;
     if (selectedTicket.status === newStatus) {
+      toast.dismiss();
       toast.info("Status not updated");
       setShowModal(false);
       return;
@@ -204,11 +207,13 @@ const NeedAssistanceDashboard = () => {
             : item,
         ),
       );
+      toast.dismiss();
       toast.success("Status updated successfully!");
       setShowConfirmModal(false);
       setShowModal(false);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error updating status: " + error.message;
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setUpdating(false);
@@ -218,6 +223,7 @@ const NeedAssistanceDashboard = () => {
   const cancelUpdateStatus = () => {
     setShowConfirmModal(false);
     setShowModal(false);
+    toast.dismiss();
     toast.info("Status not updated");
   };
 

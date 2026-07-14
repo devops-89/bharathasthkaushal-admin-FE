@@ -113,9 +113,11 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
 
       await productControllers.updateBuildStep(stepId, formData);
 
+      toast.dismiss();
       toast.success("Build Step Updated Successfully!");
       onClose();
     } catch (error) {
+      toast.dismiss();
       toast.error("Update failed");
     }
   };

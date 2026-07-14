@@ -86,6 +86,7 @@ export default function CategoryManagement() {
       // console.log("Error fetching categories:", err);
       const errorMessage =
         err.response?.data?.message || "Failed to fetch categories";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -147,6 +148,7 @@ export default function CategoryManagement() {
         !validTypes.includes(file.type) ||
         !validExtensions.includes(fileExtension)
       ) {
+        toast.dismiss();
         toast.error(
           "Invalid file format. Please upload a JPEG, JPG, or PNG image.",
         );
@@ -174,6 +176,7 @@ export default function CategoryManagement() {
     }
 
     if (formData.description.trim().split(/\s+/).length > 20) {
+      toast.dismiss();
       toast.error("Description cannot exceed 20 words");
       return;
     }
@@ -189,6 +192,7 @@ export default function CategoryManagement() {
       toast.dismiss();
       const errorMessage =
         err.response?.data?.message || "Failed to add category!";
+      toast.dismiss();
       toast.error(errorMessage);
       console.error(err);
     } finally {

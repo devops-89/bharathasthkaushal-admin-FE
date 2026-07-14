@@ -79,6 +79,7 @@ export default function ProductManagement() {
       // console.log("Error fetching products:", err);
       const errorMessage =
         err.response?.data?.message || "Failed to fetch products";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);

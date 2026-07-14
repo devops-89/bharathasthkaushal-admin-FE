@@ -314,6 +314,7 @@ const Dashboard = () => {
 
       const firstError = results.find(result => result instanceof Error || (result && result.response));
       if (firstError) {
+        toast.dismiss();
         toast.error(firstError.response?.data?.message || "Failed to fetch dashboard details");
       }
 

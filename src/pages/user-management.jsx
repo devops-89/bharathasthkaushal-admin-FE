@@ -48,6 +48,7 @@ function UserManagement() {
       }
     } catch (error) {
       // console.log(error);
+      toast.dismiss();
       toast.error("Failed to fetch users");
     } finally {
       setLoading(false);
@@ -90,10 +91,12 @@ function UserManagement() {
           u.id === selectedUser.id ? { ...u, status: newStatus } : u,
         ),
       );
+      toast.dismiss();
       toast.success(
         `User ${newStatus === "BLOCKED" ? "Blocked" : "Activated"} Successfully!`,
       );
     } catch (err) {
+      toast.dismiss();
       toast.error("Something went wrong!");
     }
 

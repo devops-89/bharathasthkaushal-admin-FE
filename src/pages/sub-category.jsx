@@ -93,6 +93,7 @@ const SubcategoryManagement = () => {
         // console.log("Error fetching subcategories:", err);
         const errorMessage =
           err.response?.data?.message || "Failed to fetch subcategories";
+        toast.dismiss();
         toast.error(errorMessage);
         setSubcategories([]);
       });
@@ -157,6 +158,7 @@ const SubcategoryManagement = () => {
         !validTypes.includes(file.type) ||
         !validExtensions.includes(fileExtension)
       ) {
+        toast.dismiss();
         toast.error(
           "Invalid file format. Please upload a JPEG, JPG, or PNG image.",
         );
@@ -186,6 +188,7 @@ const SubcategoryManagement = () => {
     }
 
     if (formData.description.trim().split(/\s+/).length > 20) {
+      toast.dismiss();
       toast.error("Description cannot exceed 20 words");
       return;
     }
@@ -217,6 +220,7 @@ const SubcategoryManagement = () => {
       toast.dismiss();
       const errorMessage =
         err.response?.data?.message || "Failed to add subcategory";
+      toast.dismiss();
       toast.error(errorMessage);
       console.error(
         "API Error:",

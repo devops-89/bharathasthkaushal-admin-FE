@@ -77,6 +77,7 @@ export default function WarehouseDetails() {
                 }
             } catch (err) {
                 console.error("Error fetching warehouse details:", err);
+                toast.dismiss();
                 toast.error("Failed to fetch warehouse details");
             } finally {
                 setLoading(false);

@@ -38,6 +38,7 @@ export default function ForgotPassword() {
             // console.log("Forgot Password response:", res);
             const responseData = res.data;
 
+            toast.dismiss();
             toast.success("OTP sent to your email!");
             setTimeout(() => {
                 navigate("/reset-password", {

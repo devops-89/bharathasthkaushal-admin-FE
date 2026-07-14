@@ -119,6 +119,7 @@ const AuctionManagement = () => {
         }
       } catch (err) {
         console.error("Error fetching warehouses:", err);
+        toast.dismiss();
         toast.error("Failed to fetch warehouses");
         setWarehouses([]);
       } finally {
@@ -159,6 +160,7 @@ const AuctionManagement = () => {
       );
       const errorMessage =
         err.response?.data?.message || "Failed to fetch products. Please try again.";
+      toast.dismiss();
       toast.error(errorMessage);
       setProducts([]);
     } finally {
@@ -255,6 +257,7 @@ const AuctionManagement = () => {
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || "Failed to fetch auctions";
+      toast.dismiss();
       toast.error(errorMessage);
       console.error(err);
     } finally {
@@ -305,6 +308,7 @@ const AuctionManagement = () => {
       }
     } catch (err) {
       console.error("Error fetching products by warehouse:", err);
+      toast.dismiss();
       toast.error("Failed to fetch products for selected warehouse");
       setProducts([]);
     } finally {
@@ -481,6 +485,7 @@ const AuctionManagement = () => {
       const res = await productControllers.createAuction(auctionData);
       toast.dismiss();
       // console.log("Create Auction Response:", res.data);
+      toast.dismiss();
       toast.success(res.data.message || "Auction created successfully");
 
       const selectedProduct = products.find((p) => (p.productId || p._id || p.id) == newAuction.productId);
@@ -592,6 +597,7 @@ const AuctionManagement = () => {
       );
       const errorMessage =
         err.response?.data?.message || "Failed to fetch auction details. Please try again.";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -603,6 +609,7 @@ const AuctionManagement = () => {
     try {
       const res = await productControllers.startAuction(auctionId);
       // console.log("Start Auction Response:", res.data);
+      toast.dismiss();
       toast.success(res.data.message || "Auction started successfully");
       fetchAuctions();
     } catch (err) {
@@ -614,6 +621,7 @@ const AuctionManagement = () => {
         "Error starting auction: " +
         (err.response?.data?.message || err.message),
       );
+      toast.dismiss();
       toast.error(
         "Error starting auction: " +
         (err.response?.data?.message || err.message),
@@ -645,11 +653,13 @@ const AuctionManagement = () => {
     setLoading(true);
     try {
       await productControllers.addImageToAuction(formData);
+      toast.dismiss();
       toast.success("Image uploaded successfully!");
       setShowPopularModal(false);
       fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
       console.error("Error uploading image:", err);
+      toast.dismiss();
       toast.error("Failed to upload image");
     } finally {
       setLoading(false);
@@ -666,6 +676,7 @@ const AuctionManagement = () => {
       formData.append("image", "null");
 
       await productControllers.addImageToAuction(formData);
+      toast.dismiss();
       toast.success("Popular image removed successfully!");
 
       setSelectedPopularAuction({
@@ -679,6 +690,7 @@ const AuctionManagement = () => {
       fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
     } catch (err) {
       console.error("Error deleting popular image:", err);
+      toast.dismiss();
       toast.error(
         err.response?.data?.message || "Failed to remove popular image."
       );
@@ -1890,6 +1902,7 @@ const AuctionManagement = () => {
                               const file = e.target.files[0];
                               if (file) {
                                 if (file.type !== "image/jpeg" && file.type !== "image/png") {
+                                  toast.dismiss();
                                   toast.error("Only PNG, JPG, and JPEG formats are allowed");
                                   return;
                                 }

@@ -48,6 +48,13 @@ const EditProduct = () => {
     c.toLowerCase().includes(countrySearch.toLowerCase()),
   );
 
+  const hasChanges = React.useMemo(() => {
+    const hasProductDataChanged = JSON.stringify(productData) !== JSON.stringify(initialProductData);
+    const haveExistingImagesChanged = existingImages.length !== initialExistingImages.length;
+    const haveNewImagesAdded = images.length > 0;
+    return hasProductDataChanged || haveExistingImagesChanged || haveNewImagesAdded;
+  }, [productData, initialProductData, existingImages.length, initialExistingImages.length, images.length]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".relative-dropdown-container")) {
@@ -75,12 +82,14 @@ const EditProduct = () => {
         const p = productRes.data.data;
 
         {/*if (p.admin_approval_status === "APPROVED") {
+          toast.dismiss();
           toast.error("Approved products cannot be edited!");
           navigate(`/product-management/product-details/${id}`);
           return;
         }*/}
 
         if (p.isReadyForAuction) {
+          toast.dismiss();
           toast.error("Products listed for auction cannot be edited!");
           navigate(`/product-management/product-details/${id}`);
           return;
@@ -191,6 +200,7 @@ const EditProduct = () => {
         setCountrySearch(p.country || "");
       } catch (err) {
         console.error("Error fetching data:", err);
+        toast.dismiss();
         toast.error("Failed to load product data");
       } finally {
         setLoading(false);
@@ -235,6 +245,7 @@ const EditProduct = () => {
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
         console.error("Error fetching warehouses:", error);
+        toast.dismiss();
         toast.error("Failed to fetch warehouses");
       }
     }
@@ -255,6 +266,7 @@ const EditProduct = () => {
 
     if (invalidFiles.length > 0) {
       const errorMessage = "Only JPEG, JPG and PNG format are allowed";
+      toast.dismiss();
       toast.error(errorMessage);
       e.target.value = null; // Reset input
       return;
@@ -308,12 +320,7 @@ const EditProduct = () => {
       return;
     }
 
-    const hasProductDataChanged = JSON.stringify(productData) !== JSON.stringify(initialProductData);
-    const haveExistingImagesChanged = existingImages.length !== initialExistingImages.length;
-    const haveNewImagesAdded = images.length > 0;
-
-    if (!hasProductDataChanged && !haveExistingImagesChanged && !haveNewImagesAdded) {
-      toast.info("No changes detected");
+    if (!hasChanges) {
       navigate(-1);
       return;
     }
@@ -945,7 +952,7 @@ const EditProduct = () => {
               type="button"
               onClick={handleSubmit}
               className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 font-medium shadow-md hover:shadow-lg"
-              disabled={loading}
+              disabled={loading || !hasChanges}
             >
               {loading ? "Updating..." : "Update Product"}
             </button>

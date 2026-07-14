@@ -62,6 +62,7 @@ export default function WarehouseManagement() {
     } catch (err) {
       // console.log("Error fetching warehouses:", err);
       const errorMessage = err.response?.data?.message || "Failed to fetch warehouses";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -124,10 +125,12 @@ export default function WarehouseManagement() {
     let newErrors = {};
 
     {/*if (!formData.warehouse_name.trim()) {
+      toast.dismiss();
       toast.error("Warehouse Name is required");
       return;
     }
     if (!formData.origin_country.trim()) {
+      toast.dismiss();
       toast.error("Origin Country is required");
       return;
     }
@@ -138,18 +141,20 @@ export default function WarehouseManagement() {
     );
 
     if (!isValidCountry) {
+      toast.dismiss();
       toast.error("This is not a valid country");
       return;
     }
 
     if (!formData.address.trim()) {
+      toast.dismiss();
       toast.error("Address is required");
       return;
     } */}
     if (!formData.warehouse_name.trim()) {
       newErrors.warehouse_name = "Warehouse Name is required";
     } else if (!/^[A-Za-z0-9][A-Za-z0-9\s&'.,()/-]*$/.test(formData.warehouse_name.trim())) {
-      newErrors.warehouse_name = "Invalid warehouse name format";
+      newErrors.warehouse_name = "Only -, ', &, (, ), ., ,, and / are allowed as special characters.";
     }
 
     if (!formData.address.trim()) {

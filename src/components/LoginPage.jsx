@@ -80,6 +80,7 @@ export default function LoginPage({ onLogin }) {
       .then((res) => {
         const response = res.data.data;
         localStorage.setItem("accessToken", response.accessToken);
+        toast.dismiss();
         toast.success("Login successful!");
         navigate("/dashboard");
         setIsLoading(false);
@@ -106,6 +107,7 @@ export default function LoginPage({ onLogin }) {
         }
         setErrors(apiErrors);
         if (!apiErrors.email && !apiErrors.password) {
+          toast.dismiss();
           toast.error(errMessage);
         }
 
@@ -120,6 +122,7 @@ export default function LoginPage({ onLogin }) {
         if (secureKeywords.some(keyword => errorMsgLower.includes(keyword))) {
           apiErrors.general = "Please enter registered email or valid password";
         } else {
+          toast.dismiss();
           toast.error(errMessage);
         }
 

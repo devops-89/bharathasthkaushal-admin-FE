@@ -44,6 +44,7 @@ const Profile = () => {
         });
       } catch (error) {
         console.error("Error fetching user details", error);
+        toast.dismiss();
         toast.error("Failed to fetch user details");
       }
     };
@@ -66,14 +67,17 @@ const Profile = () => {
   const handleSubmitPassword = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.dismiss();
       toast.error("New passwords do not match");
       return;
     }
     if (passwordData.newPassword.length < 6) {
+      toast.dismiss();
       toast.error("Password must be at least 6 characters long");
       return;
     }
     if (passwordData.newPassword === passwordData.oldPassword) {
+      toast.dismiss();
       toast.error(
         "Old password is same as new password. Please choose a different one.",
       );
@@ -85,6 +89,7 @@ const Profile = () => {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       });
+      toast.dismiss();
       toast.success("Password changed successfully");
       setIsChangePasswordOpen(false);
       setPasswordData({
@@ -94,6 +99,7 @@ const Profile = () => {
       });
     } catch (error) {
       console.error("Error changing password", error);
+      toast.dismiss();
       toast.error(error.response?.data?.message || "Failed to change password");
     }
   };
@@ -124,6 +130,7 @@ const Profile = () => {
     const newEmail = formData.email.trim();
 
     if (newName === user.name && newEmail === user.email) {
+      toast.dismiss();
       toast.info("No changes detected");
       setIsEditing(false);
       return; 
@@ -157,9 +164,11 @@ const Profile = () => {
       }
 
       setIsEditing(false);
+      toast.dismiss();
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile", error);
+      toast.dismiss();
       toast.error("Failed to update profile");
     }
   };
@@ -174,6 +183,7 @@ const Profile = () => {
 
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!validTypes.includes(file.type)) {
+      toast.dismiss();
       toast.error("Only JPG, JPEG, and PNG formats are allowed");
       // clear input
       e.target.value = null;
@@ -190,11 +200,13 @@ const Profile = () => {
       const userData = response.data.data;
       setUser((prev) => ({ ...prev, avatar: userData.avatar }));
 
+      toast.dismiss();
       toast.success("Profile picture updated successfully");
     } catch (error) {
       console.error("Error updating profile picture", error);
       const errMsg =
         error.response?.data?.message || "Failed to update profile picture";
+      toast.dismiss();
       toast.error(errMsg);
     }
   };

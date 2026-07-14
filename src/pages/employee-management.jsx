@@ -99,7 +99,9 @@ const ArtisanManagement = () => {
       // console.log("API Response:", response.data);
       let artisans = response.data?.data?.docs || [];
       if (!Array.isArray(artisans)) {
+        toast.dismiss();
         toast.error("Expected docs to be an array, got:", artisans);
+        toast.dismiss();
         toast.error("Unexpected data format from API: docs is not an array");
         return;
       }
@@ -129,6 +131,7 @@ const ArtisanManagement = () => {
       setTotalPages(response.data?.data?.totalPages || 1);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to fetch employee data.";
+      toast.dismiss();
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -172,11 +175,13 @@ const ArtisanManagement = () => {
         ),
       );
 
+      toast.dismiss();
       toast.success(
         `Employee ${newStatus === "BLOCKED" ? "Blocked" : "Activated"
         } Successfully!`,
       );
     } catch (error) {
+      toast.dismiss();
       toast.error("Something went wrong!");
     }
 
@@ -321,12 +326,34 @@ const ArtisanManagement = () => {
         toast.dismiss();
         toast.error(response.data?.message || "Something went wrong.");
       }
+      // } catch (error) {
+      //   toast.dismiss();
+      //   toast.error(
+      //     error.response?.data?.message ||
+      //     error.message ||
+      //     "Error registering employee",
+      //   );
+      // } 
     } catch (error) {
       toast.dismiss();
+      if (
+        error.response?.status === 422 &&
+        error.response?.data?.message?.includes("Invalid email format")
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "Invalid email format",
+        }));
+        return;
+      }
+
+      toast.dismiss();
       toast.error(
-        error.response?.data?.message ||
-        error.message ||
-        "Error registering employee",
+        Array.isArray(error.response?.data?.message)
+          ? error.response.data.message.join(", ")
+          : error.response?.data?.message ||
+          error.message ||
+          "Error registering employee"
       );
     } finally {
       setIsRegistering(false);
