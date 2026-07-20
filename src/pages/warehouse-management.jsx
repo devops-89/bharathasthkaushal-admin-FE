@@ -8,7 +8,7 @@ import {
   X,
   MapPin,
   Globe,
-  Eye,
+  Info,
   ChevronDown,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -319,7 +319,8 @@ export default function WarehouseManagement() {
                   currentWarehouses.map((warehouse, index) => (
                     <tr
                       key={warehouse.id || warehouse._id || index}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => handleViewDetails(warehouse.id)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td
                         className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize"
@@ -399,10 +400,13 @@ export default function WarehouseManagement() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex justify-center items-center">
                           <button
-                            onClick={() => handleViewDetails(warehouse.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(warehouse.id);
+                            }}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           >
-                            <Eye size={20} />
+                            <Info size={20} />
                           </button>
                         </div>
                       </td>

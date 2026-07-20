@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import DisableModal from "../components/DisableModal";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import { Eye, ChevronLeft, ChevronRight, Search, ChevronDown } from "lucide-react";
+import { Eye, ChevronLeft, ChevronRight, Search, ChevronDown, Info } from "lucide-react";
 import { userControllers } from "../api/user";
 import SecureImage from "../components/SecureImage";
 
@@ -213,7 +213,8 @@ function UserManagement() {
                 currentUsers.map((user) => (
                   <tr
                     key={user.id || user._id}
-                    className="border-b hover:bg-gray-50 transition-colors"
+                    onClick={() => navigate(`/user-profile/${user.id || user._id}`)}
+                    className="border-b hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -248,34 +249,37 @@ function UserManagement() {
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <Switch
-                        checked={user?.status === "ACTIVE"}
-                        onChange={() => handleToggle(user)}
-                        className={`${user?.status === "ACTIVE"
-                          ? "bg-orange-600"
-                          : "bg-gray-300"
-                          } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
-                      >
-                        <span className="sr-only">Toggle Status</span>
-                        <span
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Switch
+                          checked={user?.status === "ACTIVE"}
+                          onChange={() => handleToggle(user)}
                           className={`${user?.status === "ACTIVE"
-                            ? "translate-x-6"
-                            : "translate-x-1"
-                            } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                        />
-                      </Switch>
+                            ? "bg-orange-600"
+                            : "bg-gray-300"
+                            } relative inline-flex h-[22px] w-[45px] rounded-full transition cursor-pointer`}
+                        >
+                          <span className="sr-only">Toggle Status</span>
+                          <span
+                            className={`${user?.status === "ACTIVE"
+                              ? "translate-x-6"
+                              : "translate-x-1"
+                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                          />
+                        </Switch>
+                      </div>
                     </td>
 
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center">
                         <button
-                          onClick={() =>
-                            navigate(`/user-profile/${user.id || user._id}`)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/user-profile/${user.id || user._id}`);
+                          }}
                           className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           aria-label="View profile"
                         >
-                          <Eye size={20} />
+                          <Info size={20} />
                         </button>
                       </div>
                     </td>

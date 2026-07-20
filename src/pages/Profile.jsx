@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
-import { User, Mail, Shield, Lock, Camera, Edit2 } from "lucide-react";
+import { User, Mail, Shield, Lock, Camera, Edit2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import { userControllers } from "../api/user";
 import { authControllers } from "../api/auth";
@@ -20,7 +20,17 @@ const Profile = () => {
     email: "",
   });
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -35,7 +45,7 @@ const Profile = () => {
         setUser({
           name: userData.name || "User",
           email: userData.email || "N/A",
-          role: userData.roleName || "N/A",
+          role: (userData.user_group || userData.roleName || "N/A").toString().replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
           avatar: userData.avatar || "",
         });
         setFormData({
@@ -54,6 +64,11 @@ const Profile = () => {
 
   const handleChangePasswordClick = () => {
     setIsChangePasswordOpen(true);
+    setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    setPasswordErrors({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const handlePasswordChange = (e) => {
@@ -62,27 +77,45 @@ const Profile = () => {
       ...prev,
       [name]: value,
     }));
+    setPasswordErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const handleSubmitPassword = async (e) => {
     e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.dismiss();
-      toast.error("New passwords do not match");
-      return;
+    let hasErrors = false;
+    const errors = {
+      oldPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    };
+
+    if (!passwordData.oldPassword) {
+      errors.oldPassword = "Current password is required";
+      hasErrors = true;
     }
-    if (passwordData.newPassword.length < 6) {
-      toast.dismiss();
-      toast.error("Password must be at least 6 characters long");
-      return;
+    if (!passwordData.newPassword) {
+      errors.newPassword = "New password is required";
+      hasErrors = true;
+    } else if (passwordData.newPassword.length < 6) {
+      errors.newPassword = "Password must be at least 6 characters long";
+      hasErrors = true;
+    } else if (passwordData.newPassword === passwordData.oldPassword) {
+      errors.newPassword = "Old password is same as new password. Please choose a different one.";
+      hasErrors = true;
     }
-    if (passwordData.newPassword === passwordData.oldPassword) {
-      toast.dismiss();
-      toast.error(
-        "Old password is same as new password. Please choose a different one.",
-      );
-      return;
+    if (!passwordData.confirmPassword) {
+      errors.confirmPassword = "Confirm new password is required";
+      hasErrors = true;
+    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
+      errors.confirmPassword = "New passwords do not match";
+      hasErrors = true;
     }
+
+    setPasswordErrors(errors);
+    if (hasErrors) return;
 
     try {
       await authControllers.changePassword({
@@ -90,13 +123,15 @@ const Profile = () => {
         newPassword: passwordData.newPassword,
       });
       toast.dismiss();
-      toast.success("Password changed successfully");
+      toast.success("Password changed successfully. Please login again.");
       setIsChangePasswordOpen(false);
-      setPasswordData({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      
+      setTimeout(() => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }, 1500);
     } catch (error) {
       console.error("Error changing password", error);
       toast.dismiss();
@@ -110,6 +145,8 @@ const Profile = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
+    setNameError("");
+    setEmailError("");
     setFormData({
       name: user.name,
       email: user.email,
@@ -118,9 +155,32 @@ const Profile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let newValue = value;
+
+    if (name === "name") {
+      if (/[^a-zA-Z\s]/.test(newValue)) {
+        setNameError("Full name can only contain alphabets and spaces");
+      } else {
+        setNameError("");
+      }
+      newValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+    }
+
+    if (name === "email") {
+      newValue = newValue.toLowerCase();
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (newValue.trim() === "") {
+        setEmailError("Email is required");
+      } else if (!emailRegex.test(newValue)) {
+        setEmailError("Enter a valid email address format");
+      } else {
+        setEmailError("");
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
@@ -130,10 +190,8 @@ const Profile = () => {
     const newEmail = formData.email.trim();
 
     if (newName === user.name && newEmail === user.email) {
-      toast.dismiss();
-      toast.info("No changes detected");
       setIsEditing(false);
-      return; 
+      return;
     }
 
     try {
@@ -143,8 +201,8 @@ const Profile = () => {
       });
       setUser((prev) => ({
         ...prev,
-      //  name: formData.name,
-      //  email: formData.email,
+        //  name: formData.name,
+        //  email: formData.email,
         name: newName,
         email: newEmail,
       }));
@@ -155,8 +213,8 @@ const Profile = () => {
         const parsedUser = JSON.parse(storedUser);
         const updatedUser = {
           ...parsedUser,
-        //  name: formData.name,
-        //  email: formData.email,
+          //  name: formData.name,
+          //  email: formData.email,
           name: newName,
           email: newEmail,
         };
@@ -168,8 +226,9 @@ const Profile = () => {
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile", error);
+      const errMsg = error.response?.data?.message;
       toast.dismiss();
-      toast.error("Failed to update profile");
+      toast.error(Array.isArray(errMsg) ? errMsg[0] : (errMsg || "Failed to update profile"));
     }
   };
 
@@ -210,6 +269,9 @@ const Profile = () => {
       toast.error(errMsg);
     }
   };
+
+  const hasChanges = formData.name.trim() !== user.name || formData.email.trim() !== user.email;
+  const isFormValid = !nameError && !emailError && formData.name.trim() !== "" && formData.email.trim() !== "";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1 relative">
@@ -261,10 +323,12 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="text-center">
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">
                     {user.name}
                   </h2>
-                  <p className="text-sm text-gray-500">{user.role}</p>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 tracking-wide">
+                    {user.role}
+                  </span>
                 </div>
               </div>
             </div>
@@ -288,7 +352,11 @@ const Profile = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={handleSave}
-                      className="px-3 py-1 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700"
+                      disabled={!hasChanges || !isFormValid}
+                      className={`px-3 py-1 rounded-md text-sm transition-colors ${hasChanges && isFormValid
+                        ? "bg-orange-600 text-white hover:bg-orange-700"
+                        : "bg-gray-200 text-gray-700 cursor-not-allowed"
+                        }`}
                     >
                       Save
                     </button>
@@ -312,13 +380,18 @@ const Profile = () => {
                       Full Name
                     </p>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-orange-500 sm:text-sm border p-2"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className={`mt-1 block w-full rounded-md shadow-sm focus:outline-none sm:text-sm border p-2 ${nameError ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
+                        />
+                        {nameError && (
+                          <p className="text-red-400 text-xs mt-1">{nameError}</p>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-base font-semibold text-gray-900">
                         {user.name}
@@ -336,13 +409,18 @@ const Profile = () => {
                       Email Address
                     </p>
                     {isEditing ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:border-orange-500 sm:text-sm border p-2"
-                      />
+                      <div>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`mt-1 block w-full rounded-md shadow-sm focus:outline-none sm:text-sm border p-2 ${emailError ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
+                        />
+                        {emailError && (
+                          <p className="text-red-400 text-xs mt-1">{emailError}</p>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-base font-semibold text-gray-900">
                         {user.email}
@@ -351,17 +429,17 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
+                {/*<div className="flex items-start gap-4">
                   <div className="p-3 bg-purple-50 rounded-lg">
                     <Shield className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Role</p>
-                    <p className="text-base font-semibold text-gray-900">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Role</p>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 tracking-wide">
                       {user.role}
-                    </p>
+                    </span>
                   </div>
-                </div>
+                </div>*/}
               </div>
             </div>
 
@@ -405,40 +483,73 @@ const Profile = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  name="oldPassword"
-                  value={passwordData.oldPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    name="oldPassword"
+                    value={passwordData.oldPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.oldPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showOldPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {passwordErrors.oldPassword && (
+                  <p className="text-red-400 text-xs mt-1">{passwordErrors.oldPassword}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.newPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {passwordErrors.newPassword && (
+                  <p className="text-red-400 text-xs mt-1">{passwordErrors.newPassword}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.confirmPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {passwordErrors.confirmPassword && (
+                  <p className="text-red-400 text-xs mt-1">{passwordErrors.confirmPassword}</p>
+                )}
               </div>
               <div className="flex gap-4 mt-8">
                 <button

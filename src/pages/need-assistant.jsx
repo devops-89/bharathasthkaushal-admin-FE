@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Info
 } from "lucide-react";
 import { needAssistanceControllers } from "../api/needAssistance";
 const NEED_ASSISTANCE_STATUS = {
@@ -393,7 +394,8 @@ const NeedAssistanceDashboard = () => {
                     {currentTickets.map((item) => (
                       <tr
                         key={item.id}
-                        className="hover:bg-gray-50 transition-colors"
+                        onClick={() => handleViewDetails(item)}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
@@ -414,11 +416,14 @@ const NeedAssistanceDashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex justify-center items-center">
                             <button
-                              onClick={() => handleViewDetails(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(item);
+                              }}
                               className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                               title="View Details"
                             >
-                              <Eye size={20} />
+                              <Info size={20} />
                             </button>
                           </div>
                         </td>
@@ -461,8 +466,8 @@ const NeedAssistanceDashboard = () => {
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
                         className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === 1
-                            ? "text-gray-300 cursor-not-allowed"
-                            : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                           }`}
                       >
                         <ChevronLeft className="w-5 h-5" />
@@ -472,8 +477,8 @@ const NeedAssistanceDashboard = () => {
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
                         className={`p-2 rounded-lg border border-gray-200 transition-colors ${currentPage === totalPages
-                            ? "text-gray-300 cursor-not-allowed"
-                            : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200"
                           }`}
                       >
                         <ChevronRight className="w-5 h-5" />

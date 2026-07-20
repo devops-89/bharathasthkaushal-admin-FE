@@ -52,7 +52,7 @@ export const categoryControllers = {
   getallSubcategory: async (categoryId) => {
     try {
       let result = await productSecuredApi.get(
-        `/category/getallsubcategory?page=1&pageSize=1000`,
+        `/category/getallsubcategory?artisanExpertiseList=true`,
         {
           headers: { "cache-control": "no-cache" },
         }

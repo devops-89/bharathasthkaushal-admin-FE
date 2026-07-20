@@ -80,6 +80,9 @@ export default function LoginPage({ onLogin }) {
       .then((res) => {
         const response = res.data.data;
         localStorage.setItem("accessToken", response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem("refreshToken", response.refreshToken);
+        }
         toast.dismiss();
         toast.success("Login successful!");
         navigate("/dashboard");

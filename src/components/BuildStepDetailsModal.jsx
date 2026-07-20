@@ -33,6 +33,14 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
     }
   }, [stepId, stepDetailsData]);
 
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   if (!stepId) return null;
   const [processing, setProcessing] = useState(false);
 
@@ -94,18 +102,21 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
   };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative">
-        {/* CLOSE BUTTON */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full"
-        >
-          <X className="w-5 h-5 text-gray-600" />
-        </button>
+      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col relative overflow-hidden">
+        {/* HEADER */}
+        <div className="bg-white z-10 px-6 pt-6 pb-4 border-b border-gray-100 flex justify-between items-center shrink-0">
+          <h2 className="text-2xl font-bold text-gray-900">Build Step Details</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
 
-        {/* HEADERr */}
-        <h2 className="text-2xl font-bold mb-4">Build Step Details</h2>
-        {loading ? (
+        {/* SCROLLABLE BODY */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
           <p className="text-center py-10">Loading details...</p>
         ) : (
           <>
@@ -343,6 +354,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
             )}
           </>
         )}
+        </div>
       </div>
       <ToastContainer position="top-right" autoClose={2000} />
     </div>

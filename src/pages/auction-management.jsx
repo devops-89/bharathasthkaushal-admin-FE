@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  Eye,
+  Info,
   X,
   Play,
   ChevronLeft,
@@ -16,7 +16,6 @@ import {
   CheckCircle,
   Trophy,
   Clock,
-  Info,
   Trash2,
 } from "lucide-react";
 import { productControllers } from "../api/product.js";
@@ -418,6 +417,8 @@ const AuctionManagement = () => {
         errors.endDate = "Invalid end date";
       } else if (!isNaN(startObj.getTime()) && endObj <= startObj) {
         errors.endDate = "End time must be after start time";
+      } else if (!isNaN(startObj.getTime()) && (endObj - startObj) <= 15 * 60 * 1000) {
+        errors.endDate = "Difference must be greater than 15 minutes";
       } else if (endObj > maxDate) {
         errors.endDate = "End date must be less than 2099";
       }
@@ -801,7 +802,7 @@ const AuctionManagement = () => {
                   </tr>
                 ) : (
                   currentAuctions.map((auction) => (
-                    <tr key={auction.auction_id} className="hover:bg-gray-50">
+                    <tr key={auction.auction_id} onClick={() => handleViewDetails(auction)} className="hover:bg-gray-50 cursor-pointer">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div
                           className="text-sm font-medium text-gray-900 capitalize"
@@ -814,7 +815,10 @@ const AuctionManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          onClick={() => handlePopularClick(auction)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePopularClick(auction);
+                          }}
                           disabled={auction.status === "ENDED"}
                           className={`flex items-center justify-center p-2 rounded-lg transition-colors w-fit ${auction.status === "ENDED" ? "text-gray-400 cursor-not-allowed" : "hover:bg-orange-50 text-orange-600 hover:text-orange-700"}`}
                         >
@@ -858,15 +862,21 @@ const AuctionManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex justify-left items-center gap-2">
                           <button
-                            onClick={() => handleViewDetails(auction)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(auction);
+                            }}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                             title="View Details"
                           >
-                            <Eye size={20} />
+                            <Info size={20} />
                           </button>
                           {auction.status?.toUpperCase() === "SCHEDULED" && (
                             <button
-                              onClick={() => handleStartAuction(auction.auction_id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartAuction(auction.auction_id);
+                              }}
                               className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
                               title="Start Auction"
                             >
@@ -906,7 +916,7 @@ const AuctionManagement = () => {
           </div>
 
           <div className="text-base text-gray-600 font-medium justify-self-center">
-            {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, auctions.length)}{" "}
+            {indexOfFirstItem}–{Math.min(indexOfLastItem, auctions.length)}{" "}
             of {auctions.length}
           </div>
 
@@ -995,8 +1005,8 @@ const AuctionManagement = () => {
                   {/* Specifications Card */}
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
-                      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-                        <span className="text-orange-500"></span> Specifications
+                      <h4 className="font-bold text-gray-400 flex items-center gap-2">
+                        Specifications
                       </h4>
                     </div>
                     <div className="p-5 grid grid-cols-2 gap-y-4 gap-x-2">
@@ -1152,7 +1162,7 @@ const AuctionManagement = () => {
 
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                       <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
-                        Minimum Bid Price
+                        Min Bid Price
                       </p>
                       <p className="text-xl font-bold text-gray-900">
                         ₹{selectedAuction.reservePrice.toLocaleString()}
@@ -1163,7 +1173,7 @@ const AuctionManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Timeline */}
                     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-                      <h4 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <h4 className="font-bold text-gray-400 mb-6 flex items-center gap-2">
                         Auction Timeline
                       </h4>
                       <div className="relative pl-6 border-l-2 border-gray-100 space-y-8">
@@ -1199,7 +1209,7 @@ const AuctionManagement = () => {
                     {/* Bids History */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col h-[320px]">
                       <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
-                        <h4 className="font-bold text-gray-900">Recent Bids</h4>
+                        <h4 className="font-bold text-gray-400">Recent Bids</h4>
                         <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full">
                           {selectedAuction.bids.length}
                         </span>
@@ -1274,7 +1284,7 @@ const AuctionManagement = () => {
                   {/* Popular Image Card */}
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div className="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
-                      <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                      <h4 className="font-bold text-gray-400 flex items-center gap-2">
                         Popular Auction Image
                       </h4>
                     </div>

@@ -1,6 +1,6 @@
 import { getuserSecuredApi, dashboardSecuredApi } from "./config";
 export const userControllers = {
-  getUserListGroup: async (group, page = 1, pageSize = 50, hasAddress = null, search = "", expertizeField = "", status = "") => {
+  getUserListGroup: async (group, page = 1, pageSize = 50, hasAddress = null, search = "", expertizeField = "", status = "", verifyStatus = "") => {
     try {
       let result = await getuserSecuredApi.get(`/users/getUserList`, {
         params: {
@@ -11,6 +11,7 @@ export const userControllers = {
           ...(search && { search }),
           ...(expertizeField && { expertizeField }),
           ...(status && status !== "ALL" && { status }),
+          ...(verifyStatus && verifyStatus !== "ALL" && { verifyStatus }),
         },
         headers: { "Cache-Control": "no-cache" }
       });
@@ -54,6 +55,19 @@ export const userControllers = {
         body
       );
       // console.log("hey guyssss", response);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  rejectArtisan: async (id) => {
+    try {
+      const body = { verifyStatus: "REJECTED" };
+      const response = await getuserSecuredApi.patch(
+        `/users/${id}/verify-status`,
+        body
+      );
       return response;
     } catch (error) {
       throw error;

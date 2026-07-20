@@ -311,7 +311,8 @@ const PaymentManagement = () => {
                   payments.map((payment) => (
                     <tr
                       key={payment.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => handleViewDetails(payment.id)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center">
@@ -369,10 +370,13 @@ const PaymentManagement = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => handleViewDetails(payment.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(payment.id);
+                            }}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                           >
-                            <Eye size={16} />
+                            <Info size={20} />
                           </button>
                         </div>
                       </td>

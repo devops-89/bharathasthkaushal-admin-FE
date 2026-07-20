@@ -5,7 +5,7 @@ import {
   Filter,
   Plus,
   X,
-  Eye,
+  MoreVertical,
   Phone,
   Calendar,
   User,
@@ -14,6 +14,12 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  PlayCircle,
+  Info,
+  Pencil,
+  CheckCircle,
+  Clock,
+  XCircle,
 } from "lucide-react";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
@@ -37,6 +43,7 @@ const formatAadhaar = (number) => {
 const ArtisanManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [verifyStatusFilter, setVerifyStatusFilter] = useState("ALL");
   const [showAddForm, setShowAddForm] = useState(false);
   // const [showFilter, setShowFilter] = useState(false);
   // const [locationFilter, setLocationFilter] = useState("");
@@ -68,6 +75,7 @@ const ArtisanManagement = () => {
   });
   const [errors, setErrors] = useState({});
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showAddressesModal, setShowAddressesModal] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,7 +112,7 @@ const ArtisanManagement = () => {
 
   // Prevent background scrolling when modals are open
   useEffect(() => {
-    if (showAddForm || showDetailsModal || showStatusModal || showVideoModal) {
+    if (showAddForm || showDetailsModal || showStatusModal || showVideoModal || showAddressesModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -112,7 +120,7 @@ const ArtisanManagement = () => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [showAddForm, showDetailsModal, showStatusModal, showVideoModal]);
+  }, [showAddForm, showDetailsModal, showStatusModal, showVideoModal, showAddressesModal]);
 
   const filteredCountries = countryCodes.filter(
     (country) =>
@@ -196,6 +204,27 @@ const ArtisanManagement = () => {
       toast.error(error.response?.data?.message || "Error verifying artisan");
     }
   };
+
+  const handleRejectArtisan = async (id) => {
+    try {
+      const partner = partnersData.find((p) => p.id === id);
+      if (partner.verify_status === "REJECTED") {
+        toast.dismiss();
+        toast.warning("This artisan is already rejected");
+        return;
+      }
+      const response = await userControllers.rejectArtisan(id);
+      toast.dismiss();
+      toast.success("Artisan Rejected Successfully");
+      setSelectedPartner((prev) =>
+        prev && prev.id === id ? { ...prev, verify_status: "REJECTED" } : prev,
+      );
+      fetchArtisans(currentPage, rowsPerPage);
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error.response?.data?.message || "Error rejecting artisan");
+    }
+  };
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
     return () => clearTimeout(timer);
@@ -203,9 +232,9 @@ const ArtisanManagement = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchTerm /*, locationFilter*/]);
+  }, [debouncedSearchTerm, verifyStatusFilter]);
 
-  const fetchArtisans = async (page = 1, limit = 10, search = "" /*, location = ""*/) => {
+  const fetchArtisans = async (page = 1, limit = 10, search = "", verifyStatus = "ALL") => {
     try {
       setLoading(true);
       const response = await userControllers.getUserListGroup(
@@ -213,8 +242,10 @@ const ArtisanManagement = () => {
         page,
         limit,
         null,
-        search
-        // location
+        search,
+        "",
+        "",
+        verifyStatus
       );
       const responseData = response.data?.data || response.data || {};
       let artisans = responseData.docs || responseData || [];
@@ -245,6 +276,7 @@ const ArtisanManagement = () => {
         user_group: user.user_group || "ARTISAN",
         introVideo: user.introVideo || null,
         avatar: user.avatar || null,
+        addresses: user.addresses || [],
       }));
 
       setPartnersData(mappedData);
@@ -262,9 +294,9 @@ const ArtisanManagement = () => {
   };
 
   useEffect(() => {
-    fetchArtisans(currentPage, rowsPerPage, debouncedSearchTerm /*, locationFilter*/);
+    fetchArtisans(currentPage, rowsPerPage, debouncedSearchTerm, verifyStatusFilter);
     getallSubcategory("categoryId");
-  }, [currentPage, rowsPerPage, debouncedSearchTerm /*, locationFilter*/]);
+  }, [currentPage, rowsPerPage, debouncedSearchTerm, verifyStatusFilter]);
 
   /*
   useEffect(() => {
@@ -290,19 +322,19 @@ const ArtisanManagement = () => {
     setShowDetailsModal(true);
   };
 
-  const handleEditClick = () => {
+  const handleEditClick = (partnerToEdit = selectedPartner) => {
     setShowDetailsModal(false);
     setIsEditMode(true);
-    setEditId(selectedPartner.id);
+    setEditId(partnerToEdit.id);
 
     let parsedExpertise = [];
-    const exp = selectedPartner.expertizeField;
+    const exp = partnerToEdit.expertizeField;
     if (exp && exp !== "Not Specified") {
       parsedExpertise = typeof exp === 'string' ? exp.split(',').map(s => s.trim()) : exp;
     }
 
-    const casteCat = selectedPartner.user_caste_category;
-    const subCst = selectedPartner.subCaste;
+    const casteCat = partnerToEdit.user_caste_category;
+    const subCst = partnerToEdit.subCaste;
     if (casteCat && casteCat !== "—" && casteCategories[casteCat]) {
       if (subCst && subCst !== "_" && !casteCategories[casteCat].includes(subCst)) {
         setShowSubCasteOther(true);
@@ -310,18 +342,18 @@ const ArtisanManagement = () => {
     }
 
     const initialData = {
-      firstName: selectedPartner.firstName !== "—" ? selectedPartner.firstName : "",
-      lastName: selectedPartner.lastName !== "—" ? selectedPartner.lastName : "",
-      email: selectedPartner.email !== "—" ? selectedPartner.email : "",
-      countryCode: selectedPartner.countryCode || "+91",
-      phoneNo: selectedPartner.phoneNo !== "—" ? selectedPartner.phoneNo : "",
+      firstName: partnerToEdit.firstName !== "—" ? partnerToEdit.firstName : "",
+      lastName: partnerToEdit.lastName !== "—" ? partnerToEdit.lastName : "",
+      email: partnerToEdit.email !== "—" ? partnerToEdit.email : "",
+      countryCode: partnerToEdit.countryCode || "+91",
+      phoneNo: partnerToEdit.phoneNo !== "—" ? partnerToEdit.phoneNo : "",
       expertizeField: parsedExpertise,
-      location: selectedPartner.location !== "—" ? selectedPartner.location : "",
-      aadhaarNumber: selectedPartner.aadhaarNumber !== "N/A" ? selectedPartner.aadhaarNumber : "",
+      location: partnerToEdit.location !== "—" ? partnerToEdit.location : "",
+      aadhaarNumber: partnerToEdit.aadhaarNumber !== "N/A" ? partnerToEdit.aadhaarNumber : "",
       user_caste_category: casteCat !== "—" ? casteCat : "",
       subCaste: subCst !== "_" ? subCst : "",
-      introVideo: selectedPartner.introVideo || "",
-      gstNumber: selectedPartner.gstNumber !== "—" ? selectedPartner.gstNumber : "",
+      introVideo: partnerToEdit.introVideo || "",
+      gstNumber: partnerToEdit.gstNumber !== "—" ? partnerToEdit.gstNumber : "",
     };
 
     setFormData(initialData);
@@ -699,6 +731,19 @@ const ArtisanManagement = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
+            <div className="relative">
+              <select
+                value={verifyStatusFilter}
+                onChange={(e) => setVerifyStatusFilter(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+              >
+                <option value="ALL">All Status</option>
+                <option value="VERIFIED">Verified</option>
+                <option value="UNVERIFIED">Not Verified</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            </div>
             {/*
             <div className="flex gap-3">
               <button
@@ -812,9 +857,10 @@ const ArtisanManagement = () => {
                   />
                   {errors.email && <p className="text-red-400 text-xs mt-1 font-medium">{errors.email}</p>}
                 </div>
+                {/* 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address {/*<span className="text-red-500">*</span>*/}
+                    Address
                   </label>
                   <input
                     type="text"
@@ -825,6 +871,7 @@ const ArtisanManagement = () => {
                     placeholder=" Enter Your Address"
                   />
                 </div>
+                */}
                 <div className="flex gap-2">
                   <div className="w-40 relative" ref={dropdownRef}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1203,182 +1250,191 @@ const ArtisanManagement = () => {
         )}
         {/* Details Modal */}
         {showDetailsModal && selectedPartner && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all">
+              <div className="p-6 md:p-7">
+
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                  <h2 className="text-lg font-bold text-gray-800">
                     Artisan Details
                   </h2>
-
                   <button
                     onClick={() => setShowDetailsModal(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="p-1.5 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
-                        <SecureImage
-                          src={
-                            selectedPartner.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              `${selectedPartner.firstName} ${selectedPartner.lastName}`,
-                            )}&background=random`
-                          }
-                          alt={`${selectedPartner.firstName} ${selectedPartner.lastName}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {selectedPartner.verify_status === "VERIFIED" && (
-                        <div className="mb-1">
-                          <span className="text-green-600 text-xs font-semibold px-2 py-0.5 border border-green-500 rounded-full inline-block">
-                            Verified
-                          </span>
-                        </div>
-                      )}
-                      <h3 className="text-xl font-bold text-gray-900 break-words capitalize">
+
+                {/* Profile Info */}
+                <div className="flex items-center gap-5 mb-6">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-200 shadow-sm flex-shrink-0">
+                    <SecureImage
+                      src={
+                        selectedPartner.avatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          `${selectedPartner.firstName} ${selectedPartner.lastName}`
+                        )}&background=random`
+                      }
+                      alt={`${selectedPartner.firstName} ${selectedPartner.lastName}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-gray-900 truncate capitalize">
                         {`${selectedPartner.firstName} ${selectedPartner.lastName}`}
                       </h3>
-                      <p className="text-gray-500 break-words">
+                      {selectedPartner.verify_status === "VERIFIED" && (
+                        <span className="text-green-700 bg-green-50 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border border-green-200">
+                          Verified
+                        </span>
+                      )}
+                      {selectedPartner.verify_status === "REJECTED" && (
+                        <span className="text-red-700 bg-red-50 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border border-red-200">
+                          Rejected
+                        </span>
+                      )}
+                      {selectedPartner.verify_status === "UNVERIFIED" && (
+                        <span className="text-yellow-700 bg-yellow-50 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border border-yellow-200">
+                          Not Verified
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="text-sm text-gray-500 truncate flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-gray-400" />
                         {selectedPartner.email || "N/A"}
                       </p>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {selectedPartner.status ? selectedPartner.status.charAt(0).toUpperCase() + selectedPartner.status.slice(1).toLowerCase() : "Approved Artisan"}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${selectedPartner.status === "ACTIVE"
+                        ? "bg-blue-50 text-blue-600 border-blue-200"
+                        : "bg-red-50 text-red-600 border-red-200"
+                        }`}>
+                        {selectedPartner.status || "Approved"}
                       </span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-3">
-                      <Phone className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium break-words">{`${selectedPartner.countryCode || ""
-                          } ${selectedPartner.phoneNo || "N/A"}`}</p>
-                      </div>
+                {/* Data Grid */}
+                <div className="bg-gray-50/70 rounded-xl border border-gray-100 p-5 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-4">
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Contact</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {`${selectedPartner.countryCode || ""} ${selectedPartner.phoneNo || "N/A"}`}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Expertise Field</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.expertizeField || "Not Specified"}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Expertise Field</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {selectedPartner.expertizeField || "Not Specified"}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Joined Date</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.joinedDate || "N/A"}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Joined Date</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {selectedPartner.joinedDate || "N/A"}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Aadhaar Number</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
-                          {/* {selectedPartner.aadhaarNumber || "N/A"} */}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Aadhaar Number</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Caste Category</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.user_caste_category || "N/A"}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Caste Category</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {selectedPartner.user_caste_category || "N/A"}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Sub Caste</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.subCaste || "N/A"}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Sub Caste</p>
+                      <p className="text-sm font-medium text-gray-800 break-words">
+                        {selectedPartner.subCaste || "N/A"}
+                      </p>
                     </div>
-                    {selectedPartner.gstNumber && selectedPartner.gstNumber !== "null" && selectedPartner.gstNumber !== "N/A" && selectedPartner.gstNumber !== "-" && selectedPartner.gstNumber.trim() !== "" && (
-                      <div className="flex items-center space-x-3">
-                        <div>
-                          <p className="text-sm text-gray-500">GST Number</p>
-                          <p className="font-medium break-words">
-                            {selectedPartner.gstNumber}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {selectedPartner.location && selectedPartner.location !== "null" && selectedPartner.location !== "N/A" && selectedPartner.location !== "-" && selectedPartner.location.trim() !== "" && (
-                      <div className="flex items-center space-x-3">
-                        <div>
-                          <p className="text-sm text-gray-500">Address</p>
-                          <p className="font-medium break-words">
-                            {selectedPartner.location}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="text-sm text-gray-500">Status</p>
-                        <p className="font-medium break-words">
-                          {selectedPartner.status ? selectedPartner.status.charAt(0).toUpperCase() + selectedPartner.status.slice(1).toLowerCase() : "Approved Artisan"}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">GST Number</p>
+                      {selectedPartner.gstNumber && selectedPartner.gstNumber !== "null" && selectedPartner.gstNumber !== "—" && selectedPartner.gstNumber !== "-" ? (
+                        <p className="text-sm font-medium text-gray-800 break-words">{selectedPartner.gstNumber}</p>
+                      ) : (
+                        <p className="text-sm font-medium text-gray-800 break-words">N/A</p>
+                      )}
+                    </div>
+                    <div className="md:col-span-2">
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Address</p>
+                      {selectedPartner.addresses && selectedPartner.addresses.length > 0 ? (
+                        <button
+                          onClick={() => setShowAddressesModal(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 mt-0.5 text-xs font-medium text-orange-600 bg-transparent border border-orange-600 rounded-full hover:bg-orange-50 transition-colors"
+                        >
+                          <MapPin className="w-3.5 h-3.5" />
+                          View Addresses
+                        </button>
+                      ) : (
+                        <p className="text-sm font-medium text-gray-800 break-words">Not Added Yet</p>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 mt-6">
-                  {selectedPartner?.introVideo ? (
-                    <button
-                      onClick={() => setShowVideoModal(true)}
-                      className="px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg shadow-sm hover:bg-orange-700 transition-all"
-                    >
-                      View Intro Video
-                    </button>
-                  ) : (
-                    <span className="px-5 py-2.5 bg-gray-50 text-gray-500 text-sm font-medium rounded-lg border border-gray-200 flex items-center shadow-sm">
-                      No Intro Video Uploaded
-                    </span>
-                  )}
-                  {selectedPartner?.user_group === "ARTISAN" &&
-                    selectedPartner?.verify_status !== "VERIFIED" && (
+                {/* Actions & Footer */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                    {selectedPartner?.introVideo ? (
                       <button
-                        onClick={() => handleVerifyArtisan(selectedPartner.id)}
-                        className="px-5 py-2.5 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 transition-all"
+                        onClick={() => setShowVideoModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-orange-600 bg-transparent border border-orange-600 rounded-full hover:bg-orange-50 transition-colors"
                       >
-                        Verify Artisan
+                        <PlayCircle className="w-4 h-4" />
+                        View Intro
                       </button>
+                    ) : (
+                      <span className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">
+                        No Intro Video
+                      </span>
                     )}
+
+                    {selectedPartner?.user_group === "ARTISAN" && 
+                      (selectedPartner?.verify_status === "UNVERIFIED" || selectedPartner?.verify_status === "REJECTED") && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleVerifyArtisan(selectedPartner.id)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 shadow-sm transition-colors"
+                        >
+                          Verify Artisan
+                        </button>
+                        {selectedPartner?.verify_status === "UNVERIFIED" && (
+                          <button
+                            onClick={() => handleRejectArtisan(selectedPartner.id)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 shadow-sm transition-colors"
+                          >
+                            Reject Artisan
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button
+                      onClick={() => handleEditClick()}
+                      className="px-5 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-sm transition-colors"
+                    >
+                      Edit Details
+                    </button>
+                    <button
+                      onClick={() => setShowDetailsModal(false)}
+                      className="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex justify-end mt-6 pt-4 border-t space-x-3">
-                  <button
-                    onClick={handleEditClick}
-                    className="px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
-                  >
-                    Edit Details
-                  </button>
-                  <button
-                    onClick={() => setShowDetailsModal(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -1402,6 +1458,9 @@ const ArtisanManagement = () => {
                     Status
                   </th>
                   <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Verification Status
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     View Details
                   </th>
                 </tr>
@@ -1409,7 +1468,7 @@ const ArtisanManagement = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan="5">
+                    <td colSpan="6">
                       <div className="flex justify-center items-center py-20">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                       </div>
@@ -1419,7 +1478,8 @@ const ArtisanManagement = () => {
                   filteredPartners.map((partner) => (
                     <tr
                       key={partner.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => handleViewDetails(partner)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -1467,32 +1527,62 @@ const ArtisanManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Switch
-                          checked={partner.status === "ACTIVE"}
-                          onChange={() => handleToggleStatus(partner)}
-                          className={`${partner.status === "ACTIVE"
-                            ? "bg-orange-600"
-                            : "bg-gray-300"
-                            } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
-                        >
-                          <span className="sr-only">Toggle Status</span>
-                          <span
-                            className={`${partner.status === "ACTIVE"
-                              ? "translate-x-6"
-                              : "translate-x-1"
-                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                          />
-                        </Switch>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Switch
+                            checked={partner.status === "ACTIVE"}
+                            onChange={() => handleToggleStatus(partner)}
+                            disabled={partner.verify_status === "REJECTED"}
+                            className={`${partner.verify_status === "REJECTED" ? "opacity-50 cursor-not-allowed " : "cursor-pointer "
+                              }${partner.status === "ACTIVE"
+                                ? "bg-orange-600"
+                                : "bg-gray-300"
+                              } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                          >
+                            <span className="sr-only">Toggle Status</span>
+                            <span
+                              className={`${partner.status === "ACTIVE"
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                                } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                            />
+                          </Switch>
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center">
+                          {partner.verify_status === "VERIFIED" && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                              <CheckCircle size={14} />
+                              Verified
+                            </span>
+                          )}
+                          {partner.verify_status === "UNVERIFIED" && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                              <Clock size={14} />
+                              Not Verified
+                            </span>
+                          )}
+                          {partner.verify_status === "REJECTED" && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                              <XCircle size={14} />
+                              Rejected
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap relative">
                         <div className="flex justify-center items-center">
                           <button
-                            onClick={() => handleViewDetails(partner)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(partner);
+                            }}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                             title="View Details"
                           >
-                            <Eye size={20} />
+                            <Info size={20} />
                           </button>
                         </div>
                       </td>
@@ -1604,6 +1694,60 @@ const ArtisanManagement = () => {
           </div>
         </div>
       )}
+
+      {showAddressesModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 transition-opacity">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl max-h-[85vh] flex flex-col transform transition-all border border-gray-100">
+            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-20 px-6 py-4 border-b border-gray-100 flex justify-between items-center rounded-t-2xl">
+              <h2 className="text-lg font-bold text-gray-800">
+                Artisan Addresses
+              </h2>
+              <button
+                onClick={() => setShowAddressesModal(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto custom-scrollbar space-y-3 bg-gray-50/30">
+              {selectedPartner.addresses && selectedPartner.addresses.length > 0 ? (
+                selectedPartner.addresses.map((addr, index) => (
+                  <div key={addr.id || index} className="p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-orange-100 hover:shadow-md transition-all">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="inline-block px-2.5 py-0.5 bg-orange-50 border border-orange-100 text-orange-600 text-[10px] font-bold rounded-md uppercase tracking-wider">
+                        {addr.addressType || "ADDRESS"}
+                      </span>
+                      {addr.isDefault && (
+                        <span className="text-[10px] font-bold text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                      {[
+                        addr.houseNo,
+                        addr.street,
+                        addr.landmark,
+                        addr.city,
+                        addr.state,
+                        addr.country,
+                        addr.postalCode
+                      ].filter(Boolean).join(", ")}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+                  <span className="text-2xl mb-2 opacity-50">📍</span>
+                  <span className="text-xs font-medium italic">No addresses found</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );

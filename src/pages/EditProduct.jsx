@@ -331,7 +331,11 @@ const EditProduct = () => {
       const formData = new FormData();
 
       Object.keys(productData).forEach((key) => {
-        formData.append(key, productData[key]);
+        if (key === "remainingQuantity") {
+          formData.append("quantity", productData[key]);
+        } else {
+          formData.append(key, productData[key]);
+        }
       });
 
       images.forEach((file) => {
@@ -585,7 +589,7 @@ const EditProduct = () => {
             {/* Quantity */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Remaining Quantity *
+                Quantity *
               </label>
               <input
                 type="number"

@@ -81,6 +81,113 @@ logoutSecuredApi.interceptors.request.use((config) => {
   config.headers.accessToken = token;
   return config;
 });
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+const handleResponseError = async (error) => {
+  const originalRequest = error.config;
+
+  const isForceLogout = error.response?.status === 401 && error.response?.data?.message === "NOT_AUTHORIZED";
+
+  if (isForceLogout) {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+    return Promise.reject(error);
+  }
+
+  const isUnauthorized =
+    error.response &&
+    (error.response.status === 401 ||
+      error.response.status === 403 ||
+      error.response.status === 498 ||
+      (error.response.data &&
+        error.response.data.message &&
+        error.response.data.message.toLowerCase().includes("invalid token")));
+
+  if (isUnauthorized && !originalRequest._retry) {
+    if (isRefreshing) {
+      return new Promise(function (resolve, reject) {
+        failedQueue.push({ resolve, reject });
+      })
+        .then((token) => {
+          originalRequest.headers["accessToken"] = token;
+          return Axios(originalRequest);
+        })
+        .catch((err) => {
+          return Promise.reject(err);
+        });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    const refreshToken = localStorage.getItem("refreshToken");
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!refreshToken) {
+      isRefreshing = false;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
+    return new Promise(function (resolve, reject) {
+      publicApi
+        .post("/renewAccessToken", {
+          refreshToken: refreshToken,
+          accessToken: accessToken,
+        })
+        .then((res) => {
+          const newToken = res.data?.data?.accessToken || res.data?.accessToken;
+          if (newToken) {
+            localStorage.setItem("accessToken", newToken);
+            if (res.data?.data?.refreshToken || res.data?.refreshToken) {
+              localStorage.setItem("refreshToken", res.data?.data?.refreshToken || res.data?.refreshToken);
+            }
+            originalRequest.headers["accessToken"] = newToken;
+            processQueue(null, newToken);
+            resolve(Axios(originalRequest));
+          } else {
+            throw new Error("No token returned from refresh endpoint");
+          }
+        })
+        .catch((err) => {
+          processQueue(err, null);
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+          reject(err);
+        })
+        .finally(() => {
+          isRefreshing = false;
+        });
+    });
+  }
+
+  return Promise.reject(error);
+};
+
+securedApi.interceptors.response.use((response) => response, handleResponseError);
+logoutSecuredApi.interceptors.response.use((response) => response, handleResponseError);
+productSecuredApi.interceptors.response.use((response) => response, handleResponseError);
+getuserSecuredApi.interceptors.response.use((response) => response, handleResponseError);
+dashboardSecuredApi.interceptors.response.use((response) => response, handleResponseError);
+paymentSecuredApi.interceptors.response.use((response) => response, handleResponseError);
+userSecuredApi.interceptors.response.use((response) => response, handleResponseError);
 
 export {
   securedApi,
@@ -97,4 +204,3 @@ export {
   paymentSecuredApi,
   paymentPublicApi,
 };
-

@@ -4,7 +4,7 @@ import {
   Filter,
   Plus,
   X,
-  Eye,
+  Info,
   Phone,
   Calendar,
   User,
@@ -200,6 +200,11 @@ const ArtisanManagement = () => {
     // Allow only alphabetic characters and spaces for name fields
     if (name === "firstName" || name === "lastName") {
       newValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+    }
+
+    // Convert email to lowercase automatically
+    if (name === "email") {
+      newValue = newValue.toLowerCase();
     }
 
     // Validation for Name, Email and Location fields
@@ -898,7 +903,8 @@ const ArtisanManagement = () => {
                   currentPartners.map((partner) => (
                     <tr
                       key={partner.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => handleViewDetails(partner)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -935,31 +941,36 @@ const ArtisanManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Switch
-                          checked={partner.status === "ACTIVE"}
-                          onChange={() => handleToggleStatus(partner)}
-                          className={`${partner.status === "ACTIVE"
-                            ? "bg-orange-600"
-                            : "bg-gray-300"
-                            } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
-                        >
-                          <span className="sr-only">Toggle Status</span>
-                          <span
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Switch
+                            checked={partner.status === "ACTIVE"}
+                            onChange={() => handleToggleStatus(partner)}
                             className={`${partner.status === "ACTIVE"
-                              ? "translate-x-6"
-                              : "translate-x-1"
-                              } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                          />
-                        </Switch>
+                              ? "bg-orange-600"
+                              : "bg-gray-300"
+                              } relative inline-flex h-[22px] w-[45px] rounded-full transition`}
+                          >
+                            <span className="sr-only">Toggle Status</span>
+                            <span
+                              className={`${partner.status === "ACTIVE"
+                                ? "translate-x-6"
+                                : "translate-x-1"
+                                } absolute top-1/2 -translate-y-1/2 inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                            />
+                          </Switch>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap relative">
                         <div className="flex justify-center items-center">
                           <button
-                            onClick={() => handleViewDetails(partner)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(partner);
+                            }}
                             className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
                             title="View Details"
                           >
-                            <Eye size={20} />
+                            <Info size={20} />
                           </button>
                         </div>
                       </td>

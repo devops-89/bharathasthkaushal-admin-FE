@@ -406,58 +406,59 @@ const ProductDetails = () => {
     e.preventDefault();
 
     // Validation
+    let errors = {};
     if (Number(createStepForm.sequence) <= 0) {
-      toast.dismiss();
-      toast.error("Sequence must be a positive number greater than 0.");
-      return;
+      errors.sequence = "Sequence must be greater than 0";
     }
-    if (Number(createStepForm.proposedPrice) <= 0) {
-      toast.dismiss();
-      toast.error("Proposed Price must be a positive number greater than 0.");
-      return;
+    if (!createStepForm.proposedPrice) {
+      errors.proposedPrice = "Proposed Price is required";
+    } else if (Number(createStepForm.proposedPrice) <= 0) {
+      errors.proposedPrice = "Proposed Price must be greater than 0";
     }
+
     if (!createStepForm.stepName.trim()) {
-      toast.dismiss();
-      toast.error("Step Name cannot be empty or just spaces.");
-      return;
+      errors.stepName = "Step Name is required";
+    } else {
+      const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
+      if (!nameRegex.test(createStepForm.stepName)) {
+        errors.stepName = "Special characters are not allowed";
+      }
     }
-    const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
-    if (!nameRegex.test(createStepForm.stepName)) {
-      toast.dismiss();
-      toast.error("Special characters are not allowed in Step Name.");
-      return;
-    }
+
     if (!createStepForm.description.trim()) {
-      toast.dismiss();
-      toast.error("Description cannot be empty or just spaces.");
-      return;
+      errors.description = "Description is required";
     }
+
     if (createStepForm.materials.trim()) {
       const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
       if (!materialRegex.test(createStepForm.materials)) {
-        toast.dismiss();
-        toast.error("Invalid Material (2-50 characters, letters, space, &, - only)");
-        return;
+        errors.materials = "Invalid Material (2-50 characters, letters, space, &, - only)";
       }
     }
+
     if (!createStepForm.skills || createStepForm.skills.length === 0) {
-      toast.dismiss();
-      toast.error("Please select at least one required skill.");
-      return;
+      errors.skills = "Please select at least one skill";
     }
+
     if (!createStepForm.dueDate) {
-      toast.dismiss();
-      toast.error("Due Date is required.");
+      errors.dueDate = "Due Date is required";
+    } else {
+      const selectedDate = new Date(createStepForm.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const maxDate = new Date("2099-12-31T23:59:59");
+      if (selectedDate < today) {
+        errors.dueDate = "Due Date cannot be in the past";
+      } else if (selectedDate > maxDate) {
+        errors.dueDate = "Due Date must be less than 2099";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setStepErrors(errors);
       return;
     }
-    const selectedDate = new Date(createStepForm.dueDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (selectedDate < today) {
-      toast.dismiss();
-      toast.error("Due Date cannot be in the past.");
-      return;
-    }
+    setStepErrors({});
 
     setLoading(true);
     try {
@@ -792,57 +793,53 @@ const ProductDetails = () => {
                               <div className="px-4 pb-4 bg-gray-50">
                                 {/* Assigned Artisan Name */}
                                 {step.artisan && (
-                                  <div className="md:col-span-2 mb-4">
-                                    <h4 className="font-semibold text-gray-700 mb-2">
-                                      Assigned Artisan
-                                    </h4>
-                                    <div className="text-orange-600 font-semibold text-sm bg-orange-50 p-3 rounded-sm flex items-center gap-3">
-                                      <span>
-                                        {step.artisan.firstName ||
-                                          step.artisan.lastName
-                                          ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
-                                          }`
-                                          : "No Artisan Assigned"}
-                                      </span>
-                                      {step.artisan.phoneNo && (
-                                        <>
-                                          <span>|</span>
-                                          <span>
-                                            {step.artisan.countryCode || "+91"} {step.artisan.phoneNo}
-                                          </span>
-                                        </>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div>
-                                  <h4 className="font-semibold text-gray-700 mb-2">
-                                    Build Steps Details
+                                  <h4 className="font-semibold text-gray-700 mb-2 mt-2">
+                                    Assigned Artisan
                                   </h4>
-                                  <div className="flex items-center gap-4">
+                                )}
+                                <div className="flex items-center justify-between gap-4 flex-wrap">
+                                  {step.artisan ? (
+                                    <div className="flex-1 min-w-[250px]">
+                                      <div className="text-orange-700 font-medium text-sm bg-gradient-to-r from-orange-50 to-orange-100/50 border border-orange-100 p-2.5 rounded-xl flex items-center gap-3 w-fit shadow-sm">
+                                        <div className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-orange-800 font-bold text-sm">
+                                          {step.artisan.firstName?.[0]?.toUpperCase() || step.artisan.lastName?.[0]?.toUpperCase() || "A"}
+                                        </div>
+                                        <span>
+                                          {step.artisan.firstName ||
+                                            step.artisan.lastName
+                                            ? `${step.artisan.firstName ?? ""} ${step.artisan.lastName ?? ""
+                                            }`
+                                            : "No Artisan Assigned"}
+                                        </span>
+                                        {step.artisan.phoneNo && (
+                                          <>
+                                            <span className="text-orange-300">|</span>
+                                            <span className="font-semibold flex items-center gap-1.5">
+                                              <Phone className="w-3.5 h-3.5 text-orange-600" />
+                                              {step.artisan.countryCode || "+91"} {step.artisan.phoneNo}
+                                            </span>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex-1 min-w-[250px]"></div>
+                                  )}
+
+                                  <div className="mt-2 sm:mt-0 flex items-center">
                                     <button
-                                      onClick={() => {
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
                                         setSelectedStepId(step.id);
                                         setShowStepDetails(true);
                                       }}
-                                      className="p-2 hover:bg-gray-200 rounded-full transition-colors flex items-center gap-2"
-                                      title="View Full Details"
+                                      className="px-4 py-2 text-orange-600 hover:text-orange-700 border border-orange-600 hover:border-orange-700 hover:shadow-md rounded-xl font-medium text-sm transition-colors flex items-center gap-2"
                                     >
-                                      <span className="text-sm font-medium text-gray-600">
-                                        View Details
-                                      </span>
+                                      <span>View Details</span>
+                                      <ChevronRight className="w-4 h-4" />
                                     </button>
-
-                                    <span
-                                      className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(
-                                        step.buildStatus,
-                                      )}`}
-                                    >
-                                      {step.buildStatus
-                                        ?.replace("_", " ")
-                                        .toUpperCase()}
-                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -861,7 +858,7 @@ const ProductDetails = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate(-1)}
-                  className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
+                  className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   Back
@@ -869,7 +866,7 @@ const ProductDetails = () => {
                 {!product?.isReadyForAuction && (
                   <button
                     onClick={() => navigate(`/edit-product/${product.productId}`)}
-                    className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
+                    className="mb-6 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-md transition-all duration-300 flex items-center gap-2 w-fit"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit Product
@@ -918,6 +915,11 @@ const ProductDetails = () => {
                 {/* Price Section */}
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
                   <div className="flex items-center gap-4 mb-3">
+                    <span className="text-4xl font-bold text-orange-600 flex items-baseline gap-2">
+                      ₹{product?.productPricePerPiece || 0}
+                      <span className="text-xl font-medium text-gray-500">/ piece</span>
+                    </span>
+                    {/*
                     <span className="text-4xl font-bold text-orange-600">
                       ₹
                       {parseInt(product.productPricePerPiece) *
@@ -926,10 +928,14 @@ const ProductDetails = () => {
                     <span className="text-xl font-medium text-gray-500">
                       (Original: ₹{parseInt(product.productPricePerPiece) * (product?.quantity || 0)})
                     </span>
+                    */}
+                    {/* 
                     {product?.discount > 0 && (
                       <span className="text-xl text-gray-500 line-through"></span>
                     )}
+                    */}
                   </div>
+                  {/* 
                   {product?.discount > 0 && (
                     <div className="flex items-center gap-3">
                       <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -940,6 +946,7 @@ const ProductDetails = () => {
                       </span>
                     </div>
                   )}
+                  */}
                 </div>
                 {/* Stock Status */}
                 <div className="flex items-center gap-3">
@@ -963,8 +970,9 @@ const ProductDetails = () => {
                       : "In Stock "}
                     ({product?.remainingQuantity || 0} units)
                   </span>
-                  <span className="text-gray-500 text-sm font-medium">
-                    (Original: {product?.quantity || 0} units)
+                  <span className="px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 bg-gray-100 text-gray-700">
+                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                    Original Stock ({product?.quantity || 0} units)
                   </span>
                 </div>
                 {/* Product Details */}
@@ -1586,8 +1594,8 @@ const ProductDetails = () => {
       {/* Create Build Step Modal */}
       {showCreateStepForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-2xl px-6 pb-6 pt-0 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <div className="flex items-center justify-between pt-6 pb-4 mb-4 sticky top-0 bg-white z-10">
               <h2 className="text-2xl font-bold text-gray-900">
                 Create New Build Step
               </h2>
@@ -1598,7 +1606,7 @@ const ProductDetails = () => {
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <form onSubmit={handleCreateStepFormSubmit} className="space-y-4">
+            <form onSubmit={handleCreateStepFormSubmit} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1609,12 +1617,12 @@ const ProductDetails = () => {
                     name="sequence"
                     value={createStepForm.sequence}
                     onChange={handleCreateStepFormChange}
-                    required
                     min="1"
                     disabled
                     placeholder="e.g., 4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-500"
+                    className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed ${stepErrors.sequence ? 'border-red-500 focus:border-red-500 bg-red-50' : 'border-gray-300 bg-gray-100 text-gray-500'}`}
                   />
+                  {stepErrors.sequence && <p className="text-red-400 text-sm mt-1">{stepErrors.sequence}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1625,12 +1633,12 @@ const ProductDetails = () => {
                     name="proposedPrice"
                     value={createStepForm.proposedPrice}
                     onChange={handleCreateStepFormChange}
-                    required
                     min="0"
                     step="0.01"
                     placeholder="e.g., 200.00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.proposedPrice ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                   />
+                  {stepErrors.proposedPrice && <p className="text-red-400 text-sm mt-1">{stepErrors.proposedPrice}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1642,9 +1650,10 @@ const ProductDetails = () => {
                     value={createStepForm.dueDate}
                     onChange={handleCreateStepFormChange}
                     min={getMinDueDate()}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                    max="2099-12-31"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.dueDate ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                   />
+                  {stepErrors.dueDate && <p className="text-red-400 text-sm mt-1">{stepErrors.dueDate}</p>}
                 </div>
               </div>
               <div>
@@ -1656,7 +1665,6 @@ const ProductDetails = () => {
                   name="stepName"
                   value={createStepForm.stepName}
                   onChange={handleCreateStepFormChange}
-                  required
                   placeholder="e.g., Adding Decorative Elements"
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.stepName ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                 />
@@ -1667,7 +1675,7 @@ const ProductDetails = () => {
                   Skills <span className="text-red-500">*</span>
                 </label>
                 <div
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus-within:border-green-500 cursor-pointer bg-white flex items-center justify-between"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none cursor-pointer bg-white flex items-center justify-between ${stepErrors.skills ? 'border-red-500 focus-within:border-red-500' : 'border-gray-300 focus-within:border-green-500'}`}
                   onClick={() => setIsSkillsDropdownOpen(!isSkillsDropdownOpen)}
                 >
                   <span className="truncate text-gray-700">
@@ -1675,8 +1683,9 @@ const ProductDetails = () => {
                       ? createStepForm.skills.join(", ")
                       : "Select Skills"}
                   </span>
-                  <span className="ml-2 text-gray-400">▼</span>
+                  <ChevronDown className="ml-2 w-5 h-5 text-gray-500" />
                 </div>
+                {stepErrors.skills && <p className="text-red-400 text-sm mt-1">{stepErrors.skills}</p>}
 
                 {isSkillsDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -1722,11 +1731,11 @@ const ProductDetails = () => {
                   name="description"
                   value={createStepForm.description}
                   onChange={handleCreateStepFormChange}
-                  required
                   rows="3"
                   placeholder="e.g., Adding Decorative Elements & Final Touches"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${stepErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange-500'}`}
                 />
+                {stepErrors.description && <p className="text-red-400 text-sm mt-1">{stepErrors.description}</p>}
               </div>
 
               <div>

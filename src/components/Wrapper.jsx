@@ -33,7 +33,7 @@ const Wrapper = ({ isOpen, toggleSidebar }) => {
     { path: '/payment-management', name: 'Payment Management', icon: CreditCard },
     // { path: '/permission-management', name: 'Permission Management', icon: Lock },
     { path: '/user-management', name: 'User Management', icon: UserCheck },
-    { path: '/need-assistant', name: 'Need Assistant', icon: HelpCircle },
+    { path: '/need-assistant', name: 'Need Assistance', icon: HelpCircle },
   ]
   const isActive = (path) => {
     return location.pathname === path || (path === '/dashboard' && location.pathname === '/')
