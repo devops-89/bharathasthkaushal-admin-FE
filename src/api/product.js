@@ -181,6 +181,7 @@ export const productControllers = {
     return productSecuredApi.get("/auction", { params: filteredParams });
   },
 
+
   createAuction: (auctionData) => {
     return productSecuredApi.post("/auction/create", auctionData);
   },

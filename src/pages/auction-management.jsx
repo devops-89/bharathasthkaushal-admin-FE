@@ -59,6 +59,7 @@ const getFullName = (user) => {
 const AuctionManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [auctions, setAuctions] = useState([]);
@@ -197,24 +198,16 @@ const AuctionManagement = () => {
     };
   }, [showDetailsModal, showAddForm, showWinnersModal, showWinnerModal]);
 
-  const fetchAuctions = async (page = 1, limit = 10, search = "") => {
+  const fetchAuctions = async (page = 1, limit = 10, search = "", status = "ALL") => {
     setLoading(true);
     setError(null);
 
     try {
-      /*
-      const res = await productControllers.getAllAuctions({
-        page: 1,
-        pageSize: 50,
-      });
-
-      const response = res.data.data.docs || res.data.data || [];
-      */
-
       const res = await productControllers.getAllAuctions({
         page: page,
         pageSize: limit,
         search: search,
+        status: status !== "ALL" ? status : undefined,
       });
 
       const responseData = res.data.data;
@@ -279,12 +272,12 @@ const AuctionManagement = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchAuctions(currentPage, rowsPerPage, debouncedSearch);
-  }, [currentPage, rowsPerPage, debouncedSearch]);
+    fetchAuctions(currentPage, rowsPerPage, debouncedSearch, statusFilter);
+  }, [currentPage, rowsPerPage, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   const [isProductLoading, setIsProductLoading] = useState(false);
 
@@ -747,6 +740,23 @@ const AuctionManagement = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
             </div>
+            <div className="w-full sm:w-48 relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full appearance-none px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+              >
+                <option value="ALL">All Status</option>
+                <option value="LIVE">Live</option>
+                <option value="SCHEDULED">Scheduled</option>
+                <option value="ENDED">Ended</option>
+                {/*<option value="DRAFT">Draft</option>
+                <option value="ACTIVE">Active</option>
+                <option value="WON">Won</option>
+                <option value="SETTLED">Settled</option>*/}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
             <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
@@ -916,8 +926,7 @@ const AuctionManagement = () => {
           </div>
 
           <div className="text-base text-gray-600 font-medium justify-self-center">
-            {indexOfFirstItem}–{Math.min(indexOfLastItem, auctions.length)}{" "}
-            of {auctions.length}
+            {totalDocs === 0 ? 0 : indexOfFirstItem}–{indexOfLastItem} of {totalDocs}
           </div>
 
           <div className="flex items-center gap-4 justify-self-end">

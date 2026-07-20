@@ -489,6 +489,7 @@ const Profile = () => {
                     name="oldPassword"
                     value={passwordData.oldPassword}
                     onChange={handlePasswordChange}
+                    autoComplete="new-password"
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.oldPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
                   />
                   <button
@@ -513,6 +514,7 @@ const Profile = () => {
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
+                    autoComplete="new-password"
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.newPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
                   />
                   <button
@@ -537,6 +539,7 @@ const Profile = () => {
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
+                    autoComplete="new-password"
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none pr-10 ${passwordErrors.confirmPassword ? "border-red-400 focus:border-red-400" : "border-gray-300 focus:border-orange-500"}`}
                   />
                   <button
