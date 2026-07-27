@@ -55,6 +55,9 @@ const ArtisanManagement = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectingArtisanId, setRejectingArtisanId] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
   const aadhaarRegex = /^[0-9]{12}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -205,20 +208,32 @@ const ArtisanManagement = () => {
     }
   };
 
-  const handleRejectArtisan = async (id) => {
+  const handleRejectArtisan = (id) => {
+    const partner = partnersData.find((p) => p.id === id);
+    if (partner.verify_status === "REJECTED") {
+      toast.dismiss();
+      toast.warning("This artisan is already rejected");
+      return;
+    }
+    setRejectingArtisanId(id);
+    setRejectReason("");
+    setIsRejectModalOpen(true);
+  };
+
+  const confirmRejectArtisan = async () => {
+    if (!rejectReason.trim()) {
+      toast.dismiss();
+      toast.error("Reject reason is required when rejecting an artisan");
+      return;
+    }
     try {
-      const partner = partnersData.find((p) => p.id === id);
-      if (partner.verify_status === "REJECTED") {
-        toast.dismiss();
-        toast.warning("This artisan is already rejected");
-        return;
-      }
-      const response = await userControllers.rejectArtisan(id);
+      const response = await userControllers.rejectArtisan(rejectingArtisanId, rejectReason.trim());
       toast.dismiss();
       toast.success("Artisan Rejected Successfully");
       setSelectedPartner((prev) =>
-        prev && prev.id === id ? { ...prev, verify_status: "REJECTED" } : prev,
+        prev && prev.id === rejectingArtisanId ? { ...prev, verify_status: "REJECTED" } : prev,
       );
+      setIsRejectModalOpen(false);
       fetchArtisans(currentPage, rowsPerPage);
     } catch (error) {
       toast.dismiss();
@@ -728,14 +743,14 @@ const ArtisanManagement = () => {
                 placeholder="Search by Name & Email"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500"
               />
             </div>
             <div className="relative">
               <select
                 value={verifyStatusFilter}
                 onChange={(e) => setVerifyStatusFilter(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+                className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 bg-white"
               >
                 <option value="ALL">All Status</option>
                 <option value="VERIFIED">Verified</option>
@@ -757,7 +772,7 @@ const ArtisanManagement = () => {
             */}
             <button
               onClick={() => setShowAddForm(true)}
-              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" /> Register Artisan
             </button>
@@ -1398,37 +1413,37 @@ const ArtisanManagement = () => {
                       </span>
                     )}
 
-                    {selectedPartner?.user_group === "ARTISAN" && 
+                    {selectedPartner?.user_group === "ARTISAN" &&
                       (selectedPartner?.verify_status === "UNVERIFIED" || selectedPartner?.verify_status === "REJECTED") && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleVerifyArtisan(selectedPartner.id)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 shadow-sm transition-colors"
-                        >
-                          Verify Artisan
-                        </button>
-                        {selectedPartner?.verify_status === "UNVERIFIED" && (
+                        <div className="flex gap-2">
                           <button
-                            onClick={() => handleRejectArtisan(selectedPartner.id)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-full hover:bg-red-700 shadow-sm transition-colors"
+                            onClick={() => handleVerifyArtisan(selectedPartner.id)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 shadow-sm transition-colors"
                           >
-                            Reject Artisan
+                            Verify Artisan
                           </button>
-                        )}
-                      </div>
-                    )}
+                          {selectedPartner?.verify_status === "UNVERIFIED" && (
+                            <button
+                              onClick={() => handleRejectArtisan(selectedPartner.id)}
+                              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-sm transition-colors"
+                            >
+                              Reject Artisan
+                            </button>
+                          )}
+                        </div>
+                      )}
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                     <button
                       onClick={() => handleEditClick()}
-                      className="px-5 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 shadow-sm transition-colors"
+                      className="px-5 py-2 text-sm font-medium text-white bg-orange-600 rounded-xl hover:bg-orange-700 shadow-sm transition-colors"
                     >
                       Edit Details
                     </button>
                     <button
                       onClick={() => setShowDetailsModal(false)}
-                      className="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                     >
                       Close
                     </button>
@@ -1743,6 +1758,50 @@ const ArtisanManagement = () => {
                   <span className="text-xs font-medium italic">No addresses found</span>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-opacity duration-300">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="text-lg font-bold text-gray-900">Reject Artisan</h3>
+              <button
+                onClick={() => setIsRejectModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for Rejection <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all resize-none text-sm"
+                placeholder="Please provide a detailed reason."
+              />
+            </div>
+
+            <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                onClick={() => setIsRejectModalOpen(false)}
+                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-xl transition-colors shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRejectArtisan}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-sm"
+              >
+                Confirm Reject
+              </button>
             </div>
           </div>
         </div>

@@ -21,7 +21,7 @@ import {
 import { productControllers } from "../api/product.js";
 import { warehouseControllers } from "../api/warehouse.js";
 import { countries } from "../constants/countries.js";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SecureImage from "../components/SecureImage";
@@ -57,9 +57,10 @@ const getFullName = (user) => {
 };
 
 const AuctionManagement = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [auctions, setAuctions] = useState([]);
@@ -230,13 +231,19 @@ const AuctionManagement = () => {
         minBidAmount: auction.min_bid_amount || 0,
         reservePrice: auction.reserve_price || 0,
         quantity: auction.quantity || 1,
-        startDate: formatDateForDisplay(auction.start_date) || "Not started",
+        startDate:
+          formatDateForDisplay(
+            auction.start_date ||
+            auction.startDate ||
+            auction.scheduled_at ||
+            auction.scheduledAt
+          ) || "Not started",
         endDate:
           formatDateForDisplay(
             auction.hard_close_at ||
-            auction.end_date ||
             auction.hardCloseAt ||
-            auction.endDate,
+            auction.end_date ||
+            auction.endDate
           ) || "Not set",
 
         status: auction.status || "DRAFT",
@@ -421,8 +428,9 @@ const AuctionManagement = () => {
       errors.quantity = "Quantity must be at least 1";
     } else {
       const selectedProduct = products.find((p) => (p.productId || p._id || p.id) == newAuction.productId);
-      if (selectedProduct && parseInt(newAuction.quantity) > parseInt(selectedProduct.quantity)) {
-        errors.quantity = `Quantity cannot exceed available stock (${selectedProduct.quantity})`;
+      const availableQty = selectedProduct ? parseInt(selectedProduct.remainingQuantity ?? selectedProduct.quantity ?? 0) : 0;
+      if (selectedProduct && parseInt(newAuction.quantity) > availableQty) {
+        errors.quantity = `Quantity cannot exceed available stock (${availableQty})`;
       }
     }
 
@@ -499,8 +507,8 @@ const AuctionManagement = () => {
         currentBid: parseFloat(res.data.data.leading_amount || 0),
         minBidAmount: parseFloat(res.data.data.min_bid_amount || 0),
         reservePrice: parseFloat(res.data.data.reserve_price || 0),
-        startDate: res.data.data.start_date.slice(0, 10),
-        endDate: res.data.data.hard_close_at.slice(0, 10),
+        startDate: formatDateForDisplay(res.data.data.start_date),
+        endDate: formatDateForDisplay(res.data.data.hard_close_at),
         status:
           res.data.data.status === "LIVE"
             ? "Active"
@@ -625,6 +633,33 @@ const AuctionManagement = () => {
     }
   };
 
+  const handleEndAuction = async (auctionId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await productControllers.endAuction(auctionId);
+      toast.dismiss();
+      toast.success(res.data.message || "Auction ended successfully");
+      fetchAuctions();
+    } catch (err) {
+      console.error(
+        "Error ending auction:",
+        err.response?.data || err.message,
+      );
+      setError(
+        "Error ending auction: " +
+        (err.response?.data?.message || err.message),
+      );
+      toast.dismiss();
+      toast.error(
+        "Error ending auction: " +
+        (err.response?.data?.message || err.message),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePopularClick = (auction) => {
     if (auction.rawImage) {
       setSelectedPopularAuction(auction);
@@ -737,14 +772,14 @@ const AuctionManagement = () => {
                 placeholder="Search auctions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500"
               />
             </div>
             <div className="w-full sm:w-48 relative">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full appearance-none px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+                className="w-full appearance-none px-4 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 bg-white"
               >
                 <option value="ALL">All Status</option>
                 <option value="LIVE">Live</option>
@@ -759,7 +794,7 @@ const AuctionManagement = () => {
             </div>
             <button
               onClick={() => setShowAddForm(true)}
-              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+              className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" /> Add Auction
             </button>
@@ -891,6 +926,18 @@ const AuctionManagement = () => {
                               title="Start Auction"
                             >
                               <Play size={14} /> Start
+                            </button>
+                          )}
+                          {auction.status?.toUpperCase() === "LIVE" && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEndAuction(auction.auction_id);
+                              }}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm text-xs font-semibold"
+                              title="End Auction"
+                            >
+                              <XCircle size={14} /> End
                             </button>
                           )}
                         </div>
@@ -1810,7 +1857,7 @@ const AuctionManagement = () => {
                         onChange={(e) => {
                           const rawVal = e.target.value.replace(/\D/g, "");
                           const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
-                          const total = product ? parseInt(product.quantity || 0) : 0;
+                          const total = product ? parseInt(product.remainingQuantity ?? product.quantity ?? 0) : 0;
                           let val = parseInt(rawVal);
                           if (isNaN(val) || val < 0) {
                             val = rawVal === "" ? "" : 0;
@@ -1838,7 +1885,7 @@ const AuctionManagement = () => {
                         {(() => {
                           if (!newAuction.productId) return "Please Select a Product";
                           const product = products.find(p => (p.productId || p._id || p.id) == newAuction.productId);
-                          const total = product ? parseInt(product.quantity || 0) : 0;
+                          const total = product ? parseInt(product.remainingQuantity ?? product.quantity ?? 0) : 0;
                           if (total === 0) return <span className="text-red-500 font-medium">Not Available</span>;
                           const inputQty = parseInt(newAuction.quantity) || 0;
                           const remaining = total - inputQty;

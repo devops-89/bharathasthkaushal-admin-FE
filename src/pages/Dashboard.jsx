@@ -36,9 +36,10 @@ import { productControllers } from "../api/product";
 import { userControllers } from "../api/user";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [serviceData, setServiceData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,6 +167,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Package,
       color: "bg-green-100 text-green-600",
+      path: "/product-management"
     },
     {
       title: "Total Users",
@@ -174,6 +176,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Users,
       color: "bg-blue-100 text-blue-600",
+      path: null
     },
     {
       title: "Total Auctions",
@@ -182,6 +185,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Gavel,
       color: "bg-purple-100 text-purple-600",
+      path: "/auction-management"
     },
     {
       title: "Live Auctions",
@@ -190,6 +194,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Activity,
       color: "bg-red-100 text-red-600",
+      path: "/auction-management?status=LIVE"
     },
     {
       title: "Scheduled Auctions",
@@ -198,6 +203,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Calendar,
       color: "bg-yellow-100 text-yellow-600",
+      path: "/auction-management?status=SCHEDULED"
     },
     {
       title: "Total Payments",
@@ -206,6 +212,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: CreditCard,
       color: "bg-indigo-100 text-indigo-600",
+      path: "/payment-management"
     },
     {
       title: "Pending Payments",
@@ -214,6 +221,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Activity,
       color: "bg-orange-100 text-orange-600",
+      path: "/payment-management?status=PENDING"
     },
     {
       title: "Artisans",
@@ -222,6 +230,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Palette,
       color: "bg-purple-100 text-purple-600",
+      path: "/artisans"
     },
     {
       title: "Employees",
@@ -230,6 +239,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: Briefcase,
       color: "bg-blue-100 text-blue-600",
+      path: "/employee-management"
     },
     {
       title: "General Users",
@@ -238,6 +248,7 @@ const Dashboard = () => {
       trend: "neutral",
       icon: User,
       color: "bg-orange-100 text-orange-600",
+      path: "/user-management"
     },
   ];
 
@@ -349,7 +360,11 @@ const Dashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div
+              key={index}
+              onClick={() => stat.path ? navigate(stat.path) : null}
+              className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 transition-shadow ${stat.path ? 'cursor-pointer hover:shadow-md' : ''}`}
+            >
               <div className="flex justify-between items-start mb-2">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                   <stat.icon className="w-5 h-5" />

@@ -17,7 +17,7 @@ export const authControllers = {
         },
       });
 
-      localStorage.removeItem("accessToken");
+      localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
       return result;
     } catch (error) {
       throw error;

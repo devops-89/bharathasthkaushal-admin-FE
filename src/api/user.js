@@ -61,9 +61,9 @@ export const userControllers = {
     }
   },
 
-  rejectArtisan: async (id) => {
+  rejectArtisan: async (id, reason) => {
     try {
-      const body = { verifyStatus: "REJECTED" };
+      const body = { verifyStatus: "REJECTED", rejectReason: reason };
       const response = await getuserSecuredApi.patch(
         `/users/${id}/verify-status`,
         body

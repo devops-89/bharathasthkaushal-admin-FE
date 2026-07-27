@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { paymentControllers } from "../api/payment";
 import { toast, ToastContainer } from "react-toastify";
 import SecureImage from "../components/SecureImage";
@@ -43,8 +43,10 @@ const formatStatus = (status) => {
 };
 
 const PaymentManagement = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
   const [sortBy, setSortBy] = useState("date");
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,8 @@ const PaymentManagement = () => {
           limit,
           sortBy,
           "desc",
-          debouncedSearch
+          debouncedSearch,
+          statusFilter
         );
         if (res.data?.data) {
           setPayments(res.data.data.docs || []);
@@ -94,11 +97,11 @@ const PaymentManagement = () => {
     };
 
     fetchPayments();
-  }, [currentPage, limit, sortBy, debouncedSearch]);
+  }, [currentPage, limit, sortBy, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, statusFilter]);
 
   // Disable background scrolling when modal is open
   useEffect(() => {
@@ -252,6 +255,20 @@ const PaymentManagement = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
               />
+            </div>
+            <div className="w-full sm:w-48 relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full appearance-none px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white"
+              >
+                <option value="ALL">All Status</option>
+                <option value="SUCCESS">Success</option>
+                <option value="FAILED">Failed</option>
+                <option value="PENDING">Pending</option>
+                <option value="REFUNDED">Refunded</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
             <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
               <button

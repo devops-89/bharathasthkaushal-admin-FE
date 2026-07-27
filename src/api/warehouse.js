@@ -33,4 +33,7 @@ export const warehouseControllers = {
     getWarehousesByCountry: (country) => {
         return productSecuredApi.get(`/warehouses?country=${country}`);
     },
+    updateWarehouse: (id, data) => {
+        return productSecuredApi.patch(`/warehouses/${id}`, data);
+    },
 };

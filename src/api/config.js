@@ -41,43 +41,43 @@ const paymentPublicApi = Axios.create({
 });
 
 securedApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
 logoutSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
 productSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   // config.headers.coma = "2917DA28-C412-5525-E814-A3E1E80638CB";
   config.headers["x-company-id"] = "2917DA28-C412-5525-E814-A3E1E80638CB";
   return config;
 });
 getuserSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
 
 dashboardSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
 
 paymentSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
 
 
 logoutSecuredApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
   config.headers.accessToken = token;
   return config;
 });
@@ -101,9 +101,9 @@ const handleResponseError = async (error) => {
   const isForceLogout = error.response?.status === 401 && error.response?.data?.message === "NOT_AUTHORIZED";
 
   if (isForceLogout) {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken"); sessionStorage.removeItem("refreshToken");
+    localStorage.removeItem("user"); sessionStorage.removeItem("user");
     window.location.href = "/login";
     return Promise.reject(error);
   }
@@ -134,13 +134,13 @@ const handleResponseError = async (error) => {
     originalRequest._retry = true;
     isRefreshing = true;
 
-    const refreshToken = localStorage.getItem("refreshToken");
-    const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = (sessionStorage.getItem("refreshToken") || localStorage.getItem("refreshToken"));
+    const accessToken = (sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken"));
 
     if (!refreshToken) {
       isRefreshing = false;
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken"); sessionStorage.removeItem("refreshToken");
       window.location.href = "/login";
       return Promise.reject(error);
     }
@@ -154,9 +154,9 @@ const handleResponseError = async (error) => {
         .then((res) => {
           const newToken = res.data?.data?.accessToken || res.data?.accessToken;
           if (newToken) {
-            localStorage.setItem("accessToken", newToken);
+            if (sessionStorage.getItem("accessToken")) { sessionStorage.setItem("accessToken", newToken); } else { localStorage.setItem("accessToken", newToken); }
             if (res.data?.data?.refreshToken || res.data?.refreshToken) {
-              localStorage.setItem("refreshToken", res.data?.data?.refreshToken || res.data?.refreshToken);
+              if (sessionStorage.getItem("refreshToken")) { sessionStorage.setItem("refreshToken", res.data?.data?.refreshToken || res.data?.refreshToken); } else { localStorage.setItem("refreshToken", res.data?.data?.refreshToken || res.data?.refreshToken); }
             }
             originalRequest.headers["accessToken"] = newToken;
             processQueue(null, newToken);
@@ -167,8 +167,8 @@ const handleResponseError = async (error) => {
         })
         .catch((err) => {
           processQueue(err, null);
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken"); sessionStorage.removeItem("refreshToken");
           window.location.href = "/login";
           reject(err);
         })

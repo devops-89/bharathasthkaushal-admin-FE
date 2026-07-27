@@ -280,12 +280,12 @@ const SubcategoryManagement = () => {
               placeholder="Search subcategories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500"
             />
           </div>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors"
+            className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition-colors"
           >
             <Plus className="w-5 h-5 mr-2" /> Add Subcategory
           </button>

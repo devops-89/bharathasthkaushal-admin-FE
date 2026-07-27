@@ -22,6 +22,7 @@
     "react-phone-input-2": "^2.15.1",
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.30.1",
+    "react-time-picker": "^8.0.3",
     "react-toastify": "^11.0.5",
     "recharts": "^2.5.0",
     "validator": "^13.15.35"

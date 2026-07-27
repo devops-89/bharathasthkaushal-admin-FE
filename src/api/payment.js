@@ -6,6 +6,7 @@ export const paymentControllers = {
         sortBy = "date",
         sortOrder = "desc",
         search = "",
+        status = "",
     ) => {
         try {
             const params = {
@@ -15,6 +16,7 @@ export const paymentControllers = {
                 sortOrder,
             };
             if (search) params.search = search;
+            if (status && status !== "ALL") params.paymentStatus = status;
 
             const response = await paymentSecuredApi.get(`/payments`, {
                 params: params,

@@ -60,6 +60,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
       }));
       toast.dismiss();
       toast.success("Approved Successfully!");
+      if (onClose) onClose(true);
     } catch (err) {
       // console.log(err);
       toast.dismiss();
@@ -92,6 +93,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
       toast.dismiss();
       toast.success("Rejected Successfully!");
       setShowRejectPopup(false);
+      if (onClose) onClose(true);
     } catch (err) {
       // console.log(err);
       toast.dismiss();

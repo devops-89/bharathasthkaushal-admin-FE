@@ -32,8 +32,8 @@ const Header = ({ toggleSidebar }) => {
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
+      localStorage.removeItem("user"); sessionStorage.removeItem("user");
       navigate("/");
       setIsDropdownOpen(false);
     }

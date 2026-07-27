@@ -833,7 +833,7 @@
 //   );
 // };
 // export default AddProduct;
-import { ArrowLeft, CheckCircle, ChevronDown } from "lucide-react";
+import { ArrowLeft, CheckCircle, ChevronDown, UploadCloud, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
@@ -930,6 +930,7 @@ const AddProduct = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isDragging, setIsDragging] = useState(false);
 
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -1004,7 +1005,11 @@ const AddProduct = () => {
     if (!formData.description.trim()) newErrors.description = "Description is required";
     if (!formData.country) newErrors.country = "Country is required";
     if (!formData.warehouseId) newErrors.warehouseId = "Warehouse is required";
-    if (images.length === 0) newErrors.images = "At least one product image is required";
+    if (images.length < 4) {
+      newErrors.images = "At least 4 product images are required";
+    } else if (images.length > 10) {
+      newErrors.images = "A maximum of 10 product images are allowed";
+    }
 
     if (formData.weightValue && Number(formData.weightValue) <= 0)
       newErrors.weightValue = "Weight must be greater than 0";
@@ -1034,19 +1039,28 @@ const AddProduct = () => {
   };
 
   const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : Array.from(e.target.files);
+    const allFiles = [...images, ...files];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const invalidFiles = files.filter(
       (file) => !validTypes.includes(file.type),
     );
 
     if (invalidFiles.length > 0) {
-      const errorMessage = "only jpeg ,jpg and png format are allowed";
+      const errorMessage = "Only JPEG, JPG, PNG, and WEBP formats are allowed";
       toast.dismiss();
       toast.error(errorMessage);
       setErrors((prev) => ({ ...prev, images: errorMessage }));
-      e.target.value = null; // Reset input
-      setImages([]);
+      if (e.target.value) e.target.value = null; // Reset input
+      return;
+    }
+
+    if (allFiles.length > 10) {
+      const errorMessage = "You can only upload a maximum of 10 images";
+      toast.dismiss();
+      toast.error(errorMessage);
+      setErrors((prev) => ({ ...prev, images: errorMessage }));
+      if (e.target.value) e.target.value = null;
       return;
     }
 
@@ -1055,7 +1069,28 @@ const AddProduct = () => {
       delete newErrors.images;
       return newErrors;
     });
-    setImages(files);
+    setImages(allFiles);
+    if (e.target.value) e.target.value = null;
+  };
+
+  const removeImage = (indexToRemove) => {
+    setImages(images.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileChange(e);
   };
 
   const handleSubmit = async () => {
@@ -1092,7 +1127,7 @@ const AddProduct = () => {
       data.append("netWeight", netWeight);
       data.append("country", formData.country);
       data.append("warehouseId", formData.warehouseId);
-      data.append("isReadyForAuction", formData.isReadyForAuction);
+      data.append("isReadyForAuction", formData.isReadyForAuction ? "true" : "");
 
       if (images.length > 0) {
         images.forEach((file) => {
@@ -1690,19 +1725,69 @@ const AddProduct = () => {
               <label className="block text-gray-700 font-medium mb-2">
                 Product Images <span className="text-red-500">*</span>
               </label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-                className={`w-full border p-2 rounded-lg ${errors.images ? "border-red-500 text-red-500" : "border-gray-300"}`}
-              />
+              <div
+                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${isDragging ? "border-orange-500 bg-orange-50" : errors.images ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-orange-400 hover:bg-orange-50/50"
+                  }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById("file-upload").click()}
+              >
+                <div className="space-y-2 text-center pointer-events-none">
+                  <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600 justify-center">
+                    <span className="relative font-medium text-orange-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-offset-2 hover:text-orange-500">
+                      Upload files
+                    </span>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, JPEG, WEBP up to 10MB
+                  </p>
+                </div>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  multiple
+                  accept="image/jpeg, image/jpg, image/png, image/webp"
+                  className="sr-only"
+                  onChange={handleFileChange}
+                />
+              </div>
               {errors.images ? (
                 <p className="text-red-400 text-sm mt-1">{errors.images}</p>
               ) : (
-                <p className="text-gray-400 text-sm mt-1">
-                  Only JPEG, JPG, and PNG formats are allowed.
+                <p className="text-gray-500 text-sm mt-1">
+                  Select at least 4 images and at most 10 images.
                 </p>
+              )}
+
+              {/* Image Previews */}
+              {images.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {images.map((file, index) => (
+                    <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`preview ${index}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index);
+                          }}
+                          className="p-1.5 bg-white text-red-600 rounded-full hover:bg-red-50 shadow-sm transition-colors"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -1712,7 +1797,7 @@ const AddProduct = () => {
             <button
               type="button"
               onClick={handleGoBack}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
               disabled={loading}
             >
               Cancel
@@ -1720,7 +1805,7 @@ const AddProduct = () => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors disabled:opacity-50"
               disabled={loading}
             >
               {loading ? "Saving..." : "Save Product"}

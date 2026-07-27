@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { warehouseControllers } from "../api/warehouse";
 import {
@@ -11,6 +11,7 @@ import {
     Warehouse,
     CheckCircle,
     Search,
+
     ChevronLeft,
     ChevronRight,
     Navigation,
@@ -19,9 +20,12 @@ import {
     Play,
     FileText,
     Info,
+    Pencil,
+    X,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { countries } from "../constants/countries";
 
 export default function WarehouseDetails() {
     const { id } = useParams();
@@ -32,6 +36,141 @@ export default function WarehouseDetails() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // Edit Modal State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [editFormData, setEditFormData] = useState({
+        name: "",
+        country: "",
+        location: "",
+        latitude: "",
+        longitude: "",
+        status: "ACTIVE"
+    });
+    const [countrySearch, setCountrySearch] = useState("");
+    const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    const filteredCountries = countries.filter((country) =>
+        country.toLowerCase().includes(countrySearch.toLowerCase())
+    );
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsCountryDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+    useEffect(() => {
+        if (isEditModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isEditModalOpen]);
+
+    const [initialEditFormData, setInitialEditFormData] = useState(null);
+
+    const hasChanges = React.useMemo(() => {
+        return JSON.stringify(editFormData) !== JSON.stringify(initialEditFormData);
+    }, [editFormData, initialEditFormData]);
+
+    const handleEditClick = () => {
+        const initialData = {
+            name: warehouse.warehouse_name || warehouse.name || "",
+            country: warehouse.origin_country || warehouse.country || "",
+            location: warehouse.address || warehouse.location || "",
+            latitude: warehouse.latitude || "",
+            longitude: warehouse.longitude || "",
+            status: warehouse.status || "ACTIVE"
+        };
+        // Ensure complex address objects are strings for editing
+        if (typeof initialData.location === "object" && initialData.location !== null) {
+            const addr = initialData.location;
+            initialData.location = [addr.houseNo, addr.street, addr.city, addr.state, addr.country, addr.postalCode].filter(Boolean).join(', ');
+        }
+
+        setEditFormData(initialData);
+        setInitialEditFormData(initialData);
+        setCountrySearch(initialData.country);
+        setErrors({});
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateWarehouse = async () => {
+        if (!hasChanges) return;
+
+        let newErrors = {};
+
+        if (!editFormData.name.trim()) {
+            newErrors.name = "Warehouse Name is required";
+        } else if (!/^[a-zA-Z0-9-',\s&()./]+$/.test(editFormData.name)) {
+            newErrors.name = "Only -, ', &, (, ), ., ,, and / are allowed as special characters.";
+        }
+
+        if (!editFormData.location.trim()) {
+            newErrors.location = "Address is required";
+        }
+
+        if (!editFormData.latitude) {
+            newErrors.latitude = "Latitude is required";
+        } else if (isNaN(editFormData.latitude)) {
+            newErrors.latitude = "Invalid latitude format";
+        } else if (Number(editFormData.latitude) < -90 || Number(editFormData.latitude) > 90) {
+            newErrors.latitude = "Latitude must be between -90 and 90";
+        }
+
+        if (!editFormData.longitude) {
+            newErrors.longitude = "Longitude is required";
+        } else if (isNaN(editFormData.longitude)) {
+            newErrors.longitude = "Invalid longitude format";
+        } else if (Number(editFormData.longitude) < -180 || Number(editFormData.longitude) > 180) {
+            newErrors.longitude = "Longitude must be between -180 and 180";
+        }
+
+        if (!editFormData.country.trim()) {
+            newErrors.country = "Origin Country is required";
+        } else {
+            const isValidCountry = countries.some(
+                (c) => c.toLowerCase() === editFormData.country.trim().toLowerCase()
+            );
+            if (!isValidCountry) newErrors.country = "This is not a valid country.";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setIsUpdating(true);
+        try {
+            const payload = {
+                ...editFormData,
+                latitude: editFormData.latitude ? Number(editFormData.latitude) : null,
+                longitude: editFormData.longitude ? Number(editFormData.longitude) : null,
+            };
+            const response = await warehouseControllers.updateWarehouse(id, payload);
+            toast.dismiss();
+            toast.success("Warehouse updated successfully");
+            setWarehouse(prev => ({ ...prev, ...response.data.data }));
+            setIsEditModalOpen(false);
+        } catch (error) {
+            toast.dismiss();
+            toast.error(error.response?.data?.message || "Failed to update warehouse");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
     const formatStatus = (str) => {
         if (!str) return "N/A";
@@ -153,11 +292,19 @@ export default function WarehouseDetails() {
                 <div className="space-y-8">
                     {/* Warehouse Info - Full Width Horizontal */}
                     <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg shadow-orange-500/30">
-                                <Warehouse className="w-6 h-6 text-white" />
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-lg shadow-orange-500/30">
+                                    <Warehouse className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Information</h2>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Information</h2>
+                            <button
+                                onClick={handleEditClick}
+                                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                            >
+                                <Pencil className="w-4 h-4" /> Edit Details
+                            </button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -344,6 +491,164 @@ export default function WarehouseDetails() {
                         )}
                     </div>
                 </div>
+
+                {/* Edit Modal */}
+                {isEditModalOpen && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-opacity duration-300">
+                        <div className="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
+                            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h3 className="text-lg font-bold text-gray-900">Edit Warehouse Details</h3>
+                                <button
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto flex-1">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Name <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.name}
+                                            onChange={(e) => {
+                                                setEditFormData({ ...editFormData, name: e.target.value });
+                                                if (errors.name) setErrors(prev => ({ ...prev, name: "" }));
+                                            }}
+                                            className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all text-sm ${errors.name ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                                                }`}
+                                        />
+                                        {errors.name && <p className="text-red-400 text-xs mt-1 font-medium">{errors.name}</p>}
+                                    </div>
+                                    <div ref={dropdownRef} className="relative">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Origin Country <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            value={countrySearch}
+                                            onChange={(e) => {
+                                                setCountrySearch(e.target.value);
+                                                setIsCountryDropdownOpen(true);
+                                                setEditFormData({ ...editFormData, country: e.target.value });
+                                                if (errors.country) setErrors(prev => ({ ...prev, country: "" }));
+                                            }}
+                                            onClick={() => {
+                                                setIsCountryDropdownOpen(true);
+                                                setCountrySearch("");
+                                                setEditFormData({ ...editFormData, country: "" });
+                                            }}
+                                            className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all text-sm ${errors.country ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                                                }`}
+                                        />
+                                        {errors.country && <p className="text-red-400 text-xs mt-1 font-medium">{errors.country}</p>}
+                                        {isCountryDropdownOpen && (
+                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredCountries.length > 0 ? (
+                                                    filteredCountries.map((country) => (
+                                                        <div
+                                                            key={country}
+                                                            className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm text-gray-700"
+                                                            onClick={() => {
+                                                                setEditFormData({ ...editFormData, country });
+                                                                setCountrySearch(country);
+                                                                setIsCountryDropdownOpen(false);
+                                                            }}
+                                                        >
+                                                            {country}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="px-4 py-2 text-gray-500 text-sm">
+                                                        No countries found
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <div className="relative">
+                                            <select
+                                                value={editFormData.status}
+                                                onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm bg-white appearance-none"
+                                            >
+                                                <option value="ACTIVE">Active</option>
+                                                <option value="INACTIVE">Inactive</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            value={editFormData.location}
+                                            onChange={(e) => {
+                                                setEditFormData({ ...editFormData, location: e.target.value });
+                                                if (errors.location) setErrors(prev => ({ ...prev, location: "" }));
+                                            }}
+                                            className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all text-sm ${errors.location ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                                                }`}
+                                        />
+                                        {errors.location && <p className="text-red-400 text-xs mt-1 font-medium">{errors.location}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Latitude <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            value={editFormData.latitude}
+                                            onChange={(e) => {
+                                                setEditFormData({ ...editFormData, latitude: e.target.value });
+                                                if (errors.latitude) setErrors(prev => ({ ...prev, latitude: "" }));
+                                            }}
+                                            className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all text-sm ${errors.latitude ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                                                }`}
+                                        />
+                                        {errors.latitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.latitude}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Longitude <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            value={editFormData.longitude}
+                                            onChange={(e) => {
+                                                setEditFormData({ ...editFormData, longitude: e.target.value });
+                                                if (errors.longitude) setErrors(prev => ({ ...prev, longitude: "" }));
+                                            }}
+                                            className={`w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all text-sm ${errors.longitude ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange-500'
+                                                }`}
+                                        />
+                                        {errors.longitude && <p className="text-red-400 text-xs mt-1 font-medium">{errors.longitude}</p>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+                                <button
+                                    onClick={() => setIsEditModalOpen(false)}
+                                    className="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-xl transition-colors shadow-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdateWarehouse}
+                                    disabled={isUpdating || !hasChanges}
+                                    className={`px-5 py-2 text-sm font-medium text-white rounded-xl transition-colors shadow-sm ${isUpdating || !hasChanges
+                                        ? "bg-orange-400 cursor-not-allowed opacity-70"
+                                        : "bg-orange-600 hover:bg-orange-700"
+                                        }`}
+                                >
+                                    {isUpdating ? "Updating..." : "Update Warehouse"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <ToastContainer />
             </div >
         </div >

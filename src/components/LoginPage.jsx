@@ -17,6 +17,7 @@ export default function LoginPage({ onLogin }) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const emailTrimmed = state.email.trim();
 
@@ -79,9 +80,10 @@ export default function LoginPage({ onLogin }) {
       .login(body)
       .then((res) => {
         const response = res.data.data;
-        localStorage.setItem("accessToken", response.accessToken);
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("accessToken", response.accessToken);
         if (response.refreshToken) {
-          localStorage.setItem("refreshToken", response.refreshToken);
+          storage.setItem("refreshToken", response.refreshToken);
         }
         toast.dismiss();
         toast.success("Login successful!");
@@ -340,7 +342,16 @@ export default function LoginPage({ onLogin }) {
               </p>
             )}
 
-            <div style={{ textAlign: "right", marginBottom: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "12px", color: "#6b7280" }}>
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  style={{ accentColor: "#d97706", cursor: "pointer", width: "14px", height: "14px" }}
+                />
+                Remember me
+              </label>
               <span
                 onClick={() => navigate("/forgot-password")}
                 style={{

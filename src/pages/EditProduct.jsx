@@ -333,6 +333,8 @@ const EditProduct = () => {
       Object.keys(productData).forEach((key) => {
         if (key === "remainingQuantity") {
           formData.append("quantity", productData[key]);
+        } else if (key === "isReadyForAuction") {
+          formData.append(key, productData[key] ? "true" : "");
         } else {
           formData.append(key, productData[key]);
         }

@@ -23,14 +23,27 @@ import axios from "axios";
 import SecureImage from "../../components/SecureImage";
 
 export default function ProductManagement() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState(() => sessionStorage.getItem('pm_search') || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(() => sessionStorage.getItem('pm_search') || "");
   const [products, setProducts] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const saved = sessionStorage.getItem('pm_page');
+    return saved ? parseInt(saved, 10) : 1;
+  });
   const [rowsPerPage, setRowsPerPage] = useState(12);
+  const isFirstRender = React.useRef(true);
+
+  // Save state to sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('pm_search', searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    sessionStorage.setItem('pm_page', currentPage);
+  }, [currentPage]);
 
   // When using server-side pagination, 'docs' contains only the current page's items
   const currentProducts = products?.docs || [];
@@ -99,10 +112,32 @@ export default function ProductManagement() {
   }, [currentPage, rowsPerPage, debouncedSearch]);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     setCurrentPage(1);
   }, [debouncedSearch]);
 
+  // Restore scroll position after loading completes
+  useEffect(() => {
+    if (!loading && currentProducts.length > 0) {
+      const savedScroll = sessionStorage.getItem('pm_scroll');
+      if (savedScroll) {
+        // Small timeout ensures the DOM has fully painted the list's new height
+        setTimeout(() => {
+          window.scrollTo({
+            top: parseInt(savedScroll, 10),
+            behavior: 'instant'
+          });
+          sessionStorage.removeItem('pm_scroll');
+        }, 50);
+      }
+    }
+  }, [loading, currentProducts.length]);
+
   const handleViewDetails = (id) => {
+    sessionStorage.setItem('pm_scroll', window.scrollY);
     navigate(`/product-management/product-details/${id}`);
   };
 
@@ -148,11 +183,11 @@ export default function ProductManagement() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500"
               />
             </div>
             <Link to={"/product-management/add-product"}>
-              <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
+              <button className="flex items-center px-4 py-2 text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition-colors">
                 <Plus className="w-5 h-5 mr-2" /> Add New Product
               </button>
             </Link>

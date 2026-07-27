@@ -181,13 +181,16 @@ export const productControllers = {
     return productSecuredApi.get("/auction", { params: filteredParams });
   },
 
-
   createAuction: (auctionData) => {
     return productSecuredApi.post("/auction/create", auctionData);
   },
 
-  startAuction: (auctionId) => {
-    return productSecuredApi.put(`/auction/start/${auctionId}`);
+  startAuction: (auctionId, payload) => {
+    return productSecuredApi.put(`/auction/start/${auctionId}`, payload);
+  },
+
+  endAuction: (auctionId, payload) => {
+    return productSecuredApi.put(`/auction/end/${auctionId}`, payload);
   },
 
   getAuctionDetails: (auctionId) => {

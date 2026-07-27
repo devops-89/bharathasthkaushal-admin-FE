@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
-import { User, Mail, Shield, Lock, Camera, Edit2, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Shield, Lock, Camera, Edit2, Eye, EyeOff, X, Trash2, ImageIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { userControllers } from "../api/user";
 import { authControllers } from "../api/auth";
@@ -35,6 +35,7 @@ const Profile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -125,11 +126,11 @@ const Profile = () => {
       toast.dismiss();
       toast.success("Password changed successfully. Please login again.");
       setIsChangePasswordOpen(false);
-      
+
       setTimeout(() => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken"); sessionStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken"); sessionStorage.removeItem("refreshToken");
+        localStorage.removeItem("user"); sessionStorage.removeItem("user");
         window.location.href = "/login";
       }, 1500);
     } catch (error) {
@@ -233,7 +234,40 @@ const Profile = () => {
   };
 
   const handleImageClick = () => {
+    if (user.avatar) {
+      setIsImageModalOpen(true);
+    } else {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleChangeImage = () => {
+    setIsImageModalOpen(false);
     fileInputRef.current.click();
+  };
+
+  const handleRemoveImage = async () => {
+    try {
+      await userControllers.updateUserProfile({
+        avatar: null
+      });
+      setUser(prev => ({ ...prev, avatar: "" }));
+
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        const updatedUser = { ...parsedUser, avatar: "" };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+
+      setIsImageModalOpen(false);
+      toast.dismiss();
+      toast.success("Profile picture removed successfully");
+    } catch (error) {
+      console.error("Error removing profile picture", error);
+      toast.dismiss();
+      toast.error("Failed to remove profile picture");
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -573,6 +607,48 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Image Action Modal */}
+      {isImageModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[100] p-4 transition-opacity duration-300">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] relative transform transition-all scale-100">
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="pt-8 pb-6 px-6 flex flex-col items-center border-b border-gray-50">
+              <div className="w-16 h-16 bg-gradient-to-tr from-orange-100 to-amber-50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+                <ImageIcon className="w-8 h-8 text-orange-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 tracking-tight">Profile Photo</h3>
+              <p className="text-sm text-gray-500 mt-1 text-center font-medium">
+                Update or remove your picture
+              </p>
+            </div>
+            
+            <div className="p-6 flex gap-4 bg-gray-50/50">
+              <button
+                onClick={handleRemoveImage}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 bg-white border border-red-100 hover:bg-red-50 hover:border-red-200 text-red-600 font-semibold rounded-xl transition-all shadow-sm hover:shadow active:scale-95"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-sm">Remove</span>
+              </button>
+              <button
+                onClick={handleChangeImage}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl transition-all shadow-md shadow-orange-500/20 hover:shadow-lg active:scale-95"
+              >
+                <Camera className="w-4 h-4" />
+                <span className="text-sm">Change</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
