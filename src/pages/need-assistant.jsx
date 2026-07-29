@@ -321,7 +321,7 @@ const NeedAssistanceDashboard = () => {
               />
               <input
                 type="text"
-                placeholder="Search by name, email, or description..."
+                placeholder="Search by Name or Email"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}

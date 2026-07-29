@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "axios": "^1.11.0",
+    "browser-image-compression": "^2.0.2",
     "date-fns": "^4.4.0",
     "libphonenumber-js": "^1.13.7",
     "lucide-react": "^0.263.1",

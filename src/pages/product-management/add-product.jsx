@@ -834,6 +834,7 @@
 // };
 // export default AddProduct;
 import { ArrowLeft, CheckCircle, ChevronDown, UploadCloud, X } from "lucide-react";
+import imageCompression from "browser-image-compression";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { productControllers } from "../../api/product";
@@ -875,10 +876,8 @@ const AddProduct = () => {
   const fetchCategories = async () => {
     try {
       const res = await categoryControllers.getCategory();
-      // console.log("CATEGORY RESPONSE:", res.data.data.docs);
       setCategories(res.data?.data?.docs || []);
     } catch (error) {
-      // console.log("Category Fetch Error:", error);
     }
   };
 
@@ -888,7 +887,6 @@ const AddProduct = () => {
 
     try {
       const res = await categoryControllers.getSubCategory(selectedCategoryId);
-      // console.log("SUBCATEGORY RESPONSE:", res.data.data.docs);
 
       const filteredSubs = (res.data?.data?.docs || []).filter(
         (item) => item.type === "Sub-Category",
@@ -896,7 +894,6 @@ const AddProduct = () => {
 
       setSubCategories(filteredSubs);
     } catch (error) {
-      // console.log("SubCategory Fetch Error:", error);
     }
   };
 
@@ -913,11 +910,9 @@ const AddProduct = () => {
       try {
         const res =
           await warehouseControllers.getWarehousesByCountry(selectedCountry);
-        // console.log("Warehouse Response:", res.data);
 
         setWarehouses(res.data?.data?.docs || res.data?.data || []);
       } catch (error) {
-        console.error("Error fetching warehouses:", error);
         toast.dismiss();
         toast.error("Failed to fetch warehouses");
       }
@@ -1038,9 +1033,10 @@ const AddProduct = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
+    if (e.preventDefault) e.preventDefault();
     const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : Array.from(e.target.files);
-    const allFiles = [...images, ...files];
+    
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     const invalidFiles = files.filter(
       (file) => !validTypes.includes(file.type),
@@ -1055,7 +1051,7 @@ const AddProduct = () => {
       return;
     }
 
-    if (allFiles.length > 10) {
+    if (images.length + files.length > 10) {
       const errorMessage = "You can only upload a maximum of 10 images";
       toast.dismiss();
       toast.error(errorMessage);
@@ -1064,12 +1060,44 @@ const AddProduct = () => {
       return;
     }
 
-    setErrors((prev) => {
-      const newErrors = { ...prev };
-      delete newErrors.images;
-      return newErrors;
-    });
-    setImages(allFiles);
+
+    try {
+      const compressedFiles = [];
+      for (const file of files) {
+        const options = {
+          maxSizeMB: 0.5,
+          useWebWorker: false, // Disabling web worker to prevent silent hangs in some environments
+          fileType: file.type // Keep original file format
+        };
+        
+        try {
+          const originalSizeKB = (file.size / 1024).toFixed(2);
+          
+          const compressedBlob = await imageCompression(file, options);
+          const compressedSizeKB = (compressedBlob.size / 1024).toFixed(2);
+          
+          
+          // Convert Blob back to File to maintain file name and type properties
+          const compressedFile = new File([compressedBlob], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+          compressedFiles.push(compressedFile);
+        } catch (error) {
+          compressedFiles.push(file); // Fallback to original
+        }
+      }
+
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.images;
+        return newErrors;
+      });
+      setImages((prevImages) => [...prevImages, ...compressedFiles]);
+    } catch (error) {
+      setImages((prevImages) => [...prevImages, ...files]);
+    }
+
     if (e.target.value) e.target.value = null;
   };
 
@@ -1135,10 +1163,6 @@ const AddProduct = () => {
         });
       }
 
-      // console.log("Request Payload:");
-      for (let [key, value] of data.entries()) {
-        // console.log(`${key}:`, value);
-      }
       const res = await productControllers.addProduct(data);
 
       if (res && res.data) {
@@ -1147,7 +1171,6 @@ const AddProduct = () => {
           icon: <CheckCircle className="text-orange-600" />,
           progressStyle: { background: "#ea580c" },
         });
-        // console.log("Product Response:", res.data);
         setTimeout(() => {
           navigate("/product-management", { state: { refresh: true } });
         }, 1500);
@@ -1155,7 +1178,6 @@ const AddProduct = () => {
         throw new Error("No response received");
       }
     } catch (err) {
-      console.error("Error adding product:", err.response?.data || err);
       toast.dismiss();
       toast.error(err.response?.data?.message || "Something went wrong!");
     } finally {

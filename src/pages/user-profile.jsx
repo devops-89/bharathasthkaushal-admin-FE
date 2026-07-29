@@ -3,7 +3,7 @@ import { useParams, NavLink } from "react-router-dom";
 import { userControllers } from "../api/user";
 import { productControllers } from "../api/product";
 import { ToastContainer, toast } from "react-toastify";
-import { Phone, Calendar, Mail, User, ShieldCheck } from "lucide-react";
+import { Phone, Calendar, Mail, User, ShieldCheck, ArrowLeft } from "lucide-react";
 import SecureImage from "../components/SecureImage";
 
 function UserProfile() {
@@ -65,7 +65,7 @@ function UserProfile() {
           to="/user-management"
           className="inline-flex items-center text-gray-600 hover:text-orange-600 transition-colors font-medium"
         >
-          <span className="mr-2 text-xl">←</span> Back to User Management
+          <ArrowLeft className="mr-2 w-5 h-5" /> Back to User Management
         </NavLink>
       </div>
 
@@ -154,7 +154,9 @@ function UserProfile() {
             <div>
               <p className="text-sm text-gray-500 font-medium">Aadhaar Number</p>
               <p className="font-semibold text-gray-900">
-                {user.aadhaarNumber || "—"}
+                {user.aadhaarNumber
+                  ? user.aadhaarNumber.replace(/(.{4})(?=.)/g, "$1 ")
+                  : "—"}
               </p>
             </div>
           </div>
