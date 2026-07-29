@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ChevronDown,
   CreditCard,
+  Pencil,
 } from "lucide-react";
 import { authControllers } from "../api/auth";
 import { userControllers } from "../api/user";
@@ -63,13 +64,26 @@ const ArtisanManagement = () => {
     aadhaarNumber: "",
   });
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editFormData, setEditFormData] = useState({});
+  const [editErrors, setEditErrors] = useState({});
+  const [isUpdatingEmployee, setIsUpdatingEmployee] = useState(false);
   const [countrySearchTerm, setCountrySearchTerm] = useState("");
+  const [editCountryDropdownOpen, setEditCountryDropdownOpen] = useState(false);
+  const [editCountrySearchTerm, setEditCountrySearchTerm] = useState("");
   const dropdownRef = React.useRef(null);
+  const editDropdownRef = React.useRef(null);
 
   const filteredCountries = countryCodes.filter(
     (country) =>
       country.name.toLowerCase().includes(countrySearchTerm.toLowerCase()) ||
       country.dial_code.includes(countrySearchTerm),
+  );
+
+  const editFilteredCountries = countryCodes.filter(
+    (country) =>
+      country.name.toLowerCase().includes(editCountrySearchTerm.toLowerCase()) ||
+      country.dial_code.includes(editCountrySearchTerm),
   );
 
   const [partnersData, setPartnersData] = useState([]);
@@ -190,7 +204,156 @@ const ArtisanManagement = () => {
 
   const handleViewDetails = (partner) => {
     setSelectedPartner(partner);
+    setEditFormData({
+      firstName: partner.firstName || "",
+      lastName: partner.lastName || "",
+      email: partner.email || "",
+      phoneNo: partner.phoneNo || "",
+      countryCode: partner.countryCode || "+91",
+      location: partner.location || "",
+      aadhaarNumber: partner.aadhaarNumber ? formatAadhaar(partner.aadhaarNumber.toString().replace(/\D/g, "")) : "",
+    });
+    setEditErrors({});
+    setIsEditingDetails(false);
     setShowDetailsModal(true);
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    let newValue = value;
+
+    if (name === "firstName" || name === "lastName") {
+      newValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+    }
+    if (name === "email") {
+      newValue = newValue.toLowerCase();
+    }
+    if (
+      name === "firstName" ||
+      name === "lastName" ||
+      name === "email" ||
+      name === "location"
+    ) {
+      newValue = newValue.replace(/^\s+/, "");
+      newValue = newValue.replace(/\s{2,}/g, " ");
+    }
+
+    let newErrors = { ...editErrors };
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      newErrors.email = newValue.trim() === "" ? "Email is required" : !emailRegex.test(newValue) ? "Enter a valid email address" : "";
+    }
+    if (name === "firstName") {
+      newErrors.firstName = newValue.trim() === "" ? "First name is required" : "";
+    }
+    if (name === "lastName") {
+      newErrors.lastName = newValue.trim() === "" ? "Last name is required" : "";
+    }
+    if (name === "location") {
+      const locationRegex = /^[a-zA-Z0-9,\s]*$/;
+      newErrors.location = newValue.trim() === ""
+        ? "Location is required"
+        : !locationRegex.test(newValue)
+          ? "Invalid location format. Only alphanumeric characters and commas are allowed"
+          : "";
+    }
+
+    if (name === "aadhaarNumber") {
+      let unformatted = newValue.replace(/\D/g, "");
+      if (unformatted.length > 12) unformatted = unformatted.slice(0, 12);
+      newValue = formatAadhaar(unformatted);
+      if (unformatted.length !== 12 && unformatted.length > 0) {
+        newErrors.aadhaarNumber = "Aadhaar Number must be 12 digits";
+      } else {
+        newErrors.aadhaarNumber = "";
+      }
+    }
+
+    setEditErrors(newErrors);
+    setEditFormData((prev) => ({ ...prev, [name]: newValue }));
+  };
+
+  const handleUpdateEmployee = async () => {
+    if (isUpdatingEmployee) return;
+    toast.dismiss();
+
+    let newErrors = {};
+
+    if (!editFormData.firstName?.trim()) newErrors.firstName = "First Name is required";
+    if (!editFormData.lastName?.trim()) newErrors.lastName = "Last Name is required";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!editFormData.email?.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(editFormData.email.trim())) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    if (!editFormData.phoneNo) {
+      newErrors.phoneNo = "Phone Number is required";
+    } else {
+      const selectedCountry = countryCodes.find(c => c.dial_code === editFormData.countryCode);
+      const countryIso = selectedCountry ? selectedCountry.code : undefined;
+      try {
+        if (countryIso) {
+          if (!isValidPhoneNumber(editFormData.phoneNo, countryIso)) {
+            newErrors.phoneNo = "Invalid phone number for the selected country";
+          }
+        } else {
+          const fullNumber = editFormData.countryCode + editFormData.phoneNo;
+          if (!isValidPhoneNumber(fullNumber)) {
+            newErrors.phoneNo = "Invalid phone number format";
+          }
+        }
+      } catch (e) {
+        newErrors.phoneNo = "Invalid phone number";
+      }
+    }
+
+    const unformattedAadhaar = editFormData.aadhaarNumber ? editFormData.aadhaarNumber.replace(/\D/g, "") : "";
+    if (unformattedAadhaar && unformattedAadhaar.length !== 12) {
+      newErrors.aadhaarNumber = "Aadhaar Number must be 12 digits";
+    }
+
+    const locationRegex = /^[a-zA-Z0-9,\s]*$/;
+    if (!editFormData.location?.trim()) {
+      newErrors.location = "Location is required";
+    } else if (!locationRegex.test(editFormData.location)) {
+      newErrors.location = "Invalid location format. Only alphanumeric characters and commas are allowed";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setEditErrors(newErrors);
+      toast.error("Please fill all required fields correctly");
+      return;
+    }
+
+    setIsUpdatingEmployee(true);
+    try {
+      const payload = {
+        firstName: editFormData.firstName.trim(),
+        lastName: editFormData.lastName.trim(),
+        name: `${editFormData.firstName.trim()} ${editFormData.lastName.trim()}`,
+        email: editFormData.email.trim(),
+        phoneNo: editFormData.phoneNo,
+        countryCode: editFormData.countryCode,
+        location: editFormData.location?.trim() || "",
+        aadhaarNumber: editFormData.aadhaarNumber ? editFormData.aadhaarNumber.replace(/\D/g, "") : "",
+      };
+      const response = await userControllers.updateArtisan(selectedPartner.id, payload);
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Employee updated successfully!");
+        fetchArtisans(currentPage, rowsPerPage, debouncedSearch);
+        setIsEditingDetails(false);
+        setShowDetailsModal(false);
+      } else {
+        toast.error(response.data?.message || "Something went wrong.");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error updating employee");
+    } finally {
+      setIsUpdatingEmployee(false);
+    }
   };
 
   const handleFormChange = (e) => {
@@ -398,6 +561,17 @@ const ArtisanManagement = () => {
   const uniqueLocations = [
     ...new Set(partnersData.map((p) => p.location.split(",")[0])),
   ];
+
+  const isFormChanged = selectedPartner ? (
+    (editFormData.firstName || "").trim() !== (selectedPartner.firstName || "").trim() ||
+    (editFormData.lastName || "").trim() !== (selectedPartner.lastName || "").trim() ||
+    (editFormData.email || "").trim() !== (selectedPartner.email || "").trim() ||
+    (editFormData.phoneNo || "").trim() !== (selectedPartner.phoneNo || "").trim() ||
+    (editFormData.countryCode || "").trim() !== (selectedPartner.countryCode || "+91").trim() ||
+    (editFormData.location || "").trim() !== (selectedPartner.location || "").trim() ||
+    (editFormData.aadhaarNumber || "").replace(/\D/g, "") !== (selectedPartner.aadhaarNumber || "").toString().replace(/\D/g, "")
+  ) : false;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-6 ml-64 pt-24 flex-1">
       <div className="max-w-7xl mx-auto">
@@ -774,8 +948,8 @@ const ArtisanManagement = () => {
                     <X className="w-6 h-6" />
                   </button>
                 </div>
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-4 mb-6">
+                <div className={isEditingDetails ? "space-y-4" : "space-y-6"}>
+                  <div className={`flex items-center space-x-4 ${isEditingDetails ? "mb-4" : "mb-6"}`}>
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-orange-100">
                         <SecureImage
@@ -790,70 +964,245 @@ const ArtisanManagement = () => {
                         />
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 capitalize">
-                        {selectedPartner.name}
-                      </h3>
-                      <p className="text-gray-500">{selectedPartner.email}</p>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {selectedPartner.status || "ACTIVE"}
-                      </span>
-                    </div>
+                    {!isEditingDetails ? (
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 capitalize">
+                          {selectedPartner.name}
+                        </h3>
+                        <p className="text-gray-500">{selectedPartner.email}</p>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedPartner.status === "ACTIVE"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {selectedPartner.status || "ACTIVE"}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
+                          <input type="text" name="firstName" value={editFormData.firstName} onChange={handleEditFormChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.firstName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`} />
+                          {editErrors.firstName && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.firstName}</p>}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
+                          <input type="text" name="lastName" value={editFormData.lastName} onChange={handleEditFormChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.lastName ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`} />
+                          {editErrors.lastName && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.lastName}</p>}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Basic Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-3">
-                      <Phone className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Contact</p>
-                        <p className="font-medium">
-                          {selectedPartner.countryCode}{" "}
-                          {selectedPartner.phoneNo}
-                        </p>
+                  {!isEditingDetails ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-3">
+                        <Phone className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Contact</p>
+                          <p className="font-medium">
+                            {selectedPartner.countryCode}{" "}
+                            {selectedPartner.phoneNo}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Location</p>
+                          <p className="font-medium">
+                            {selectedPartner.location}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Joined Date</p>
+                          <p className="font-medium">
+                            {selectedPartner.joinedDate}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <CreditCard className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Aadhaar Number</p>
+                          <p className="font-medium">
+                            {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <p className="text-sm text-gray-500">Location</p>
-                        <p className="font-medium">
-                          {selectedPartner.location}
-                        </p>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                        <input type="email" name="email" value={editFormData.email} onChange={handleEditFormChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.email ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`} />
+                        {editErrors.email && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.email}</p>}
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-30 relative" ref={editDropdownRef}>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Country Code</label>
+                          <div
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 cursor-pointer bg-white flex items-center justify-between"
+                            onClick={() => setEditCountryDropdownOpen(!editCountryDropdownOpen)}
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              {(() => {
+                                const selected = countryCodes.find(c => c.dial_code === editFormData.countryCode);
+                                return selected && selected.code ? (
+                                  <img
+                                    src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
+                                    alt={selected.code}
+                                    className="w-5 h-auto rounded-sm object-cover shadow-sm"
+                                  />
+                                ) : null;
+                              })()}
+                              <span>{editFormData.countryCode}</span>
+                            </div>
+                            <ChevronDown className="ml-2 text-gray-400 w-4 h-4" />
+                          </div>
+
+                          {editCountryDropdownOpen && (
+                            <div className="absolute z-10 w-64 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                              <div className="p-2 border-b border-gray-200 sticky top-0 bg-white">
+                                <div className="relative">
+                                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                  <input
+                                    type="text"
+                                    placeholder="Search country..."
+                                    value={editCountrySearchTerm}
+                                    onChange={(e) => setEditCountrySearchTerm(e.target.value)}
+                                    className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-gray-400"
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                              </div>
+                              <div className="overflow-y-auto flex-1">
+                                {editFilteredCountries.length > 0 ? (
+                                  editFilteredCountries.map((country) => (
+                                    <div
+                                      key={country.code}
+                                      className="px-4 py-2 hover:bg-orange-50 cursor-pointer text-sm flex items-center gap-2"
+                                      onClick={() => {
+                                        setEditFormData({ ...editFormData, countryCode: country.dial_code });
+                                        setEditCountryDropdownOpen(false);
+                                        setEditCountrySearchTerm("");
+                                      }}
+                                    >
+                                      {country.code && (
+                                        <img
+                                          src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`}
+                                          alt={country.code}
+                                          className="w-5 h-auto rounded-sm object-cover shadow-sm flex-shrink-0"
+                                        />
+                                      )}
+                                      <span className="font-medium text-gray-900 w-12">{country.dial_code}</span>
+                                      <span className="text-gray-600 truncate">{country.name}</span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="px-4 py-3 text-sm text-gray-500 text-center">No countries found</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                          <input
+                            type="tel"
+                            name="phoneNo"
+                            value={editFormData.phoneNo}
+                            maxLength={countryCodes.find((c) => c.dial_code === editFormData.countryCode)?.max_length || 15}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, "");
+                              const selectedCountry = countryCodes.find(c => c.dial_code === editFormData.countryCode);
+                              const countryIso = selectedCountry ? selectedCountry.code : undefined;
+
+                              if (countryIso) {
+                                if (value.length > (editFormData.phoneNo || "").length) {
+                                  let isTooLong = false;
+                                  if (countryIso === 'IN' && value.length > 10) isTooLong = true;
+                                  else if (validatePhoneNumberLength(value, countryIso) === 'TOO_LONG') isTooLong = true;
+                                  if (isTooLong) return;
+                                }
+
+                                setEditFormData((prev) => ({ ...prev, phoneNo: value }));
+
+                                const maxLength = selectedCountry.max_length;
+                                if (value.length > 0 && maxLength && value.length === maxLength) {
+                                  if (!isValidPhoneNumber(value, countryIso)) {
+                                    setEditErrors((prev) => ({ ...prev, phoneNo: "Invalid phone number for selected country" }));
+                                  } else {
+                                    if (editErrors.phoneNo) setEditErrors((prev) => ({ ...prev, phoneNo: "" }));
+                                  }
+                                } else {
+                                  if (editErrors.phoneNo) setEditErrors((prev) => ({ ...prev, phoneNo: "" }));
+                                }
+                              } else {
+                                if (value.length <= 15) {
+                                  setEditFormData((prev) => ({ ...prev, phoneNo: value }));
+                                  if (editErrors.phoneNo) setEditErrors((prev) => ({ ...prev, phoneNo: "" }));
+                                }
+                              }
+                            }}
+                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.phoneNo ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
+                          />
+                          {editErrors.phoneNo && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.phoneNo}</p>}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Location <span className="text-red-500">*</span></label>
+                        <input type="text" name="location" value={editFormData.location} onChange={handleEditFormChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.location ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`} />
+                        {editErrors.location && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.location}</p>}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Aadhaar Number</label>
+                        <input type="text" name="aadhaarNumber" value={editFormData.aadhaarNumber} maxLength={14} onChange={handleEditFormChange} className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${editErrors.aadhaarNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`} />
+                        {editErrors.aadhaarNumber && <p className="text-red-400 text-xs mt-1 font-medium">{editErrors.aadhaarNumber}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Joined Date</p>
-                        <p className="font-medium">
-                          {selectedPartner.joinedDate}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <CreditCard className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-500">Aadhaar Number</p>
-                        <p className="font-medium">
-                          {selectedPartner.aadhaarNumber ? formatAadhaar(selectedPartner.aadhaarNumber) : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                <div className="flex justify-end mt-6 pt-4 border-t">
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                  {!isEditingDetails && (
+                    <button
+                      onClick={() => {
+                        setEditErrors({});
+                        setIsEditingDetails(true);
+                      }}
+                      className="px-4 py-2 text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition-colors flex items-center gap-2"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit Details
+                    </button>
+                  )}
+                  {isEditingDetails && (
+                    <button
+                      onClick={handleUpdateEmployee}
+                      disabled={isUpdatingEmployee || !isFormChanged}
+                      className={`px-4 py-2 text-white rounded-xl transition-colors ${isUpdatingEmployee || !isFormChanged
+                        ? "bg-orange-300 cursor-not-allowed"
+                        : "bg-orange-600 hover:bg-orange-700"
+                        }`}
+                    >
+                      {isUpdatingEmployee ? "Saving..." : "Save"}
+                    </button>
+                  )}
                   <button
-                    onClick={() => setShowDetailsModal(false)}
+                    onClick={() => {
+                      if (isEditingDetails) setIsEditingDetails(false);
+                      else setShowDetailsModal(false);
+                    }}
                     className="px-4 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                   >
-                    Close
+                    Cancel
                   </button>
                 </div>
               </div>
