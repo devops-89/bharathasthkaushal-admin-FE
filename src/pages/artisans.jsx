@@ -566,6 +566,7 @@ const ArtisanManagement = () => {
     // Stop and show inline errors if any exist
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      toast.error("Please fill all required fields correctly");
       setIsSubmitting(false);
       return;
     }

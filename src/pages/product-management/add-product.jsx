@@ -1125,6 +1125,7 @@ const AddProduct = () => {
     if (loading) return;
     toast.dismiss(); // Clear any existing toasts
     if (!validateForm()) {
+      toast.error("Please fill all required fields correctly");
       return;
     }
 

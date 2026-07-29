@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { productControllers } from "../api/product";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { categoryControllers } from "../api/category";
 import { warehouseControllers } from "../api/warehouse";
 import { X, ArrowLeft, ChevronDown } from "lucide-react";
@@ -317,6 +318,7 @@ const EditProduct = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fill all required fields correctly");
       return;
     }
 
@@ -965,6 +967,11 @@ const EditProduct = () => {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        style={{ zIndex: 99999 }}
+      />
     </div>
   );
 };

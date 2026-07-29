@@ -76,6 +76,48 @@ const AuctionManagement = () => {
   const [popularImageFile, setPopularImageFile] = useState(null);
   const [error, setError] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [showStatusConfirmModal, setShowStatusConfirmModal] = useState(false);
+  const [statusConfirmAction, setStatusConfirmAction] = useState("");
+  const [statusConfirmAuctionId, setStatusConfirmAuctionId] = useState(null);
+
+  const confirmAuctionStatusAction = (action, auction) => {
+    if (action === "END") {
+      const rawStart = auction.rawStartDate || auction.start_date || auction.startDate || auction.scheduled_at || auction.scheduledAt;
+      if (rawStart) {
+        const startTime = new Date(rawStart).getTime();
+        const currentTime = new Date().getTime();
+        const diffMinutes = (currentTime - startTime) / (1000 * 60);
+
+        if (diffMinutes < 15) {
+          const minEndTime = new Date(startTime + 15 * 60000);
+          
+          let hours = minEndTime.getHours();
+          const minutes = String(minEndTime.getMinutes()).padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          const formattedTime = `${hours}:${minutes} ${ampm}`;
+
+          toast.dismiss();
+          toast.error(`You can end the auction after ${formattedTime}`);
+          return;
+        }
+      }
+    }
+
+    setStatusConfirmAction(action);
+    setStatusConfirmAuctionId(auction.auction_id || auction._id || auction.id);
+    setShowStatusConfirmModal(true);
+  };
+
+  const executeStatusConfirmAction = () => {
+    setShowStatusConfirmModal(false);
+    if (statusConfirmAction === "START") {
+      handleStartAuction(statusConfirmAuctionId);
+    } else if (statusConfirmAction === "END") {
+      handleEndAuction(statusConfirmAuctionId);
+    }
+  };
   const [newAuction, setNewAuction] = useState({
     productId: "",
     startingBid: "",
@@ -920,7 +962,7 @@ const AuctionManagement = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleStartAuction(auction.auction_id);
+                                confirmAuctionStatusAction("START", auction);
                               }}
                               className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm text-xs font-semibold"
                               title="Start Auction"
@@ -932,7 +974,7 @@ const AuctionManagement = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleEndAuction(auction.auction_id);
+                                confirmAuctionStatusAction("END", auction);
                               }}
                               className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm text-xs font-semibold"
                               title="End Auction"
@@ -2047,6 +2089,45 @@ const AuctionManagement = () => {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       "Remove"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Status Action Confirm Modal */}
+        {showStatusConfirmModal && (
+          <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm transform transition-all">
+              <div className="flex flex-col items-center text-center">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${statusConfirmAction === "START" ? "bg-green-100" : "bg-red-100"}`}>
+                  <AlertCircle className={`h-6 w-6 ${statusConfirmAction === "START" ? "text-green-600" : "text-red-600"}`} />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Confirm {statusConfirmAction === "START" ? "Start" : "End"}
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Are you sure you want to {statusConfirmAction === "START" ? "start" : "end"} this auction?
+                </p>
+                <div className="flex w-full gap-3">
+                  <button
+                    onClick={() => setShowStatusConfirmModal(false)}
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={executeStatusConfirmAction}
+                    disabled={loading}
+                    className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors font-medium disabled:opacity-50 flex justify-center items-center ${statusConfirmAction === "START" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+                  >
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Confirm"
                     )}
                   </button>
                 </div>
