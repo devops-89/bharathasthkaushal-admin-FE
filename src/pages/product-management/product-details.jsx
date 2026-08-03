@@ -89,7 +89,6 @@ const ProductDetails = () => {
   });
   const [createStepForm, setCreateStepForm] = useState({
     productId: "",
-    sequence: "",
     stepName: "",
     description: "",
     proposedPrice: "",
@@ -345,7 +344,7 @@ const ProductDetails = () => {
     const { name, value } = e.target;
 
     if (
-      (name === "sequence" || name === "proposedPrice") &&
+      name === "proposedPrice" &&
       value !== "" &&
       Number(value) < 0
     ) {
@@ -388,7 +387,6 @@ const ProductDetails = () => {
     setShowCreateStepForm(false);
     setCreateStepForm({
       productId: "",
-      sequence: "",
       stepName: "",
       description: "",
       proposedPrice: "",
@@ -407,9 +405,6 @@ const ProductDetails = () => {
 
     // Validation
     let errors = {};
-    if (Number(createStepForm.sequence) <= 0) {
-      errors.sequence = "Sequence must be greater than 0";
-    }
     if (!createStepForm.proposedPrice) {
       errors.proposedPrice = "Proposed Price is required";
     } else if (Number(createStepForm.proposedPrice) <= 0) {
@@ -456,6 +451,8 @@ const ProductDetails = () => {
 
     if (Object.keys(errors).length > 0) {
       setStepErrors(errors);
+      toast.dismiss();
+      toast.error("Please Enter the required fields correctly");
       return;
     }
     setStepErrors({});
@@ -464,7 +461,6 @@ const ProductDetails = () => {
     try {
       const formData = new FormData();
       formData.append("productId", createStepForm.productId);
-      formData.append("sequence", createStepForm.sequence);
       formData.append("stepName", createStepForm.stepName.trim());
       formData.append("description", createStepForm.description.trim());
       formData.append("proposedPrice", createStepForm.proposedPrice);
@@ -678,22 +674,14 @@ const ProductDetails = () => {
                           );
                           return;
                         }
-                        const maxSequence =
-                          buildSteps.length > 0
-                            ? Math.max(
-                              ...buildSteps.map(
-                                (step) =>
-                                  Number(step.stepNumber || step.sequence) ||
-                                  0,
-                              ),
-                            )
-                            : 0;
-                        const nextSequence = maxSequence + 1;
+                        if (!product || !product.productId) {
+                          toast.error("Product ID is missing.");
+                          return;
+                        }
 
                         setCreateStepForm((prev) => ({
                           ...prev,
                           productId: product.productId,
-                          sequence: nextSequence,
                         }));
                         setShowCreateStepForm(true);
                       }}
@@ -739,7 +727,7 @@ const ProductDetails = () => {
                             >
                               <div className="flex items-center gap-3">
                                 <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
-                                  Step {step.stepNumber || step.sequence}
+                                  Step {step.stepNumber}
                                 </span>
                                 <span className="font-medium text-gray-900">
                                   {step.stepName}
@@ -786,8 +774,8 @@ const ProductDetails = () => {
                                     step.buildStatus === "COMPLETED" && step.adminReviewStatus !== "APPROVED" && step.adminReviewStatus !== "ADMIN_APPROVED" ? "pending" : step.buildStatus,
                                   )}`}
                                 >
-                                  {step.buildStatus === "COMPLETED" && step.adminReviewStatus !== "APPROVED" && step.adminReviewStatus !== "ADMIN_APPROVED" 
-                                    ? "REVIEW NEEDED" 
+                                  {step.buildStatus === "COMPLETED" && step.adminReviewStatus !== "APPROVED" && step.adminReviewStatus !== "ADMIN_APPROVED"
+                                    ? "REVIEW NEEDED"
                                     : step.buildStatus?.replace("_", " ").toUpperCase()}
                                 </span>
                               </div>
@@ -1629,23 +1617,7 @@ const ProductDetails = () => {
               </button>
             </div>
             <form onSubmit={handleCreateStepFormSubmit} className="space-y-4" noValidate>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sequence <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="sequence"
-                    value={createStepForm.sequence}
-                    onChange={handleCreateStepFormChange}
-                    min="1"
-                    disabled
-                    placeholder="e.g., 4"
-                    className={`w-full px-3 py-2 border rounded-lg cursor-not-allowed ${stepErrors.sequence ? 'border-red-500 focus:border-red-500 bg-red-50' : 'border-gray-300 bg-gray-100 text-gray-500'}`}
-                  />
-                  {stepErrors.sequence && <p className="text-red-400 text-sm mt-1">{stepErrors.sequence}</p>}
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Proposed Price (₹) <span className="text-red-500">*</span>
@@ -1881,7 +1853,7 @@ const ProductDetails = () => {
                   <option value="">Choose step...</option>
                   {buildSteps.map((step) => (
                     <option key={step.id} value={step.id}>
-                      Step {step.sequence} - {step.stepName}
+                      Step {step.stepNumber} - {step.stepName}
                     </option>
                   ))}
                 </select>

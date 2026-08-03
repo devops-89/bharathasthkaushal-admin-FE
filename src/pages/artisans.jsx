@@ -59,7 +59,7 @@ const ArtisanManagement = () => {
   const [rejectingArtisanId, setRejectingArtisanId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const aadhaarRegex = /^[0-9]{12}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
   const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -356,19 +356,28 @@ const ArtisanManagement = () => {
       }
     }
 
+    const getValue = (val) => {
+      if (!val) return "";
+      const strVal = String(val).trim();
+      if (strVal === "—" || strVal === "-" || strVal === "_" || strVal.toUpperCase() === "N/A" || strVal.toLowerCase() === "null") {
+        return "";
+      }
+      return strVal;
+    };
+
     const initialData = {
-      firstName: partnerToEdit.firstName !== "—" ? partnerToEdit.firstName : "",
-      lastName: partnerToEdit.lastName !== "—" ? partnerToEdit.lastName : "",
-      email: partnerToEdit.email !== "—" ? partnerToEdit.email : "",
+      firstName: getValue(partnerToEdit.firstName),
+      lastName: getValue(partnerToEdit.lastName),
+      email: getValue(partnerToEdit.email),
       countryCode: partnerToEdit.countryCode || "+91",
-      phoneNo: partnerToEdit.phoneNo !== "—" ? partnerToEdit.phoneNo : "",
+      phoneNo: getValue(partnerToEdit.phoneNo),
       expertizeField: parsedExpertise,
-      location: partnerToEdit.location !== "—" ? partnerToEdit.location : "",
-      aadhaarNumber: partnerToEdit.aadhaarNumber !== "N/A" ? partnerToEdit.aadhaarNumber : "",
-      user_caste_category: casteCat !== "—" ? casteCat : "",
-      subCaste: subCst !== "_" ? subCst : "",
+      location: getValue(partnerToEdit.location),
+      aadhaarNumber: getValue(partnerToEdit.aadhaarNumber).replace(/\D/g, ""),
+      user_caste_category: getValue(casteCat),
+      subCaste: getValue(subCst),
       introVideo: partnerToEdit.introVideo || "",
-      gstNumber: partnerToEdit.gstNumber !== "—" ? partnerToEdit.gstNumber : "",
+      gstNumber: getValue(partnerToEdit.gstNumber),
     };
 
     setFormData(initialData);
@@ -631,15 +640,18 @@ const ArtisanManagement = () => {
       toast.dismiss();
       console.error("API Request Failed (Catch Block):", error);
 
-      if (
-        error.response?.status === 422 &&
-        error.response?.data?.message?.includes("Invalid email format")
-      ) {
-        setErrors((prev) => ({
-          ...prev,
-          email: "Invalid email format",
-        }));
-        return;
+      if (error.response?.status === 422) {
+        const errorMsg = Array.isArray(error.response?.data?.message) 
+          ? error.response.data.message.join(" ") 
+          : error.response?.data?.message || "";
+          
+        if (errorMsg.includes("Invalid email format") || errorMsg.includes("Please provide a valid email address.")) {
+          setErrors((prev) => ({
+            ...prev,
+            email: "Please provide a valid email address.",
+          }));
+          return;
+        }
       }
 
       toast.dismiss();
@@ -1207,17 +1219,19 @@ const ArtisanManagement = () => {
                   <input
                     type="text"
                     name="gstNumber"
-                    value={formData.gstNumber.toUpperCase()}
+                    value={(formData.gstNumber || "").toUpperCase()}
                     onChange={(e) => {
                       setFormData({
                         ...formData,
                         gstNumber: e.target.value.toUpperCase(),
                       });
+                      if (errors.gstNumber) setErrors((prev) => ({ ...prev, gstNumber: "" }));
                     }}
                     maxLength={15}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none ${errors.gstNumber ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-gray-400"}`}
                     placeholder=" Enter GST Number"
                   />
+                  {errors.gstNumber && <p className="text-red-400 text-xs mt-1 font-medium">{errors.gstNumber}</p>}
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button

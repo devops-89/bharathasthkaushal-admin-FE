@@ -287,7 +287,7 @@ export default function ProductManagement() {
 
                     <button
                       onClick={() => handleViewDetails(product.productId)}
-                      className="w-full mt-auto bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                      className="w-full mt-auto bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
                     >
                       View Details
                     </button>

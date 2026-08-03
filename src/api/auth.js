@@ -66,4 +66,12 @@ export const authControllers = {
       throw error;
     }
   },
+  resendOtp: async (data) => {
+    try {
+      let result = await publicApi.post("/resendOtp", data);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
 }

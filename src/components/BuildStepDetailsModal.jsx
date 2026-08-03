@@ -154,14 +154,28 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
             </div>
 
             {/* Skills */}
-            {stepDetails?.skills && (
+            {stepDetails?.skills && stepDetails.skills.length > 0 && (
               <div className="mb-2">
-                <p className="text-xs text-gray-500 uppercase font-semibold">
+                <p className="text-xs text-gray-500 uppercase font-semibold mb-1.5">
                   Required Skills
                 </p>
-                <p className="text-sm font-semibold text-gray-900 capitalize">
-                  {stepDetails.skills}
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(typeof stepDetails.skills === 'string'
+                    ? stepDetails.skills.split(",")
+                    : Array.isArray(stepDetails.skills)
+                      ? stepDetails.skills
+                      : []
+                  ).map((s, idx) => (
+                    s.trim() ? (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-full text-xs font-semibold capitalize"
+                      >
+                        {s.trim()}
+                      </span>
+                    ) : null
+                  ))}
+                </div>
               </div>
             )}
 
@@ -177,7 +191,7 @@ const BuildStepDetailsModal = ({ stepId, stepDetailsData, onClose }) => {
                 <p className="text-sm text-gray-500 mb-1">Due Date</p>
                 <p className="text-gray-900 font-medium">
                   {stepDetails?.dueDate
-                    ? new Date(stepDetails.dueDate).toLocaleString()
+                    ? new Date(stepDetails.dueDate).toLocaleDateString()
                     : "N/A"}
                 </p>
               </div>

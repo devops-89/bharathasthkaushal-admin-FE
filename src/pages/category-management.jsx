@@ -15,6 +15,7 @@ import { categoryControllers } from "../api/category";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import { compressImage } from "../utils/imageCompressor";
 import SecureImage from "../components/SecureImage";
 
 export default function CategoryManagement() {
@@ -137,7 +138,7 @@ export default function CategoryManagement() {
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -155,7 +156,9 @@ export default function CategoryManagement() {
         e.target.value = null;
         return;
       }
-      setFormData((prev) => ({ ...prev, category_logo: file }));
+
+      const compressedFile = await compressImage(file);
+      setFormData((prev) => ({ ...prev, category_logo: compressedFile }));
       setFormErrors((prev) => ({ ...prev, category_logo: "" }));
     }
   };
@@ -459,7 +462,7 @@ export default function CategoryManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Logo <span className="text-red-500">*</span>
+                    Category Image <span className="text-red-500">*</span>
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
                     <input

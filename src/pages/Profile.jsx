@@ -628,7 +628,7 @@ const Profile = () => {
                 Update or remove your picture
               </p>
             </div>
-            
+
             <div className="p-6 flex gap-4 bg-gray-50/50">
               <button
                 onClick={handleRemoveImage}

@@ -7,10 +7,12 @@ import { categoryControllers } from "../api/category";
 import { warehouseControllers } from "../api/warehouse";
 import { X, ArrowLeft, ChevronDown } from "lucide-react";
 import { countries } from "../constants/countries";
+import { compressImage } from "../utils/imageCompressor";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [compressingImagesCount, setCompressingImagesCount] = useState(0);
   const [productData, setProductData] = useState({
     product_name: "",
     description: "",
@@ -40,6 +42,7 @@ const EditProduct = () => {
   const [originalProduct, setOriginalProduct] = useState(null);
   const [initialProductData, setInitialProductData] = useState(null);
   const [initialExistingImages, setInitialExistingImages] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
@@ -73,7 +76,7 @@ const EditProduct = () => {
       setLoading(true);
       try {
         const [catRes, productRes] = await Promise.all([
-          categoryControllers.getCategory(),
+          categoryControllers.getCategory(1, 1000, "", true),
           productControllers.getProductById(id),
         ]);
 
@@ -260,19 +263,49 @@ const EditProduct = () => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const invalidFiles = files.filter((file) => !validTypes.includes(file.type));
+    if (!files.length) return;
+    setCompressingImagesCount((prev) => prev + files.length);
 
-    if (invalidFiles.length > 0) {
-      const errorMessage = "Only JPEG, JPG and PNG format are allowed";
-      toast.dismiss();
-      toast.error(errorMessage);
-      e.target.value = null; // Reset input
-      return;
+    try {
+      const compressedFiles = await Promise.all(
+        files.map(async (file) => {
+          try {
+            return await compressImage(file);
+          } catch (error) {
+            console.error("Compression failed for", file.name, error);
+            return file; // Fallback to original
+          }
+        })
+      );
+      setImages((prevImages) => [...prevImages, ...compressedFiles]);
+    } catch (error) {
+      console.error("Overall compression setup error:", error);
+      setImages((prevImages) => [...prevImages, ...files]);
+    } finally {
+      setCompressingImagesCount((prev) => Math.max(0, prev - files.length));
     }
-    setImages((prev) => [...prev, ...files]);
+
+    if (e.target.value) e.target.value = null;
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileChange({ target: { files: e.dataTransfer.files, value: null } });
+    }
   };
 
   const removeExistingImage = (indexToRemove) => {
@@ -287,6 +320,27 @@ const EditProduct = () => {
     e.preventDefault();
     if (loading) return;
     toast.dismiss();
+
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const validExtensions = ["jpg", "jpeg", "png", "webp"];
+    const invalidIndices = [];
+    images.forEach((file, idx) => {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!validTypes.includes(file.type) || !validExtensions.includes(ext)) {
+        invalidIndices.push(existingImages.length + idx + 1);
+      }
+    });
+
+    if (invalidIndices.length > 0) {
+      const getOrdinal = (n) => {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+      };
+      const text = invalidIndices.map(getOrdinal).join(" and ");
+      toast.error(`${text} image have wrong file type. Must be PNG, JPEG, JPG, WEBP.`);
+      return;
+    }
 
     const nameRegex = /^[a-zA-Z0-9\s\-&]{3,100}$/;
     const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
@@ -432,7 +486,7 @@ const EditProduct = () => {
             {/* Product Name */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Product Name *
+                Product Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -450,7 +504,7 @@ const EditProduct = () => {
             {/* Country */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Origin Country *
+                Origin Country <span className="text-red-500">*</span>
               </label>
               <div className="relative relative-dropdown-container">
                 <input
@@ -499,7 +553,7 @@ const EditProduct = () => {
             {/* Warehouse */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Warehouse *
+                Warehouse <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -523,7 +577,7 @@ const EditProduct = () => {
             {/* Category */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Category *
+                Category <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -546,7 +600,7 @@ const EditProduct = () => {
             {/* SubCategory */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                SubCategory *
+                SubCategory <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -570,7 +624,7 @@ const EditProduct = () => {
             {/* Product Price Per Piece */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Price Per Piece (₹) *
+                Price Per Piece (₹) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -593,7 +647,7 @@ const EditProduct = () => {
             {/* Quantity */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Quantity *
+                Quantity <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -647,7 +701,7 @@ const EditProduct = () => {
             {/* Material */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Material *
+                Material <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -805,7 +859,7 @@ const EditProduct = () => {
             {/* Description */}
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
-                Description *
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
@@ -877,6 +931,7 @@ const EditProduct = () => {
                 {/* Existing Images */}
                 {existingImages.map((img, idx) => (
                   <div key={`existing-${idx}`} className="relative group border border-gray-200 rounded-lg overflow-hidden bg-gray-50 aspect-square">
+                    <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">{idx + 1}</div>
                     <img
                       src={typeof img === "object" ? (img.downloadUrl || img.imageUrl) : img}
                       alt={`Existing ${idx}`}
@@ -899,7 +954,7 @@ const EditProduct = () => {
                 {images.map((file, idx) => (
                   <div key={`new-${idx}`} className="relative group border border-orange-200 rounded-lg overflow-hidden bg-orange-50 aspect-square">
                     <img src={URL.createObjectURL(file)} alt={`New ${idx}`} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">NEW</div>
+                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow z-10">NEW - {existingImages.length + idx + 1}</div>
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
                         type="button"
@@ -915,8 +970,14 @@ const EditProduct = () => {
               </div>
 
               {/* Upload Input */}
-              <label htmlFor="file-upload" className="block cursor-pointer group">
-                <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg group-hover:border-orange-500 group-hover:bg-orange-50/50 transition-colors">
+              <label
+                htmlFor="file-upload"
+                className="block cursor-pointer group"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <div className={`mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${isDragging ? "border-orange-500 bg-orange-50" : "border-gray-300 group-hover:border-orange-500 group-hover:bg-orange-50/50"}`}>
                   <div className="space-y-1 text-center">
                     <svg
                       className="mx-auto h-12 w-12 text-gray-400 group-hover:text-orange-500 transition-colors"
@@ -939,7 +1000,7 @@ const EditProduct = () => {
                       </span>
                       <p className="pl-1 group-hover:text-gray-700">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500 group-hover:text-gray-600">PNG, JPG, JPEG up to 10MB</p>
+                    <p className="text-xs text-gray-500 group-hover:text-gray-600">PNG, JPG, JPEG, WEBP</p>
                   </div>
                 </div>
               </label>
@@ -960,7 +1021,7 @@ const EditProduct = () => {
               type="button"
               onClick={handleSubmit}
               className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 font-medium shadow-md hover:shadow-lg"
-              disabled={loading || !hasChanges}
+              disabled={loading || !hasChanges || compressingImagesCount > 0}
             >
               {loading ? "Updating..." : "Update Product"}
             </button>

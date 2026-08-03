@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { toast } from "react-toastify";
+import { X, ChevronDown } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 import { productControllers } from "../api/product";
 import { categoryControllers } from "../api/category";
 
@@ -19,6 +19,8 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
     materials: "",
     skills: [],
   });
+  const [initialData, setInitialData] = useState(null);
+  const [stepErrors, setStepErrors] = useState({});
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -71,22 +73,27 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
     // loadDetails();
 
     if (stepDetails) {
-      setStepData({
+      const initial = {
         stepName: stepDetails.stepName || "",
         description: stepDetails.description || "",
-        dueDate: stepDetails.dueDate ? stepDetails.dueDate.split("T")[0] : "",
+        dueDate: stepDetails.dueDate ? (() => {
+          const d = new Date(stepDetails.dueDate);
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        })() : "",
         proposedPrice: stepDetails.proposedPrice || "",
         adminRemarks: stepDetails.adminRemarks || stepDetails.admin_remarks || "",
         instructions: stepDetails.instructions || "",
         materials: stepDetails.materials || "",
         skills: stepDetails.skills
-          ? (typeof stepDetails.skills === 'string' 
-              ? stepDetails.skills.split(",") 
-              : Array.isArray(stepDetails.skills) 
-                ? stepDetails.skills 
-                : []).map((s) => (s.trim ? s.trim() : s)).filter(Boolean)
+          ? (typeof stepDetails.skills === 'string'
+            ? stepDetails.skills.split(",")
+            : Array.isArray(stepDetails.skills)
+              ? stepDetails.skills
+              : []).map((s) => (s.trim ? s.trim() : s)).filter(Boolean)
           : [],
-      });
+      };
+      setStepData(initial);
+      setInitialData(initial);
       setLoading(false);
     } else {
       setLoading(false);
@@ -96,9 +103,71 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setStepData((prev) => ({ ...prev, [name]: value }));
+    if (stepErrors[name]) setStepErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  const isDataChanged = 
+    initialData && (
+      JSON.stringify({ ...stepData, skills: [...stepData.skills].sort() }) !== 
+      JSON.stringify({ ...initialData, skills: [...initialData.skills].sort() }) ||
+      images.length > 0
+    );
+
   const handleSubmit = async () => {
+    let errors = {};
+
+    if (!stepData.proposedPrice) {
+      errors.proposedPrice = "Proposed Price is required";
+    } else if (Number(stepData.proposedPrice) <= 0) {
+      errors.proposedPrice = "Proposed Price must be greater than 0";
+    }
+
+    if (!stepData.stepName.trim()) {
+      errors.stepName = "Step Name is required";
+    } else {
+      const nameRegex = /^[a-zA-Z0-9\s,\.]+$/;
+      if (!nameRegex.test(stepData.stepName)) {
+        errors.stepName = "Special characters are not allowed";
+      }
+    }
+
+    if (!stepData.description.trim()) {
+      errors.description = "Description is required";
+    }
+
+    if (stepData.materials && stepData.materials.trim()) {
+      const materialRegex = /^[a-zA-Z\s&\-]{2,50}$/;
+      if (!materialRegex.test(stepData.materials)) {
+        errors.materials = "Invalid Material (2-50 characters, letters, space, &, - only)";
+      }
+    }
+
+    if (!stepData.skills || stepData.skills.length === 0) {
+      errors.skills = "Please select at least one skill";
+    }
+
+    if (!stepData.dueDate) {
+      errors.dueDate = "Due Date is required";
+    } else {
+      const selectedDate = new Date(stepData.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const maxDate = new Date("2099-12-31T23:59:59");
+      if (selectedDate < today) {
+        errors.dueDate = "Due Date cannot be in the past";
+      } else if (selectedDate > maxDate) {
+        errors.dueDate = "Due Date must be less than 2099";
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setStepErrors(errors);
+      toast.dismiss();
+      toast.error("Please Enter the required fields correctly");
+      return;
+    }
+    setStepErrors({});
+
     try {
       const formData = new FormData();
       Object.entries(stepData).forEach(([key, value]) => {
@@ -143,7 +212,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-0">
             <div className="col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Step Name
+                Step Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -153,11 +222,12 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Step Name"
               />
+              {stepErrors.stepName && <p className="text-red-500 text-xs mt-1">{stepErrors.stepName}</p>}
             </div>
 
             <div className="col-span-1 relative relative-skills-dropdown">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skills *
+                Skills <span className="text-red-500">*</span>
               </label>
               <div
                 className="w-full border border-gray-300 p-2.5 rounded-lg focus:outline-none focus-within:border-orange-500 cursor-pointer bg-white flex items-center justify-between text-sm"
@@ -168,13 +238,16 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                     ? stepData.skills.join(", ")
                     : "Select Skills"}
                 </span>
-                <span className="ml-2 text-gray-400">▼</span>
+                <ChevronDown className="w-4 h-4 text-gray-500" />
               </div>
+              {stepErrors.skills && <p className="text-red-500 text-xs mt-1">{stepErrors.skills}</p>}
 
               {isSkillsDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {subCategories.map((sub, index) => {
-                    const isSelected = stepData.skills.includes(sub.category_name);
+                    const isSelected = stepData.skills.some(
+                      (skill) => skill.toLowerCase() === sub.category_name.toLowerCase()
+                    );
                     return (
                       <div
                         key={sub.id || sub._id || index}
@@ -183,7 +256,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                           let newSkills;
                           if (isSelected) {
                             newSkills = stepData.skills.filter(
-                              (item) => item !== sub.category_name
+                              (item) => item.toLowerCase() !== sub.category_name.toLowerCase()
                             );
                           } else {
                             newSkills = [...stepData.skills, sub.category_name];
@@ -192,6 +265,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                             ...prev,
                             skills: newSkills,
                           }));
+                          if (stepErrors.skills) setStepErrors((prev) => ({ ...prev, skills: "" }));
                         }}
                       >
                         <input
@@ -210,7 +284,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
 
             <div className="col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Proposed Price
+                Proposed Price <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -220,11 +294,12 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Proposed Price"
               />
+              {stepErrors.proposedPrice && <p className="text-red-500 text-xs mt-1">{stepErrors.proposedPrice}</p>}
             </div>
 
             <div className="col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Date
+                Due Date <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -233,6 +308,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                 onChange={handleChange}
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
               />
+              {stepErrors.dueDate && <p className="text-red-500 text-xs mt-1">{stepErrors.dueDate}</p>}
             </div>
 
             <div className="col-span-1">
@@ -250,7 +326,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
 
             <div className="col-span-1 md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="description"
@@ -260,6 +336,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Description"
               />
+              {stepErrors.description && <p className="text-red-500 text-xs mt-1">{stepErrors.description}</p>}
             </div>
 
             <div className="col-span-1 md:col-span-2">
@@ -288,6 +365,7 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
                 className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:border-orange-500"
                 placeholder="Materials"
               />
+              {stepErrors.materials && <p className="text-red-500 text-xs mt-1">{stepErrors.materials}</p>}
             </div>
 
             <div className="col-span-1 md:col-span-2">
@@ -310,12 +388,18 @@ const EditBuildStepModal = ({ stepId, stepDetails, onClose }) => {
         <div className="p-6 border-t bg-gray-50 rounded-b-xl shrink-0">
           <button
             onClick={handleSubmit}
-            className="w-full bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 font-semibold shadow-lg shadow-orange-200 transition-all"
+            disabled={!isDataChanged}
+            className={`w-full py-3 rounded-xl font-semibold shadow-lg transition-all ${
+              isDataChanged
+                ? "bg-orange-600 text-white hover:bg-orange-700 shadow-orange-200"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
             Update Build Step
           </button>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 };

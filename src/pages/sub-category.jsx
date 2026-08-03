@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { categoryControllers } from "../api/category";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { compressImage } from "../utils/imageCompressor";
 import SecureImage from "../components/SecureImage";
 
 const SubcategoryManagement = () => {
@@ -147,7 +148,7 @@ const SubcategoryManagement = () => {
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -165,9 +166,11 @@ const SubcategoryManagement = () => {
         e.target.value = null;
         return;
       }
+      
+      const compressedFile = await compressImage(file);
       setFormData((prev) => ({
         ...prev,
-        category_logo: file,
+        category_logo: compressedFile,
       }));
       setFormErrors((prev) => ({ ...prev, category_logo: "" }));
     }

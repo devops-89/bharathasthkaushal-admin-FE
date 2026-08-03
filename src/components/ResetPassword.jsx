@@ -4,7 +4,8 @@ import logoImage from "../assets/image.png";
 import { authControllers } from "../api/auth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+
 
 export default function ResetPassword() {
     const location = useLocation();
@@ -13,12 +14,99 @@ export default function ResetPassword() {
     // Get state passed from ForgotPassword
     const { email, referenceId } = location.state || {};
 
-    const [otp, setOtp] = useState("");
+    const [otp, setOtp] = useState(new Array(6).fill(""));
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [timer, setTimer] = useState(120);
+    const [isResending, setIsResending] = useState(false);
+    const [errors, setErrors] = useState({
+        otp: "",
+        password: "",
+        confirmPassword: "",
+        passwordFormat: ""
+    });
+
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [timer]);
+
+    const handleOtpChange = (element, index) => {
+        if (isNaN(element.value)) return false;
+
+        const newOtp = [...otp];
+        newOtp[index] = element.value;
+        setOtp(newOtp);
+
+        if (errors.otp) setErrors({ ...errors, otp: "" });
+
+        if (element.nextSibling && element.value !== "") {
+            element.nextSibling.focus();
+        }
+    };
+
+    const handleOtpKeyDown = (e, index) => {
+        if (e.key === "Backspace" && !otp[index] && e.target.previousSibling) {
+            e.target.previousSibling.focus();
+        }
+    };
+
+    const handleOtpPaste = (e) => {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData("text/plain").slice(0, 6);
+        if (/^\d+$/.test(pasteData)) {
+            const newOtp = [...otp];
+            pasteData.split("").forEach((char, index) => {
+                if (index < 6) newOtp[index] = char;
+            });
+            setOtp(newOtp);
+            // Focus the last filled input
+            const form = e.target.form;
+            if (form) {
+                const inputs = Array.from(form.querySelectorAll('input[name="otp"]'));
+                const lastIndex = Math.min(pasteData.length - 1, 5);
+                if (inputs[lastIndex]) {
+                    inputs[lastIndex].focus();
+                }
+            }
+        }
+    };
+
+    const formatTime = (timeInSeconds) => {
+        const m = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
+        const s = (timeInSeconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
+    const handleResendOtp = async () => {
+        if (timer > 0 || isResending) return;
+
+        setIsResending(true);
+        try {
+            await authControllers.resendOtp({
+                identity: email,
+                otpType: "FORGOT_PASSWORD_OTP"
+            });
+            toast.dismiss();
+            toast.success("OTP resent to your email!");
+            setTimer(120);
+        } catch (err) {
+            console.error("Resend OTP Error:", err);
+            const errorMessage = err?.response?.data?.message || "Failed to resend OTP.";
+            toast.dismiss();
+            toast.error(errorMessage);
+        } finally {
+            setIsResending(false);
+        }
+    };
 
     useEffect(() => {
         if (!email && !referenceId) {
@@ -31,35 +119,49 @@ export default function ResetPassword() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        let newErrors = { otp: "", password: "", confirmPassword: "", passwordFormat: "" };
+        let hasError = false;
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
         if (!referenceId) {
             toast.dismiss();
             toast.error("Missing reference ID. Please try 'Forgot Password' again.");
             return;
         }
 
-        if (!otp) {
-            toast.dismiss();
-            toast.error("Please enter the OTP sent to your email.");
-            return;
+        const otpValue = otp.join("");
+
+        if (otpValue.length < 6) {
+            newErrors.otp = "Please enter the 6-digit OTP.";
+            hasError = true;
         }
 
-        if (password !== confirmPassword) {
-            toast.dismiss();
-            toast.error("Passwords do not match");
-            return;
+        if (!password) {
+            newErrors.password = "Please enter a new password.";
+            hasError = true;
+        } else if (!passwordRegex.test(password)) {
+            newErrors.passwordFormat = "A password should contain: At least 8 characters, 1 uppercase (A-Z), 1 lowercase (a-z), 1 number (0-9) & 1 special character (!@#$%^&*).";
+            hasError = true;
         }
 
-        if (password.length < 6) {
-            toast.dismiss();
-            toast.error("Password must be at least 6 characters long");
-            return;
+        if (!confirmPassword) {
+            newErrors.confirmPassword = "Please confirm your new password.";
+            hasError = true;
+        } else if (password !== confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match.";
+            hasError = true;
         }
+
+        setErrors(newErrors);
+
+        if (hasError) return;
 
         setIsLoading(true);
         try {
             const payload = {
                 referenceId: referenceId, // Using the ID from the previous step
-                otp: otp,
+                otp: otpValue,
                 password: password
             };
             // console.log("Resetting password with:", payload);
@@ -157,7 +259,7 @@ export default function ResetPassword() {
         boxShadow:
             "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
         transition: "all 0.2s",
-        marginTop: "24px",
+        marginTop: "16px",
         fontSize: "14px",
     };
 
@@ -183,26 +285,64 @@ export default function ResetPassword() {
                         }}
                     />
                     <h1 style={titleStyle}>Reset Password</h1>
-                    <p style={subtitleStyle}>Enter OTP and your new password</p>
+                    {/*<p style={subtitleStyle}>Enter OTP and your new password</p>*/}
                 </div>
 
                 <div style={formContainerStyle}>
-                    <form onSubmit={handleSubmit}>
+                    <button
+                        onClick={() => navigate(-1)}
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "#d97706",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: "16px",
+                            fontSize: "14px",
+                            fontWeight: "500"
+                        }}
+                        type="button"
+                    >
+                        <ArrowLeft size={16} style={{ marginRight: "4px" }} /> Back
+                    </button>
+                    <form onSubmit={handleSubmit} noValidate>
                         {/* OTP Field */}
                         <div style={fieldContainerStyle}>
-                            <label htmlFor="otp" style={labelStyle}>
-                                OTP
+                            <label style={labelStyle}>
+                                Enter OTP
                             </label>
-                            <input
-                                id="otp"
-                                type="text"
-                                value={otp}
-                                required
-                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                                style={inputStyle}
-                                placeholder="Enter OTP code"
-                                maxLength={6}
-                            />
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                                {otp.map((data, index) => {
+                                    return (
+                                        <input
+                                            key={index}
+                                            type="text"
+                                            name="otp"
+                                            maxLength="1"
+                                            value={data}
+                                            onChange={(e) => handleOtpChange(e.target, index)}
+                                            onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                                            onPaste={handleOtpPaste}
+                                            style={{
+                                                ...inputStyle,
+                                                border: errors.otp ? "2px solid #f87171" : "2px solid #fde68a",
+                                                width: "100%",
+                                                height: "45px",
+                                                padding: "0",
+                                                textAlign: "center",
+                                                fontSize: "18px",
+                                                fontWeight: "bold",
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                            {errors.otp && (
+                                <p style={{ color: "#f87171", fontSize: "12px", marginTop: "4px" }}>
+                                    {errors.otp}
+                                </p>
+                            )}
                         </div>
 
                         <div style={fieldContainerStyle}>
@@ -215,8 +355,11 @@ export default function ResetPassword() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     required
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    style={{ ...inputStyle, paddingRight: "40px" }}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (errors.password) setErrors({ ...errors, password: "" });
+                                    }}
+                                    style={{ ...inputStyle, border: (errors.password || errors.passwordFormat) ? "2px solid #f87171" : "2px solid #fde68a", paddingRight: "40px" }}
                                     placeholder="Enter new password"
                                 />
                                 <span
@@ -233,6 +376,11 @@ export default function ResetPassword() {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </span>
                             </div>
+                            {errors.password && (
+                                <p style={{ color: "#f87171", fontSize: "12px", marginTop: "4px" }}>
+                                    {errors.password}
+                                </p>
+                            )}
                         </div>
 
                         <div style={fieldContainerStyle}>
@@ -245,8 +393,11 @@ export default function ResetPassword() {
                                     type={showConfirmPassword ? "text" : "password"}
                                     value={confirmPassword}
                                     required
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    style={{ ...inputStyle, paddingRight: "40px" }}
+                                    onChange={(e) => {
+                                        setConfirmPassword(e.target.value);
+                                        if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: "" });
+                                    }}
+                                    style={{ ...inputStyle, border: errors.confirmPassword ? "2px solid #f87171" : "2px solid #fde68a", paddingRight: "40px" }}
                                     placeholder="Confirm new password"
                                 />
                                 <span
@@ -263,7 +414,18 @@ export default function ResetPassword() {
                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </span>
                             </div>
+                            {errors.confirmPassword && (
+                                <p style={{ color: "#f87171", fontSize: "12px", marginTop: "4px" }}>
+                                    {errors.confirmPassword}
+                                </p>
+                            )}
                         </div>
+
+                        {errors.passwordFormat && (
+                            <div style={{ color: "#f87171", fontSize: "12px", marginBottom: "16px", textAlign: "center", fontWeight: "500", lineHeight: "1.4" }}>
+                                {errors.passwordFormat}
+                            </div>
+                        )}
 
                         <button
                             type="submit"
@@ -286,6 +448,27 @@ export default function ResetPassword() {
                         >
                             {isLoading ? "Resetting..." : "Reset Password"}
                         </button>
+                        <div style={{ textAlign: "center", marginTop: "16px", fontSize: "14px", color: "#92400e" }}>
+                            {/*Didn't receive the OTP?{" "} */}
+                            <span
+                                onClick={timer > 0 || isResending ? undefined : handleResendOtp}
+                                style={{
+                                    color: timer > 0 || isResending ? "#9ca3af" : "#d97706",
+                                    cursor: timer > 0 || isResending ? "not-allowed" : "pointer",
+                                    fontWeight: "600",
+                                    transition: "color 0.2s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (timer === 0 && !isResending) e.target.style.color = "#ea580c";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (timer === 0 && !isResending) e.target.style.color = "#d97706";
+                                }}
+                            >
+                                Resend OTP
+                            </span>
+                            {timer > 0 && <span style={{ marginLeft: "8px", fontWeight: "bold" }}>{formatTime(timer)}</span>}
+                        </div>
                     </form>
                 </div>
             </div>

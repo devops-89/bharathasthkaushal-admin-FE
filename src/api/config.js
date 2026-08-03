@@ -115,7 +115,7 @@ const handleResponseError = async (error) => {
       error.response.status === 498 ||
       (error.response.data &&
         error.response.data.message &&
-        error.response.data.message.toLowerCase().includes("invalid token")));
+        String(error.response.data.message).toLowerCase().includes("invalid token")));
 
   if (isUnauthorized && !originalRequest._retry) {
     if (isRefreshing) {
