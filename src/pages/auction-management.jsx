@@ -57,7 +57,7 @@ const getFullName = (user) => {
 };
 
 const AuctionManagement = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
@@ -820,7 +820,10 @@ const AuctionManagement = () => {
             <div className="w-full sm:w-48 relative">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setSearchParams(e.target.value === "ALL" ? {} : { status: e.target.value });
+                }}
                 className="w-full appearance-none px-4 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 bg-white"
               >
                 <option value="ALL">All Status</option>

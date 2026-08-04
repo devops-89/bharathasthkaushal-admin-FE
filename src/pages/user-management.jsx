@@ -4,13 +4,14 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DisableModal from "../components/DisableModal";
 import { useNavigate } from "react-router-dom";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { Eye, ChevronLeft, ChevronRight, Search, ChevronDown, Info } from "lucide-react";
 import { userControllers } from "../api/user";
 import SecureImage from "../components/SecureImage";
 
 function UserManagement() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -20,7 +21,7 @@ function UserManagement() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [totalDocs, setTotalDocs] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -164,7 +165,10 @@ function UserManagement() {
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setSearchParams(e.target.value === "ALL" ? {} : { status: e.target.value });
+                }}
                 className="appearance-none p-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 bg-white min-w-[150px]"
               >
                 <option value="ALL">All Status</option>

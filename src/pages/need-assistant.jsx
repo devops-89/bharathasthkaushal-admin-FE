@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -35,6 +35,7 @@ const NEED_ASSISTANCE_ISSUE_TYPE = {
 };
 
 const NeedAssistanceDashboard = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -42,7 +43,7 @@ const NeedAssistanceDashboard = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
   const [issueTypeFilter, setIssueTypeFilter] = useState("ALL");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -331,7 +332,10 @@ const NeedAssistanceDashboard = () => {
               <select
                 className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 appearance-none bg-white"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setSearchParams(e.target.value === "ALL" ? {} : { status: e.target.value });
+                }}
               >
                 <option value="ALL">All Status</option>
                 {Object.keys(NEED_ASSISTANCE_STATUS).map((status) => (

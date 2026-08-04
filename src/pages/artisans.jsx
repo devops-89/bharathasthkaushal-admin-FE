@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import {
   Search,
   Filter,
@@ -41,9 +41,10 @@ const formatAadhaar = (number) => {
 };
 
 const ArtisanManagement = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [verifyStatusFilter, setVerifyStatusFilter] = useState("ALL");
+  const [verifyStatusFilter, setVerifyStatusFilter] = useState(searchParams.get("status") || "ALL");
   const [showAddForm, setShowAddForm] = useState(false);
   // const [showFilter, setShowFilter] = useState(false);
   // const [locationFilter, setLocationFilter] = useState("");
@@ -762,7 +763,10 @@ const ArtisanManagement = () => {
             <div className="relative">
               <select
                 value={verifyStatusFilter}
-                onChange={(e) => setVerifyStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  setVerifyStatusFilter(e.target.value);
+                  setSearchParams(e.target.value === "ALL" ? {} : { status: e.target.value });
+                }}
                 className="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-orange-500 bg-white"
               >
                 <option value="ALL">All Status</option>
